@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = () => {
             <span className="material-symbols-outlined text-2xl">sailing</span>
           </div>
           <div className="leading-none">
-            <h2 className="text-2xl font-black uppercase tracking-tighter text-abysse">CVC</h2>
+            <h2 className="text-2xl font-black uppercase tracking-tighter text-abysse">CNC</h2>
             <p className="text-[10px] font-bold tracking-[0.2em] text-turquoise uppercase">Coutainville</p>
           </div>
         </Link>

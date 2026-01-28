@@ -21,20 +21,24 @@
 @layer base {
   body {
     background-color: var(--color-background-light);
-    background-image: radial-gradient(#94a3b8 2px, transparent 2px);
-    background-size: 250px 250px;
     color: var(--color-abysse);
     -webkit-font-smoothing: antialiased;
+    position: relative;
+    min-height: 100vh;
   }
+
+
 }
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 .material-symbols-outlined {
   font-variation-settings:
     "FILL" 1,

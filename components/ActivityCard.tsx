@@ -10,13 +10,13 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
     <div className="bg-white rounded-[2rem] overflow-hidden shadow-card hover:shadow-card-hover group flex flex-col h-full border-none transition-all duration-300">
       
       {/* Image Area */}
-      <div className="relative aspect-[5/4] overflow-hidden">
+      <div className="relative aspect-5/4 overflow-hidden">
         <img 
           src={activity.image} 
           alt={activity.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-abysse/90 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-transparent to-transparent"></div>
         
         <div className="absolute bottom-6 left-8 right-8">
            <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-none mb-1">
