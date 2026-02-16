@@ -85,46 +85,45 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
                 (window as any).__oneSignalInitialized = true;
 
                 try {
-                    console.log("OneSignal: Starting initialization...");
+                    console.log("OneSignal: Starting minimal initialization...");
 
-                    // Register events BEFORE init to catch everything
-                    if (OneSignal.Notifications) {
-                        OneSignal.Notifications.addEventListener('permissionChange', (permission: any) => {
-                            console.log("OneSignal: Permission changed to:", permission);
-                        });
-                    }
-                    if (OneSignal.User?.PushSubscription) {
-                        OneSignal.User.PushSubscription.addEventListener('change', (event: any) => {
-                            console.log("OneSignal: Subscription changed:", event.current.optedIn);
-                            setIsSubscribed(event.current.optedIn);
-                            if (event.current.optedIn) refreshTags();
-                        });
-                    }
-
-                    await OneSignal.init({
+                    // On laisse OneSignal chercher OneSignalSDKWorker.js à la racine (dossier public/)
+                    // On ne force le chemin que si nécessaire, OneSignal v16 est plus intelligent.
+                    const initConfig: any = {
                         appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID,
                         safari_web_id: process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_ID,
-                        allowLocalhostAsSecureOrigin: true,
-                        serviceWorkerPath: '/OneSignalSDKWorker.js',
-                    });
+                        notifyButton: { enable: false }, // On utilise notre propre UI
+                    };
+
+                    // Si on est sur localhost, on ajoute le paramètre de sécurité
+                    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+                        initConfig.allowLocalhostAsSecureOrigin = true;
+                    }
+
+                    console.log("OneSignal: Config using AppID:", initConfig.appId);
+                    await OneSignal.init(initConfig);
 
                     // Sync initial state
                     if (OneSignal.User?.PushSubscription) {
-                        setIsSubscribed(OneSignal.User.PushSubscription.optedIn);
+                        const isOptedIn = OneSignal.User.PushSubscription.optedIn;
+                        const subscriptionId = OneSignal.User.PushSubscription.id;
+                        console.log("OneSignal: Subscription State:", { isOptedIn, subscriptionId });
+                        setIsSubscribed(isOptedIn);
                     }
 
                     refreshTags();
                     setIsInitialized(true);
-                    console.log("OneSignal: Initialized successfully. Subscribed:", OneSignal.User?.PushSubscription?.optedIn);
+                    console.log("OneSignal: Initialized successfully. User ID:", OneSignal.User?.onesignalId || 'N/A');
                 } catch (e: any) {
+                    console.error("OneSignal: Critical Init Error:", e);
                     if (e.message?.includes('Can only be used on') || e.message?.includes('origin')) {
-                        console.warn("OneSignal: Mismatch d'URL détecté (Local vs Dashboard).");
+                        console.warn("OneSignal: Mismatch d'URL détecté. Vérifiez le 'Site URL' dans le Dashboard OneSignal.");
                         setIsInitialized(true);
                     } else if (e.name === 'AbortError' || e.message?.includes('push service error')) {
-                        console.warn("OneSignal: Push service error during init:", e.message);
+                        console.warn("OneSignal: Erreur de service push :", e.message);
                         setIsInitialized(true);
                     } else {
-                        console.error("OneSignal Init Error:", e);
+                        setIsInitialized(true); // Don't block UI even on error
                     }
                 }
             });
