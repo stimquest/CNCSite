@@ -9,6 +9,7 @@ import { GamesSlideshow } from '../../components/GamesSlideshow';
 import PillarStory from '../../components/PillarStory';
 import PageNavigation from '../../components/PageNavigation';
 import { SpotConditionsBento } from '../../components/SpotConditionsBento';
+import { LogoComponent } from '../../components/Logo';
 import Link from 'next/link';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import gsap from 'gsap';
@@ -266,23 +267,16 @@ export const HomePage: React.FC = () => {
                             transformStyle: 'preserve-3d',
                         }}
                     >
-                        {/* 1. BASE : Le Logo Blanc Semi-Transparent (pour la forme et la lisibilité) */}
-                        <img
-                            src="/images/LogoCNC_W.svg"
-                            alt="CNC Logo Base"
-                            className="absolute w-full h-full object-contain pointer-events-none opacity-20"
-                        />
-
-                        {/* 2. EFFET GLASS : Couche de flou masquée par le logo */}
+                        {/* 1. EFFET GLASS : Couche de flou masquée par le logo */}
                         <div
                             className="hero-logo-glass-layer logo-drop-shadow"
                             style={{
-                                maskImage: "url('/images/LogoCNC_W.svg')",
-                                WebkitMaskImage: "url('/images/LogoCNC_W.svg')"
+                                maskImage: "url('/images/logoWhite.png')",
+                                WebkitMaskImage: "url('/images/logoWhite.png')"
                             }}
                         />
 
-                        {/* 3. REFLET : Effet lumineux dynamique qui suit la souris */}
+                        {/* 2. REFLET : Effet lumineux dynamique qui suit la souris */}
                         <motion.div
                             className="absolute inset-0 pointer-events-none"
                             animate={{
@@ -290,8 +284,8 @@ export const HomePage: React.FC = () => {
                             }}
                             style={{
                                 mixBlendMode: 'overlay',
-                                maskImage: "url('/images/LogoCNC_W.svg')",
-                                WebkitMaskImage: "url('/images/LogoCNC_W.svg')",
+                                maskImage: "url('/images/logoWhite.png')",
+                                WebkitMaskImage: "url('/images/logoWhite.png')",
                                 maskSize: 'contain',
                                 maskPosition: 'center',
                                 maskRepeat: 'no-repeat',
@@ -316,7 +310,7 @@ export const HomePage: React.FC = () => {
                 <div className="mb-12 px-2">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Expérience CVC</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Expérience CNC</span>
                     </div>
                     <h2 className="text-3xl md:text-4xl text-abysse">
                         {homePageData?.spirit?.title || "L'Esprit du Club"} <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise"></span>

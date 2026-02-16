@@ -383,10 +383,11 @@ export const InfosPratiquesPage: React.FC = () => {
                 shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
                 shadowSize: [41, 41]
             });
-            L.marker([49.030384, -1.595904], { icon }).addTo(map).bindPopup('<b>CVC Coutainville</b><br/>Plage Nord').openPopup();
+            L.marker([49.030384, -1.595904], { icon }).addTo(map).bindPopup('<b>CNC Coutainville</b><br/>Plage Nord').openPopup();
             mapInstance.current = map;
         };
         initMap();
+
         return () => { if (mapInstance.current) { mapInstance.current.remove(); mapInstance.current = null; } };
     }, []);
 

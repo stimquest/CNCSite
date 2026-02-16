@@ -1,16 +1,16 @@
 {
   "enabled": true,
   "checkHour": 6,
-  "lastCheck": "2026-02-16T06:34:08.622Z",
+  "lastCheck": "2026-02-16T12:24:48.725Z",
   "lastCheckResult": {
     "weather": {
-      "wind": 26,
-      "gusts": 43,
-      "cape": 320,
-      "visibility": 16780,
-      "waveHeight": 1.7,
-      "wavePeriod": 6.4,
-      "waterTemp": 8.4
+      "wind": 25.7,
+      "gusts": 40.1,
+      "cape": 275,
+      "visibility": 17980,
+      "waveHeight": 1.6,
+      "wavePeriod": 6.3,
+      "waterTemp": 8.5
     },
     "char": {
       "status": "CLOSED",

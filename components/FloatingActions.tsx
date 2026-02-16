@@ -168,80 +168,94 @@ export const FloatingActions: React.FC = () => {
 
     return (
         <>
-            {/* BARRE FLOTTANTE */}
-            <div className="fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-4">
-
-                {ACTIONS.map((action) => (
-                    action.href ? (
-                        <Link
-                            key={action.id}
-                            href={action.href}
-                            className={`group relative flex items-center justify-center size-14 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-blue-900 shadow-2xl transition-all duration-300 hover:scale-110 hover:text-white ${action.color}`}
-                        >
-                            {action.icon}
-                            <span className="absolute right-full mr-4 px-3 py-1 bg-abysse text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                                {action.label}
-                            </span>
-                        </Link>
-                    ) : (
-                        <button
-                            key={action.id}
-                            onClick={action.onClick}
-                            className={`group relative flex items-center justify-center size-14 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-blue-900 shadow-2xl transition-all duration-300 hover:scale-110 hover:text-white ${action.color}`}
-                        >
-                            {action.icon}
-                            <span className="absolute right-full mr-4 px-3 py-1 bg-abysse text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                                {action.label}
-                            </span>
-                        </button>
-                    )
-                ))}
-
-
-                {/* NAVIGATION INTELLIGENTE (Point Permanent) */}
-                <div
-                    className="mt-6 flex flex-col items-center gap-4"
-                    onMouseEnter={() => setIsNavHovered(true)}
-                    onMouseLeave={() => setIsNavHovered(false)}
-                >
-                    <AnimatePresence>
-                        {isNavHovered && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: 20, scale: 0.8 }}
-                                className="flex flex-col gap-3"
+            {/* BARRE FLOTTANTE / TAB BAR MOBILE */}
+            <div className="fixed bottom-4 left-4 right-4 md:right-6 md:left-auto md:top-1/2 md:bottom-auto md:-translate-y-1/2 z-50">
+                <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-2 md:bg-transparent md:backdrop-blur-none md:border-none md:p-0 md:shadow-none shadow-2xl flex flex-row md:flex-col gap-2 md:gap-4 items-center justify-around md:justify-center">
+                    {ACTIONS.map((action) => (
+                        action.href ? (
+                            <Link
+                                key={action.id}
+                                href={action.href}
+                                className={`group relative flex flex-col md:flex-row items-center justify-center size-12 md:size-14 bg-white/10 md:bg-white/20 backdrop-blur-xl border border-white/20 rounded-2xl text-blue-900 shadow-xl transition-all duration-300 hover:scale-110 hover:text-white ${action.color}`}
                             >
-                                <button
-                                    onClick={() => window.history.back()}
-                                    className="group relative flex items-center justify-center size-12 bg-white/90 backdrop-blur-xl border border-slate-200 rounded-xl text-abysse shadow-xl transition-all duration-300 hover:scale-110 hover:bg-slate-100"
-                                >
-                                    <ArrowRight size={20} className="rotate-180" />
-                                    <span className="absolute right-full mr-4 px-3 py-1 bg-abysse text-white text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                                        Retour
-                                    </span>
-                                </button>
+                                {action.icon}
+                                <span className="hidden md:group-hover:block absolute right-full mr-4 px-3 py-1 bg-abysse text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 md:group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                                    {action.label}
+                                </span>
+                                <span className="md:hidden text-[7px] font-black uppercase tracking-tighter mt-1 text-blue-900/60 group-hover:text-white">
+                                    {action.id === 'weather' ? 'Météo' : action.id === 'planning' ? 'Planning' : action.id === 'direct' ? 'Vigie' : 'Contact'}
+                                </span>
+                            </Link>
+                        ) : (
+                            <button
+                                key={action.id}
+                                onClick={action.onClick}
+                                className={`group relative flex flex-col md:flex-row items-center justify-center size-12 md:size-14 bg-white/10 md:bg-white/20 backdrop-blur-xl border border-white/20 rounded-2xl text-blue-900 shadow-xl transition-all duration-300 hover:scale-110 hover:text-white ${action.color}`}
+                            >
+                                {action.icon}
+                                <span className="hidden md:group-hover:block absolute right-full mr-4 px-3 py-1 bg-abysse text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 md:group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                                    {action.label}
+                                </span>
+                                <span className="md:hidden text-[7px] font-black uppercase tracking-tighter mt-1 text-blue-900/60 group-hover:text-white">
+                                    {action.id === 'weather' ? 'Météo' : action.id === 'planning' ? 'Planning' : action.id === 'direct' ? 'Vigie' : 'Contact'}
+                                </span>
+                            </button>
+                        )
+                    ))}
 
-                                <button
-                                    onClick={scrollToTop}
-                                    className="group relative flex items-center justify-center size-12 bg-abysse/90 backdrop-blur-xl border border-white/20 rounded-xl text-white shadow-xl transition-all duration-300 hover:scale-110 hover:bg-turquoise"
+                    {/* NAVIGATION INTELLIGENTE (Point Permanent) */}
+                    <div
+                        className="hidden md:flex flex-col items-center gap-4 mt-6"
+                        onMouseEnter={() => setIsNavHovered(true)}
+                        onMouseLeave={() => setIsNavHovered(false)}
+                    >
+                        <AnimatePresence>
+                            {isNavHovered && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 20, scale: 0.8 }}
+                                    className="flex flex-col gap-3"
                                 >
-                                    <ChevronUp size={20} />
-                                    <span className="absolute right-full mr-4 px-3 py-1 bg-abysse text-white text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                                        Haut
-                                    </span>
-                                </button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                                    <button
+                                        onClick={() => window.history.back()}
+                                        className="group relative flex items-center justify-center size-12 bg-white/90 backdrop-blur-xl border border-slate-200 rounded-xl text-abysse shadow-xl transition-all duration-300 hover:scale-110 hover:bg-slate-100"
+                                    >
+                                        <ArrowRight size={20} className="rotate-180" />
+                                        <span className="absolute right-full mr-4 px-3 py-1 bg-abysse text-white text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                                            Retour
+                                        </span>
+                                    </button>
 
-                    {/* Le Point (Trigger permanent) */}
-                    <div className="flex flex-col items-center gap-2 mt-2">
-                        <div className={`size-3 rounded-full transition-all duration-500 cursor-help shadow-lg 
-                            ${isNavHovered ? 'bg-turquoise scale-125 shadow-[0_0_15px_rgba(45,212,191,0.5)]' : 'bg-slate-300 border border-slate-400/20'}
-                        `} />
-                        <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest opacity-40">Nav</span>
+                                    <button
+                                        onClick={scrollToTop}
+                                        className="group relative flex items-center justify-center size-12 bg-abysse/90 backdrop-blur-xl border border-white/20 rounded-xl text-white shadow-xl transition-all duration-300 hover:scale-110 hover:bg-turquoise"
+                                    >
+                                        <ChevronUp size={20} />
+                                        <span className="absolute right-full mr-4 px-3 py-1 bg-abysse text-white text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                                            Haut
+                                        </span>
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Le Point (Trigger permanent) */}
+                        <div className="flex flex-col items-center gap-2 mt-2">
+                            <div className={`size-3 rounded-full transition-all duration-500 cursor-help shadow-lg 
+                                ${isNavHovered ? 'bg-turquoise scale-125 shadow-[0_0_15px_rgba(45,212,191,0.5)]' : 'bg-slate-300 border border-slate-400/20'}
+                            `} />
+                            <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest opacity-40">Nav</span>
+                        </div>
                     </div>
+
+                    {/* Scroll to top Mobile shortcut */}
+                    <button
+                        onClick={scrollToTop}
+                        className="md:hidden flex items-center justify-center size-12 bg-white/5 border border-white/5 rounded-2xl text-blue-900 transition-all hover:bg-turquoise hover:text-white"
+                    >
+                        <ChevronUp size={20} />
+                    </button>
                 </div>
             </div>
 

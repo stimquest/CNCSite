@@ -56,32 +56,36 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
             window.OneSignalDeferred = window.OneSignalDeferred || [];
 
             window.OneSignalDeferred.push(async (OneSignal: any) => {
+                // Double protection: OneSignal.initialized property + a local flag if needed
                 if (OneSignal.initialized) {
+                    console.log("OneSignal: Already initialized, skipping init.");
                     setIsInitialized(true);
                     return;
                 }
 
-
-
                 try {
+                    console.log("OneSignal: Starting initialization...");
                     await OneSignal.init({
                         appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID,
                         safari_web_id: process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_ID,
                         allowLocalhostAsSecureOrigin: true,
-                        serviceWorkerParam: { scope: '/' },
+                        // When files are in /public, use standard names without leading slash or with absolute path depending on hosting
+                        // Standard OneSignal Web Push setup usually expects these to be at the root
                         serviceWorkerPath: 'OneSignalSDKWorker.js',
-                        notifyButton: { enable: false },
                     });
 
 
                     try {
                         if (OneSignal.Notifications) {
+                            console.log("OneSignal: Notifications support detected");
                             OneSignal.Notifications.addEventListener('permissionChange', (permission: any) => {
+                                console.log("OneSignal: Permission changed to:", permission);
                             });
                         }
 
                         if (OneSignal.User?.PushSubscription) {
                             OneSignal.User.PushSubscription.addEventListener('change', (event: any) => {
+                                console.log("OneSignal: Subscription changed:", event.current.optedIn);
                                 setIsSubscribed(event.current.optedIn);
                                 if (event.current.optedIn) refreshTags();
                             });
@@ -98,6 +102,7 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
 
                     refreshTags();
                     setIsInitialized(true);
+                    console.log("OneSignal: Initialized successfully");
                 } catch (e: any) {
                     if (e.name === 'AbortError' || e.message?.includes('push service error')) {
                         console.warn("OneSignal: Push service error during init (safely suppressed):", e.message);
@@ -113,28 +118,37 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
     }, []);
 
     const subscribeToGroup = async (groupId: string) => {
-        if (!window.OneSignalDeferred) return; // Changed from OneSignal to OneSignalDeferred
+        if (typeof window === 'undefined') return;
 
-
-        window.OneSignalDeferred.push(async (OneSignal: any) => { // Changed from OneSignal to OneSignalDeferred
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        window.OneSignalDeferred.push(async (OneSignal: any) => {
             const tagKey = `group_${groupId}`;
+            console.log(`OneSignal: Subscribing to group ${groupId}`);
             try {
-                await OneSignal.User.addTag(tagKey, "true"); // Added await
+                await OneSignal.User.addTag(tagKey, "true");
                 refreshTags();
 
                 if (!OneSignal.User.PushSubscription.optedIn) {
-                    await OneSignal.Slidedown.promptPush(); // Added await
+                    console.log("OneSignal: Prompting for push permission...");
+                    await OneSignal.Slidedown.promptPush();
+                } else {
+                    console.log("OneSignal: Already opted in, tag added.");
                 }
-            } catch (e) { console.error("Error subscribing:", e); }
+            } catch (e) {
+                console.error("Error subscribing:", e);
+                alert("Erreur lors de l'abonnement aux notifications.");
+            }
         });
     };
 
     const unsubscribeFromGroup = async (groupId: string) => {
-        if (!window.OneSignalDeferred) return; // Changed from OneSignal to OneSignalDeferred
+        if (typeof window === 'undefined') return;
 
-        window.OneSignalDeferred.push(async (OneSignal: any) => { // Changed from OneSignal to OneSignalDeferred
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        window.OneSignalDeferred.push(async (OneSignal: any) => {
+            console.log(`OneSignal: Unsubscribing from group ${groupId}`);
             try {
-                await OneSignal.User.removeTag(`group_${groupId}`); // Added await
+                await OneSignal.User.removeTag(`group_${groupId}`);
                 refreshTags();
             } catch (e) { console.error("Error unsubscribing:", e); }
         });

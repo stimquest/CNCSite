@@ -6,6 +6,7 @@
 @theme {
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
+  --font-logo: var(--font-logo);
 
   --color-abysse: #002B49;
   --color-turquoise: #00A9CE;

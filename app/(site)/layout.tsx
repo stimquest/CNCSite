@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Outfit, Syncopate } from 'next/font/google';
+import { Outfit, Syncopate, Shrikhand } from 'next/font/google';
 import '../globals.css';
 import { ContentProvider } from '@/contexts/ContentContext';
 import { Header } from '@/components/Header';
@@ -17,9 +17,14 @@ const syncopate = Syncopate({
   weight: ['400', '700'],
   variable: '--font-display',
 });
+const shrikhand = Shrikhand({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-logo',
+});
 
 export const metadata: Metadata = {
-  title: 'CVC - Club de Voile de Coutainville',
+  title: 'CNC - Club de Voile de Coutainville',
   description: 'Club de Voile de Coutainville, l\'école de référence sur la côte Ouest du Cotentin depuis 1978.',
 };
 
@@ -31,7 +36,7 @@ export default function SiteLayout({
 }) {
   return (
     <>
-      <div className={`${outfit.variable} ${syncopate.variable} font-sans text-abysse antialiased selection:bg-turquoise selection:text-white`}>
+      <div className={`${outfit.variable} ${syncopate.variable} ${shrikhand.variable} font-sans text-abysse antialiased selection:bg-turquoise selection:text-white`}>
         <ContentProvider>
           <SmoothScroll>
             <div className="min-h-screen flex flex-col">
