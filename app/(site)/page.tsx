@@ -298,6 +298,9 @@ export const HomePage: React.FC = () => {
                         <p className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm">
                             Club Nautique de Coutainville
                         </p>
+                        <p className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm mt-2 opacity-80">
+                            Sauvetage et Secourisme
+                        </p>
                     </div>
                 </div>
             </section>
