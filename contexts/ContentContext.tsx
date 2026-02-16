@@ -420,49 +420,68 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (!data) return;
 
         // Fetch local tides to enrich weather data
-        try {
-          const tideRes = await fetch('/api/tides');
-          const tideData = await tideRes.json();
+        // Circuit breaker: stop fetching tides if we have too many errors (e.g. no credits)
+        const MAX_TIDE_ERRORS = 3;
+        const tideErrorCount = parseInt(sessionStorage.getItem('CNC_TIDE_ERROR_COUNT') || '0');
 
-          let tideInfo = {};
+        if (tideErrorCount < MAX_TIDE_ERRORS) {
+          try {
+            const tideRes = await fetch('/api/tides');
+            const tideData = await tideRes.json();
 
-          // 1. Get Coefficient
-          if (tideData.coefficients) {
-            tideInfo = {
-              ...tideInfo,
-              coefficient: tideData.coefficients.coef_1 || tideData.coefficients.coef_2 || 0
-            };
-          }
+            if (tideData.error) {
+              console.warn("WorldTides API returned an error, incrementing error count.");
+              sessionStorage.setItem('CNC_TIDE_ERROR_COUNT', (tideErrorCount + 1).toString());
+            } else {
+              // Reset error count on success
+              sessionStorage.setItem('CNC_TIDE_ERROR_COUNT', '0');
+            }
 
-          // 2. Get High/Low times for today
-          if (tideData.tides) {
-            setTides(tideData.tides);
-            const now = Date.now();
-            const todayStr = new Date().toDateString();
-            const daysTides = tideData.tides.filter((t: any) =>
-              t.type === 'extreme' && new Date(t.timestamp).toDateString() === todayStr
-            );
+            let tideInfo = {};
 
-            const nextHigh = daysTides.find((t: any) => t.status === 'high' && t.timestamp > now) || daysTides.find((t: any) => t.status === 'high');
-            const nextLow = daysTides.find((t: any) => t.status === 'low' && t.timestamp > now) || daysTides.find((t: any) => t.status === 'low');
-
-            if (nextHigh) {
+            // 1. Get Coefficient
+            if (tideData.coefficients) {
               tideInfo = {
                 ...tideInfo,
-                tideHigh: new Date(nextHigh.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+                coefficient: tideData.coefficients.coef_1 || tideData.coefficients.coef_2 || 0
               };
             }
-            if (nextLow) {
-              tideInfo = {
-                ...tideInfo,
-                tideLow: new Date(nextLow.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-              };
-            }
-          }
 
-          setWeather(prev => ({ ...prev, ...data, ...tideInfo }));
-        } catch (e) {
-          console.error("Error fetching tides for weather context", e);
+            // 2. Get High/Low times for today
+            if (tideData.tides) {
+              setTides(tideData.tides);
+              const now = Date.now();
+              const todayStr = new Date().toDateString();
+              const daysTides = tideData.tides.filter((t: any) =>
+                t.type === 'extreme' && new Date(t.timestamp).toDateString() === todayStr
+              );
+
+              const nextHigh = daysTides.find((t: any) => t.status === 'high' && t.timestamp > now) || daysTides.find((t: any) => t.status === 'high');
+              const nextLow = daysTides.find((t: any) => t.status === 'low' && t.timestamp > now) || daysTides.find((t: any) => t.status === 'low');
+
+              if (nextHigh) {
+                tideInfo = {
+                  ...tideInfo,
+                  tideHigh: new Date(nextHigh.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+                };
+              }
+              if (nextLow) {
+                tideInfo = {
+                  ...tideInfo,
+                  tideLow: new Date(nextLow.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+                };
+              }
+            }
+
+            setWeather(prev => ({ ...prev, ...data, ...tideInfo }));
+          } catch (e) {
+            console.error("Error fetching tides for weather context", e);
+            sessionStorage.setItem('CNC_TIDE_ERROR_COUNT', (tideErrorCount + 1).toString());
+            setWeather(prev => ({ ...prev, ...data }));
+          }
+        } else {
+          // If too many errors, just use static coefficients if we want, or do nothing
+          console.warn("WorldTides API retry limit reached. Skipping tide fetch.");
           setWeather(prev => ({ ...prev, ...data }));
         }
       })
