@@ -25,6 +25,47 @@ export async function POST(req: Request) {
                 _type: 'infoMessage',
                 ...patch
             });
+
+            // Trigger OneSignal if requested
+            if (patch.sendPush) {
+                const ONESIGNAL_APP_ID = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
+                const ONESIGNAL_API_KEY = process.env.ONESIGNAL_REST_API_KEY;
+
+                if (ONESIGNAL_APP_ID && ONESIGNAL_API_KEY) {
+                    try {
+                        let filters: any[] = [];
+                        const targetGroups = patch.targetGroups || ['all'];
+
+                        if (!targetGroups.includes('all')) {
+                            filters = targetGroups.map((groupId: string, index: number) => {
+                                const filter = { field: "tag", key: `group_${groupId}`, relation: "=", value: "true" };
+                                return index === 0 ? filter : { operator: "OR", ...filter };
+                            });
+                        }
+
+                        await fetch('https://onesignal.com/api/v1/notifications', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json; charset=utf-8',
+                                'Authorization': `Basic ${ONESIGNAL_API_KEY}`,
+                            },
+                            body: JSON.stringify({
+                                app_id: ONESIGNAL_APP_ID,
+                                headings: { fr: patch.title },
+                                contents: { fr: patch.content },
+                                url: `https://cnccoutainville.vercel.app/fil-info?id=${result._id}`,
+                                filters: filters.length > 0 ? filters : undefined,
+                                included_segments: filters.length === 0 ? ['Subscribed Users'] : undefined,
+                            }),
+                        });
+                        console.log("OneSignal: Notification sent for", result._id);
+                    } catch (pushError) {
+                        console.error("OneSignal Push Error:", pushError);
+                        // We don't fail the whole request if push fails
+                    }
+                }
+            }
+
             return NextResponse.json({ success: true, id: result._id });
         }
 

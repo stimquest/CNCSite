@@ -40,15 +40,29 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
     const [activeTags, setActiveTags] = useState<Record<string, string>>({});
 
     const refreshTags = async () => {
-        if (!window.OneSignal) return;
-        window.OneSignal.push(async (OneSignal: any) => {
-            try {
-                const tags = await OneSignal.User.getTags();
-                setActiveTags(tags || {});
-            } catch (e) {
-                console.error("Error fetching OneSignal tags:", e);
-            }
-        });
+        const os = (window as any).OneSignal;
+        if (!os) {
+            // If OneSignal is not yet available, queue the operation
+            window.OneSignalDeferred = window.OneSignalDeferred || [];
+            window.OneSignalDeferred.push(async (OneSignal: any) => {
+                try {
+                    const tags = await OneSignal.User.getTags();
+                    console.log("OneSignal: Tags refreshed (deferred):", tags);
+                    setActiveTags(tags || {});
+                } catch (e) {
+                    console.error("Error fetching OneSignal tags (deferred):", e);
+                }
+            });
+            return;
+        }
+
+        try {
+            const tags = await os.User.getTags();
+            console.log("OneSignal: Tags refreshed:", tags);
+            setActiveTags(tags || {});
+        } catch (e) {
+            console.error("Error fetching OneSignal tags:", e);
+        }
     };
 
     useEffect(() => {
@@ -71,11 +85,22 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
                 (window as any).__oneSignalInitialized = true;
 
                 try {
-                    // Check if we are on the right domain or localhost
-                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                    const isVercel = window.location.hostname.includes('vercel.app');
-
                     console.log("OneSignal: Starting initialization...");
+
+                    // Register events BEFORE init to catch everything
+                    if (OneSignal.Notifications) {
+                        OneSignal.Notifications.addEventListener('permissionChange', (permission: any) => {
+                            console.log("OneSignal: Permission changed to:", permission);
+                        });
+                    }
+                    if (OneSignal.User?.PushSubscription) {
+                        OneSignal.User.PushSubscription.addEventListener('change', (event: any) => {
+                            console.log("OneSignal: Subscription changed:", event.current.optedIn);
+                            setIsSubscribed(event.current.optedIn);
+                            if (event.current.optedIn) refreshTags();
+                        });
+                    }
+
                     await OneSignal.init({
                         appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID,
                         safari_web_id: process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_ID,
@@ -83,39 +108,21 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
                         serviceWorkerPath: '/OneSignalSDKWorker.js',
                     });
 
-
-                    try {
-                        if (OneSignal.Notifications) {
-                            console.log("OneSignal: Notifications support detected");
-                            OneSignal.Notifications.addEventListener('permissionChange', (permission: any) => {
-                                console.log("OneSignal: Permission changed to:", permission);
-                            });
-                        }
-
-                        if (OneSignal.User?.PushSubscription) {
-                            OneSignal.User.PushSubscription.addEventListener('change', (event: any) => {
-                                console.log("OneSignal: Subscription changed:", event.current.optedIn);
-                                setIsSubscribed(event.current.optedIn);
-                                if (event.current.optedIn) refreshTags();
-                            });
-                            setIsSubscribed(OneSignal.User.PushSubscription.optedIn);
-                        }
-                    } catch (innerError: any) {
-                        // Registration or Event attaching errors (like push service error)
-                        if (innerError.name === 'AbortError') {
-                            console.warn("OneSignal: Push service registration aborted (common in dev/localhost).", innerError);
-                        } else {
-                            console.error("OneSignal: Error attaching listeners or registering push:", innerError);
-                        }
+                    // Sync initial state
+                    if (OneSignal.User?.PushSubscription) {
+                        setIsSubscribed(OneSignal.User.PushSubscription.optedIn);
                     }
 
                     refreshTags();
                     setIsInitialized(true);
-                    console.log("OneSignal: Initialized successfully");
+                    console.log("OneSignal: Initialized successfully. Subscribed:", OneSignal.User?.PushSubscription?.optedIn);
                 } catch (e: any) {
-                    if (e.name === 'AbortError' || e.message?.includes('push service error')) {
-                        console.warn("OneSignal: Push service error during init (safely suppressed):", e.message);
-                        setIsInitialized(true); // Still marks as initialized to avoid re-init loops if logic depends on it
+                    if (e.message?.includes('Can only be used on') || e.message?.includes('origin')) {
+                        console.warn("OneSignal: Mismatch d'URL détecté (Local vs Dashboard).");
+                        setIsInitialized(true);
+                    } else if (e.name === 'AbortError' || e.message?.includes('push service error')) {
+                        console.warn("OneSignal: Push service error during init:", e.message);
+                        setIsInitialized(true);
                     } else {
                         console.error("OneSignal Init Error:", e);
                     }
