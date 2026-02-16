@@ -1,0 +1,156 @@
+{
+  "enabled": true,
+  "checkHour": 6,
+  "lastCheck": "2026-02-16T06:34:08.622Z",
+  "lastCheckResult": {
+    "weather": {
+      "wind": 26,
+      "gusts": 43,
+      "cape": 320,
+      "visibility": 16780,
+      "waveHeight": 1.7,
+      "wavePeriod": 6.4,
+      "waterTemp": 8.4
+    },
+    "char": {
+      "status": "CLOSED",
+      "message": "Vent trop fort, activité suspendue.",
+      "tags": [
+        "Vent fort"
+      ],
+      "causes": [
+        "wind",
+        "waves"
+      ]
+    },
+    "nautique": {
+      "status": "CLOSED",
+      "message": "Conditions dangereuses, plan d'eau fermé.",
+      "tags": [
+        "Vent fort"
+      ],
+      "causes": [
+        "wind"
+      ]
+    },
+    "marche": {
+      "status": "CLOSED",
+      "message": "Vent trop fort pour la marche.",
+      "tags": [
+        "Vent fort"
+      ],
+      "causes": [
+        "wind",
+        "waves"
+      ]
+    }
+  },
+  "manualOverride": false,
+  "activities": {
+    "char": {
+      "enabled": true,
+      "thresholds": {
+        "wind": {
+          "closedBelow": 5,
+          "restrictedBelow": 10,
+          "restrictedAbove": 25,
+          "closedAbove": 40
+        },
+        "gusts": {
+          "restrictedAbove": 35,
+          "closedAbove": 50
+        },
+        "waveHeight": {
+          "restrictedAbove": 1,
+          "closedAbove": 1.5
+        },
+        "cape": {
+          "closedAbove": 1000
+        },
+        "visibility": {
+          "closedBelow": 500,
+          "restrictedBelow": 1000
+        }
+      },
+      "messages": {
+        "wind_low": "Vent insuffisant pour le char à voile.",
+        "wind_high": "Vent trop fort, activité suspendue.",
+        "wind_restricted_low": "Vent faible, roulage possible mais technique.",
+        "wind_restricted_high": "Vent fort, session encadrée pour confirmés.",
+        "waves": "Houle forte, plage réduite pour le départ.",
+        "storm": "Risque d'orage, activité suspendue (sécurité foudre).",
+        "visibility": "Visibilité réduite.",
+        "ok": "Bonnes conditions pour le char à voile."
+      }
+    },
+    "nautique": {
+      "enabled": true,
+      "thresholds": {
+        "wind": {
+          "restrictedBelow": 5,
+          "restrictedAbove": 20,
+          "closedAbove": 30
+        },
+        "gusts": {
+          "restrictedAbove": 25,
+          "closedAbove": 40
+        },
+        "waveHeight": {
+          "restrictedAbove": 1.5,
+          "closedAbove": 2.5
+        },
+        "cape": {
+          "closedAbove": 1000
+        },
+        "visibility": {
+          "closedBelow": 300,
+          "restrictedBelow": 1000
+        }
+      },
+      "messages": {
+        "wind_low": "Peu de vent, activités possibles au moteur.",
+        "wind_high": "Conditions dangereuses, plan d'eau fermé.",
+        "wind_restricted_low": "Vent léger.",
+        "wind_restricted_high": "Vent soutenu, activité réservée aux confirmés.",
+        "waves": "Mer agitée, sorties techniques.",
+        "storm": "Risque d'orage, sorties interdites.",
+        "visibility": "Visibilité insuffisante pour la navigation.",
+        "ok": "Bonnes conditions nautiques."
+      }
+    },
+    "marche": {
+      "enabled": true,
+      "thresholds": {
+        "wind": {
+          "restrictedAbove": 25,
+          "closedAbove": 35
+        },
+        "gusts": {
+          "restrictedAbove": 40
+        },
+        "waveHeight": {
+          "restrictedAbove": 0.8,
+          "closedAbove": 1.2
+        },
+        "wavePeriod": {
+          "restrictedAbove": 10
+        },
+        "waterTemp": {
+          "restrictedBelow": 10,
+          "closedBelow": 5
+        },
+        "cape": {
+          "closedAbove": 1000
+        }
+      },
+      "messages": {
+        "wind_high": "Vent trop fort pour la marche.",
+        "wind_restricted_high": "Vent fort, parcours adapté.",
+        "waves": "Houle trop importante pour la pratique.",
+        "waterTemp": "Eau très froide, équipement grand froid obligatoire.",
+        "storm": "Risque d'orage, activité annulée.",
+        "ok": "Conditions favorables pour la marche aquatique."
+      }
+    }
+  }
+}

@@ -50,6 +50,11 @@ export const ACTIVITIES: Activity[] = [
     ],
     minAge: 8,
     image: 'https://images.unsplash.com/photo-1519830842880-928929944634?q=80&w=1600',
+    gallery: [
+      'https://images.unsplash.com/photo-1519830842880-928929944634?q=80&w=1600', // Char 1
+      '/images/Hero/upscaled_char3.JPEG', // Char 2
+      'https://images.unsplash.com/photo-1544411047-c491574abb46?q=80&w=1600' // Char 3
+    ],
     isTideDependent: true,
     planningNote: "Lundi 16 février:14h - 16h|Mardi 17 février:14h30 - 16h30|Mercredi 18 février:14h30 - 16h30|Jeudi 19 février:13h30 - 15h30|Vendredi 20 février:13h30 - 15h30|Lundi 23 février:15h30 - 17h30|Mardi 24 février:16h - 18h|Vendredi 27 février:10h - 12h|Lundi 02 mars:10h30 - 12h30|Mardi 03 mars:14h30 - 16h30|Jeudi 05 mars:16h - 18h|Vendredi 06 mars:13h30 - 15h30",
     bookingUrl: "https://coutainville.axyomes.com/client/2-1.php?stagetype=2",
@@ -78,6 +83,11 @@ export const ACTIVITIES: Activity[] = [
     ],
     minAge: 14,
     image: 'https://images.unsplash.com/photo-1544458514-6e6962cb1cb2?q=80&w=1600',
+    gallery: [
+      'https://images.unsplash.com/photo-1544458514-6e6962cb1cb2?q=80&w=1600',
+      'https://images.unsplash.com/photo-1506477331477-33d5d8b3dc85?q=80&w=1600', // Kite 2
+      'https://images.unsplash.com/photo-1510134444003-8d6978160408?q=80&w=1600'  // Kite 3
+    ],
     isTideDependent: true,
     planningNote: "Activite saisonnière (Avril à Novembre). Séances de 3h dépendantes de la force du vent (12 à 25 nœuds) et de la marée (mi-marée préférée).",
     bookingUrl: "https://coutainville.axyomes.com/client/2-1.php?stagetype=4",
@@ -103,6 +113,11 @@ export const ACTIVITIES: Activity[] = [
     ],
     minAge: 12,
     image: 'https://images.unsplash.com/photo-1612459957245-0d0458df8643?q=80&w=1600',
+    gallery: [
+      'https://images.unsplash.com/photo-1612459957245-0d0458df8643?q=80&w=1600',
+      'https://images.unsplash.com/photo-1598514983053-ec5507ad2ea4?q=80&w=1600', // Wing 2
+      'https://images.unsplash.com/photo-1620864205510-9b48f655823e?q=80&w=1600'  // Wing 3
+    ],
     isTideDependent: false,
     planningNote: "Pratique d'Avril à Octobre. Nécessite un vent régulier. Séances calées sur les créneaux de pleine mer ou mi-marée selon les bancs de sable.",
     bookingUrl: "https://coutainville.axyomes.com/client/2-1.php?stagetype=9",
@@ -339,7 +354,7 @@ export const ACTIVITIES: Activity[] = [
   },
   {
     id: 'marche-aquatique',
-    title: 'Longe-Côte',
+    title: 'Marche Aquatique',
     category: ActivityCategory.BIEN_ETRE,
     accroche: "Le fitness marin par excellence.",
     experience: "Fitness en milieu marin. On marche dans l'eau avec une immersion jusqu'à la taille. Excellent pour le renforcement musculaire et le cardio. Convivialité garantie été comme hiver.",

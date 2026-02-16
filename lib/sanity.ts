@@ -12,10 +12,54 @@ type SanityImageSource = any;
 export const client = createClient({
   projectId: '9v7nk22c',
   dataset: 'production',
-  useCdn: process.env.NODE_ENV === 'production',
+  useCdn: false, // Désactiver le CDN pour éviter les problèmes de cache (temporaire ou définitif pour ce site à faible trafic)
   apiVersion: '2024-03-15',
-  // TOKEN D'ÉCRITURE : Uniquement présent côté serveur ou injecté via .env
-  token: process.env.NEXT_PUBLIC_SANITY_WRITE_TOKEN || '', 
+  // Pas de token ici pour éviter les coûts API inutiles
+});
+
+// ... (skip to queries)
+
+// Page Nature (Avec projection intelligente : on garde les titres du singleton, mais on remplit la liste avec les documents natureEntity)
+naturePage: `*[_type == "naturePage"][0] {
+      ...,
+      "hero": { ..., "heroImage": hero.heroImage.asset->url },
+      "estran": {
+          ...,
+          "cards": estran.cards[] { ..., "iconName": iconName }
+      },
+      "habitants": {
+          "tag": habitants.tag,
+          "title": habitants.title,
+          "subtitle": habitants.subtitle,
+          "list": *[_type == "natureEntity"] | order(name asc) {
+              name,
+              scientificName,
+              "image": image.asset->url,
+              tags,
+              tagColor,
+              description
+          }
+      },
+      "peche": { ... },
+      "observations": observations[]{
+          ...,
+          "images": images[].asset->url
+      },
+      "exploration": {
+          ...,
+          "cards": exploration.cards[]{
+             ...,
+             "image": image.asset->url
+          }
+      }
+  }`
+
+export const writeClient = createClient({
+  projectId: '9v7nk22c',
+  dataset: 'production',
+  useCdn: false, // Jamais de CDN pour l'écriture
+  apiVersion: '2024-03-15',
+  token: process.env.NEXT_PUBLIC_SANITY_WRITE_TOKEN || '',
 });
 
 // Image URL Builder
@@ -30,12 +74,14 @@ export function urlFor(source: SanityImageSource) {
  */
 export const queries = {
   // Récupération des activités
-  activities: `*[_type == "activity"] | order(title asc) {
+  activities: `*[_type == "activity" && !(_id in path('drafts.**'))] | order(order asc, title asc) {
     id,
     title,
     category,
     description,
+    accroche,
     price,
+    "prices": prices[]{ label, value },
     "image": image.asset->url,
     isTideDependent,
     bookingUrl,
@@ -43,15 +89,22 @@ export const queries = {
     minAge,
     pedagogie,
     experience,
-    logistique
+    logistique,
+    planningNote
   }`,
 
-  // Récupération du statut du spot
-  settings: `*[_type == "spotSettings"][0]{
+  // Récupération du statut du spot (exclure les brouillons pour éviter le rollback)
+  settings: `*[_type == "spotSettings" && !(_id in path('drafts.**'))][0]{
     spotStatus,
     statusMessage,
     alertMessage,
-    lastUpdated
+    lastUpdated,
+    charStatus,
+    charMessage,
+    marcheStatus,
+    marcheMessage,
+    nautiqueStatus,
+    nautiqueMessage
   }`,
 
   // Flash Info (News)
@@ -110,5 +163,40 @@ export const queries = {
         sessions[]{ time }
       }
     }
+  }`,
+
+  // Page Nature (Avec projection intelligente : on garde les titres du singleton, mais on remplit la liste avec les documents natureEntity)
+  naturePage: `*[_type == "naturePage"][0] {
+      ...,
+      "hero": { ..., "heroImage": hero.heroImage.asset->url },
+      "estran": {
+          ...,
+          "cards": estran.cards[] { ..., "iconName": iconName }
+      },
+      "habitants": {
+          "tag": habitants.tag,
+          "title": habitants.title,
+          "subtitle": habitants.subtitle,
+          "list": *[_type == "natureEntity"] | order(name asc) {
+              name,
+              scientificName,
+              "image": image.asset->url,
+              tags,
+              tagColor,
+              description
+          }
+      },
+      "peche": { ... },
+      "observations": observations[]{
+          ...,
+          "images": images[].asset->url
+      },
+      "exploration": {
+          ...,
+          "cards": exploration.cards[]{
+             ...,
+             "image": cardImage.asset->url
+          }
+      }
   }`
 };

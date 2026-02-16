@@ -1,17 +1,5 @@
 import { useState, useEffect } from 'react';
-
-export interface TideData {
-  timestamp: number;
-  type: "height" | "extreme";
-  height: number;
-  status?: string;
-}
-
-export interface Coefficients {
-  date: string;
-  coef_1: number | null;
-  coef_2: number | null;
-}
+import { TideData, TideCoefficients as Coefficients } from '@/types';
 
 const CALIBRATION = {
   HEIGHT: 0.0,

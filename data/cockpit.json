@@ -1,0 +1,20 @@
+{
+  "spotStatus": "RESTRICTED",
+  "statusMessage": "Plan d'eau calme, mais vent faible",
+  "charStatus": "CLOSED",
+  "charMessage": "Vent trop fort, activité suspendue.",
+  "marcheStatus": "CLOSED",
+  "marcheMessage": "Vent trop fort pour la marche.",
+  "nautiqueStatus": "CLOSED",
+  "nautiqueMessage": "Conditions dangereuses, plan d'eau fermé.",
+  "lastUpdated": "2026-02-16T06:34:08.621Z",
+  "charTags": [
+    "Vent fort"
+  ],
+  "marcheTags": [
+    "Vent fort"
+  ],
+  "nautiqueTags": [
+    "Vent fort"
+  ]
+}

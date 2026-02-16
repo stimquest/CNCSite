@@ -5,6 +5,18 @@ export const planningCharAVoile = defineType({
   title: 'Char à Voile - Planning',
   type: 'document',
   icon: () => '🏁',
+  orderings: [
+    {
+      title: 'Date croissante',
+      name: 'startDateAsc',
+      by: [{ field: 'startDate', direction: 'asc' }]
+    },
+    {
+      title: 'Date décroissante',
+      name: 'startDateDesc',
+      by: [{ field: 'startDate', direction: 'desc' }]
+    }
+  ],
   fields: [
     defineField({
       name: 'title',
@@ -59,9 +71,9 @@ export const planningCharAVoile = defineType({
                       title: 'Sessions',
                       type: 'array',
                       validation: Rule => Rule.max(2),
-                      of: [{ 
-                          type: 'object', 
-                          fields: [{ name: 'time', type: 'string', title: 'Horaire' }] 
+                      of: [{
+                        type: 'object',
+                        fields: [{ name: 'time', type: 'string', title: 'Horaire' }]
                       }]
                     }
                   ],

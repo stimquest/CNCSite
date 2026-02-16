@@ -33,6 +33,18 @@ export const news = defineType({
       description: 'Ex: "Il y a 2h", "Hier", "15 Mars"',
     }),
     defineField({
+      name: 'content',
+      title: 'Contenu du flash',
+      type: 'text',
+      rows: 3,
+      description: 'Le corps du message affiché dans le bandeau.',
+    }),
+    defineField({
+      name: 'externalLink',
+      title: 'Lien "En savoir plus"',
+      type: 'url',
+    }),
+    defineField({
       name: 'publishedAt',
       title: 'Date de publication (tri)',
       type: 'datetime',

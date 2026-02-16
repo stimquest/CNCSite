@@ -1,748 +1,675 @@
 
 "use client";
 
-import React, { useState } from 'react';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  GraduationCap, 
+import React, { useState, useEffect, useRef } from 'react';
+import { SecondaryNav } from '@/components/SecondaryNav';
+import { useContent } from '@/contexts/ContentContext';
+import {
+  ChevronLeft,
+  ChevronRight,
+  GraduationCap,
   Anchor,
   Sun,
   Wind,
   ArrowRight,
   Waves,
+  Download,
   Info,
   CheckCircle2,
   AlertTriangle,
-  LayoutGrid,
   Calendar,
-  Map,
-  Trophy,
+  LifeBuoy,
   Ship,
-  LifeBuoy
+  Sparkles,
+  Compass,
+  ArrowDownCircle,
+  Clock,
+  Euro
 } from 'lucide-react';
 
-// --- DATA: PLANNING & SEMAINES ---
-// Structure stricte avec start/end pour les horaires
+import { motion } from 'framer-motion';
 
-const PLANNING_WEEKS = [
+// --- DATA: PLANNING ROWS ---
+const PLANNING_ROWS = [
   {
-    id: 1,
-    label: "Semaine du 7 au 11 Juillet",
-    coefficient: 85,
-    tide: "Matin",
-    days: [
-      {
-        name: "Lundi 07",
-        mini: { start: "09:30", end: "12:00", activity: "Piscine", icon: "pool" },
-        mousse: { start: "09:30", end: "12:00", activity: "Optimist", icon: "boat" },
-        initiation: { start: "14:00", end: "17:00", isRaid: false },
-        perf: { start: "14:00", end: "17:00", isRaid: false }
-      },
-      {
-        name: "Mardi 08",
-        mini: { start: "09:30", end: "12:00", activity: "Char à Voile", icon: "wind" },
-        mousse: { start: "09:30", end: "12:00", activity: "Catamaran", icon: "cata" },
-        initiation: { start: "14:30", end: "17:30", isRaid: false },
-        perf: { start: "14:30", end: "17:30", isRaid: false }
-      },
-      {
-        name: "Mercredi 09",
-        mini: { start: "09:30", end: "12:00", activity: "Pêche à pied", icon: "fish" },
-        mousse: { start: "09:30", end: "12:00", activity: "Paddle", icon: "sup" },
-        initiation: { start: "15:00", end: "18:00", isRaid: false },
-        perf: { start: "10:00", end: "17:00", isRaid: true, label: "Raid Chausey" } 
-      },
-      {
-        name: "Jeudi 10",
-        mini: { start: "09:30", end: "12:00", activity: "Cerf-Volant", icon: "kite" },
-        mousse: { start: "09:30", end: "12:00", activity: "Char à Voile", icon: "wind" },
-        initiation: { start: "15:30", end: "18:30", isRaid: false },
-        perf: { start: "15:30", end: "18:30", isRaid: false }
-      },
-      {
-        name: "Vendredi 11",
-        mini: { start: "09:30", end: "12:00", activity: "Optimist Mer", icon: "boat" },
-        mousse: { start: "09:30", end: "12:00", activity: "Chasse Trésor", icon: "map" },
-        initiation: { start: "16:00", end: "19:00", isRaid: false },
-        perf: { start: "16:00", end: "19:00", isRaid: false }
-      }
-    ]
+    id: "miniMousses",
+    title: "Mini-Mousses",
+    age: "5-7 ans",
+    color: "text-orange-500",
+    bgColor: "bg-orange-500",
+    icon: <Sun size={24} />,
+    accessor: (day: any) => day.miniMousses
   },
   {
-    id: 2,
-    label: "Semaine du 14 au 18 Juillet",
-    coefficient: 45,
-    tide: "Après-midi",
-    days: [
-      {
-        name: "Lundi 14",
-        mini: { start: "14:00", end: "16:30", activity: "Piscine", icon: "pool" },
-        mousse: { start: "14:00", end: "16:30", activity: "Optimist Lac", icon: "boat" },
-        initiation: { start: "09:30", end: "12:30", isRaid: false },
-        perf: { start: "09:30", end: "12:30", isRaid: false }
-      },
-      {
-        name: "Mardi 15",
-        mini: { start: "14:00", end: "16:30", activity: "Cata Cool", icon: "cata" },
-        mousse: { start: "14:00", end: "16:30", activity: "Char à Voile", icon: "wind" },
-        initiation: { start: "10:00", end: "13:00", isRaid: false },
-        perf: { start: "10:00", end: "13:00", isRaid: false }
-      },
-      {
-        name: "Mercredi 16",
-        mini: { start: "14:00", end: "16:30", activity: "Cerf-Volant", icon: "kite" },
-        mousse: { start: "14:00", end: "16:30", activity: "Kayak Fun", icon: "sup" },
-        initiation: { start: "09:00", end: "17:00", isRaid: true, label: "Raid Ecréhou" }, 
-        perf: { start: "10:30", end: "13:30", isRaid: false }
-      },
-      {
-        name: "Jeudi 17",
-        mini: { start: "14:00", end: "16:30", activity: "Château Sable", icon: "map" },
-        mousse: { start: "14:00", end: "16:30", activity: "Optimist Mer", icon: "boat" },
-        initiation: { start: "11:00", end: "14:00", isRaid: false },
-        perf: { start: "11:00", end: "14:00", isRaid: false }
-      },
-      {
-        name: "Vendredi 18",
-        mini: { start: "14:00", end: "16:30", activity: "Olympiades", icon: "trophy" },
-        mousse: { start: "14:00", end: "16:30", activity: "Régate", icon: "trophy" },
-        initiation: { start: "11:30", end: "14:30", isRaid: false },
-        perf: { start: "11:30", end: "14:30", isRaid: false }
-      }
-    ]
+    id: "mousses",
+    title: "Moussaillons",
+    age: "8-9 ans",
+    color: "text-turquoise",
+    bgColor: "bg-turquoise",
+    icon: <Anchor size={24} />,
+    accessor: (day: any) => day.mousses
+  },
+  {
+    id: "initiation",
+    title: "Initiation",
+    age: "10-16 ans",
+    color: "text-blue-500",
+    bgColor: "bg-blue-500",
+    icon: <Wind size={24} />,
+    accessor: (day: any) => day.initiation
+  },
+  {
+    id: "perfectionnement",
+    title: "Perfectionnement",
+    age: "10-16 ans",
+    color: "text-purple-500",
+    bgColor: "bg-purple-500",
+    icon: <Waves size={24} />,
+    accessor: (day: any) => day.perfectionnement
   }
 ];
 
-
-// Configuration des Lignes du Planning (Indépendant du catalogue)
-const PLANNING_ROWS = [
-    {
-        id: "miniMousses",
-        title: "Mini-Mousses",
-        age: "5-7 ans",
-        color: "text-orange-500",
-        bgColor: "bg-orange-500",
-        icon: <Sun size={24} />,
-        accessor: (day: any) => day.miniMousses
-    },
-    {
-        id: "mousses",
-        title: "Moussaillons",
-        age: "8-9 ans",
-        color: "text-turquoise",
-        bgColor: "bg-turquoise",
-        icon: <Anchor size={24} />,
-        accessor: (day: any) => day.mousses
-    },
-    {
-        id: "initiation",
-        title: "Initiation",
-        age: "10-16 ans",
-        color: "text-blue-500",
-        bgColor: "bg-blue-500",
-        icon: <Wind size={24} />,
-        accessor: (day: any) => day.initiation
-    },
-    {
-        id: "perfectionnement",
-        title: "Perfectionnement",
-        age: "10-16 ans",
-        color: "text-purple-500",
-        bgColor: "bg-purple-500",
-        icon: <Waves size={24} />,
-        accessor: (day: any) => day.perfectionnement
-    }
-];
-
-// --- DATA: NIVEAUX D'ENSEIGNEMENT OFFICIELS ---
-const SCHOOL_LEVELS = [
+// --- DATA: NIVEAUX D'ENSEIGNEMENT (STORYTELLING VERSION) ---
+const SCHOOL_STORY = [
   {
     id: "mini-mousses",
-    title: "Mini-Mousses",
+    step: "01",
+    phase: "L'Éveil",
+    title: "Les Petits Pas",
+    officialName: "Mini-Mousses",
     age: "5-7 ans",
-    subtitle: "Pluri-activité & Aisance",
+    hook: "Apprivoiser l'eau, un jeu d'enfant.",
+    description: `Le voyage commence ici. Pour les plus petits, la mer est un terrain de jeu intimidant mais fascinant. Notre approche privilégie l'immersion douce. 
+    
+    Tout commence dans la sécurité rassurante de notre bassin marin. Entre deux éclaboussures, on apprend à flotter, à diriger un petit bateau, et surtout à ne plus avoir peur. C'est le temps de la découverte pluri-activités : un jour moussaillon sur un Optimist, le lendemain pilote de char à voile ou dompteur de cerf-volant.`,
+    longDescription: `Proposé uniquement en Juillet et Août, ce stage inclut des séances de natation dispensées par la Fédération Française de Natation dans le bassin présent à l'école de voile. 
+    
+    Le programme est riche et varié : deux séances de deux heures du Lundi au Vendredi. Le stage est modulable : l'activité est choisie la veille en fonction du groupe et de la météo. L'effectif est limité à 8 enfants avec un matériel spécialement adapté aux plus petits.`,
     price: "163 €",
-    priceDetail: "/semaine (tout inclus)",
-    description: `Le stage Mini-Mousses est spécialement conçu pour que les 5/7 ans puissent découvrir les activités nautiques et véliques à leur rythme.
-    
-    Proposé uniquement en Juillet et Août, ce stage inclut des séances de natation dispensées par la Fédération Française de Natation dans le bassin présent à l'école de voile. C'est une sécurité indispensable pour appréhender la mer sereinement.
-    
-    Le programme est riche et varié : deux séances de deux heures du Lundi au Vendredi. Le stage est modulable : l'activité est choisie la veille en fonction du groupe et de la météo parmi toutes les activités proposées : Natation, Optimist, Trimaran, Catamaran, Chars à voile ou Cerf volant.
-    
-    Les cours sont encadrés par des moniteurs diplômés en voile et chars à voile. L'effectif du groupe est limité à huit enfants pour permettre un apprentissage optimum. Le matériel est spécialement adapté aux plus petits (chars à voile enfant, bateau collectif, optimist).`,
-    gallery: [
-      "https://images.unsplash.com/photo-1596423736772-799a4e3df530?q=80&w=1600",
-      "https://images.unsplash.com/photo-1516686120803-03099958197c?q=80&w=1600",
-      "https://images.unsplash.com/photo-1540946485063-a40da27545f8?q=80&w=1600"
-    ],
+    prices: [{ label: "Stage Semaine (Tout Inclus)", value: "163 €" }],
+    logistique: ["Gilet de sauvetage fourni", "Combinaison adaptée fournie", "Bassin marin sécurisé", "Carnet de voile offert"],
+    image: "/images/imgBank/minimousse.jpg",
     color: "text-orange-500",
     bgColor: "bg-orange-500",
-    borderColor: "border-orange-500",
     icon: <Sun size={24} />
   },
   {
     id: "moussaillons",
-    title: "Moussaillons",
+    step: "02",
+    phase: "L'Exploration",
+    title: "Le Cap vers l'Horizon",
+    officialName: "Moussaillons",
     age: "6-9 ans",
-    subtitle: "Découverte & Autonomie",
+    hook: "De la mare au rivage, l'aventure s'agrandit.",
+    description: `L'enfant grandit, son terrain de jeu aussi. On quitte la protection du bassin pour les eaux calmes de la mare de L’Essay. C'est là, sans vagues ni courants, que l'on prend véritablement les commandes de son Optimist.
+    
+    Une fois les bases acquises, la mer nous appelle. Du mardi au vendredi, le rivage de Coutainville devient notre domaine. On apprend à lire le vent, à sentir la glisse sur un trimaran ou à filer sur le sable en char à voile. Chaque jour est une nouvelle histoire de mer adaptée aux éléments.`,
+    longDescription: `Le stage se déroule en Juillet et Août. Le lundi matin est consacré à la prise en main sur plan d'eau intérieur pour une sécurité totale. 
+    
+    Le reste de la semaine, les séances de 2h permettent une progression ludique vers l'autonomie. Toujours à la carte selon la météo : Optimist, Trimaran, Catamaran ou Chars à voile. 8 enfants maximum par moniteur.`,
     price: "168 €",
-    priceDetail: "/semaine (tout inclus)",
-    description: `Le stage Moussaillons est l'étape suivante, conçu pour les 6-9 ans. Il se déroule également en Juillet et Août.
-    
-    Une particularité importante de ce stage : le Lundi matin, la séance d'Optimist se déroule sur la mare de L’Essay (plan d’eau intérieur) situé devant le Centre équestre d’Agon Coutainville. Cela permet une prise en main du bateau en toute sécurité, sans vagues ni courants.
-    
-    Ensuite, du mardi au vendredi, place à l'aventure avec une séance de 2h par jour sur des activités variées. Comme pour les plus petits, le programme est "à la carte" et adapté la veille selon la météo : Optimist, Trimaran, Catamaran, Chars à voile ou Cerf volant.
-    
-    L'objectif est que les enfants se fassent plaisir tout en progressant vers l'autonomie. L'effectif est limité à 8 enfants par moniteur diplômé.`,
-    gallery: [
-      "https://images.unsplash.com/photo-1562677765-a8775df50b4e?q=80&w=1600",
-      "https://images.unsplash.com/photo-1534008897995-27a23e859048?q=80&w=1600",
-      "https://images.unsplash.com/photo-1471922694854-ff1b63b20054?q=80&w=1600"
-    ],
+    prices: [{ label: "Stage Semaine (Tout Inclus)", value: "168 €" }],
+    logistique: ["Initiation sur lac incluse", "Matériel sécurisé FFV", "Passage de niveaux", "Combinaison fournie"],
+    image: "/images/imgBank/moussaillon.jpg",
     color: "text-turquoise",
     bgColor: "bg-turquoise",
-    borderColor: "border-turquoise",
     icon: <Anchor size={24} />
   },
   {
     id: "catamaran",
-    title: "Catamaran",
+    step: "03",
+    phase: "La Puissance",
+    title: "Dompter le Vent",
+    officialName: "Stage Catamaran",
     age: "Dès 8 ans",
-    subtitle: "Vitesse & Équipe",
+    hook: "Vitesse, équipe et adrénaline salée.",
+    description: `C'est le passage aux choses sérieuses. Le catamaran, c'est la vitesse pure et le partage. On ne navigue plus seul, on fait partie d'un équipage. 
+    
+    On apprend l'équilibre dynamique, le réglage fin des voiles et la coordination parfaite. Du petit 10 pieds pour les juniors aux puissants 16 pieds pour les adultes, chaque support est une promesse de sensations. On ne subit plus le vent, on l'utilise pour voler au-dessus des vagues de la Manche.`,
+    longDescription: `Stage de référence pour ados et adultes. 5 demi-journées (lundi au vendredi) avec des séances de 3h. 
+    Supports adaptés :
+    - 10/12 pieds : Initiation jeunes
+    - 14/16 pieds : Perf et adultes
+    Le tarif inclut systématiquement le passeport voile et l'adhésion club.`,
     price: "Dès 183 €",
-    priceDetail: "/semaine (tout inclus)",
-    description: `Le stage de référence pour les enfants dès 8 ans, les adolescents et les adultes. Que ce soit pour de l'initiation ou du perfectionnement, le catamaran offre des sensations de vitesse immédiates.
-    
-    Le stage se compose de 5 demi-journées (du lundi au vendredi) avec des séances de 3h. Nous adaptons le support à la morphologie et à l'âge des pratiquants : Catamaran 10 pieds pour les plus jeunes, jusqu'au puissant 16 pieds pour les adultes.
-    
-    Les tarifs incluent la licence voile stage ponctuel FFV (12€) et l'adhésion (20€).`,
-    pricingTiers: [
-        { label: "Cata 10 pieds (8-9 ans)", price: "183€/pers" },
-        { label: "Cata 12 pieds (10-12 ans)", price: "183€/pers" },
-        { label: "Cata 14 pieds (13-15 ans)", price: "203€/pers" },
-        { label: "Cata 16 pieds (16+ ans)", price: "233€/pers" },
+    prices: [
+      { label: "Cata 10-12 pieds (8-12 ans)", value: "183 €" },
+      { label: "Cata 14 pieds (13-15 ans)", value: "203 €" },
+      { label: "Cata 16 pieds (Adultes)", value: "233 €" }
     ],
-    gallery: [
-      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1600",
-      "https://images.unsplash.com/photo-1500930287596-c1ecaa373bb2?q=80&w=1600",
-      "https://images.unsplash.com/photo-1563462058316-29a399f665e7?q=80&w=1600"
-    ],
+    logistique: ["Bateaux de sécurité dédiés", "Liaison radio permanente", "Matériel renouvelé régulièrement", "Licence FFV comprise"],
+    image: "/images/imgBank/Cata001.jpg",
     color: "text-blue-600",
     bgColor: "bg-blue-600",
-    borderColor: "border-blue-600",
     icon: <Wind size={24} />
   },
   {
     id: "planche",
-    title: "Planche à Voile",
+    step: "04",
+    phase: "La Maîtrise",
+    title: "L'Équilibre Pur",
+    officialName: "Stage Planche",
     age: "Dès 10 ans",
-    subtitle: "Équilibre & Glisse",
+    hook: "Faire corps avec les éléments.",
+    description: `Ici, l'aventure devient personnelle. La planche à voile, c'est le dialogue direct entre votre corps, le vent et l'eau. C'est l'école de la persévérance et de la récompense immédiate.
+    
+    Après les premières chutes riches d'enseignement, vient le moment magique : la planche se stabilise, la voile prend le vent, et vous glissez en silence. De l'apprentissage des manoeuvres de base au funboard spectaculaire, nous vous accompagnons vers une liberté totale sur l'eau.`,
+    longDescription: `Accessible dès 10 ans. Matériel récent F-One et Duotone. Boards larges pour débuter, voiles légères pour les jeunes. 
+    5 séances de 3h du lundi au vendredi. Progression individualisée validée sur livret FFV.`,
     price: "183 €",
-    priceDetail: "/semaine (tout inclus)",
-    description: `Pour tous, adultes et ados à partir de 14 ans. De l’initiation au funboard, nous possédons du matériel récent et adapté à tous les niveaux (planches larges et stables pour débuter, flotteurs plus techniques pour progresser).
-    
-    Le stage se déroule sur 5 demi-journées (du lundi au vendredi) avec des séances de 3h. C'est le support roi pour ressentir la force du vent dans les mains et travailler son équilibre.
-    
-    Le tarif inclut le passeport voile et l'adhésion au club.`,
-    gallery: [
-      "https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=1600",
-      "https://images.unsplash.com/photo-1473663175406-03c6237227d8?q=80&w=1600",
-      "https://images.unsplash.com/photo-1628173429871-3f0e01764491?q=80&w=1600"
-    ],
+    prices: [{ label: "Stage Semaine (Tout Inclus)", value: "183 €" }],
+    logistique: ["Planches larges haute stabilité", "Gréements légers spécial jeunes", "Encadrement expert", "Combinaison renforcée"],
+    image: "/images/imgBank/WindsurfandKite.jpg",
     color: "text-purple-500",
     bgColor: "bg-purple-500",
-    borderColor: "border-purple-500",
     icon: <Waves size={24} />
+  },
+  {
+    id: "formation",
+    step: "05",
+    phase: "La Transmission",
+    title: "Partager l'Horizon",
+    officialName: "CQP Initiateur",
+    age: "Dès 16 ans",
+    hook: "Transmettez votre passion, devenez moniteur.",
+    description: `Vous avez dompté le vent et maîtrisé la glisse. L'heure est venue de passer de l'autre côté de la barre. Le CQP Initiateur Voile est l'étape ultime de votre parcours à Coutainville : apprendre à enseigner, à sécuriser et à inspirer les futurs navigateurs.
+    
+    Au sein du Centre Permanent de la Côte Ouest (CPCO), cette formation vous plonge dans la réalité du métier de moniteur en partenariat avec les clubs de Hauteville et Barneville-Carteret. Un mélange de théorie et de pratique intensive pour faire de votre passion une compétence reconnue.`,
+    longDescription: `Le CQP Initiateur Voile permet d’encadrer sous la responsabilité d’un moniteur diplômé. 
+    Formation en situation à Agon-Coutainville, Hauteville sur mer et Barneville-Carteret (CPCO). 
+    
+    Conditions d'accès : 16 ans min, Niveau 4 FFVoile, PSC1, Permis Bateau Côtier.
+    Pour toute question sur le PSC1 (secourisme) ou le recyclage, contactez-nous par mail à contact@cncoutainville.fr`,
+    price: "Frais Pédago : Nous contacter",
+    prices: [
+      { label: "CQP Initiateur Voile", value: "Sur Devis" },
+      { label: "Formation PSC1 / Recyclage", value: "Nous contacter" }
+    ],
+    logistique: [
+      "Avoir 16 ans minimum",
+      "Niveau 4 FFVoile (ou équivalent)",
+      "PSC1 / Diplôme Secourisme",
+      "Permis bateau option côtière",
+      "Licence FFVoile valide"
+    ],
+    image: "/images/imgBank/Secourisme.jpg",
+    color: "text-slate-900",
+    bgColor: "bg-slate-900",
+    icon: <GraduationCap size={24} />
   }
 ];
 
-// --- UTILS: ICON MAPPING ---
-const getActivityIcon = (type: string) => {
-    switch(type) {
-        case 'piscine': return <LifeBuoy size={16} />;
-        case 'optimist': return <Ship size={16} />;
-        case 'catamaran': return <Anchor size={16} />;
-        case 'paddle': return <Waves size={16} />;
-        case 'char': return <Wind size={16} />;
-        default: return <Sun size={16} />;
-    }
-};
-
-// --- COMPOSANT : SLIDER PHOTO ---
-const PhotoSlider: React.FC<{ images: string[]; title: string }> = ({ images, title }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const next = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const prev = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
+// --- COMPOSANT : STORY SECTION ---
+const StorySection: React.FC<{ item: any; index: number }> = ({ item, index }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isEven = index % 2 === 0;
 
   return (
-    <div className="relative w-full h-full group overflow-hidden bg-slate-200">
-      {/* Images */}
-      {images.map((img, idx) => (
-        <div 
-          key={idx}
-          className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-            idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
-          }`}
-        >
-          <img src={img} alt={`${title} ${idx}`} className="w-full h-full object-cover" />
+    <div id={item.id} className="relative py-24 md:py-32 overflow-hidden">
+      {/* Background Decor */}
+      <div className={`absolute top-0 ${isEven ? 'right-0' : 'left-0'} w-1/2 h-full bg-slate-50 -z-10 hidden lg:block opacity-50`}></div>
+
+      <div className="max-w-[1400px] mx-auto px-6">
+        <div className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-12 lg:gap-24 items-center`}>
+
+          {/* Visual Column */}
+          <div className="w-full lg:w-1/2 group">
+            <div className="relative rounded-[3rem] overflow-hidden shadow-2xl aspect-4/3">
+              <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent"></div>
+
+              {/* Floating Badge */}
+              <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+                <div className="bg-white/95 backdrop-blur-xl p-4 rounded-[2rem] shadow-xl border border-white/40 flex flex-col min-w-[140px]">
+                  <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1">Public</span>
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <span className={`text-2xl md:text-3xl font-black ${item.color} uppercase italic tracking-tighter leading-none`}>
+                      {item.age}
+                    </span>
+                  </div>
+                  <span className="text-xs md:text-sm text-abysse font-black uppercase italic tracking-tight leading-none">
+                    {item.officialName}
+                  </span>
+                </div>
+                <div className={`size-12 md:size-14 rounded-2xl flex items-center justify-center text-white shadow-xl ${item.bgColor} border-2 border-white/20 shrink-0`}>
+                  {React.cloneElement(item.icon as React.ReactElement<any>, { size: 24 })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Text Column */}
+          <div className="w-full lg:w-1/2">
+            <div className="flex items-center gap-4 mb-8">
+              <span className={`text-6xl font-black ${item.color} opacity-20 tracking-tighter leading-none`}>{item.step}</span>
+              <div className="w-12 h-1 bg-turquoise rounded-full"></div>
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">{item.phase}</span>
+            </div>
+
+            <h2 className="text-4xl md:text-6xl text-abysse leading-[0.85] mb-6">
+              {item.title}
+            </h2>
+
+            <p className="text-turquoise text-lg font-black uppercase tracking-widest mb-8 leading-tight">
+              "{item.hook}"
+            </p>
+
+            <div className="text-slate-600 text-lg font-medium leading-relaxed text-justify mb-10 whitespace-pre-line">
+              {item.description}
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-wrap gap-4">
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className={`flex items-center gap-3 px-8 py-4 rounded-2xl border-2 font-black uppercase tracking-widest text-[11px] transition-all ${isExpanded ? 'bg-abysse border-abysse text-white' : 'bg-white border-slate-100 text-abysse hover:border-turquoise hover:text-turquoise shadow-sm'}`}
+              >
+                {isExpanded ? 'Masquer les détails' : 'Fiche Technique & Tarifs'}
+                {isExpanded ? <ChevronLeft className="rotate-90" size={16} /> : <ArrowDownCircle size={16} />}
+              </button>
+
+              <a
+                href="https://coutainville.axyomes.com/"
+                target="_blank"
+                className={`flex items-center gap-3 px-8 py-4 rounded-2xl ${item.bgColor} text-white font-black uppercase tracking-widest text-[11px] hover:scale-105 transition-all shadow-xl shadow-${item.bgColor}/20`}
+              >
+                Réserver ce stage <ArrowRight size={16} />
+              </a>
+            </div>
+
+            {/* Technical Detail Panel (Expandable) */}
+            <div className={`grid transition-all duration-500 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-10' : 'grid-rows-[0fr] opacity-0'}`}>
+              <div className="overflow-hidden">
+                <div className="p-8 bg-slate-900 text-white rounded-[2rem] shadow-2xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div>
+                      <h4 className="flex items-center gap-3 text-turquoise text-[10px] mb-6 border-b border-white/10 pb-3">
+                        <Euro size={16} /> Tarifs
+                      </h4>
+                      <div className="space-y-4">
+                        {item.prices.map((p: any, i: number) => (
+                          <div key={i} className="flex justify-between items-center">
+                            <span className="text-xs font-bold text-slate-400 uppercase">{p.label}</span>
+                            <span className="text-lg font-black text-white">{p.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="mt-6 text-[9px] text-slate-500 italic leading-tight">
+                        * Les tarifs incluent systématiquement la licence FFV, l'adhésion au club et le prêt du matériel complet.
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="flex items-center gap-3 text-turquoise text-[10px] mb-6 border-b border-white/10 pb-3">
+                        <LifeBuoy size={16} /> Logistique & Pratique
+                      </h4>
+                      <ul className="space-y-3">
+                        {item.logistique.map((log: string, i: number) => (
+                          <li key={i} className="flex items-center gap-3 text-[11px] font-bold text-slate-300">
+                            <div className="size-1.5 rounded-full bg-turquoise"></div>
+                            {log}
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="mt-8 pt-6 border-t border-white/10">
+                        <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
+                          {item.longDescription}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      ))}
-
-      {/* Overlay léger pour contraste boutons */}
-      <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
-
-      {/* Controls */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-4 z-20">
-        <button 
-          onClick={prev}
-          className="size-12 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white hover:text-abysse transition-all shadow-lg"
-        >
-            <ChevronLeft size={24} />
-        </button>
-        <button 
-          onClick={next}
-          className="size-12 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white hover:text-abysse transition-all shadow-lg"
-        >
-            <ChevronRight size={24} />
-        </button>
       </div>
     </div>
   );
 };
 
 // --- PAGE PRINCIPALE ---
-import { useContent } from '@/contexts/ContentContext';
-
 export const EcoleVoilePage: React.FC = () => {
-  const { plannings, isLoading } = useContent();
-  const [activeTab, setActiveTab] = useState('all');
+  const { plannings: rawPlannings, isLoading } = useContent();
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
+  const [isWeekSelectorOpen, setIsWeekSelectorOpen] = useState(false);
 
-  const visibleLevels = activeTab === 'all' 
-    ? SCHOOL_LEVELS 
-    : SCHOOL_LEVELS.filter(l => (l as any).id === activeTab);
+  // Tri chronologique par startDate (sécurité côté client)
+  const plannings = React.useMemo(() => {
+    if (!rawPlannings?.length) return [];
+    return [...rawPlannings].sort((a, b) => {
+      const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+      const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+      return dateA - dateB;
+    });
+  }, [rawPlannings]);
 
   const currentWeek = plannings?.[currentWeekIndex];
 
-  const nextWeek = () => {
-    if (!plannings) return;
-    setCurrentWeekIndex(prev => (prev + 1) % plannings.length);
-  };
+  const nextWeek = () => { if (plannings) setCurrentWeekIndex(prev => (prev + 1) % plannings.length); };
+  const prevWeek = () => { if (plannings) setCurrentWeekIndex(prev => (prev - 1 + plannings.length) % plannings.length); };
 
-  const prevWeek = () => {
-    if (!plannings) return;
-    setCurrentWeekIndex(prev => (prev - 1 + plannings.length) % plannings.length);
-  };
-
-  // HELPER FOR TIME FORMATTING
-  const renderTime = (timeStr: string) => {
-      if (!timeStr) return null;
-      const parts = timeStr.split(' - ');
-      if (parts.length === 2) {
-          return (
-            <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-3xl font-black text-white tracking-tighter leading-none">{parts[0]}</span>
-                <span className="text-lg font-medium text-white/30">-</span>
-                <span className="text-lg font-bold text-white/60">{parts[1]}</span>
-            </div>
-          );
-      }
-      return <div className="text-2xl font-black text-white mb-2">{timeStr}</div>;
-  };
-
-  if (isLoading && !plannings?.length) return <div className="min-h-screen bg-abysse flex items-center justify-center text-white font-black uppercase tracking-widest animate-pulse">Chargement...</div>;
+  if (isLoading && !plannings?.length) return (
+    <div className="min-h-screen bg-abysse flex flex-col items-center justify-center text-white text-center p-6">
+      <div className="relative size-32 mb-8">
+        <div className="absolute inset-0 rounded-full border-4 border-turquoise/20"></div>
+        <div className="absolute inset-0 rounded-full border-4 border-turquoise border-t-transparent animate-spin"></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Compass size={48} className="text-turquoise" />
+        </div>
+      </div>
+      <p className="font-black uppercase tracking-[0.3em] text-sm">Chargement du journal de bord...</p>
+    </div>
+  );
 
   return (
-    <div className="w-full font-sans bg-white overflow-x-hidden">
-      
-      {/* 1. HERO HEADER */}
-      <section className="pt-32 pb-20 px-6 bg-abysse text-white">
-        <div className="max-w-[1400px] mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-black uppercase tracking-widest text-turquoise mb-8">
-                <GraduationCap size={16} />
-                <span>École Française de Voile</span>
-            </div>
-            <h1 className="text-5xl md:text-8xl font-black uppercase italic tracking-tighter leading-[0.9] mb-8">
-                L'École de<br/><span className="text-turquoise">La Mer.</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed max-w-4xl mx-auto">
-                Apprendre la voile à Coutainville, c'est découvrir l'autonomie et le respect des éléments. Une pédagogie adaptée à chaque âge.
-            </p>
+    <div className="w-full font-sans bg-white">
+
+      {/* 1. HERO HEADER - IMMERSIF */}
+      <section className="relative h-[80vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-abysse">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/images/imgBank/CataPharePointeAgon.jpg"
+            className="w-full h-full object-cover opacity-50 scale-105"
+            alt="Sailing School"
+          />
+          <div className="absolute inset-0 bg-linear-to-b from-abysse/80 via-abysse/40 to-white"></div>
         </div>
-      </section>
 
-      {/* NAVIGATION ONGLETS (STICKY) */}
-      <section className="sticky top-20 z-40 bg-white/95 backdrop-blur-md border-y border-slate-100 shadow-sm">
-        <div className="max-w-[1600px] mx-auto px-6 overflow-x-auto no-scrollbar">
-           <div className="flex gap-4 py-4 justify-start md:justify-center min-w-max">
-              
-              {/* Onglet TOUS */}
-              <button
-                onClick={() => setActiveTab('all')}
-                className={`flex items-center gap-4 p-3 pr-6 rounded-2xl border-2 transition-all duration-300 ${
-                  activeTab === 'all' 
-                  ? 'bg-abysse text-white border-abysse shadow-xl scale-100' 
-                  : 'bg-white text-slate-400 border-transparent hover:bg-slate-50 opacity-70 hover:opacity-100 scale-95'
-                }`}
-              >
-                  <div className={`size-12 rounded-xl flex items-center justify-center shadow-lg ${activeTab === 'all' ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-400'}`}>
-                      <LayoutGrid size={24} />
-                  </div>
-                  <span className="font-black uppercase tracking-widest text-xs text-left">Vue<br/>D'ensemble</span>
-              </button>
+        <div className="relative z-10 container mx-auto px-6 max-w-[1400px] mt-20">
+          <div className="flex flex-col items-center text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-2 rounded-full mb-8"
+            >
+              <span className="text-white text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
+                <GraduationCap size={14} className="text-turquoise" /> École Française de Voile
+              </span>
+            </motion.div>
 
-              {/* Onglets STAGES */}
-              {SCHOOL_LEVELS.map((level) => (
-                <button
-                  key={level.id}
-                  onClick={() => setActiveTab(level.id)}
-                  className={`flex items-center gap-4 p-3 pr-6 rounded-2xl border-2 transition-all duration-300 ${
-                    activeTab === level.id 
-                    ? 'bg-white border-transparent shadow-xl scale-100 ring-1 ring-slate-100' 
-                    : 'bg-white border-transparent hover:bg-slate-50 opacity-60 hover:opacity-100 scale-95'
-                  }`}
-                >
-                   <div className={`size-12 rounded-xl flex items-center justify-center text-white shadow-lg ${level.bgColor}`}>
-                      {level.icon}
-                   </div>
-                   <div className="text-left">
-                      <span className={`block text-[10px] font-black uppercase tracking-widest ${activeTab === level.id ? level.color : 'text-slate-400'}`}>
-                          {level.age}
-                      </span>
-                      <span className={`block text-sm font-black italic tracking-tighter leading-none ${activeTab === level.id ? 'text-abysse' : 'text-slate-50'}`}>
-                          {level.title}
-                      </span>
-                   </div>
-                </button>
-              ))}
-           </div>
-        </div>
-      </section>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-6xl md:text-8xl lg:text-9xl text-white leading-[0.8] mb-12"
+            >
+              L'École de <br />
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-turquoise to-white">La Mer.</span>
+            </motion.h1>
 
-      {/* 2. SECTIONS "CHAPITRES" POUR CHAQUE STAGE (FILTRÉES) */}
-      <div className="flex flex-col min-h-[50vh]">
-         {visibleLevels.map((level, index) => (
-           <section 
-             key={level.id} 
-             className={`py-24 px-6 border-b border-slate-100 animate-in fade-in slide-in-from-bottom-8 duration-500 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
-           >
-             <div className="max-w-[1600px] mx-auto">
-               <div className={`flex flex-col xl:flex-row gap-16 items-start`}>
-                 
-                 {/* COLONNE VISUELLE (40%) */}
-                 <div className={`w-full xl:w-[45%] shrink-0 ${index % 2 === 1 ? 'xl:order-2' : ''}`}>
-                    <div className="sticky top-40">
-                        <div className="h-[400px] md:h-[600px] rounded-4xl overflow-hidden shadow-2xl relative">
-                            <PhotoSlider images={level.gallery} title={level.title} />
-                            
-                            {/* Badge Age */}
-                            <div className="absolute top-8 left-8 z-20">
-                                <div className={`px-6 py-3 rounded-xl ${level.bgColor} text-white shadow-lg`}>
-                                    <span className="block text-[10px] font-black uppercase tracking-widest opacity-80">Public</span>
-                                    <span className="block text-2xl font-black italic">{level.age}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                 </div>
-
-                 {/* COLONNE ÉDITORIALE (60%) */}
-                 <div className="w-full xl:w-[55%] flex flex-col gap-8">
-                    
-                    {/* En-tête de section */}
-                    <div className="border-l-4 border-slate-200 pl-8 py-2">
-                        <div className={`flex items-center gap-3 ${level.color} mb-2`}>
-                            {level.icon}
-                            <span className="font-black uppercase tracking-[0.2em] text-sm">{level.subtitle}</span>
-                        </div>
-                        <h2 className="text-5xl md:text-7xl font-black text-abysse uppercase italic tracking-tighter leading-none">
-                            {level.title}
-                        </h2>
-                    </div>
-
-                    {/* TEXTE NARRATIF */}
-                    <div className="prose prose-lg prose-slate max-w-none text-slate-600 leading-loose text-justify font-medium whitespace-pre-line">
-                        {level.description}
-                    </div>
-
-                    {/* GRILLE TARIFAIRE SPÉCIFIQUE */}
-                    {(level as any).pricingTiers && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                            {(level as any).pricingTiers.map((tier: any, i: number) => (
-                                <div key={i} className="flex items-center justify-between p-4 bg-slate-100 rounded-xl border border-slate-200">
-                                    <span className="text-sm font-bold text-slate-600">{tier.label}</span>
-                                    <span className="text-lg font-black text-abysse">{tier.price}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Zone de bas de page : Prix & CTA */}
-                    <div className="mt-8 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div>
-                            <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Tarif Semaine</p>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-4xl md:text-5xl font-black text-abysse tracking-tighter">{level.price}</span>
-                                <span className="text-xs font-bold text-turquoise max-w-[120px] leading-tight block">{level.priceDetail}</span>
-                            </div>
-                        </div>
-
-                        <a 
-                           href="https://coutainville.axyomes.com/" 
-                           target="_blank" 
-                           rel="noopener noreferrer" 
-                           className={`group px-10 py-5 rounded-2xl ${level.bgColor} text-white font-black uppercase tracking-widest text-sm hover:opacity-90 transition-all shadow-xl flex items-center gap-4 w-full md:w-auto justify-center`}
-                        >
-                           Réserver
-                           <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                        </a>
-                    </div>
-
-                 </div>
-
-               </div>
-             </div>
-           </section>
-         ))}
-      </div>
-
-      {/* 3. SECTION INFOS PRATIQUES (Fixe, toujours visible) */}
-      <section className="py-24 px-6 bg-slate-100">
-          <div className="max-w-[1600px] mx-auto">
-             <div className="flex items-center gap-4 mb-12">
-                 <div className="size-16 bg-abysse text-white rounded-2xl flex items-center justify-center shadow-lg">
-                    <Info size={32} />
-                 </div>
-                 <h2 className="text-4xl md:text-5xl font-black text-abysse uppercase italic tracking-tighter leading-none">
-                    Infos Pratiques <br/>& Logistique
-                 </h2>
-             </div>
-
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                
-                {/* BLOC 1 : CONDITIONS METEO */}
-                <div className="bg-white p-8 rounded-4xl shadow-sm border border-slate-200">
-                    <h3 className="text-xl font-black text-turquoise uppercase tracking-widest mb-6 flex items-center gap-3">
-                        <AlertTriangle size={24} /> Conditions Particulières
-                    </h3>
-                    <p className="text-slate-600 font-medium leading-relaxed">
-                        En cas de mauvaises conditions météo, la première séance est prise en charge à terre (cours théorique, matelotage etc…). 
-                        Si les conditions ne s’améliorent pas, la deuxième séance est reportée au samedi.
-                    </p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-wrap justify-center gap-6"
+            >
+              <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-[300px]">
+                <div className="size-16 rounded-2xl bg-abysse flex items-center justify-center text-white shadow-lg shrink-0">
+                  <Anchor size={32} />
                 </div>
-
-                {/* BLOC 2 : EQUIPEMENT FOURNI */}
-                <div className="bg-white p-8 rounded-4xl shadow-sm border border-slate-200">
-                    <h3 className="text-xl font-black text-turquoise uppercase tracking-widest mb-6 flex items-center gap-3">
-                        <CheckCircle2 size={24} /> Equipement Fourni
-                    </h3>
-                    <p className="text-slate-600 font-medium leading-relaxed mb-4">
-                        Le Club Nautique de Coutainville fournit pour la durée du stage :
-                    </p>
-                    <ul className="space-y-3">
-                        <li className="flex items-center gap-3 font-bold text-abysse">
-                            <div className="size-2 bg-abysse rounded-full"></div> Le gilet de sauvetage
-                        </li>
-                        <li className="flex items-center gap-3 font-bold text-abysse">
-                            <div className="size-2 bg-abysse rounded-full"></div> La combinaison (manches courtes, jambes longues)
-                        </li>
-                    </ul>
+                <div className="text-left">
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Fondée en</p>
+                  <p className="text-4xl font-black text-abysse tracking-tighter">1978</p>
+                  <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">Savoir-faire historique</p>
                 </div>
+              </div>
 
-                {/* BLOC 3 : A PRÉVOIR */}
-                <div className="bg-abysse text-white p-8 rounded-4xl shadow-lg relative overflow-hidden">
-                    <h3 className="text-xl font-black text-white uppercase tracking-widest mb-6 relative z-10">
-                        À Prévoir
-                    </h3>
-                    <ul className="space-y-4 relative z-10">
-                        <li className="flex items-start gap-4">
-                            <span className="text-turquoise font-bold">01.</span>
-                            <span className="font-medium text-slate-300">Un maillot de bain et un T-shirt à mettre sous la combinaison.</span>
-                        </li>
-                        <li className="flex items-start gap-4">
-                            <span className="text-turquoise font-bold">02.</span>
-                            <span className="font-medium text-slate-300">Une serviette de bain.</span>
-                        </li>
-                        <li className="flex items-start gap-4">
-                            <span className="text-turquoise font-bold">03.</span>
-                            <span className="font-medium text-slate-300">Une paire de chaussures ne craignant pas l’eau.</span>
-                        </li>
-                        <li className="flex items-start gap-4">
-                            <span className="text-turquoise font-bold">04.</span>
-                            <span className="font-medium text-slate-300">Crème solaire et lunettes de soleil attachées.</span>
-                        </li>
-                        <li className="flex items-start gap-4">
-                            <span className="text-turquoise font-bold">05.</span>
-                            <span className="font-medium text-slate-300">Un short de bain (à mettre par dessus la combinaison).</span>
-                        </li>
-                    </ul>
-                    {/* Décoration */}
-                    <div className="absolute top-0 right-0 p-32 bg-turquoise/10 blur-[80px] rounded-full pointer-events-none"></div>
+              <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-[300px]">
+                <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center text-white shrink-0">
+                  <CheckCircle2 size={32} />
                 </div>
-
-             </div>
+                <div className="text-left">
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">Label</p>
+                  <p className="text-2xl font-black text-white uppercase italic leading-none">Qualité FFV</p>
+                  <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">Stages tous niveaux</p>
+                </div>
+              </div>
+            </motion.div>
           </div>
+        </div>
       </section>
 
-      {/* 4. PLANNING & DISPONIBILITÉS (DARK GLASS DESIGN) */}
-      <section className="py-24 px-4 md:px-6 bg-abysse text-white relative overflow-hidden">
-         {/* Background Fx */}
-         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-turquoise/5 rounded-full blur-[150px] pointer-events-none"></div>
-         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[120px] pointer-events-none"></div>
-         
-         <div className="max-w-[1600px] mx-auto relative z-10">
-            
-            {/* Header Planning */}
-            <div className="text-center mb-16">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-turquoise mb-6">
-                    <Calendar size={14} />
-                    <span>Saison 2025</span>
-                </div>
-                <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter mb-4 text-white">
-                   PLANNING
-                </h2>
-                <p className="text-slate-400 font-medium max-w-xl mx-auto">
-                    Nos stages sont rythmés par la marée. Sélectionnez une semaine pour voir le programme détaillé jour par jour.
-                </p>
+      {/* 2. MENU SECONDAIRE STICKY (Style Harmonisé) */}
+      <SecondaryNav sections={[
+        { id: 'mini-mousses', label: '5-7 ans' },
+        { id: 'moussaillons', label: '8-9 ans' },
+        { id: 'catamaran', label: 'Catamaran' },
+        { id: 'planche', label: 'Planche' },
+        { id: 'formation', label: 'Formation' },
+        { id: 'planning', label: 'Planning' },
+      ]} />
+
+      <div className="relative z-20"></div>
+
+      {/* 2. THE NARRATIVE JOURNEY */}
+      <section className="relative bg-white">
+        {/* The Connector line (Journey Line) */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-full bg-linear-to-b from-turquoise/0 via-turquoise to-turquoise/0 hidden lg:block opacity-20"></div>
+
+        {SCHOOL_STORY.map((item, index) => (
+          <StorySection key={item.id} item={item} index={index} />
+        ))}
+      </section>
+
+      {/* 3. PRACTICAL INFO GRID */}
+      <section className="py-24 px-6 bg-slate-900 text-white relative overflow-hidden">
+        {/* Background Visuals */}
+        <div className="absolute -top-40 -left-40 size-96 bg-turquoise/10 rounded-full blur-[100px]"></div>
+        <div className="absolute -bottom-40 -right-40 size-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+
+        <div className="max-w-[1400px] mx-auto relative z-10">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
+            <div>
+              <span className="text-turquoise text-[10px] font-black uppercase tracking-[0.4em] mb-4 block">Le Sac de Bord</span>
+              <h2 className="text-4xl md:text-6xl leading-none">
+                Prêt pour<br />Le Grand Saut ?
+              </h2>
+            </div>
+            <div className="max-w-xs text-slate-400 text-sm font-medium leading-relaxed border-l-2 border-turquoise pl-6">
+              Nous nous occupons de la technique, vous apportez l'enthousiasme. Voici tout ce qu'il faut savoir avant d'embarquer.
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Equipt Provided */}
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-[3rem] hover:bg-white/10 transition-all group">
+              <div className="size-16 bg-white rounded-2xl flex items-center justify-center text-abysse mb-8 shadow-xl group-hover:bg-turquoise group-hover:text-white transition-colors">
+                <LifeBuoy size={32} />
+              </div>
+              <h3 className="text-2xl mb-6">Matériel Fourni</h3>
+              <ul className="space-y-4">
+                {["Combinaisons intégrales", "Gilets de sauvetage", "Harnais de trapèze", "Coupe-vent"].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-slate-300 font-bold text-sm tracking-wide">
+                    <CheckCircle2 size={18} className="text-turquoise" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* To Bring */}
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-[3rem] hover:bg-white/10 transition-all group">
+              <div className="size-16 bg-white rounded-2xl flex items-center justify-center text-abysse mb-8 shadow-xl group-hover:bg-turquoise group-hover:text-white transition-colors">
+                <Sparkles size={32} />
+              </div>
+              <h3 className="text-2xl mb-6">À Prévoir</h3>
+              <ul className="space-y-4">
+                {[
+                  "Maillot de bain",
+                  "Chaussures fermées sacrifiables",
+                  "Crème solaire & Lunettes",
+                  "Serviette & Rechange"
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-slate-300 font-bold text-sm tracking-wide">
+                    <span className="text-turquoise font-black text-xs">{i + 1}.</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Safety/Weather */}
+            <div className="bg-turquoise text-abysse p-10 rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col justify-center">
+              <AlertTriangle size={64} className="opacity-10 absolute -top-4 -right-4" />
+              <h3 className="text-2xl mb-6">Météo & Sécurité</h3>
+              <p className="font-bold leading-relaxed mb-8">
+                La mer décide toujours. En cas de tempête, la séance est maintenue à terre (théorie, noeuds, matelotage) ou reportée au samedi.
+              </p>
+              <div className="p-6 bg-abysse/10 rounded-2xl border border-abysse/10 font-black text-[10px] uppercase tracking-widest leading-loose">
+                <Compass size={20} className="mb-2" />
+                École labellisée Fédération Française de Voile depuis 1978.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. PLANNING & DISPO (COMPACT AT BOTTOM) */}
+      <section id="planning" className="py-24 px-6 bg-white border-t border-slate-100 scroll-mt-24">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-8">
+            <div>
+              <div className="inline-flex items-center gap-2 mb-4 text-[10px] font-black uppercase tracking-[0.3em] text-turquoise">
+                <Calendar size={14} /> <span>Logistique</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl text-abysse leading-none">
+                Le Planning des Stages
+              </h2>
             </div>
 
             {/* Week Selector */}
             {plannings && plannings.length > 0 && (
-                <div className="flex items-center justify-center gap-6 mb-16">
-                    <button 
-                        onClick={prevWeek}
-                        className="size-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-turquoise hover:border-turquoise hover:text-abysse transition-all group"
-                    >
-                        <ChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-                    </button>
-                    
-                    <div className="bg-white/5 border border-white/10 rounded-2xl px-12 py-6 text-center min-w-[340px] backdrop-blur-md shadow-2xl">
-                        <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Semaine sélectionnée</span>
-                        <span className="block text-2xl font-black italic">{currentWeek?.title}</span>
+              <div className="flex items-center bg-slate-50 p-2 rounded-2xl border border-slate-100 shadow-sm min-w-[320px]">
+                <button onClick={prevWeek} className="size-12 flex items-center justify-center hover:bg-white rounded-xl transition-all text-slate-400 hover:text-abysse">
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="relative flex-1 px-4 text-center">
+                  <button onClick={() => setIsWeekSelectorOpen(!isWeekSelectorOpen)} className="w-full flex items-center justify-center gap-2">
+                    <div>
+                      <span className="block text-[8px] font-black uppercase tracking-widest text-slate-400">Semaine {currentWeekIndex + 1} / {plannings.length}</span>
+                      <span className="text-sm font-black text-abysse">{currentWeek?.title}</span>
                     </div>
-
-                    <button 
-                        onClick={nextWeek}
-                        className="size-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-turquoise hover:border-turquoise hover:text-abysse transition-all group"
-                    >
-                        <ChevronRight size={24} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    <ChevronRight size={14} className={`text-slate-400 transition-transform duration-200 ${isWeekSelectorOpen ? 'rotate-90' : ''}`} />
+                  </button>
+                  {isWeekSelectorOpen && (
+                    <>
+                      {/* Backdrop to close on click outside */}
+                      <div className="fixed inset-0 z-40" onClick={() => setIsWeekSelectorOpen(false)} />
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[280px] bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                        {/* Header with current position indicator */}
+                        <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sélectionner une semaine</span>
+                        </div>
+                        {/* Scrollable list with max 5 visible items */}
+                        <div className="max-h-[220px] overflow-y-auto py-1">
+                          {plannings.map((p, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => { setCurrentWeekIndex(idx); setIsWeekSelectorOpen(false); }}
+                              className={`w-full text-left px-4 py-3 text-xs font-bold flex items-center justify-between gap-2 transition-all ${idx === currentWeekIndex
+                                ? 'bg-abysse text-white'
+                                : 'text-slate-600 hover:bg-slate-50'
+                                }`}
+                            >
+                              <span className="flex items-center gap-3">
+                                <span className={`size-6 rounded-lg flex items-center justify-center text-[10px] font-black ${idx === currentWeekIndex ? 'bg-turquoise text-abysse' : 'bg-slate-100 text-slate-400'
+                                  }`}>{idx + 1}</span>
+                                <span className="truncate">{p.title}</span>
+                              </span>
+                              {idx === currentWeekIndex && <span className="text-turquoise text-[10px] font-black uppercase">Actuel</span>}
+                            </button>
+                          ))}
+                        </div>
+                        {/* Footer with navigation hint */}
+                        <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-center gap-2 text-[9px] text-slate-400 font-medium">
+                          <ChevronLeft size={10} /> Utilisez les flèches pour naviguer <ChevronRight size={10} />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
+                <button onClick={nextWeek} className="size-12 flex items-center justify-center hover:bg-white rounded-xl transition-all text-slate-400 hover:text-abysse">
+                  <ChevronRight size={20} />
+                </button>
+              </div>
             )}
+          </div>
 
-            {/* THE GRID */}
-            {currentWeek && (
-                <div className="overflow-x-auto pb-4 custom-scrollbar">
-                <div className="min-w-[1200px]">
-                   
-                   {/* Grid Headers */}
-                   <div className="grid grid-cols-6 gap-6 mb-6">
-                       <div className="col-span-1"></div> {/* Spacer for Row Labels */}
-                       {currentWeek.days.map((day, i) => (
-                           <div key={i} className="text-center pb-4 border-b border-white/5">
-                               <span className="text-sm font-black uppercase tracking-widest text-slate-400">{day.name}</span>
-                               <span className="block text-[10px] font-bold text-slate-500 mt-1">{new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
-                           </div>
-                       ))}
-                   </div>
-
-                   {/* LOOP THOUGH PLANNING ROWS */}
-                   {PLANNING_ROWS.map((row) => {
-                       return (
-                         <div key={row.id} className="grid grid-cols-6 gap-6 mb-6 group/row">
-                             
-                             {/* Colonne de gauche : CARD ARCHITECTURALE */}
-                             <div className={`col-span-1 ${row.bgColor} rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden shadow-lg hover:scale-[1.02] transition-transform duration-300`}>
-                                 <div>
-                                     <span className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-1 block">{row.age}</span>
-                                     <span className="text-2xl font-black italic text-white uppercase leading-none">{row.title}</span>
-                                 </div>
-                                 <div className="text-white/80">
-                                    {row.icon}
-                                 </div>
-                                 <div className="absolute top-0 right-0 w-full h-full bg-linear-to-bl from-white/20 to-transparent pointer-events-none"></div>
-                             </div>
-
-                             {/* Cases Jours : DARK GLASS + ACCENT BORDER */}
-                             {currentWeek.days.map((day, dayIdx) => {
-                                 const data = row.accessor(day);
-                                 if (data === undefined) return <div key={dayIdx} className="bg-white/5 rounded-2xl"></div>;
-
-                                 // CASE DATA: Is it an object (Kids) or string (Adults)?
-                                 const isObject = typeof data === 'object';
-                                 const timeStr = isObject ? data?.time : data;
-                                 const activityLabel = isObject ? data?.activity : null;
-                                 const detailLabel = isObject ? data?.description : null;
-                                 const isRaid = timeStr === 'Raid' || day.isRaidDay;
-
-                                 return (
-                                     <div key={dayIdx} className={`relative bg-white/5 backdrop-blur-md rounded-2xl p-5 flex flex-col justify-center border border-white/5 hover:bg-white/10 transition-colors group/cell overflow-hidden ${isRaid ? 'bg-yellow-500/10 border-yellow-500/30' : ''}`}>
-                                         
-                                         <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-full ${isRaid ? 'bg-yellow-500' : row.bgColor}`}></div>
-
-                                         <div className="pl-4 relative z-10">
-                                             {isRaid && (
-                                                 <span className="inline-block px-2 py-0.5 rounded bg-yellow-500 text-abysse text-[9px] font-black uppercase tracking-widest mb-2">
-                                                     Événement
-                                                 </span>
-                                             )}
-                                             
-                                             {renderTime(timeStr)}
-                                             
-                                             {activityLabel && (
-                                                 <div className={`text-[10px] font-bold uppercase tracking-widest truncate ${isRaid ? 'text-yellow-400' : row.color}`}>
-                                                     {activityLabel}
-                                                 </div>
-                                             )}
-                                             
-                                             {detailLabel && (
-                                                 <div className="text-[9px] text-white/40 uppercase tracking-widest truncate">
-                                                     {detailLabel}
-                                                 </div>
-                                             )}
-
-                                             {!isObject && !isRaid && (
-                                                 <div className={`text-[10px] font-bold uppercase tracking-widest truncate ${row.color}`}>
-                                                     {row.title}
-                                                 </div>
-                                             )}
-                                         </div>
-
-                                         <div className={`absolute -right-4 -bottom-4 opacity-[0.03] text-white scale-150 group-hover/cell:scale-125 transition-transform duration-500 rotate-12`}>
-                                             {activityLabel ? getActivityIcon(activityLabel as any) : row.icon}
-                                         </div>
-                                     </div>
-                                 );
-                             })}
-                         </div>
-                       );
-                   })}
-
-                </div>
-             </div>
-            )}
-            
-            <div className="mt-12 flex justify-center">
-                <a href="https://coutainville.axyomes.com/" target="_blank" className="bg-white text-abysse px-10 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-turquoise hover:text-white transition-all shadow-xl shadow-white/5 flex items-center gap-4 hover:scale-105 duration-300">
-                    Réserver ma place <ArrowRight size={20} />
-                </a>
+          {/* Table Design Vertical-Friendly */}
+          {currentWeek && (
+            <div className="bg-slate-50 rounded-[3rem] p-4 md:p-8 border border-slate-100 shadow-inner overflow-hidden">
+              <div className="overflow-x-auto no-scrollbar">
+                <table className="w-full min-w-[1000px] border-separate border-spacing-2">
+                  <thead>
+                    <tr>
+                      <th className="p-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest border-b-2 border-slate-200">Parcours</th>
+                      {currentWeek.days.map((day, i) => (
+                        <th key={i} className="p-6 text-center border-b-2 border-slate-200">
+                          <div className="text-xs font-black text-abysse uppercase tracking-widest mb-1">{day.name}</div>
+                          <div className="text-[10px] font-bold text-slate-400">{new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="before:block before:h-4">
+                    {PLANNING_ROWS.map((row) => (
+                      <tr key={row.id} className="group">
+                        <td className={`p-4 rounded-2xl ${row.bgColor} text-white shadow-lg`}>
+                          <div className="flex items-center gap-4">
+                            <div className="size-10 bg-white/20 rounded-xl flex items-center justify-center">{React.cloneElement(row.icon as React.ReactElement<any>, { size: 18 })}</div>
+                            <div>
+                              <div className="text-[8px] font-black uppercase tracking-widest opacity-60">{row.age}</div>
+                              <div className="text-sm font-black italic uppercase leading-none">{row.title}</div>
+                            </div>
+                          </div>
+                        </td>
+                        {currentWeek.days.map((day, dayIdx) => {
+                          const data = row.accessor(day);
+                          const timeStr = typeof data === 'object' ? data?.time : data;
+                          const activity = typeof data === 'object' ? data?.activity : row.title;
+                          if (!data) return <td key={dayIdx} className="bg-white/40 rounded-2xl"></td>;
+                          return (
+                            <td key={dayIdx} className="bg-white rounded-2xl p-6 border border-slate-100 group-hover:border-slate-300 transition-all text-center">
+                              <div className="flex items-center justify-center gap-2 mb-2 text-abysse">
+                                <Clock size={14} className="text-slate-300" />
+                                <span className="text-xs font-black tracking-tighter">{timeStr}</span>
+                              </div>
+                              <div className={`text-[9px] font-black uppercase tracking-[0.2em] ${row.color}`}>
+                                {activity}
+                              </div>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
+          )}
 
-         </div>
+          <div className="mt-16 flex flex-col md:flex-row items-center justify-between gap-8 bg-abysse p-10 rounded-[3rem] shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-linear-to-r from-turquoise/10 to-transparent"></div>
+            <div className="relative z-10">
+              <h4 className="text-2xl text-white mb-2">Prêt à Larguer les Amarres ?</h4>
+              <p className="text-slate-400 text-sm font-bold mb-6">Inscrivez-vous directement sur notre plateforme Axyomes ou téléchargez les documents papier.</p>
+              <div className="flex flex-wrap gap-4">
+                <a href="https://coutainville.axyomes.com/" target="_blank" className="relative z-10 flex items-center gap-4 bg-turquoise text-abysse px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-white transition-all shadow-xl">
+                  Accéder aux inscriptions <ArrowRight size={20} />
+                </a>
+                <a href="/infos-pratiques#documents-stages" className="relative z-10 flex items-center gap-4 bg-white/10 text-white border border-white/20 px-8 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-white hover:text-abysse transition-all">
+                  Documents d'inscription (PDF) <Download size={18} className="text-turquoise" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
+      {/* FOOTER PADDING */}
+      <div className="h-32 bg-white"></div>
     </div>
   );
 };
 
 export default EcoleVoilePage;
-

@@ -1,19 +1,28 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Outfit, Syncopate } from 'next/font/google';
 import '../globals.css';
 import { ContentProvider } from '@/contexts/ContentContext';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import BackgroundParallax from '@/components/BackgroundParallax';
-
-const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'] });
+import { FloatingActions } from '@/components/FloatingActions';
+import { SmoothScroll } from '@/components/SmoothScroll';
+import { CookieBanner } from '@/components/CookieBanner';
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['300', '400', '600', '800'],
+  variable: '--font-sans',
+});
+const syncopate = Syncopate({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-display',
+});
 
 export const metadata: Metadata = {
   title: 'CVC - Club de Voile de Coutainville',
-  description: 'Club de Voile de Coutainville, l\'école de référence sur la côte Ouest du Cotentin depuis 1965.',
+  description: 'Club de Voile de Coutainville, l\'école de référence sur la côte Ouest du Cotentin depuis 1978.',
 };
 
-import { ConvexClientProvider } from '@/components/ConvexClientProvider';
 
 export default function SiteLayout({
   children,
@@ -21,25 +30,22 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr">
-      <head>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
-      </head>
-      <body className={`${jakarta.className} font-sans text-abysse antialiased selection:bg-turquoise selection:text-white`}>
-        <BackgroundParallax />
-        <ConvexClientProvider>
-          <ContentProvider>
+    <>
+      <div className={`${outfit.variable} ${syncopate.variable} font-sans text-abysse antialiased selection:bg-turquoise selection:text-white`}>
+        <ContentProvider>
+          <SmoothScroll>
             <div className="min-h-screen flex flex-col">
               <Header />
-              <main className="grow pt-20">
+              <main className="grow pt-16">
                 {children}
               </main>
               <Footer />
+              <FloatingActions />
+              <CookieBanner />
             </div>
-          </ContentProvider>
-        </ConvexClientProvider>
-      </body>
-    </html>
+          </SmoothScroll>
+        </ContentProvider>
+      </div>
+    </>
   );
 }

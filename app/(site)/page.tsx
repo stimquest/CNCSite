@@ -2,776 +2,818 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useContent } from '../../contexts/ContentContext';
-import { TideChart } from '../../components/TideChart';
-import { Compass, Leaf, Zap, Users, ArrowRight, Anchor, Gauge, Activity, ChevronRight, ChevronLeft, Pause, Play, Camera, Wind, Sparkles, Map, Building2, LifeBuoy, Award, GraduationCap, CheckCircle2, Siren, Briefcase, Medal, Wifi, MonitorPlay, Coffee, Projector, Binoculars, ShoppingBag, Film, Images, X, Sun, Radio, Clock, Calendar, Rss, Newspaper, Megaphone } from 'lucide-react';
+
+import { Compass, Wind, Leaf, Zap, Users, ArrowRight, LifeBuoy, GraduationCap, Briefcase, Medal, Siren, CheckCircle2, Wifi, ShoppingBag, Image, Radio, Bird, Waves, Youtube, Play } from 'lucide-react';
+import { PhotoWallGallery } from '../../components/PhotoWallGallery';
+import { GamesSlideshow } from '../../components/GamesSlideshow';
+import PillarStory from '../../components/PillarStory';
+import PageNavigation from '../../components/PageNavigation';
+import { SpotConditionsBento } from '../../components/SpotConditionsBento';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+
+const HERO_IMAGES = [
+    '/images/Hero/Ryan.jpg',
+    '/images/Hero/SunriseCata.png',
+    '/images/Hero/upscaled_char3.JPEG'
+];
+
+if (typeof window !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger);
+}
+
+const FEATURED_ACTIVITIES = [
+    {
+        id: 'char-a-voile',
+        title: 'Le Char à Voile',
+        tagline: 'Sensation de Vitesse Pure',
+        desc: 'Glissez sur le sable à quelques centimètres du sol. Une activité unique accessible à tous sur l’immense plage de Coutainville.',
+        image: 'https://images.unsplash.com/photo-1544411047-c491574abb46?q=80&w=2000',
+        cta: 'Vivre l’expérience',
+        link: '/activites',
+        color: 'from-orange-500 to-red-600',
+        label: 'Activité Phare'
+    },
+    {
+        id: 'stages-ete',
+        title: 'Stages Vacances',
+        tagline: 'L’Aventure en Mer',
+        desc: 'Du Optimist au Catamaran, nos moniteurs accueillent vos enfants pour une semaine de progression et de plaisir.',
+        image: 'https://images.unsplash.com/photo-1500930287596-c1ecaa373bb2?q=80&w=2000',
+        cta: 'Réserver un stage',
+        link: '/ecole-voile',
+        color: 'from-turquoise to-blue-600',
+        label: 'Saison en cours'
+    },
+    {
+        id: 'longe-cote',
+        title: 'Marche Aquatique',
+        tagline: 'Bien-être & Énergie',
+        desc: 'Une autre façon de vivre la mer. Renforcez votre corps tout en profitant du paysage exceptionnel de la côte normande.',
+        image: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=2000',
+        cta: 'En savoir plus',
+        link: '/activites',
+        color: 'from-emerald-500 to-teal-600',
+        label: 'Santé & Forme'
+    }
+];
+
+const PARTNERS = [
+    { name: 'Région Normandie', logo: '/images/partenaires/Normandie.jpg', link: 'https://www.normandie.fr/' },
+    { name: 'Département de la Manche', logo: '/images/partenaires/Manche.jpg', link: 'https://www.manche.fr/' },
+    { name: 'Coutances Mer et Bocage', logo: '/images/partenaires/coutances.png', link: 'https://www.coutancesmeretbocage.fr/' },
+    { name: 'Agon-Coutainville', logo: '/images/partenaires/coutainville.png', link: 'https://www.agoncoutainville.fr/' },
+    { name: 'FFV', logo: '/images/partenaires/ffv.jpg', link: 'https://www.ffvoile.fr/' },
+    { name: 'FFCV', logo: '/images/partenaires/ffcv.png', link: 'https://www.ffcv.org/' },
+    { name: 'Agence Nationale du Sport', logo: '/images/partenaires/ANS.jpg', link: 'https://www.agencedusport.fr/' },
+    { name: 'Union Européenne', logo: '/images/partenaires/FinanceUE.png', link: 'https://european-union.europa.eu/' },
+    { name: '1 Jeune 1 Solution', logo: '/images/partenaires/1jeune1solution.jpg', link: 'https://www.1jeune1solution.gouv.fr/' },
+    { name: 'Famille Plus', logo: '/images/partenaires/famillePlus.jpg', link: 'https://www.familleplus.fr/' },
+    { name: 'FFSS', logo: '/images/partenaires/ffss.jpg', link: 'https://www.ffss.fr/' },
+    { name: 'Tourisme & Handicap', logo: '/images/partenaires/tourismeHandicap.jpg', link: 'https://www.tourisme-handicaps.org/' },
+];
 
 export const HomePage: React.FC = () => {
-  const { weather, statusMessage, news, homeGallery } = useContent();
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  
-  // State pour l'effet de parallaxe et 3D
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const {
+        weather, statusMessage, news, homeGallery, infoMessages,
+        spotStatus,
+        charStatus, charMessage,
+        marcheStatus, marcheMessage,
+        nautiqueStatus, nautiqueMessage,
+        homePageData
+    } = useContent();
+    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+    const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+    const [currentCharIndex, setCurrentCharIndex] = useState(0);
+    const [currentGlisseIndex, setCurrentGlisseIndex] = useState(0);
+    const [currentWellbeingIndex, setCurrentWellbeingIndex] = useState(0);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    const { clientX, clientY, currentTarget } = e;
-    const { width, height } = currentTarget.getBoundingClientRect();
-    
-    // Normaliser entre -1 et 1
-    const x = (clientX / width - 0.5) * 2; 
-    const y = (clientY / height - 0.5) * 2;
-    
-    setMousePos({ x, y });
-  };
+    // Auto-advance slideshow
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentHeroIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+        }, 6000); // 6 seconds per slide
+        return () => clearInterval(timer);
+    }, []);
 
-  const scrollToDashboard = () => {
-    document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth' });
-  };
-  // --- LOGIQUE MOOD DU SPOT ---
-  const getSpotMood = () => {
-    if (weather.windSpeed > 18) return {
-      title: "Mode Turbulences",
-      desc: "Ça moutonne sévère ! Sortez les petites toiles. Session Kitesurf & Wing réservée aux experts.",
-      icon: "🌪️",
-      gradient: "from-purple-500 to-indigo-600"
+    const CHAR_IMAGES = homePageData?.focusChar?.images?.length ? homePageData.focusChar.images : [
+        '/images/imgBank/Char001.jpg',
+        '/images/imgBank/Char002.jpg',
+        '/images/imgBank/Char003.jpg',
+    ];
+
+    const GLISSE_IMAGES = homePageData?.focusGlisse?.images?.length ? homePageData.focusGlisse.images : [
+        'https://images.unsplash.com/photo-1598514983053-ec5507ad2ea4?q=80&w=2000', // Wingfolk
+        'https://images.unsplash.com/photo-1506477331477-33d5d8b3dc85?q=80&w=2000', // Kitesurf
+        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?q=80&w=2000', // Windsurf
+    ];
+
+    const WELLBEING_IMAGES = homePageData?.focusBienEtre?.images?.length ? homePageData.focusBienEtre.images : [
+        'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=2000', // Marche Aquatique
+        '/images/imgBank/paddleKayak.jpg',
+        '/images/imgBank/paddleGeant.jpg',
+    ];
+
+    useEffect(() => {
+        const charTimer = setInterval(() => {
+            setCurrentCharIndex((prev) => (prev + 1) % CHAR_IMAGES.length);
+        }, 5000);
+        const glisseTimer = setInterval(() => {
+            setCurrentGlisseIndex((prev) => (prev + 1) % GLISSE_IMAGES.length);
+        }, 5500);
+        const wellbeingTimer = setInterval(() => {
+            setCurrentWellbeingIndex((prev) => (prev + 1) % WELLBEING_IMAGES.length);
+        }, 6000);
+        return () => {
+            clearInterval(charTimer);
+            clearInterval(glisseTimer);
+            clearInterval(wellbeingTimer);
+        };
+    }, []);
+
+    // Scroll Parallax for Waves & Photos
+    const { scrollY } = useScroll();
+    const waveX1 = useTransform(scrollY, [0, 1000], ["0%", "-33%"]);
+    const waveY2 = useTransform(scrollY, [0, 500], [0, 30]);
+    // Balayage vertical du point focal (exploite la hauteur de l'image HD)
+    const photoYPos = useTransform(scrollY, [0, 1500], ["20%", "80%"]);
+
+    // State for Mouse Interactions (Tilt, Transparency, Blur)
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+        const { clientX, clientY, currentTarget } = e;
+        const { width, height, left, top } = currentTarget.getBoundingClientRect();
+        const x = ((clientX - left) / width - 0.5) * 2;
+        const y = ((clientY - top) / height - 0.5) * 2;
+        setMousePos({ x, y });
     };
-    if (weather.windSpeed < 8 && weather.temp > 18) return {
-      title: "Dolce Vita",
-      desc: "Plan d'eau miroir. Le moment rêvé pour une rando Paddle vers les bouchots ou un café en terrasse.",
-      icon: "☀️",
-      gradient: "from-orange-400 to-pink-500"
+
+    const scrollToSpot = () => {
+        const spotSection = document.getElementById('esprit-club');
+        if (spotSection) {
+            spotSection.scrollIntoView({ behavior: 'smooth' });
+        }
     };
-    if (weather.windSpeed < 8) return {
-      title: "Calme Plat",
-      desc: "Pas un souffle d'air. Idéal pour l'initiation des tout-petits ou le Yoga sur paddle.",
-      icon: "🧘",
-      gradient: "from-blue-400 to-cyan-300"
-    };
-    return {
-      title: "Conditions Royales",
-      desc: "La brise parfaite. Ni trop fort, ni trop mou. Le catamaran va filer tout seul !",
-      icon: "⛵",
-      gradient: "from-turquoise to-teal-500"
-    };
-  };
 
-  const mood = getSpotMood();
+    useEffect(() => {
+        // GSAP Hero Animations
+        gsap.to('.hero-title', {
+            opacity: 1,
+            y: 0,
+            duration: 1.5,
+            delay: 0.2,
+            ease: 'power4.out'
+        });
 
-  const galleryImages = useMemo(() => {
-    if (!homeGallery?.images?.length) return [];
-    return [...homeGallery.images].sort(() => Math.random() - 0.5);
-  }, [homeGallery]);
+        gsap.to('.hero-subtitle', {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            delay: 0.8,
+        });
 
-  return (
-    <div className="w-full">
-      
-      {/* HERO SECTION - REFINED TEXT MASK */}
-      <section 
-        className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-abysse"
-        onMouseMove={handleMouseMove}
-        style={{ perspective: '1000px' }}
-      >
-        {/* 1. Background Image (Static) */}
-        <motion.div 
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            style={{
-                x: -mousePos.x * 20,
-                y: -mousePos.y * 20,
-                scale: 1.1,
-            }}
-        >
-            <img 
-                src="https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?q=80&w=3000&auto=format&fit=crop" 
-                alt="Ocean Background" 
-                className="w-full h-full object-cover brightness-[0.6]" 
-            />
-        </motion.div>
+        gsap.to('.hero-btn', {
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            delay: 1,
+        });
 
-        {/* 2. Overlay Dégradé pour lisibilité max */}
-        <div className="absolute inset-0 bg-linear-to-b from-abysse/60 via-transparent to-abysse z-10 pointer-events-none"></div>
-        
-        {/* 3. 3D Tilt Container (Static Scale/Opacity) */}
-        <motion.div 
-            className="relative z-20 flex flex-col items-center justify-center text-center"
-            style={{
-                rotateX: mousePos.y * 5,
-                rotateY: -mousePos.x * 5,
-                transformStyle: 'preserve-3d',
-                scale: 1,
-                opacity: 1
-            }}
-        >
-            {/* FILTRE SVG POUR HALO BLANC SUBTIL */}
-            <svg width="0" height="0" className="absolute">
-              <defs>
-                <filter id="white-glow" x="-20%" y="-20%" width="120%" height="120%">
-                  <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur" />
-                  <feFlood floodColor="white" result="color" />
-                  <feComposite in="color" in2="blur" operator="in" />
-                  <feMerge>
-                    <feMergeNode />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-            </svg>
+        // Sections appear with generic reveal if needed, but campus-card logic is removed 
+        // as it was part of an older design.
+    }, []);
 
-            {/* LOGO MASQUE SVG : CNC + VOILE (SOFT GLOW) */}
-            <div style={{ filter: 'url(#white-glow) drop-shadow(0 10px 30px rgba(0,0,0,0.3))' }}>
-                <div 
-                    className="w-[85vw] h-[50vh] md:h-[60vh] select-none"
-                    style={{
-                        backgroundImage: "url('https://images.pexels.com/photos/11029040/pexels-photo-11029040.jpeg')",
-                        backgroundSize: '100%',
-                        backgroundPosition: `${50 + (mousePos.x * 25)}% ${50 + (mousePos.y * 25)}%`,
-                        WebkitMaskImage: 'url("/images/LogoCNC_W.svg")',
-                        maskImage: 'url("/images/LogoCNC_W.svg")',
-                        WebkitMaskSize: 'contain',
-                        maskSize: 'contain',
-                        WebkitMaskRepeat: 'no-repeat',
-                        maskRepeat: 'no-repeat',
-                        WebkitMaskPosition: 'center',
-                        maskPosition: 'center',
-                    }}
-                />
-            </div>
+    const galleryImages = useMemo(() => {
+        if (!homeGallery?.images?.length) return [];
+        return [...homeGallery.images].sort(() => Math.random() - 0.5);
+    }, [homeGallery]);
 
-            {/* Elements flottants au premier plan (Static Title) */}
-            <motion.div 
-                className="space-y-8 mt-[-2vw]"
-                style={{ 
-                    translateZ: '100px',
-                }}
+    return (
+        <div className="w-full">
+            <PageNavigation />
+
+            {/* HERO SECTION - LOGO GLASS EFFECT */}
+            <section
+                id="hero"
+                className="relative h-screen w-full flex items-center justify-center overflow-hidden"
+                style={{ perspective: '1500px' }}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={() => setMousePos({ x: 0, y: 0 })}
             >
-                <p className="text-white/90 font-bold uppercase tracking-[0.5em] text-sm md:text-xl drop-shadow-lg flex items-center justify-center gap-4">
-                    <span className="hidden md:block w-12 h-px bg-white/50"></span>
-                    Club Nautique Coutainville
-                    <span className="hidden md:block w-12 h-px bg-white/50"></span>
-                </p>
-                
-                <button 
-                    onClick={scrollToDashboard}
-                    className="group px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white font-black uppercase tracking-widest text-xs hover:bg-white hover:text-abysse transition-all duration-300 shadow-[0_0_30px_rgba(0,0,0,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.4)]"
-                >
-                    <span className="flex items-center gap-3">
-                        Plonger dans l'expérience
-                        <ArrowRight size={16} className="group-hover:rotate-90 transition-transform" />
-                    </span>
-                </button>
-            </motion.div>
-        </motion.div>
-      </section>
-
-      {/* SECTION : LE SPOT EN DIRECT */}
-      <main id="dashboard" className="max-w-[1500px] mx-auto px-4 sm:px-6 py-20 relative z-30">
-        
-        {/* TITRE DE SECTION */}
-        <div className="mb-12 px-2">
-            <div className="flex items-center gap-3 mb-3">
-                <div className="size-2 rounded-full bg-red-500 animate-pulse"></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Temps Réel</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
-                Le Spot <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">en Direct</span>
-            </h2>
-        </div>
-
-        {/* LA GRILLE BENTO - SANS CADRE */}
-
-            {/* LA GRILLE BENTO - REORGANISÉE */}
-            <div className="grid grid-cols-1 md:grid-cols-12 auto-rows-[minmax(180px,auto)] gap-5 relative z-10">
-                
-                {/* 1. WEATHER STATION (Gauche, Hauteur 2) */}
-                <div className="col-span-12 lg:col-span-6 row-span-2 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group">
-                    <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-4">
-                            <div className="size-14 bg-turquoise/10 text-turquoise rounded-2xl flex items-center justify-center">
-                            <span className="material-symbols-outlined text-4xl">air</span>
-                            </div>
-                            <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Station Locale</p>
-                            <h3 className="text-2xl font-black text-abysse italic uppercase">Conditions</h3>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-sm font-black text-abysse">14:45</p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase">Live</p>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-8 my-6">
-                        <div className="border-r border-slate-100 pr-4">
-                            <p className="text-7xl font-black text-abysse tracking-tighter leading-none">
-                                {weather.windSpeed}<span className="text-2xl text-slate-400 ml-1 tracking-normal">nds</span>
-                            </p>
-                            <div className="flex items-center gap-2 mt-2">
-                            <span className="material-symbols-outlined text-turquoise -rotate-45 font-bold">arrow_upward</span>
-                            <p className="text-xs font-black text-turquoise uppercase tracking-widest">{weather.windDirection}</p>
-                            </div>
-                        </div>
-                        <div className="flex flex-col justify-center gap-4">
-                            <div className="flex items-center gap-3">
-                            <span className="material-symbols-outlined text-slate-400">thermostat</span>
-                            <p className="text-2xl font-black text-abysse">{weather.temp}°C <span className="text-xs text-slate-400 uppercase font-bold block">Air</span></p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                            <span className="material-symbols-outlined text-turquoise">water_drop</span>
-                            <p className="text-2xl font-black text-abysse">14°C <span className="text-xs text-slate-400 uppercase font-bold block">Eau</span></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-slate-50/50 rounded-2xl relative overflow-hidden h-36 border border-slate-100">
-                        <TideChart />
-                    </div>
+                {/* Background Slideshow - Parallaxe & Ken Burns subtil restauré */}
+                <div className="absolute inset-0 w-full h-full overflow-hidden bg-abysse">
+                    <AnimatePresence mode="popLayout">
+                        <motion.div
+                            key={HERO_IMAGES[currentHeroIndex]}
+                            className="absolute inset-0 w-full h-full"
+                            initial={{ opacity: 0, scale: 1.06 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{
+                                opacity: { duration: 2.5, ease: "easeInOut" },
+                                scale: { duration: 15, ease: "easeOut" }
+                            }}
+                            style={{
+                                backgroundImage: `url('${HERO_IMAGES[currentHeroIndex]}')`,
+                                backgroundSize: 'cover',
+                                backgroundPositionX: 'center',
+                                backgroundPositionY: photoYPos,
+                            }}
+                        />
+                    </AnimatePresence>
                 </div>
 
-                {/* 2. MOOD DU SPOT (Droite Haut, Hauteur 1) */}
-                <div className={`col-span-12 lg:col-span-6 row-span-1 rounded-3xl p-8 relative overflow-hidden bg-linear-to-br ${mood.gradient} text-white shadow-lg flex flex-col justify-center group`}>
-                    <div className="absolute top-0 right-0 p-8 opacity-20 text-9xl pointer-events-none group-hover:scale-110 transition-transform duration-500">{mood.icon}</div>
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-3">
-                            <Sparkles size={18} className="animate-pulse" />
-                            <span className="text-xs font-black uppercase tracking-widest opacity-90">Vibe Check</span>
-                        </div>
-                        <h3 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter leading-none mb-3">
-                            "{mood.title}"
-                        </h3>
-                        <p className="font-medium text-white/90 text-sm md:text-base leading-relaxed max-w-md line-clamp-2">
-                            {mood.desc}
+                {/* Overlay sombre pour le contraste (Texte blanc sur image) */}
+                <div className="absolute inset-0 bg-black/20 z-10" />
+
+                {/* SEPARATOR : REFINED WAVE (Plus de galbe, sans bouffer le bouton) */}
+                <div className="absolute inset-x-0 bottom-0 pointer-events-none z-10 leading-0 overflow-hidden">
+
+                    {/* Layer 1: Background Wave (Visibilité équilibrée gauche/droite) */}
+                    <motion.div
+                        className="absolute bottom-0 left-0 w-[200%] h-[150px] md:h-[220px] opacity-40 z-0"
+                        style={{ x: waveX1 }}
+                    >
+                        <svg className="w-full h-full fill-white/40" viewBox="0 0 2880 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0,120 C480,250, 960,250, 1440,120 C1920,-10, 2400,-10, 2880,120 L2880,320 L0,320 Z" />
+                        </svg>
+                    </motion.div>
+
+                    {/* Layer 2: Foreground Wave (Plus de courbe mais contenue) */}
+                    <motion.div
+                        className="relative w-full h-[140px] md:h-[200px]"
+                        style={{ y: waveY2 }}
+                    >
+                        <svg className="w-full h-full fill-slate-50" viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0,180 C360,320 1080,40 1440,180 L1440,320 L0,320 Z" />
+                        </svg>
+                    </motion.div>
+                </div>
+
+                {/* Conteneur du Logo avec Tilt 3D */}
+                <div className="relative z-20 w-full flex flex-col items-center justify-center -translate-y-12">
+                    <motion.div
+                        className="relative w-[85vw] h-[40vh] md:w-[60vw] md:h-[50vh] flex items-center justify-center"
+                        animate={{
+                            rotateX: mousePos.y * -15,
+                            rotateY: mousePos.x * 15,
+                        }}
+                        transition={{ type: 'spring', stiffness: 150, damping: 20 }}
+                        style={{
+                            transformStyle: 'preserve-3d',
+                        }}
+                    >
+                        {/* 1. BASE : Le Logo Blanc Semi-Transparent (pour la forme et la lisibilité) */}
+                        <img
+                            src="/images/LogoCNC_W.svg"
+                            alt="CNC Logo Base"
+                            className="absolute w-full h-full object-contain pointer-events-none opacity-20"
+                        />
+
+                        {/* 2. EFFET GLASS : Couche de flou masquée par le logo */}
+                        <div
+                            className="hero-logo-glass-layer logo-drop-shadow"
+                            style={{
+                                maskImage: "url('/images/LogoCNC_W.svg')",
+                                WebkitMaskImage: "url('/images/LogoCNC_W.svg')"
+                            }}
+                        />
+
+                        {/* 3. REFLET : Effet lumineux dynamique qui suit la souris */}
+                        <motion.div
+                            className="absolute inset-0 pointer-events-none"
+                            animate={{
+                                background: `radial-gradient(circle at ${50 + mousePos.x * 50}% ${50 + mousePos.y * 50}%, rgba(255,255,255,0.4) 0%, transparent 60%)`,
+                            }}
+                            style={{
+                                mixBlendMode: 'overlay',
+                                maskImage: "url('/images/LogoCNC_W.svg')",
+                                WebkitMaskImage: "url('/images/LogoCNC_W.svg')",
+                                maskSize: 'contain',
+                                maskPosition: 'center',
+                                maskRepeat: 'no-repeat',
+                            }}
+                        />
+                    </motion.div>
+
+                    {/* Texte du Hero */}
+                    <div className="flex flex-col items-center mt-12 hero-subtitle pointer-events-auto opacity-100">
+                        <p className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm mb-6">
+                            Club Nautique de Coutainville
                         </p>
                     </div>
                 </div>
+            </section>
 
-                {/* 3. CINÉMA (Droite Bas, Hauteur 1, Format 16/9) */}
-                <div className="col-span-12 lg:col-span-6 row-span-1 bg-black rounded-3xl overflow-hidden relative group cursor-pointer shadow-md border border-white/10 flex items-end">
-                    <div className="absolute inset-0 opacity-70 group-hover:opacity-50 transition-opacity">
-                        <img src="https://images.unsplash.com/photo-1495554605052-6c3e9cb19ea3?q=80&w=1200" className="w-full h-full object-cover" alt="Drone" />
-                    </div>
-                    <div className="absolute inset-0 bg-linear-to-t from-black/90 via-transparent to-transparent"></div>
-                    
-                    <div className="absolute top-6 left-6">
-                        <div className="size-10 rounded-full border border-white/20 flex items-center justify-center text-white backdrop-blur-md">
-                            <Film size={18} />
-                        </div>
-                    </div>
+            {/* NOUVELLE LIGNE : SPOT CONDITIONS BENTO */}
+            <SpotConditionsBento />
 
-                    <div className="relative z-10 p-6 w-full flex items-end justify-between">
-                        <div>
-                            <p className="text-turquoise font-black uppercase tracking-widest text-[10px] mb-1">Ciné-Club</p>
-                            <h3 className="text-2xl font-black text-white uppercase italic leading-none">
-                                Coutainville<br/>Vue du Ciel.
-                            </h3>
-                        </div>
-                        <div className="size-12 rounded-full bg-white text-abysse flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
-                            <Play size={16} fill="currentColor" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* 4. WEBCAM (Gauche, Largeur 8) */}
-                <div className="col-span-12 lg:col-span-8 row-span-2 relative overflow-hidden rounded-3xl bg-slate-900 group cursor-pointer border border-slate-200 shadow-md" onClick={() => window.location.hash = '#le-spot'}>
-                    <img 
-                        alt="Webcam Plage Nord" 
-                        className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-1000" 
-                        src="https://picsum.photos/1200/800?grayscale"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-black/60"></div>
-                    <div className="absolute top-6 left-6 flex items-center gap-3">
-                        <div className="bg-red-600 px-3 py-1.5 rounded text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg">
-                            <span className="size-2 bg-white rounded-full animate-pulse"></span> Live
-                        </div>
-                        <span className="text-white text-xs font-bold tracking-tight bg-black/30 backdrop-blur-md px-3 py-1.5 rounded border border-white/10">Plage Nord</span>
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="size-20 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center text-white border-2 border-white/50 group-hover:bg-turquoise group-hover:border-turquoise transition-all group-hover:scale-110">
-                            <span className="material-symbols-outlined text-4xl fill-current ml-1">play_arrow</span>
-                        </div>
-                    </div>
-                    <div className="absolute bottom-6 left-6">
-                        <p className="text-white text-xl font-bold italic mb-1">{weather.description}</p>
-                        <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Archipel des Écréhou visible</p>
-                    </div>
-                </div>
-
-                {/* 5. FAUNE & FLORE (Droite, Largeur 4) */}
-                <div className="col-span-12 lg:col-span-4 row-span-2 bg-slate-50 rounded-3xl p-6 border border-slate-200 relative overflow-hidden flex flex-col justify-between group shadow-sm hover:shadow-md transition-shadow">
-                    <img src="https://images.unsplash.com/photo-1547035160-2647c093a778?q=80&w=800" className="absolute inset-0 w-full h-full object-cover opacity-100 transition-transform duration-700 group-hover:scale-110" alt="Phoque" />
-                    <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/20 to-transparent"></div>
-                    
-                    <div className="relative z-10 flex justify-between items-start">
-                        <span className="bg-green-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg border border-green-500">
-                            <Binoculars size={12} /> Nature
-                        </span>
-                        <span className="text-[10px] font-bold text-white/80 uppercase tracking-wider bg-black/30 px-2 py-1 rounded">
-                            Hier 16h45
-                        </span>
-                    </div>
-
-                    <div className="relative z-10 mt-auto">
-                        <h3 className="text-2xl font-black text-white uppercase italic mb-2 leading-tight">
-                            Alerte<br/>Phoques !
-                        </h3>
-                        <p className="text-slate-300 text-xs font-medium mb-6 line-clamp-2">
-                            Un veau marin a été aperçu près de la cale sud à marée haute. Gardez vos distances (50m).
-                        </p>
-                        <button className="w-full py-3 bg-white text-abysse rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-turquoise hover:text-white transition-colors flex items-center justify-center gap-2 shadow-lg">
-                            <Map size={14} /> J'ai vu un animal
-                        </button>
-                    </div>
-                </div>
-
-                {/* 6. GALERIE (Gauche, Hauteur 2) */}
-                <div className="col-span-12 lg:col-span-6 row-span-2 bg-white rounded-3xl p-2 border border-slate-100 shadow-sm hover:shadow-md overflow-hidden flex flex-col cursor-pointer group transition-shadow" onClick={() => setIsGalleryOpen(true)}>
-                    <div className="flex-1 grid grid-cols-2 gap-2 p-2 relative">
-                        {galleryImages.length > 0 ? (
-                            <>
-                                {galleryImages.slice(0, 3).map((img: string, i: number) => (
-                                    <div key={i} className="relative rounded-xl overflow-hidden aspect-square first:row-span-2 first:aspect-auto">
-                                        <img src={img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Gallery" />
-                                        <div className="absolute inset-0 bg-abysse/0 group-hover:bg-abysse/10 transition-colors"></div>
-                                    </div>
-                                ))}
-                                
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <div className="bg-white/90 backdrop-blur px-6 py-3 rounded-full shadow-2xl flex items-center gap-3">
-                                        <Images size={18} className="text-abysse" />
-                                        <span className="font-black text-abysse uppercase tracking-widest text-xs">Ouvrir la Galerie</span>
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="col-span-2 row-span-2 flex flex-col items-center justify-center bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-                                <Images size={40} className="text-slate-300 mb-4" />
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Galerie en cours de chargement...</p>
-                            </div>
-                        )}
-                    </div>
-                    <div className="px-6 py-4 flex justify-between items-center bg-white relative z-10">
-                        <div>
-                            <h3 className="text-lg font-black text-abysse uppercase italic">{homeGallery?.title || "L'Album Photo"}</h3>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{homeGallery?.subtitle || "Souvenirs 2024"}</p>
-                        </div>
-                        <div className="size-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-turquoise group-hover:text-white transition-colors">
-                            <ChevronRight size={16} />
-                        </div>
-                    </div>
-                </div>
-
-                {/* 7. FLASH INFO / RSS (Dynamique Sanity) */}
-                <div className="col-span-12 lg:col-span-6 row-span-1 bg-slate-100 rounded-3xl p-6 relative overflow-hidden group border border-slate-200 shadow-sm flex flex-col">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2 text-abysse">
-                            <div className="size-8 bg-white rounded-lg flex items-center justify-center shadow-sm text-red-500">
-                                <Rss size={16} />
-                            </div>
-                            <span className="text-xs font-black uppercase tracking-widest">Dernières News</span>
-                        </div>
-                        <span className="text-[9px] font-bold bg-white px-2 py-1 rounded text-slate-400 border border-slate-100">Live Feed</span>
-                    </div>
-
-                    <div className="flex-1 flex flex-col gap-3 justify-center">
-                        {news && news.length > 0 ? (
-                            news.map((item, idx) => (
-                                <div key={idx} className="bg-white p-3 rounded-xl border-l-4 border-l-red-500 shadow-sm flex items-start gap-3 hover:translate-x-1 transition-transform cursor-pointer group/item">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">{item.category}</span>
-                                            <span className="text-[9px] font-bold text-slate-400">{item.date}</span>
-                                        </div>
-                                        <h4 className="text-sm font-bold text-abysse truncate group-hover/item:text-red-500 transition-colors">{item.title}</h4>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            // Fallback si vide
-                            <>
-                                <div className="bg-white p-3 rounded-xl border-l-4 border-l-red-500 shadow-sm flex items-start gap-3 opacity-50">
-                                    <div className="flex-1">
-                                        <p className="text-xs font-bold text-slate-400">Aucune actualité pour le moment</p>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-
-                {/* 8. PLANNING (Réduit - Demi taille) */}
-                <Link href="/infos-pratiques" className="col-span-12 md:col-span-6 lg:col-span-3 row-span-1 bg-white rounded-3xl p-6 relative overflow-hidden group cursor-pointer border border-slate-200 shadow-md hover:shadow-lg hover:border-turquoise transition-all flex flex-col justify-between">
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-4 text-turquoise">
-                            <Calendar size={18} />
-                            <span className="text-xs font-black uppercase tracking-widest">Agenda</span>
-                        </div>
-                        <h3 className="text-2xl font-black text-abysse uppercase italic leading-none mb-2">
-                            Planning<br/>Hebdo.
-                        </h3>
-                    </div>
-                    
-                    <div className="flex justify-end mt-4">
-                        <div className="size-12 rounded-full bg-slate-50 text-abysse flex items-center justify-center shadow-sm group-hover:bg-turquoise group-hover:text-white transition-all">
-                            <ArrowRight size={20} />
-                        </div>
-                    </div>
-                </Link>
-
-                {/* 9. BOUTIQUE (Réduit - Demi taille) */}
-                <div className="col-span-12 md:col-span-6 lg:col-span-3 row-span-1 bg-yellow-400 rounded-3xl p-6 relative overflow-hidden group cursor-pointer border border-yellow-500 shadow-md hover:scale-[1.02] transition-transform flex flex-col justify-between">
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-4 text-abysse">
-                            <ShoppingBag size={18} />
-                            <span className="text-xs font-black uppercase tracking-widest">Shop</span>
-                        </div>
-                        <h3 className="text-2xl font-black text-abysse uppercase italic leading-none mb-2">
-                            Style<br/>Marin.
-                        </h3>
-                    </div>
-                    
-                    <div className="flex justify-end mt-4">
-                        <div className="size-12 rounded-full bg-white/20 text-abysse flex items-center justify-center shadow-sm group-hover:bg-white transition-all">
-                            <ArrowRight size={20} />
-                        </div>
-                    </div>
-                    
-                    <div className="absolute -right-4 -bottom-8 opacity-10 text-abysse rotate-12 pointer-events-none">
-                        <ShoppingBag size={80} />
-                    </div>
-                </div>
-
-            </div>
-      </main>
-
-      {/* SECTION : L'ESPRIT DU CLUB */}
-      <section className="mb-32 max-w-[1500px] mx-auto px-6">
-        <div className="mb-12">
-            <div className="flex items-center gap-3 mb-3">
-                <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Expérience CVC</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
-                L'Esprit <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">du Club</span>
-            </h2>
-        </div>
-
-        <div className="relative rounded-[3rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-[700px] md:h-[600px] border border-slate-900 group/container">
-                
-                {/* 0. Le Message */}
-                <div className="absolute top-8 left-8 z-30 pointer-events-none md:max-w-md">
-                    <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter leading-[0.9] drop-shadow-lg">
-                        Ressentez<br/>la force<br/>du vent.
-                    </h2>
-                    <p className="text-slate-300 font-medium mt-4 text-sm md:text-base hidden md:block">
-                        Entre dunes et grand large, choisissez votre façon de vivre la mer.
-                    </p>
-                </div>
-
-                {/* 1. PANEL : NATURE (Kids/École) */}
-                <Link href="/ecole-voile" className="relative flex-1 group/panel hover:flex-2 transition-all duration-700 ease-in-out overflow-hidden border-b md:border-b-0 md:border-r border-white/10 cursor-pointer">
-                    <div className="absolute inset-0 bg-black/40 group-hover/panel:bg-black/20 transition-colors z-10"></div>
-                    <img 
-                        src="https://images.unsplash.com/photo-1596423736772-799a4e3df530?q=80&w=1200&auto=format&fit=crop" 
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-110" 
-                        alt="Enfants Nature" 
-                    />
-                    
-                    <div className="absolute bottom-0 left-0 w-full p-8 z-20 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent">
-                        <div className="flex items-center gap-4 mb-2">
-                            <div className="size-12 bg-white rounded-xl flex items-center justify-center text-turquoise shadow-lg group-hover/panel:scale-110 transition-transform">
-                                <Leaf size={24} />
-                            </div>
-                            <span className="text-turquoise font-black uppercase tracking-[0.2em] text-xs">Nature</span>
-                        </div>
-                        <h3 className="text-3xl font-black text-white uppercase italic mb-2 group-hover/panel:text-4xl transition-all">Apprendre</h3>
-                        
-                        <div className="h-0 opacity-0 group-hover/panel:h-auto group-hover/panel:opacity-100 overflow-hidden transition-all duration-500 ease-out">
-                            <p className="text-slate-200 text-sm mb-4 leading-relaxed font-medium">
-                                De l'éveil des sens à l'autonomie. L'école de voile pour les enfants de 5 à 12 ans.
-                            </p>
-                            <span className="inline-flex items-center gap-2 bg-white text-abysse px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:bg-turquoise hover:text-white transition-colors">
-                                Découvrir l'école <ArrowRight size={14} />
-                            </span>
-                        </div>
-                    </div>
-                </Link>
-
-                {/* 2. PANEL : SENSATION (Adultes/Sport) */}
-                <Link href="/activites" className="relative flex-1 group/panel hover:flex-2 transition-all duration-700 ease-in-out overflow-hidden border-b md:border-b-0 md:border-r border-white/10 cursor-pointer">
-                    <div className="absolute inset-0 bg-black/40 group-hover/panel:bg-black/20 transition-colors z-10"></div>
-                    <img 
-                        src="https://images.unsplash.com/photo-1534008897995-27a23e859048?q=80&w=1200&auto=format&fit=crop" 
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-110" 
-                        alt="Catamaran Sport" 
-                    />
-                    
-                    <div className="absolute bottom-0 left-0 w-full p-8 z-20 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent">
-                        <div className="flex items-center gap-4 mb-2">
-                            <div className="size-12 bg-white rounded-xl flex items-center justify-center text-orange-500 shadow-lg group-hover/panel:scale-110 transition-transform">
-                                <Zap size={24} />
-                            </div>
-                            <span className="text-orange-500 font-black uppercase tracking-[0.2em] text-xs">Sensation</span>
-                        </div>
-                        <h3 className="text-3xl font-black text-white uppercase italic mb-2 group-hover/panel:text-4xl transition-all">Naviguer</h3>
-                        
-                        <div className="h-0 opacity-0 group-hover/panel:h-auto group-hover/panel:opacity-100 overflow-hidden transition-all duration-500 ease-out">
-                            <p className="text-slate-200 text-sm mb-4 leading-relaxed font-medium">
-                                Adrénaline et vitesse. Stages catamarans, char à voile et glisse pour ados & adultes.
-                            </p>
-                            <span className="inline-flex items-center gap-2 bg-white text-abysse px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-colors">
-                                Voir les stages <ArrowRight size={14} />
-                            </span>
-                        </div>
-                    </div>
-                </Link>
-
-                {/* 3. PANEL : EXPLORATION (Location/Balade) */}
-                <Link href="/activites" className="relative flex-1 group/panel hover:flex-2 transition-all duration-700 ease-in-out overflow-hidden cursor-pointer">
-                    <div className="absolute inset-0 bg-black/40 group-hover/panel:bg-black/20 transition-colors z-10"></div>
-                    <img 
-                        src="https://images.unsplash.com/photo-1541549467657-3f9f9d7c078d?q=80&w=1200&auto=format&fit=crop" 
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-110" 
-                        alt="Kayak Exploration" 
-                    />
-                    
-                    <div className="absolute bottom-0 left-0 w-full p-8 z-20 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent">
-                        <div className="flex items-center gap-4 mb-2">
-                            <div className="size-12 bg-white rounded-xl flex items-center justify-center text-purple-500 shadow-lg group-hover/panel:scale-110 transition-transform">
-                                <Compass size={24} />
-                            </div>
-                            <span className="text-purple-500 font-black uppercase tracking-[0.2em] text-xs">Exploration</span>
-                        </div>
-                        <h3 className="text-3xl font-black text-white uppercase italic mb-2 group-hover/panel:text-4xl transition-all">S'évader</h3>
-                        
-                        <div className="h-0 opacity-0 group-hover/panel:h-auto group-hover/panel:opacity-100 overflow-hidden transition-all duration-500 ease-out">
-                            <p className="text-slate-200 text-sm mb-4 leading-relaxed font-medium">
-                                Louez un paddle ou un kayak, longez la côte à votre rythme. La liberté absolue.
-                            </p>
-                            <span className="inline-flex items-center gap-2 bg-white text-abysse px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-colors">
-                                Louer du matériel <ArrowRight size={14} />
-                            </span>
-                        </div>
-                    </div>
-                </Link>
-
-            </div>
-        </section>
-
-        {/* --- NOUVEAU : INSTITUTIONNEL (STACK LAYOUT - PROPRE) --- */}
-        <section className="mb-32 max-w-[1400px] mx-auto px-6">
-        <div className="mb-12">
-            <div className="flex items-center gap-3 mb-3">
-                <div className="size-2 rounded-full bg-slate-900 animate-pulse"></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Campus Nautique</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
-                Plus qu'un Club, <br/>Une <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">Institution.</span>
-            </h2>
-        </div>
-
-        <div className="mb-24">
-            <p className="text-slate-500 text-lg font-medium max-w-2xl">
-                Au Club Nautique de Coutainville, nous ne faisons pas que naviguer. Nous formons les marins de demain, nous éduquons les plus jeunes et nous accueillons les entreprises.
-            </p>
-        </div>
-
-           <div className="space-y-24">
-               
-               {/* PILIER 1 : FORMATION & SECOURISME (HERO DARK) */}
-               <div className="relative group overflow-hidden rounded-[3rem] bg-abysse border border-slate-900 shadow-2xl">
-                   <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[500px]">
-                       <div className="relative h-[300px] lg:h-auto overflow-hidden">
-                           <div className="absolute inset-0 bg-linear-to-r from-abysse/20 to-abysse/80 lg:to-abysse mix-blend-multiply z-10"></div>
-                           <img src="https://images.unsplash.com/photo-1558488551-4018a6f881aa?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Sauvetage" />
-                       </div>
-                       <div className="p-12 lg:p-20 flex flex-col justify-center relative z-20">
-                           <div className="flex items-center gap-4 mb-8">
-                               <div className="size-16 bg-white/10 rounded-2xl flex items-center justify-center text-turquoise border border-white/10 backdrop-blur-md">
-                                   <LifeBuoy size={32} />
-                               </div>
-                               <div>
-                                   <span className="text-turquoise font-black uppercase tracking-[0.2em] text-xs block mb-1">Pôle Expertise</span>
-                                   <h3 className="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-none">Formation &<br/>Secourisme</h3>
-                               </div>
-                           </div>
-                           <p className="text-slate-300 text-lg font-medium leading-relaxed mb-10 border-l-2 border-turquoise pl-6">
-                               Transformez votre passion en métier. Le CNC est un centre de formation agréé pour les futurs professionnels de la mer. Devenez Nageur Sauveteur ou Moniteur de Voile.
-                           </p>
-                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-                               <div className="bg-white/5 rounded-xl p-4 border border-white/5 flex items-center gap-3">
-                                   <Medal size={20} className="text-yellow-400" />
-                                   <span className="text-white font-bold text-sm">Diplômes d'État (BPJEPS)</span>
-                               </div>
-                               <div className="bg-white/5 rounded-xl p-4 border border-white/5 flex items-center gap-3">
-                                   <Siren size={20} className="text-red-400" />
-                                   <span className="text-white font-bold text-sm">Secourisme (BNSSA/PSE)</span>
-                               </div>
-                           </div>
-                           <Link href="/ecole-voile" className="inline-flex items-center gap-4 text-white font-black uppercase tracking-widest text-xs group/link hover:text-turquoise transition-colors w-fit">
-                               Découvrir nos cursus <ArrowRight className="group-hover/link:translate-x-1 transition-transform" />
-                           </Link>
-                       </div>
-                   </div>
-               </div>
-
-               {/* PILIER 2 : ACADÉMIE (LIGHT & CLEAN) */}
-               <div className="relative group overflow-hidden rounded-[3rem] bg-white border border-slate-100 shadow-xl">
-                   <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[450px]">
-                       <div className="p-12 lg:p-20 flex flex-col justify-center order-2 lg:order-1">
-                           <div className="flex items-center gap-4 mb-6">
-                               <div className="size-14 bg-slate-50 rounded-2xl flex items-center justify-center text-abysse border border-slate-100">
-                                   <GraduationCap size={28} />
-                               </div>
-                               <h3 className="text-3xl md:text-4xl font-black text-abysse uppercase italic tracking-tighter">Académie Nautique</h3>
-                           </div>
-                           <p className="text-slate-600 font-medium leading-relaxed mb-8">
-                               L'école de référence de la Côte Ouest. Une pédagogie structurée et labellisée "École Française de Voile" pour accompagner vos enfants dès 4 ans vers l'autonomie.
-                           </p>
-                           <ul className="space-y-4 mb-10">
-                               <li className="flex items-center gap-3 text-abysse font-bold text-sm">
-                                   <CheckCircle2 size={18} className="text-turquoise" /> Label EFV & Coachs diplômés
-                               </li>
-                               <li className="flex items-center gap-3 text-abysse font-bold text-sm">
-                                   <CheckCircle2 size={18} className="text-turquoise" /> Jardin des Mers (4-6 ans)
-                               </li>
-                               <li className="flex items-center gap-3 text-abysse font-bold text-sm">
-                                   <CheckCircle2 size={18} className="text-turquoise" /> Flotte récente & Sécurité
-                               </li>
-                           </ul>
-                           <Link href="/ecole-voile" className="inline-flex items-center justify-center px-8 py-4 bg-slate-50 text-abysse rounded-xl font-black uppercase tracking-widest text-xs hover:bg-abysse hover:text-white transition-all w-fit">
-                               Programme École
-                           </Link>
-                       </div>
-                       <div className="relative h-[300px] lg:h-auto overflow-hidden order-1 lg:order-2">
-                            <img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?q=80&w=1200" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Enfants voile" />
-                       </div>
-                   </div>
-               </div>
-
-               {/* PILIER 3 : BUSINESS (GREY TECH) */}
-               <div className="relative group overflow-hidden rounded-[3rem] bg-slate-100 border border-slate-200 shadow-xl">
-                   <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[500px]">
-                       <div className="relative h-[300px] lg:h-auto overflow-hidden">
-                           <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200" className="w-full h-full object-cover" alt="Meeting room" />
-                           <div className="absolute inset-0 bg-abysse/10"></div>
-                       </div>
-                       <div className="p-12 lg:p-20 flex flex-col justify-center">
-                           <div className="flex items-center gap-4 mb-6">
-                               <div className="size-14 bg-white rounded-2xl flex items-center justify-center text-abysse shadow-sm">
-                                   <Briefcase size={28} />
-                               </div>
-                               <h3 className="text-3xl md:text-4xl font-black text-abysse uppercase italic tracking-tighter">Espace Pro &<br/>Séminaires</h3>
-                           </div>
-                           <p className="text-slate-600 font-medium leading-relaxed mb-10">
-                               Un cadre inspirant pour vos équipes. Organisez vos séminaires, CODIR et teambuildings face à la mer dans un espace tout équipé.
-                           </p>
-                           
-                           {/* INFOS UTILES BUSINESS */}
-                           <div className="grid grid-cols-2 gap-4 mb-10">
-                              <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
-                                  <Wifi size={20} className="text-slate-400" />
-                                  <div className="leading-tight">
-                                      <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Connexion</span>
-                                      <span className="block text-xs font-bold text-abysse">Fibre Pro</span>
-                                  </div>
-                              </div>
-                              <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
-                                  <MonitorPlay size={20} className="text-slate-400" />
-                                  <div className="leading-tight">
-                                      <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Visio</span>
-                                      <span className="block text-xs font-bold text-abysse">Écran 85"</span>
-                                  </div>
-                              </div>
-                              <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
-                                  <Users size={20} className="text-slate-400" />
-                                  <div className="leading-tight">
-                                      <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Capacité</span>
-                                      <span className="block text-xs font-bold text-abysse">10 à 80 pers.</span>
-                                  </div>
-                              </div>
-                              <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
-                                  <Coffee size={20} className="text-slate-400" />
-                                  <div className="leading-tight">
-                                      <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Services</span>
-                                      <span className="block text-xs font-bold text-abysse">Traiteur & Café</span>
-                                  </div>
-                              </div>
-                           </div>
-
-                           <Link href="/groupes-entreprises" className="inline-flex items-center gap-2 text-abysse font-black uppercase tracking-widest text-xs border-b-2 border-abysse pb-1 hover:text-turquoise hover:border-turquoise transition-colors w-fit">
-                               Télécharger la brochure Pro <ArrowRight size={14} />
-                           </Link>
-                       </div>
-                   </div>
-               </div>
-
-           </div>
-        </section>
-
-        {/* --- CTA CLUB --- */}
-        <section className="mb-32 max-w-[1400px] mx-auto px-6">
-           <div className="bg-slate-50 rounded-[3rem] p-12 md:p-20 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-12 group overflow-hidden relative shadow-lg">
-              {/* Background Element */}
-              <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-turquoise/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-
-              <div className="relative z-10 max-w-xl">
-                 <div className="mb-8">
+            {/* SECTION : L'ESPRIT DU CLUB */}
+            <section id="esprit-club" className="py-24 max-w-[1600px] mx-auto px-6 relative z-10">
+                <div className="mb-12 px-2">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Communauté CVC</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Expérience CVC</span>
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-black text-abysse uppercase italic tracking-tighter leading-none">
-                        Plus qu'une école,<br/> <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">Une Famille.</span>
+                    <h2 className="text-3xl md:text-4xl text-abysse">
+                        {homePageData?.spirit?.title || "L'Esprit du Club"} <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise"></span>
                     </h2>
-                 </div>
-                 <p className="text-slate-600 text-lg font-medium leading-relaxed mb-10">
-                    Rejoignez une communauté de passionnés. Régates, barbecues, entraide et convivialité... Devenez membre du CNC et vivez la mer autrement, toute l'année.
-                 </p>
-                 <Link href="/club" className="inline-flex items-center gap-3 bg-abysse text-white px-8 py-4 rounded-full font-black uppercase tracking-widest hover:bg-turquoise transition-all shadow-xl group/btn">
-                    Rejoindre le Club <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
-                 </Link>
-              </div>
+                </div>
 
-              {/* Visual Element (Mosaic or Abstract) */}
-              <div className="relative z-10 w-full md:w-1/3 aspect-square rotate-3 group-hover:rotate-0 transition-transform duration-700">
-                 <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=1000" className="w-full h-full object-cover rounded-[2rem] shadow-2xl grayscale group-hover:grayscale-0 transition-all duration-700 border-4 border-white" alt="Club Life" />
-              </div>
-           </div>
-        </section>
+                <div className="relative rounded-[3rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-[700px] md:h-[600px] group/container">
 
-      {/* --- GALLERY MODAL --- */}
-      {isGalleryOpen && (
-        <div className="fixed inset-0 z-100 bg-black/95 flex flex-col animate-in fade-in duration-300">
-          <div className="p-6 flex justify-between items-center text-white">
-             <h3 className="text-xl font-black uppercase italic tracking-widest">Galerie CNC</h3>
-             <button onClick={() => setIsGalleryOpen(false)} className="size-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-colors">
-               <X size={20} />
-             </button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-6">
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-[1600px] mx-auto">
-                {galleryImages.map((img: string, i: number) => (
-                  <div key={i} className="aspect-4/3 rounded-lg overflow-hidden cursor-zoom-in group" onClick={() => setSelectedImage(img)}>
-                     <img src={img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Gallery" />
-                  </div>
-                ))}
-             </div>
-          </div>
-        </div>
-      )}
+                    {/* 0. Le Message */}
+                    <div className="absolute top-8 left-8 z-30 pointer-events-none md:max-w-xl">
+                        <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter leading-[0.9] drop-shadow-lg whitespace-pre-line">
+                            {homePageData?.spirit?.message || "Ressentez\nla force\ndu vent."}
+                        </h2>
+                        <p className="text-slate-300 font-medium mt-4 text-sm md:text-base hidden md:block">
+                            {homePageData?.spirit?.description || "Entre dunes et grand large, choisissez votre façon de vivre la mer."}
+                        </p>
+                    </div>
 
-      {/* --- FULLSCREEN IMAGE OVERLAY --- */}
-      {selectedImage && (
-        <div className="fixed inset-0 z-110 bg-black/95 flex items-center justify-center p-4 md:p-12 animate-in zoom-in-95 duration-200" onClick={() => setSelectedImage(null)}>
-           <img src={selectedImage} className="max-w-full max-h-full rounded-lg shadow-2xl" alt="Full view" />
-           <button onClick={() => setSelectedImage(null)} className="absolute top-6 right-6 text-white bg-black/50 p-2 rounded-full hover:bg-white hover:text-black transition-colors">
-              <X size={32} />
-           </button>
-        </div>
-      )}
+                    {/* CARTES DYNAMIQUES */}
+                    {(homePageData?.spirit?.cards || [
+                        {
+                            tag: 'Nature',
+                            title: 'Apprendre',
+                            description: "De l'éveil des sens à l'autonomie. L'école de voile pour les enfants de 5 à 12 ans.",
+                            buttonText: "Découvrir l'école",
+                            link: '/ecole-voile',
+                            iconName: 'Leaf',
+                            colorTheme: 'turquoise',
+                            image: '/images/imgBank/Cata001.jpg'
+                        },
+                        {
+                            tag: 'Sensation',
+                            title: 'Naviguer',
+                            description: "Adrénaline et vitesse. Stages catamarans, char à voile et glisse pour ados & adultes.",
+                            buttonText: "Voir les stages",
+                            link: '/activites?cat=Sensations',
+                            iconName: 'Zap',
+                            colorTheme: 'orange',
+                            image: '/images/imgBank/Navigation.jpg'
+                        },
+                        {
+                            tag: 'Exploration',
+                            title: "S'évader",
+                            description: "Louez un paddle ou un kayak, longez la côte à votre rythme. La liberté absolue.",
+                            buttonText: "Louer du matériel",
+                            link: '/activites',
+                            iconName: 'Compass',
+                            colorTheme: 'purple',
+                            image: '/images/imgBank/paddlekayak.jpg'
+                        }
+                    ]).map((card: any, idx: number) => {
+                        // Color Theme Helper
+                        const themeColor = card.colorTheme === 'orange' ? 'text-orange-500' : card.colorTheme === 'purple' ? 'text-purple-500' : 'text-turquoise';
+                        const hoverBg = card.colorTheme === 'orange' ? 'hover:bg-orange-500' : card.colorTheme === 'purple' ? 'hover:bg-purple-500' : 'hover:bg-turquoise';
 
-    </div>
-  );
+                        return (
+                            <Link key={idx} href={card.link || '#'} className="relative flex-1 group/panel hover:flex-2 transition-all duration-700 ease-in-out overflow-hidden cursor-pointer">
+                                <div className="absolute inset-0 bg-black/40 group-hover/panel:bg-black/20 transition-colors z-10"></div>
+                                <img
+                                    src={card.image}
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-110"
+                                    alt={card.title}
+                                />
+
+                                <div className="absolute bottom-0 left-0 w-full p-8 z-20 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent">
+                                    <div className="flex items-center gap-4 mb-2">
+                                        <div className={`size-12 bg-white rounded-xl flex items-center justify-center ${themeColor} shadow-lg group-hover/panel:scale-110 transition-transform`}>
+                                            {card.iconName === 'Leaf' && <Leaf size={24} />}
+                                            {card.iconName === 'Zap' && <Zap size={24} />}
+                                            {card.iconName === 'Compass' && <Compass size={24} />}
+                                            {/* Fallback Icon if needed */}
+                                            {!['Leaf', 'Zap', 'Compass'].includes(card.iconName) && <Leaf size={24} />}
+                                        </div>
+                                        <span className={`${themeColor} font-black uppercase tracking-[0.2em] text-xs`}>{card.tag}</span>
+                                    </div>
+                                    <h3 className="text-2xl font-black text-white uppercase italic mb-2 group-hover/panel:text-3xl transition-all">{card.title}</h3>
+
+                                    <div className="h-0 opacity-0 group-hover/panel:h-auto group-hover/panel:opacity-100 overflow-hidden transition-all duration-500 ease-out">
+                                        <p className="text-slate-200 text-sm mb-4 leading-relaxed font-medium">
+                                            {card.description}
+                                        </p>
+                                        <span className={`inline-flex items-center gap-2 bg-white text-abysse px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest ${hoverBg} hover:text-white transition-colors`}>
+                                            {card.buttonText} <ArrowRight size={14} />
+                                        </span>
+                                    </div>
+                                </div>
+                            </Link>
+                        );
+                    })}
+
+                </div>
+            </section>
+
+            {/* SECTION : FOCUS ACTIVITÉ (Le Char à Voile) */}
+            <section id="vitesse" className="py-12 max-w-[1600px] mx-auto px-6 relative z-10">
+                <div className="group relative overflow-hidden rounded-[3rem] bg-abysse shadow-2xl flex flex-col lg:flex-row min-h-[550px]">
+                    {/* Contenu Texte */}
+                    <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-orange-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                <Zap size={24} fill="currentColor" />
+                            </div>
+                            <div>
+                                <span className="text-orange-500 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusChar?.tagline || "Activité Phare"}</span>
+                                <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusChar?.subTagline || "Sensation & Vitesse"}</span>
+                            </div>
+                        </div>
+
+                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
+                            {homePageData?.focusChar?.title || "Le Char"} <br />
+                            <span className="text-transparent bg-clip-text bg-linear-to-r from-orange-400 via-orange-500 to-red-600">{homePageData?.focusChar?.highlightSuffix || "à Voile."}</span>
+                        </h2>
+
+                        <p className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-orange-500/30 pl-8 italic">
+                            "{homePageData?.focusChar?.description || "Glissez sur le sable à quelques centimètres du sol. Une expérience unique, propulsée par la seule force du vent sur l'immense plage de Coutainville."}"
+                        </p>
+
+                        <div className="flex flex-wrap gap-4 mt-auto">
+                            <Link href={homePageData?.focusChar?.ctaButton?.link || "/activites"} className="inline-flex items-center justify-center px-10 py-4 bg-orange-500 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-orange-600 transition-all shadow-lg group/btn shadow-orange-500/20">
+                                {homePageData?.focusChar?.ctaButton?.text || "Réserver une séance"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
+                            </Link>
+                            <Link href={homePageData?.focusChar?.infoButton?.link || "/activites"} className="inline-flex items-center justify-center px-10 py-4 bg-white/5 border border-white/10 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                                {homePageData?.focusChar?.infoButton?.text || "En savoir plus"}
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Visuel Impactant - Slideshow */}
+                    <div className="flex-1 relative overflow-hidden min-h-[400px] lg:min-h-auto">
+                        <div className="absolute inset-0 z-0">
+                            <AnimatePresence mode="wait">
+                                <motion.img
+                                    key={CHAR_IMAGES[currentCharIndex]}
+                                    src={CHAR_IMAGES[currentCharIndex]}
+                                    initial={{ opacity: 0, scale: 1.1 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                    alt="Pratique du char à voile"
+                                />
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Sharp Vertical Accent */}
+                        <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
+
+                        {/* Mobile Gradient Overlay */}
+                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
+
+                        {/* Indicateurs Slideshow */}
+                        <div className="absolute bottom-6 right-8 flex gap-2 z-20">
+                            {CHAR_IMAGES.map((_, idx) => (
+                                <div
+                                    key={idx}
+                                    className={`h-1 rounded-full transition-all duration-500 ${idx === currentCharIndex ? 'w-8 bg-orange-500' : 'w-2 bg-white/30'}`}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Badge de vitesse stylisé */}
+                        <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                            <span className="text-orange-500 font-black text-3xl block leading-none mb-1">{homePageData?.focusChar?.badgeValue || "60+"}</span>
+                            <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusChar?.badgeLabel || "Km/h de sensations pures"}</span>
+                        </div>
+                    </div>
+                </div>
+            </section >
+
+            {/* SECTION : FOCUS ACTIVITÉ (La Glisse Extrême) */}
+            < section id="adrenaline" className="py-12 max-w-[1600px] mx-auto px-6 relative z-10" >
+                <div className="group relative overflow-hidden rounded-[3rem] bg-abysse shadow-2xl flex flex-col lg:flex-row-reverse min-h-[550px]">
+                    {/* Contenu Texte */}
+                    <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-blue-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                <Wind size={24} fill="currentColor" className="text-blue-500" />
+                            </div>
+                            <div>
+                                <span className="text-blue-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusGlisse?.tagline || "Sensations Fortes"}</span>
+                                <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusGlisse?.subTagline || "Wing, Kite & Funboard"}</span>
+                            </div>
+                        </div>
+
+                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
+                            {homePageData?.focusGlisse?.title || "Glisse"} <br />
+                            <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 via-indigo-500 to-purple-600">{homePageData?.focusGlisse?.highlightSuffix || "Extrême."}</span>
+                        </h2>
+
+                        <p className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-blue-500/30 pl-8 italic">
+                            "{homePageData?.focusGlisse?.description || "Dominez les éléments. Wingfoil, Kitesurf ou Windsurf : repoussez vos limites avec les moniteurs du club sur l'un des meilleurs spots de Normandie."}"
+                        </p>
+
+                        <div className="flex flex-wrap gap-4 mt-auto">
+                            <Link href={homePageData?.focusGlisse?.ctaButton?.link || "/activites?cat=Sensations"} className="inline-flex items-center justify-center px-10 py-4 bg-blue-600 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-blue-500 transition-all shadow-lg group/btn shadow-blue-500/20">
+                                {homePageData?.focusGlisse?.ctaButton?.text || "Découvrir la glisse"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
+                            </Link>
+                            <Link href={homePageData?.focusGlisse?.infoButton?.link || "/le-spot"} className="inline-flex items-center justify-center px-10 py-4 bg-white/5 border border-white/10 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                                {homePageData?.focusGlisse?.infoButton?.text || "Le Spot"}
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Visuel Impactant - Slideshow */}
+                    <div className="flex-1 relative overflow-hidden min-h-[400px] lg:min-h-auto">
+                        <div className="absolute inset-0 z-0">
+                            <AnimatePresence mode="wait">
+                                <motion.img
+                                    key={GLISSE_IMAGES[currentGlisseIndex]}
+                                    src={GLISSE_IMAGES[currentGlisseIndex]}
+                                    initial={{ opacity: 0, scale: 1.1 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                    alt="Sports de glisse extrême"
+                                />
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Sharp Vertical Accent */}
+                        <div className="absolute inset-y-0 right-0 w-px bg-white/10 hidden lg:block z-20"></div>
+
+                        {/* Mobile Gradient Overlay */}
+                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
+
+                        {/* Indicateurs Slideshow */}
+                        <div className="absolute bottom-6 left-8 flex gap-2 z-20">
+                            {GLISSE_IMAGES.map((_, idx) => (
+                                <div
+                                    key={idx}
+                                    className={`h-1 rounded-full transition-all duration-500 ${idx === currentGlisseIndex ? 'w-8 bg-blue-500' : 'w-2 bg-white/30'}`}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Badge technique stylisé */}
+                        <div className="absolute top-8 left-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                            <span className="text-blue-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusGlisse?.badgeValue || "Pure"}</span>
+                            <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusGlisse?.badgeLabel || "Énergie & Adrénaline"}</span>
+                        </div>
+                    </div>
+                </div>
+            </section >
+
+            {/* SECTION : FOCUS ACTIVITÉ (Bien-être & Slow Tourisme) */}
+            < section id="bien-etre" className="py-12 max-w-[1600px] mx-auto px-6 relative z-10" >
+                <div className="group relative overflow-hidden rounded-[3rem] bg-abysse shadow-2xl flex flex-col lg:flex-row min-h-[550px]">
+                    {/* Contenu Texte */}
+                    <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-emerald-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                <Waves size={24} className="text-emerald-500" />
+                            </div>
+                            <div>
+                                <span className="text-emerald-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusBienEtre?.tagline || "Slow Tourisme"}</span>
+                                <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusBienEtre?.subTagline || "Marche Aquatique, Kayak & Paddle"}</span>
+                            </div>
+                        </div>
+
+                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
+                            {homePageData?.focusBienEtre?.title || "Bien-être"} <br />
+                            <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 via-teal-500 to-cyan-600">{homePageData?.focusBienEtre?.highlightSuffix || "& Slow Tourisme."}</span>
+                        </h2>
+
+                        <p className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-emerald-500/30 pl-8 italic">
+                            "{homePageData?.focusBienEtre?.description || "Prenez le temps de vivre. Entre marche aquatique revitalisante et balades contemplatives en kayak ou paddle, découvrez la côte normande sous un autre angle, au rythme des marées."}"
+                        </p>
+
+                        <div className="flex flex-wrap gap-4 mt-auto">
+                            <Link href={homePageData?.focusBienEtre?.ctaButton?.link || "/activites?cat=Bien-être"} className="inline-flex items-center justify-center px-10 py-4 bg-emerald-600 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-emerald-500 transition-all shadow-lg group/btn shadow-emerald-500/20">
+                                {homePageData?.focusBienEtre?.ctaButton?.text || "S'évader en mer"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
+                            </Link>
+                            <Link href={homePageData?.focusBienEtre?.infoButton?.link || "/activites"} className="inline-flex items-center justify-center px-10 py-4 bg-white/5 border border-white/10 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                                {homePageData?.focusBienEtre?.infoButton?.text || "Voir les tarifs"}
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Visuel Impactant - Slideshow */}
+                    <div className="flex-1 relative overflow-hidden min-h-[400px] lg:min-h-auto">
+                        <div className="absolute inset-0 z-0">
+                            <AnimatePresence mode="wait">
+                                <motion.img
+                                    key={WELLBEING_IMAGES[currentWellbeingIndex]}
+                                    src={WELLBEING_IMAGES[currentWellbeingIndex]}
+                                    initial={{ opacity: 0, scale: 1.1 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                    alt="Bien-être et slow tourisme au CNC"
+                                />
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Sharp Vertical Accent */}
+                        <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
+
+                        {/* Mobile Gradient Overlay */}
+                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
+
+                        {/* Indicateurs Slideshow */}
+                        <div className="absolute bottom-6 right-8 flex gap-2 z-20">
+                            {WELLBEING_IMAGES.map((_, idx) => (
+                                <div
+                                    key={idx}
+                                    className={`h-1 rounded-full transition-all duration-500 ${idx === currentWellbeingIndex ? 'w-8 bg-emerald-500' : 'w-2 bg-white/30'}`}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Badge oxygène stylisé */}
+                        <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                            <span className="text-emerald-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusBienEtre?.badgeValue || "100%"}</span>
+                            <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusBienEtre?.badgeLabel || "Oxygène & Sérénité Locale"}</span>
+                        </div>
+                    </div>
+                </div>
+            </section >
+
+            {/* --- PILLAR STORY --- */}
+            < PillarStory />
+
+            {/* --- SECTION : MINI-JEU PÉDAGOGIQUE --- */}
+            < section id="pedagogie" className="py-24 bg-abysse relative z-10" >
+                <div className="max-w-[1600px] mx-auto px-6">
+                    <GamesSlideshow />
+                </div>
+            </section >
+
+            <section className="max-w-[1600px] mx-auto px-6 relative z-10">
+                <div className="h-12"></div>
+            </section>
+
+            {/* --- NOUVEAU : LE CLUB EN IMMERSION (Shop & Galerie) --- */}
+            <section className="py-24 max-w-[1600px] mx-auto px-6 relative z-10" id="immersion">
+                <div className="mb-12 px-2">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="size-2 rounded-full bg-yellow-400"></div>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Style & Souvenirs</span>
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic leading-none">
+                        Le Club <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-yellow-500">en Immersion.</span>
+                    </h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {/* TUILE : LA VIGIE (NEWS/LIVE) */}
+                    <Link href="/fil-info" className="group relative h-[380px] rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
+                        <img src="/images/imgBank/CataPharePointeAgon.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" alt="La Vigie Direct" />
+                        <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
+
+                        <div className="absolute inset-0 p-6 flex flex-col z-20">
+                            <div className="size-12 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/10 mb-auto">
+                                <Radio size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">La Vigie <span className="text-blue-400">Live</span></h3>
+                                <p className="text-slate-300 text-sm font-medium mb-4 line-clamp-2">
+                                    Alertes météo et infos de dernière minute.
+                                </p>
+                                <span className="inline-flex items-center gap-2 bg-white text-slate-900 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-blue-400 hover:text-white transition-all shadow-lg">
+                                    Fil d'info <ArrowRight size={12} />
+                                </span>
+                            </div>
+                        </div>
+                    </Link>
+
+                    {/* TUILE : BOUTIQUE (CNC SHOP) */}
+                    <Link href="/boutique" className="group relative h-[380px] rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
+                        <img src="/images/imgBank/naviguer.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" alt="Boutique CNC" />
+                        <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
+
+                        <div className="absolute inset-0 p-6 flex flex-col z-20">
+                            <div className="size-12 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/10 mb-auto">
+                                <ShoppingBag size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">Boutique <span className="text-yellow-400">CNC</span></h3>
+                                <p className="text-slate-300 text-sm font-medium mb-4 line-clamp-2">
+                                    Sweats, t-shirts et accessoires aux couleurs du club.
+                                </p>
+                                <span className="inline-flex items-center gap-2 bg-yellow-400 text-slate-900 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all shadow-lg">
+                                    La collection <ArrowRight size={12} />
+                                </span>
+                            </div>
+                        </div>
+                    </Link>
+
+                    {/* TUILE : GALERIE MÉDIAS */}
+                    <div className="group relative h-[380px] rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl cursor-pointer">
+                        <img src="/images/imgBank/Navigation.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="Galerie Médias" />
+                        <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
+
+                        <div className="absolute inset-0 p-6 flex flex-col z-20">
+                            <div className="size-12 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/10 mb-auto">
+                                <Play size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">Galerie <span className="text-turquoise">Médias</span></h3>
+                                <p className="text-slate-300 text-sm font-medium mb-4 line-clamp-2">
+                                    Photos et vidéos des plus beaux moments du spot.
+                                </p>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setIsGalleryOpen(true)}
+                                        className="inline-flex items-center gap-2 bg-white text-slate-900 px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-turquoise hover:text-white transition-all shadow-lg"
+                                    >
+                                        <Image size={12} /> Photos
+                                    </button>
+                                    <a
+                                        href="https://www.youtube.com/@clubnautiquedecoutainville"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-lg"
+                                    >
+                                        <Youtube size={12} /> Vidéos
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* TUILE : SÉMINAIRES & ÉVÉNEMENTS */}
+                    <Link href="/groupes-entreprises" className="group relative h-[380px] rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
+                        <img src="/images/imgBank/Secourisme.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="Séminaires entreprises" />
+                        <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
+
+                        <div className="absolute inset-0 p-6 flex flex-col z-20">
+                            <div className="size-12 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/10 mb-auto">
+                                <Briefcase size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">Séminaires <span className="text-slate-400">&</span> Events</h3>
+                                <p className="text-slate-300 text-sm font-medium mb-4 line-clamp-2">
+                                    Teambuilding, CODIR et formations face à la mer.
+                                </p>
+                                <span className="inline-flex items-center gap-2 bg-white text-slate-900 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-turquoise hover:text-white transition-all shadow-lg">
+                                    Brochure Pro <ArrowRight size={12} />
+                                </span>
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+            </section>
+
+            {/* --- SECTION : PARTENAIRES --- */}
+            <section id="reseau" className="py-24 bg-slate-50 border-t border-slate-100" >
+                <div className="max-w-[1600px] mx-auto px-6">
+                    <div className="mb-16 text-center">
+                        <div className="flex items-center justify-center gap-3 mb-3">
+                            <div className="size-1.5 rounded-full bg-slate-300"></div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Réseau & Soutiens</span>
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic">
+                            Nos <span className="text-turquoise">Partenaires</span>
+                        </h2>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 md:gap-12 items-center justify-items-center">
+                        {PARTNERS.map((partner, idx) => (
+                            <a
+                                key={idx}
+                                href={partner.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group grayscale hover:grayscale-0 transition-all duration-500 flex flex-col items-center"
+                                title={partner.name}
+                            >
+                                <div className="h-16 md:h-20 w-32 md:w-40 flex items-center justify-center mb-2 transform group-hover:scale-110 transition-transform duration-500">
+                                    <img
+                                        src={partner.logo}
+                                        alt={partner.name}
+                                        className="max-h-full max-w-full object-contain"
+                                    />
+                                </div>
+                                <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    {partner.name}
+                                </span>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+
+            {/* --- PHOTO WALL GALLERY --- */}
+            < PhotoWallGallery
+                isOpen={isGalleryOpen}
+                onClose={() => setIsGalleryOpen(false)}
+                images={galleryImages}
+                title={homeGallery?.title || "Galerie Photos"}
+            />
+
+        </div >
+    );
 };
 
 export default HomePage;

@@ -12,9 +12,9 @@ export const spotSettings = defineType({
       type: 'string',
       options: {
         list: [
-          { title: '🟢 Ouvert', value: 'OPEN' },
-          { title: '🟡 Restreint', value: 'RESTRICTED' },
-          { title: '🔴 Fermé', value: 'CLOSED' },
+          { title: '🟢 Activité ouverte', value: 'OPEN' },
+          { title: '🟡 Activité ouverte avec adaptation', value: 'RESTRICTED' },
+          { title: '🔴 Activité suspendue', value: 'CLOSED' },
         ],
         layout: 'radio',
       },
@@ -43,6 +43,87 @@ export const spotSettings = defineType({
         dateFormat: 'DD/MM/YYYY',
         timeFormat: 'HH:mm',
       },
+    }),
+
+    // --- STATUS PAR ACTIVITÉ ---
+    defineField({
+      name: 'charStatus',
+      title: 'Statut Char à Voile',
+      type: 'string',
+      options: {
+        list: [
+          { title: '🟢 Ouverte', value: 'OPEN' },
+          { title: '🟡 Adaptée', value: 'RESTRICTED' },
+          { title: '🔴 Suspendue', value: 'CLOSED' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'OPEN',
+    }),
+    defineField({
+      name: 'charMessage',
+      title: 'Note Char à Voile',
+      type: 'string',
+      description: 'Ex: Annulé faute de vent',
+    }),
+    defineField({
+      name: 'charTags',
+      title: 'Tags Char à Voile',
+      type: 'array',
+      of: [{ type: 'string' }],
+    }),
+
+    defineField({
+      name: 'marcheStatus',
+      title: 'Statut Marche Aquatique',
+      type: 'string',
+      options: {
+        list: [
+          { title: '🟢 Ouverte', value: 'OPEN' },
+          { title: '🟡 Adaptée', value: 'RESTRICTED' },
+          { title: '🔴 Suspendue', value: 'CLOSED' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'OPEN',
+    }),
+    defineField({
+      name: 'marcheMessage',
+      title: 'Note Marche Aquatique',
+      type: 'string',
+      description: 'Ex: Annulé (mer forte)',
+    }),
+    defineField({
+      name: 'marcheTags',
+      title: 'Tags Marche Aquatique',
+      type: 'array',
+      of: [{ type: 'string' }],
+    }),
+
+    defineField({
+      name: 'nautiqueStatus',
+      title: 'Statut École de Voile / Location',
+      type: 'string',
+      options: {
+        list: [
+          { title: '🟢 Ouverte', value: 'OPEN' },
+          { title: '🟡 Adaptée', value: 'RESTRICTED' },
+          { title: '🔴 Suspendue', value: 'CLOSED' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'OPEN',
+    }),
+    defineField({
+      name: 'nautiqueMessage',
+      title: 'Note Voile',
+      type: 'string',
+    }),
+    defineField({
+      name: 'nautiqueTags',
+      title: 'Tags Voile',
+      type: 'array',
+      of: [{ type: 'string' }],
     }),
   ],
   preview: {

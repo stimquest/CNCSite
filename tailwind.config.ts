@@ -10,8 +10,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'sans-serif'],
-        display: ['Plus Jakarta Sans', 'sans-serif'],
+        sans: ['var(--font-sans)', 'sans-serif'],
+        display: ['var(--font-display)', 'sans-serif'],
       },
       colors: {
         abysse: "#002B49",
@@ -20,6 +20,9 @@ const config: Config = {
           light: "#F8FAFC",
           dark: "#020617"
         }
+      },
+      rotate: {
+        '135': '135deg',
       },
       boxShadow: {
         'card': '0 20px 25px -5px rgba(0, 43, 73, 0.05), 0 8px 10px -6px rgba(0, 43, 73, 0.05)',

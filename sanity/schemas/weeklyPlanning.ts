@@ -13,6 +13,18 @@ export const weeklyPlanning = defineType({
   title: 'Stages - Planning Hebdomadaire',
   type: 'document',
   icon: () => '📅',
+  orderings: [
+    {
+      title: 'Date croissante',
+      name: 'startDateAsc',
+      by: [{ field: 'startDate', direction: 'asc' }]
+    },
+    {
+      title: 'Date décroissante',
+      name: 'startDateDesc',
+      by: [{ field: 'startDate', direction: 'desc' }]
+    }
+  ],
   fields: [
     defineField({
       name: 'title',
@@ -33,98 +45,92 @@ export const weeklyPlanning = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
-        name: 'days',
-        title: 'Jours de la semaine',
-        description: '5 jours par défaut (Lun-Ven). Ajoutez Samedi/Dimanche si besoin.',
-        type: 'array',
-        validation: Rule => Rule.required().min(5).max(7),
-        of: [
-          defineArrayMember({
-            type: 'object',
-            name: 'dayEntry',
-            fields: [
-              { 
-                name: 'name',
-                title: 'Nom du jour',
-                type: 'string', // Lundi, Mardi...
-                initialValue: 'Lundi'
+      name: 'days',
+      title: 'Jours de la semaine',
+      description: '5 jours par défaut (Lun-Ven). Ajoutez Samedi/Dimanche si besoin.',
+      type: 'array',
+      validation: Rule => Rule.required().min(5).max(7),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'dayEntry',
+          fields: [
+            {
+              name: 'name',
+              title: 'Nom du jour',
+              type: 'string', // Lundi, Mardi...
+              initialValue: 'Lundi'
+            },
+            {
+              name: 'date',
+              title: 'Date',
+              type: 'date',
+              validation: Rule => Rule.required()
+            },
+            { name: 'isRaidDay', title: 'Journée Raid ?', type: 'boolean', initialValue: false },
+            {
+              name: 'raidTarget',
+              title: 'Cible du Raid',
+              type: 'string',
+              options: {
+                list: [
+                  { title: 'Aucun', value: 'none' },
+                  { title: 'Initiation', value: 'initiation' },
+                  { title: 'Perfectionnement', value: 'perfectionnement' },
+                  { title: 'Moussaillons', value: 'mousses' },
+                  { title: 'Mini-Mousses', value: 'miniMousses' }
+                ],
+                layout: 'radio'
               },
-              {
-                name: 'date',
-                title: 'Date',
-                type: 'date',
-                validation: Rule => Rule.required()
-              },
-              { name: 'isRaidDay', title: 'Journée Raid ?', type: 'boolean', initialValue: false },
-              {
-                name: 'raidTarget',
-                title: 'Cible du Raid',
-                type: 'string',
-                options: {
-                  list: [
-                    { title: 'Aucun', value: 'none' },
-                    { title: 'Initiation', value: 'initiation' },
-                    { title: 'Perfectionnement', value: 'perfectionnement' },
-                    { title: 'Moussaillons', value: 'mousses' },
-                    { title: 'Mini-Mousses', value: 'miniMousses' }
-                  ],
-                  layout: 'radio'
-                },
-                initialValue: 'none'
-              },
-              
-              // MINI MOUSSES
-              {
-                name: 'miniMousses',
-                title: 'Mini-Mousses',
-                type: 'object',
-                fields: [
-                  { name: 'time', title: 'Horaire', type: 'string' },
-                  { name: 'activity', title: 'Activité', type: 'string', options: { list: activityOptions } },
-                  { name: 'description', title: 'Description', type: 'string' }
-                ]
-              },
-  
-              // MOUSSES
-              {
-                name: 'mousses',
-                title: 'Moussaillons',
-                type: 'object',
-                fields: [
-                  { name: 'time', title: 'Horaire', type: 'string' },
-                  { name: 'activity', title: 'Activité', type: 'string', options: { list: activityOptions } },
-                  { name: 'description', title: 'Description', type: 'string' }
-                ]
-              },
-  
-              // INITIATION
-              {
-                name: 'initiation',
-                title: 'Initiation',
-                type: 'string',
-                description: 'Format: "HHhMM - HHhMM" OU "Raid"'
-              },
-  
-              // PERFECTIONNEMENT
-              {
-                name: 'perfectionnement',
-                title: 'Perfectionnement',
-                type: 'string',
-                 description: 'Format: "HHhMM - HHhMM" OU "Raid"'
-              }
-            ],
-            preview: {
-                select: { title: 'name', subtitle: 'date' }
+              initialValue: 'none'
+            },
+
+            // MINI MOUSSES
+            {
+              name: 'miniMousses',
+              title: 'Mini-Mousses',
+              type: 'object',
+              fields: [
+                { name: 'time', title: 'Horaire', type: 'string' },
+                { name: 'activity', title: 'Activité', type: 'string', options: { list: activityOptions } },
+                { name: 'description', title: 'Description', type: 'string' }
+              ]
+            },
+
+            // MOUSSES
+            {
+              name: 'mousses',
+              title: 'Moussaillons',
+              type: 'object',
+              fields: [
+                { name: 'time', title: 'Horaire', type: 'string' },
+                { name: 'activity', title: 'Activité', type: 'string', options: { list: activityOptions } },
+                { name: 'description', title: 'Description', type: 'string' }
+              ]
+            },
+
+            // INITIATION
+            {
+              name: 'initiation',
+              title: 'Initiation',
+              type: 'string',
+              description: 'Format: "HHhMM - HHhMM" OU "Raid"'
+            },
+
+            // PERFECTIONNEMENT
+            {
+              name: 'perfectionnement',
+              title: 'Perfectionnement',
+              type: 'string',
+              description: 'Format: "HHhMM - HHhMM" OU "Raid"'
             }
-          })
-        ]
-      }),
-    defineField({
-      name: 'isPublished',
-      title: 'Publié',
-      type: 'boolean',
-      initialValue: true,
-    })
+          ],
+          preview: {
+            select: { title: 'name', subtitle: 'date' }
+          }
+        })
+      ]
+    }),
   ],
   preview: {
     select: {
