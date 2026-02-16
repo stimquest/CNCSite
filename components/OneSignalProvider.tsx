@@ -71,7 +71,7 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
                         allowLocalhostAsSecureOrigin: true,
                         // When files are in /public, use standard names without leading slash or with absolute path depending on hosting
                         // Standard OneSignal Web Push setup usually expects these to be at the root
-                        serviceWorkerPath: 'OneSignalSDKWorker.js',
+                        serviceWorkerPath: '/OneSignalSDKWorker.js',
                     });
 
 
