@@ -432,6 +432,7 @@ export interface FocusSection {
 export interface HomePageData {
   hero: {
     title: string;
+    subtitle?: string;
     images: string[];
   };
   spirit: {

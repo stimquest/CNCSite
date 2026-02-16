@@ -23,6 +23,14 @@ export default defineType({
             initialValue: 'Club Nautique de Coutainville',
         }),
         defineField({
+            name: 'heroSubtitle',
+            title: 'Sous-titre (Hero)',
+            type: 'string',
+            group: 'hero',
+            initialValue: 'Sauvetage et Secourisme',
+            description: 'S\'affiche sous le titre principal (ex: Statut réglementaire)',
+        }),
+        defineField({
             name: 'heroImages',
             title: 'Images du Diaporama (Hero)',
             type: 'array',

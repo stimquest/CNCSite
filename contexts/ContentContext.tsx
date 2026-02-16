@@ -254,6 +254,7 @@ const queries = {
   homePage: `*[_type == "homePage"][0] {
     "hero": { 
       "title": heroTitle,
+      "subtitle": heroSubtitle,
       "images": heroImages[].asset->url
     },
     "spirit": {

@@ -296,10 +296,10 @@ export const HomePage: React.FC = () => {
                     {/* Texte du Hero */}
                     <div className="flex flex-col items-center mt-12 hero-subtitle pointer-events-auto opacity-100 text-center">
                         <p className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm">
-                            Club Nautique de Coutainville
+                            {homePageData?.hero?.title || "Club Nautique de Coutainville"}
                         </p>
                         <p className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm mt-2 opacity-80">
-                            Sauvetage et Secourisme
+                            {homePageData?.hero?.subtitle || "Sauvetage et Secourisme"}
                         </p>
                     </div>
                 </div>

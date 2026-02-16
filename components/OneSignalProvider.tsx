@@ -52,25 +52,34 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
     };
 
     useEffect(() => {
+        let isJoining = false;
+
         const loadOneSignal = async () => {
+            if (isJoining) return;
+            isJoining = true;
+
             window.OneSignalDeferred = window.OneSignalDeferred || [];
 
             window.OneSignalDeferred.push(async (OneSignal: any) => {
-                // Double protection: OneSignal.initialized property + a local flag if needed
-                if (OneSignal.initialized) {
+                // Triple protection: global flag, OneSignal.initialized, and a local guard
+                if (OneSignal.initialized || (window as any).__oneSignalInitialized) {
                     console.log("OneSignal: Already initialized, skipping init.");
                     setIsInitialized(true);
                     return;
                 }
 
+                (window as any).__oneSignalInitialized = true;
+
                 try {
+                    // Check if we are on the right domain or localhost
+                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                    const isVercel = window.location.hostname.includes('vercel.app');
+
                     console.log("OneSignal: Starting initialization...");
                     await OneSignal.init({
                         appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID,
                         safari_web_id: process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_ID,
                         allowLocalhostAsSecureOrigin: true,
-                        // When files are in /public, use standard names without leading slash or with absolute path depending on hosting
-                        // Standard OneSignal Web Push setup usually expects these to be at the root
                         serviceWorkerPath: '/OneSignalSDKWorker.js',
                     });
 
