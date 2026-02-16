@@ -271,8 +271,8 @@ export const HomePage: React.FC = () => {
                         <div
                             className="hero-logo-glass-layer logo-drop-shadow"
                             style={{
-                                maskImage: "url('/images/logoWhite.png')",
-                                WebkitMaskImage: "url('/images/logoWhite.png')"
+                                maskImage: "url('/images/LogoCNC2S.png')",
+                                WebkitMaskImage: "url('/images/LogoCNC2S.png')"
                             }}
                         />
 
@@ -284,8 +284,8 @@ export const HomePage: React.FC = () => {
                             }}
                             style={{
                                 mixBlendMode: 'overlay',
-                                maskImage: "url('/images/logoWhite.png')",
-                                WebkitMaskImage: "url('/images/logoWhite.png')",
+                                maskImage: "url('/images/LogoCNC2S.png')",
+                                WebkitMaskImage: "url('/images/LogoCNC2S.png')",
                                 maskSize: 'contain',
                                 maskPosition: 'center',
                                 maskRepeat: 'no-repeat',
@@ -294,8 +294,8 @@ export const HomePage: React.FC = () => {
                     </motion.div>
 
                     {/* Texte du Hero */}
-                    <div className="flex flex-col items-center mt-12 hero-subtitle pointer-events-auto opacity-100">
-                        <p className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm mb-6">
+                    <div className="flex flex-col items-center mt-12 hero-subtitle pointer-events-auto opacity-100 text-center">
+                        <p className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm">
                             Club Nautique de Coutainville
                         </p>
                     </div>
