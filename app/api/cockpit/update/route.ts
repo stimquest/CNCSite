@@ -57,13 +57,17 @@ export async function POST(req: Request) {
                                 contents: { fr: patch.content },
                                 url: `https://cnccoutainville.vercel.app/fil-info?id=${result._id}`,
                                 filters: filters.length > 0 ? filters : undefined,
-                                // Note: On tente "All" si "Subscribed Users" échoue, ou vice versa.
-                                included_segments: filters.length === 0 ? ['Total Subscriptions', 'Subscribed Users'] : undefined,
+                                included_segments: filters.length === 0 ? ['Subscribed Users'] : undefined,
                             }),
                         });
 
                         const osData = await osRes.json();
                         console.log("OneSignal: API Response:", { status: osRes.status, data: osData });
+
+                        if (!osRes.ok) {
+                            console.error("OneSignal API Error:", osData);
+                            // On ne bloque pas la réponse principale, mais on loggue fermement
+                        }
                     } catch (pushError) {
                         console.error("OneSignal Push Network Error:", pushError);
                     }
@@ -91,13 +95,25 @@ export async function POST(req: Request) {
                         app_id: ONESIGNAL_APP_ID,
                         headings: { fr: title || "Test Direct" },
                         contents: { fr: content || "Ceci est un test de connexion directe." },
-                        // En v16, c'est mieux d'utiliser include_subscription_ids
-                        include_subscription_ids: [targetId],
+                        // Tentative avec include_player_ids (plus permissif pour les UUIDs)
+                        include_player_ids: [targetId],
                     }),
                 });
                 const osData = await osRes.json();
                 console.log("OneSignal: Test Push Response:", { status: osRes.status, data: osData });
-                return NextResponse.json({ success: true, response: osData });
+
+                // DEBUG CRITIQUE : On renvoie l'App ID utilisé pour vérifier qu'il correspond à celui du client
+                if (!osRes.ok) {
+                    return NextResponse.json({
+                        error: `OneSignal Error: ${osData.errors?.[0] || JSON.stringify(osData)}`,
+                        debug: {
+                            serverAppId: ONESIGNAL_APP_ID,
+                            targetIdSent: targetId
+                        }
+                    }, { status: 400 });
+                }
+
+                return NextResponse.json({ success: true, response: osData, debug: { serverAppId: ONESIGNAL_APP_ID } });
             }
             return NextResponse.json({ error: 'Config missing' }, { status: 500 });
         }

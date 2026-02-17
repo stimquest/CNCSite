@@ -95,9 +95,13 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
                         notifyButton: { enable: false }, // On utilise notre propre UI
                     };
 
-                    // Si on est sur localhost, on ajoute le paramètre de sécurité
-                    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-                        initConfig.allowLocalhostAsSecureOrigin = true;
+                    // Si on est sur un domaine de test (localhost, ngrok, vercel preview), on autorise l'origine non-secure
+                    if (typeof window !== 'undefined') {
+                        const host = window.location.hostname;
+                        if (host === 'localhost' || host.includes('ngrok-free.app') || host.includes('vercel.app')) {
+                            initConfig.allowLocalhostAsSecureOrigin = true;
+                            console.log("OneSignal: Testing domain detected, allowing insecure origin.");
+                        }
                     }
 
                     console.log("OneSignal: Config using AppID:", initConfig.appId);

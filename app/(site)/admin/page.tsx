@@ -459,9 +459,9 @@ export default function AdminPage() {
             });
             const data = await res.json();
             if (res.ok) {
-                alert(`Test envoyé ! Vérifiez votre mobile.\nRéponse: ${JSON.stringify(data.response)}`);
+                alert(`Test envoyé ! Vérifiez votre mobile.\nInfo Serveur AppID: ${data.debug?.serverAppId}\nRéponse: ${JSON.stringify(data.response)}`);
             } else {
-                alert(`Erreur: ${data.error || 'Inconnue'}`);
+                alert(`Erreur: ${data.error || 'Inconnue'}\nInfo Debug: ${JSON.stringify(data.debug)}`);
             }
         } catch (e) {
             console.error(e);
