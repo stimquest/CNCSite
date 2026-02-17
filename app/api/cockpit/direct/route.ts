@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
                 if (ONESIGNAL_APP_ID && ONESIGNAL_API_KEY) {
                     const { title, content } = notify;
-                    await fetch('https://onesignal.com/api/v1/notifications', {
+                    const osRes = await fetch('https://onesignal.com/api/v1/notifications', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json; charset=utf-8',
@@ -59,9 +59,11 @@ export async function POST(req: Request) {
                             app_id: ONESIGNAL_APP_ID,
                             headings: { fr: title },
                             contents: { fr: content },
-                            included_segments: ['Subscribed Users'],
+                            included_segments: ['Total Subscriptions', 'Subscribed Users'],
                         }),
                     });
+                    const osResult = await osRes.json();
+                    console.log("OneSignal: Direct Push Result:", { status: osRes.status, data: osResult });
                 }
             }
 

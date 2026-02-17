@@ -113,7 +113,9 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
 
                     refreshTags();
                     setIsInitialized(true);
-                    console.log("OneSignal: Initialized successfully. User ID:", OneSignal.User?.onesignalId || 'N/A');
+                    console.log("OneSignal: Initialized successfully.");
+                    console.log("OneSignal: User ID (Registration):", OneSignal.User?.onesignalId || 'N/A');
+                    console.log("OneSignal: Subscription ID (For Push):", OneSignal.User?.PushSubscription?.id || 'N/A');
                 } catch (e: any) {
                     console.error("OneSignal: Critical Init Error:", e);
                     if (e.message?.includes('Can only be used on') || e.message?.includes('origin')) {

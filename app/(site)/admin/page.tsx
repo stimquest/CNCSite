@@ -438,6 +438,39 @@ export default function AdminPage() {
 
 
     // --- VIGIE HANDLERS ---
+    const [testPushId, setTestPushId] = useState('');
+    const [isTestingPush, setIsTestingPush] = useState(false);
+
+    const handleTestPush = async () => {
+        if (!testPushId) return alert("Entrez votre User ID (vu dans la console F12)");
+        setIsTestingPush(true);
+        try {
+            const res = await fetch('/api/cockpit/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'TEST_PUSH',
+                    patch: {
+                        targetId: testPushId,
+                        title: "Test de Liaison Directe",
+                        content: "Si vous recevez ceci, la clé API REST et l'App ID sont corrects."
+                    }
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(`Test envoyé ! Vérifiez votre mobile.\nRéponse: ${JSON.stringify(data.response)}`);
+            } else {
+                alert(`Erreur: ${data.error || 'Inconnue'}`);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Erreur réseau");
+        } finally {
+            setIsTestingPush(false);
+        }
+    };
+
     const handleSendVigie = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!vigieMsg.title || !vigieMsg.content) return alert("Titre et contenu obligatoires");
@@ -1383,6 +1416,31 @@ export default function AdminPage() {
                                     Publier le message sur La Vigie
                                 </button>
                             </form>
+
+                            {/* SECTION DE TEST DE SECOURS */}
+                            <div className="mt-12 pt-8 border-t-2 border-dashed border-slate-100">
+                                <h4 className="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest text-center italic">Zone de Diagnostic de Secours</h4>
+                                <div className="flex flex-col md:flex-row gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Collez votre User ID ici (ex: e7e1ae51...)"
+                                        value={testPushId}
+                                        onChange={(e) => setTestPushId(e.target.value)}
+                                        className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-mono outline-none focus:border-turquoise transition-all"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleTestPush}
+                                        disabled={isTestingPush || !testPushId}
+                                        className="px-6 py-3 bg-slate-800 text-white rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-turquoise transition-all disabled:opacity-30"
+                                    >
+                                        {isTestingPush ? 'Envoi...' : 'Tester Push Direct'}
+                                    </button>
+                                </div>
+                                <p className="mt-2 text-[9px] text-slate-400 text-center">
+                                    Ce bouton ignore les segments et envoie directement au device. Utile pour vérifier la clé REST API.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 )}

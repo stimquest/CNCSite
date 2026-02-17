@@ -56,13 +56,14 @@ export async function POST(req: Request) {
                 app_id: ONESIGNAL_APP_ID,
                 headings: { en: title, fr: title },
                 contents: { en: content, fr: content },
-                url: `https://cnc-site.vercel.app/fil-info?id=${_id}`, // URL vers le message précis
+                url: `https://cnccoutainville.vercel.app/fil-info?id=${_id}`,
                 filters: filters.length > 0 ? filters : undefined,
-                included_segments: filters.length === 0 ? ['Subscribed Users'] : undefined,
+                included_segments: filters.length === 0 ? ['Total Subscriptions', 'Subscribed Users'] : undefined,
             }),
         });
 
         const result = await response.json();
+        console.log("OneSignal: Webhook Push Result:", { status: response.status, data: result });
 
         if (!response.ok) {
             throw new Error(`OneSignal error: ${JSON.stringify(result)}`);
