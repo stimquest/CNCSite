@@ -94,9 +94,9 @@ export async function POST(req: Request) {
                     body: JSON.stringify({
                         app_id: ONESIGNAL_APP_ID,
                         headings: { fr: title || "Test Direct" },
-                        contents: { fr: content || "Ceci est un test de connexion directe." },
-                        // Tentative avec include_player_ids (plus permissif pour les UUIDs)
-                        include_player_ids: [targetId],
+                        contents: { fr: content || "Ceci est un test de connexion globale." },
+                        // IMPORTANT: En SDK v16+, on utilise include_subscription_ids pour les IDs de type eaff...
+                        include_subscription_ids: [targetId],
                     }),
                 });
                 const osData = await osRes.json();
