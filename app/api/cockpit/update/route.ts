@@ -31,6 +31,8 @@ export async function POST(req: Request) {
                 const ONESIGNAL_APP_ID = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
                 const ONESIGNAL_API_KEY = process.env.ONESIGNAL_REST_API_KEY;
 
+                console.log("OneSignal: Attempting push with AppID:", ONESIGNAL_APP_ID);
+
                 if (ONESIGNAL_APP_ID && ONESIGNAL_API_KEY) {
                     try {
                         let filters: any[] = [];
@@ -43,7 +45,7 @@ export async function POST(req: Request) {
                             });
                         }
 
-                        await fetch('https://onesignal.com/api/v1/notifications', {
+                        const osRes = await fetch('https://onesignal.com/api/v1/notifications', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json; charset=utf-8',
@@ -58,11 +60,14 @@ export async function POST(req: Request) {
                                 included_segments: filters.length === 0 ? ['Subscribed Users'] : undefined,
                             }),
                         });
-                        console.log("OneSignal: Notification sent for", result._id);
+
+                        const osData = await osRes.json();
+                        console.log("OneSignal: API Response:", { status: osRes.status, data: osData });
                     } catch (pushError) {
-                        console.error("OneSignal Push Error:", pushError);
-                        // We don't fail the whole request if push fails
+                        console.error("OneSignal Push Network Error:", pushError);
                     }
+                } else {
+                    console.error("OneSignal: Missing Config (AppID or API Key)");
                 }
             }
 
