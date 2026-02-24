@@ -10,6 +10,18 @@ import {
 import Link from 'next/link';
 import { useContent } from '../../../contexts/ContentContext';
 
+// Helper: extract plain text from Portable Text blocks or return string as-is
+function toPlainText(value: any): string {
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) {
+        return value
+            .filter((b: any) => b._type === 'block')
+            .map((b: any) => b.children?.map((c: any) => c.text).join('') ?? '')
+            .join('\n');
+    }
+    return '';
+}
+
 // --- FALLBACK DATA: MERCHANDISING ---
 const MOCK_MERCH = [
     {
@@ -197,7 +209,7 @@ export const BoutiquePage: React.FC = () => {
                                         {item.name}
                                     </h3>
                                     <p className="text-slate-500 text-sm font-medium leading-relaxed mb-8 flex-1">
-                                        {item.description}
+                                        {toPlainText(item.description)}
                                     </p>
                                     <button className="w-full bg-slate-50 group-hover:bg-abysse group-hover:text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-3">
                                         Voir au club <ArrowRight size={14} className="text-turquoise" />
@@ -264,7 +276,7 @@ export const BoutiquePage: React.FC = () => {
                                         <div>
                                             <h3 className="text-2xl text-abysse mb-4">{item.name}</h3>
                                             <p className="text-slate-500 text-sm font-medium leading-relaxed mb-8">
-                                                {item.description}
+                                                {toPlainText(item.description)}
                                             </p>
                                         </div>
                                         <div className="flex flex-col gap-4">

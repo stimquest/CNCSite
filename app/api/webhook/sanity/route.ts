@@ -1,4 +1,14 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
+
+// Document types that should trigger a /llms.txt refresh
+const LLM_REVALIDATE_TYPES = new Set([
+    'weeklyPlanning',
+    'planningCharAVoile',
+    'planningMarche',
+    'activity',
+    'spotSettings',
+]);
 
 export async function POST(req: Request) {
     const ONESIGNAL_APP_ID = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
@@ -6,7 +16,7 @@ export async function POST(req: Request) {
     const WEBHOOK_SECRET = process.env.SANITY_WEBHOOK_SECRET;
 
     try {
-        // 1. Vérification du secret (sécurité minimale)
+        // 1. Vérification du secret
         const authHeader = req.headers.get('authorization')?.trim();
         const fallbackSecret = req.headers.get('x-webhook-secret')?.trim();
         const trimmedSecret = WEBHOOK_SECRET?.trim();
@@ -19,9 +29,20 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { title, content, targetGroups, sendPush, category, _id } = body;
+        const { title, content, targetGroups, sendPush, category, _id, _type } = body;
 
-        // 2. Vérifier si on doit envoyer un push
+        // 2. Revalidation /llms.txt si le document est lié aux plannings ou activités
+        if (_type && LLM_REVALIDATE_TYPES.has(_type)) {
+            revalidatePath('/llms.txt');
+            console.log(`[Webhook] Revalidated /llms.txt for _type="${_type}" (_id=${_id})`);
+
+            // Si c'est uniquement un update de planning (pas de push demandé), on s'arrête là
+            if (!sendPush) {
+                return NextResponse.json({ message: 'llms.txt revalidated, no push requested' });
+            }
+        }
+
+        // 3. Vérifier si on doit envoyer un push
         if (!sendPush) {
             return NextResponse.json({ message: 'Push not requested for this update' });
         }
@@ -31,21 +52,19 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'OneSignal not configured' }, { status: 500 });
         }
 
-        // 3. Préparer le ciblage OneSignal
-        // On cible soit "all" soit les segments/tags spécifiques
+        // 4. Préparer le ciblage OneSignal
         let filters: any[] = [];
 
         if (targetGroups.includes('all')) {
-            // Pas de filtre particulier, ou ciblage global
+            // Ciblage global
         } else {
-            // Ciblage par tags OneSignal dynamiques
             filters = targetGroups.map((groupId: string, index: number) => {
                 const filter = { field: "tag", key: `group_${groupId}`, relation: "=", value: "true" };
                 return index === 0 ? filter : { operator: "OR", ...filter };
             });
         }
 
-        // 4. Envoyer à OneSignal
+        // 5. Envoyer à OneSignal
         const response = await fetch('https://onesignal.com/api/v1/notifications', {
             method: 'POST',
             headers: {

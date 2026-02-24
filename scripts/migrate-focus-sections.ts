@@ -11,7 +11,7 @@ dotenv.config({ path: '.env.local' });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '9v7nk22c';
+const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'df7iwkkw';
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production';
 const token = process.env.SANITY_API_TOKEN || process.env.NEXT_PUBLIC_SANITY_WRITE_TOKEN;
 

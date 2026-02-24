@@ -113,6 +113,12 @@ export const OneSignalProvider: React.FC<OneSignalProviderProps> = ({ children }
                         const subscriptionId = OneSignal.User.PushSubscription.id;
                         console.log("OneSignal: Subscription State:", { isOptedIn, subscriptionId });
                         setIsSubscribed(isOptedIn);
+
+                        // Listen for changes
+                        OneSignal.User.PushSubscription.addEventListener("change", (event: any) => {
+                            console.log("OneSignal: Push Subscription Change:", event);
+                            setIsSubscribed(event.current.optedIn);
+                        });
                     }
 
                     refreshTags();

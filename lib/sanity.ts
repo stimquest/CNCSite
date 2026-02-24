@@ -6,11 +6,11 @@ type SanityImageSource = any;
 
 /**
  * CONFIGURATION SANITY
- * Project ID: 9v7nk22c
+ * Project ID: df7iwkkw
  * Dataset: production
  */
 export const client = createClient({
-  projectId: '9v7nk22c',
+  projectId: 'df7iwkkw',
   dataset: 'production',
   useCdn: false, // Désactiver le CDN pour éviter les problèmes de cache (temporaire ou définitif pour ce site à faible trafic)
   apiVersion: '2024-03-15',
@@ -55,7 +55,7 @@ naturePage: `*[_type == "naturePage"][0] {
   }`
 
 export const writeClient = createClient({
-  projectId: '9v7nk22c',
+  projectId: 'df7iwkkw',
   dataset: 'production',
   useCdn: false, // Jamais de CDN pour l'écriture
   apiVersion: '2024-03-15',

@@ -1,20 +1,16 @@
 {
   "spotStatus": "RESTRICTED",
   "statusMessage": "Plan d'eau calme, mais vent faible",
-  "charStatus": "CLOSED",
-  "charMessage": "Vent trop fort, activité suspendue.",
-  "marcheStatus": "CLOSED",
-  "marcheMessage": "Vent trop fort pour la marche.",
-  "nautiqueStatus": "CLOSED",
-  "nautiqueMessage": "Conditions dangereuses, plan d'eau fermé.",
-  "lastUpdated": "2026-02-16T12:24:48.724Z",
-  "charTags": [
-    "Vent fort"
-  ],
+  "charStatus": "OPEN",
+  "charMessage": "Bonnes conditions pour le char à voile.",
+  "marcheStatus": "RESTRICTED",
+  "marcheMessage": "Eau très froide, équipement grand froid obligatoire.",
+  "nautiqueStatus": "OPEN",
+  "nautiqueMessage": "Bonnes conditions nautiques.",
+  "lastUpdated": "2026-02-23T15:01:51.491Z",
+  "charTags": [],
   "marcheTags": [
-    "Vent fort"
+    "Eau froide"
   ],
-  "nautiqueTags": [
-    "Vent fort"
-  ]
+  "nautiqueTags": []
 }

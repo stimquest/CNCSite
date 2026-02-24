@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
 const config = {
-    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '9v7nk22c',
+    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'df7iwkkw',
     dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
     apiVersion: '2024-02-05',
     token: process.env.SANITY_API_TOKEN || process.env.NEXT_PUBLIC_SANITY_WRITE_TOKEN,

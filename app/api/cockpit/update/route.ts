@@ -3,7 +3,7 @@ import { createClient } from '@sanity/client';
 
 // We create a server-side client with the write token
 const serverClient = createClient({
-    projectId: '9v7nk22c',
+    projectId: 'df7iwkkw',
     dataset: 'production',
     apiVersion: '2024-03-15',
     token: process.env.NEXT_PUBLIC_SANITY_WRITE_TOKEN || process.env.SANITY_WRITE_TOKEN || '',

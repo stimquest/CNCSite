@@ -2,13 +2,13 @@ import { defineConfig } from 'sanity';
 import { structureTool } from 'sanity/structure';
 
 import { schemaTypes } from './sanity/schemas';
-import { structure } from './sanity/structure';
+import { structure } from './sanity/studioStructure';
 
 export default defineConfig({
   name: 'cnc-studio',
   title: 'CNC - Club Nautique Coutainville',
 
-  projectId: '9v7nk22c',
+  projectId: 'df7iwkkw',
   dataset: 'production',
 
   basePath: '/studio',

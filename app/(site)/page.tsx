@@ -444,14 +444,14 @@ export const HomePage: React.FC = () => {
                     {/* Visuel Impactant - Slideshow */}
                     <div className="flex-1 relative overflow-hidden min-h-[400px] lg:min-h-auto">
                         <div className="absolute inset-0 z-0">
-                            <AnimatePresence mode="wait">
+                            <AnimatePresence mode="popLayout">
                                 <motion.img
                                     key={CHAR_IMAGES[currentCharIndex]}
                                     src={CHAR_IMAGES[currentCharIndex]}
-                                    initial={{ opacity: 0, scale: 1.1 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                                    initial={{ opacity: 0, scale: 1 }}
+                                    animate={{ opacity: 1, scale: 1.08 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6, ease: "linear" } }}
                                     className="absolute inset-0 w-full h-full object-cover"
                                     alt="Pratique du char à voile"
                                 />
@@ -520,14 +520,14 @@ export const HomePage: React.FC = () => {
                     {/* Visuel Impactant - Slideshow */}
                     <div className="flex-1 relative overflow-hidden min-h-[400px] lg:min-h-auto">
                         <div className="absolute inset-0 z-0">
-                            <AnimatePresence mode="wait">
+                            <AnimatePresence mode="popLayout">
                                 <motion.img
                                     key={GLISSE_IMAGES[currentGlisseIndex]}
                                     src={GLISSE_IMAGES[currentGlisseIndex]}
-                                    initial={{ opacity: 0, scale: 1.1 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                                    initial={{ opacity: 0, scale: 1 }}
+                                    animate={{ opacity: 1, scale: 1.08 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6.5, ease: "linear" } }}
                                     className="absolute inset-0 w-full h-full object-cover"
                                     alt="Sports de glisse extrême"
                                 />
@@ -596,14 +596,14 @@ export const HomePage: React.FC = () => {
                     {/* Visuel Impactant - Slideshow */}
                     <div className="flex-1 relative overflow-hidden min-h-[400px] lg:min-h-auto">
                         <div className="absolute inset-0 z-0">
-                            <AnimatePresence mode="wait">
+                            <AnimatePresence mode="popLayout">
                                 <motion.img
                                     key={WELLBEING_IMAGES[currentWellbeingIndex]}
                                     src={WELLBEING_IMAGES[currentWellbeingIndex]}
-                                    initial={{ opacity: 0, scale: 1.1 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                                    initial={{ opacity: 0, scale: 1 }}
+                                    animate={{ opacity: 1, scale: 1.08 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 7, ease: "linear" } }}
                                     className="absolute inset-0 w-full h-full object-cover"
                                     alt="Bien-être et slow tourisme au CNC"
                                 />
@@ -638,8 +638,8 @@ export const HomePage: React.FC = () => {
             {/* --- PILLAR STORY --- */}
             < PillarStory />
 
-            {/* --- SECTION : MINI-JEU PÉDAGOGIQUE --- */}
-            < section id="pedagogie" className="py-24 bg-abysse relative z-10" >
+            {/* --- SECTION : MINI-JEU PÉDAGOGIQUE (desktop only) --- */}
+            < section id="pedagogie" className="hidden md:block py-24 bg-abysse relative z-10" >
                 <div className="max-w-[1600px] mx-auto px-6">
                     <GamesSlideshow />
                 </div>

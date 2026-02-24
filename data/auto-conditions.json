@@ -1,47 +1,37 @@
 {
   "enabled": true,
   "checkHour": 6,
-  "lastCheck": "2026-02-16T12:24:48.725Z",
+  "lastCheck": "2026-02-23T15:01:51.492Z",
   "lastCheckResult": {
     "weather": {
-      "wind": 25.7,
-      "gusts": 40.1,
-      "cape": 275,
-      "visibility": 17980,
-      "waveHeight": 1.6,
-      "wavePeriod": 6.3,
-      "waterTemp": 8.5
+      "wind": 11.1,
+      "gusts": 17.9,
+      "cape": 10,
+      "visibility": 24140,
+      "waveHeight": 0.66,
+      "wavePeriod": 8.55,
+      "waterTemp": 8.8
     },
     "char": {
-      "status": "CLOSED",
-      "message": "Vent trop fort, activité suspendue.",
-      "tags": [
-        "Vent fort"
-      ],
-      "causes": [
-        "wind",
-        "waves"
-      ]
+      "status": "OPEN",
+      "message": "Bonnes conditions pour le char à voile.",
+      "tags": [],
+      "causes": []
     },
     "nautique": {
-      "status": "CLOSED",
-      "message": "Conditions dangereuses, plan d'eau fermé.",
-      "tags": [
-        "Vent fort"
-      ],
-      "causes": [
-        "wind"
-      ]
+      "status": "OPEN",
+      "message": "Bonnes conditions nautiques.",
+      "tags": [],
+      "causes": []
     },
     "marche": {
-      "status": "CLOSED",
-      "message": "Vent trop fort pour la marche.",
+      "status": "RESTRICTED",
+      "message": "Eau très froide, équipement grand froid obligatoire.",
       "tags": [
-        "Vent fort"
+        "Eau froide"
       ],
       "causes": [
-        "wind",
-        "waves"
+        "waterTemp"
       ]
     }
   },
