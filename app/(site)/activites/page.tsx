@@ -24,6 +24,7 @@ import { useContent } from '../../../contexts/ContentContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ActivityGallery } from '../../../components/ActivityGallery';
 import { PortableText } from '@portabletext/react';
+import { PageHero } from '@/components/PageHero';
 
 const ActivitiesPageContent: React.FC = () => {
     const { activities, activitiesData } = useContent();
@@ -138,43 +139,15 @@ const ActivitiesPageContent: React.FC = () => {
                 )}
             </AnimatePresence>
 
-            {/* 1. HERO HEADER - IMMERSIF */}
-            <section className="relative h-[80vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-abysse">
-                <div className="absolute inset-0 z-0">
-                    <img
-                        src={hero?.heroImage || "https://images.unsplash.com/photo-1513326738677-b93060cf2c0b?q=80&w=2000"}
-                        className="w-full h-full object-cover opacity-50 scale-105"
-                        alt="Water Activities"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-b from-abysse/80 via-abysse/40 to-white"></div>
-                </div>
-
-                <div className="relative z-10 container mx-auto px-6 max-w-[1400px] mt-20">
-                    <div className="flex flex-col items-center text-center">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-2 rounded-full mb-8"
-                        >
-                            <span className="text-[9px] font-black uppercase tracking-widest text-turquoise flex items-center gap-2">
-                                <Compass size={14} /> Saison en cours
-                            </span>
-                        </motion.div>
-
-                        <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="text-6xl md:text-8xl lg:text-9xl text-white leading-[0.8]"
-                        >
-                            {hero?.title || "Catalogue"} <br />
-                            <span className="text-transparent bg-clip-text bg-linear-to-r from-turquoise to-white">
-                                {hero?.subtitle || "Activités."}
-                            </span>
-                        </motion.h1>
-                    </div>
-                </div>
-            </section>
+            {/* 1. HERO HEADER */}
+            <PageHero
+                image={hero?.heroImage || "https://images.unsplash.com/photo-1513326738677-b93060cf2c0b?q=80&w=2000"}
+                imageAlt="Water Activities"
+                tagIcon={<Compass size={14} />}
+                tagText="Saison en cours"
+                title={hero?.title || "Catalogue"}
+                subtitle={hero?.subtitle || "Activités."}
+            />
 
             {/* 2. BARRE DE FILTRES (STICKY) */}
             <section className="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm py-4">
@@ -292,36 +265,15 @@ const ActivitiesPageContent: React.FC = () => {
                                     }`}
                             >
                                 <div className="overflow-hidden">
-                                    <div className="p-8 lg:p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+                                    <div className="p-8 lg:p-10 grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
 
-                                        {/* COL 1: LA FLOTTE */}
-                                        <div>
-                                            <h4 className="flex items-center gap-3 text-sm text-abysse mb-6">
-                                                <Anchor size={18} className="text-turquoise" /> La Flotte
-                                            </h4>
-                                            <ul className="space-y-3">
-                                                <li className="text-xs text-slate-600 font-medium leading-relaxed">
-                                                    <span className="block font-bold text-abysse mb-1">• Matériel Récent</span>
-                                                    Renouvelé tous les 3 ans pour garantir sécurité et performance.
-                                                </li>
-                                                <li className="text-xs text-slate-600 font-medium leading-relaxed">
-                                                    <span className="block font-bold text-abysse mb-1">• Adapté au niveau</span>
-                                                    Du support stable pour l'initiation au modèle sport pour la vitesse.
-                                                </li>
-                                                <li className="text-xs text-slate-600 font-medium leading-relaxed">
-                                                    <span className="block font-bold text-abysse mb-1">• Sécurité</span>
-                                                    Bateaux de sécurité toujours sur l'eau et liaison radio.
-                                                </li>
-                                            </ul>
-                                        </div>
-
-                                        {/* COL 2: PÉDAGOGIE */}
+                                        {/* COL 1: PÉDAGOGIE */}
                                         <div>
                                             <h4 className="flex items-center gap-3 text-sm text-abysse mb-6">
                                                 <GraduationCap size={18} className="text-turquoise" /> Pédagogie
                                             </h4>
-                                            <div className="text-xs text-slate-600 font-medium leading-relaxed text-justify">
-                                                {activity.pedagogie ? activity.pedagogie : "Une progression individualisée grâce au livret de voile FFV. Nos moniteurs diplômés vous accompagnent vers l'autonomie en validant vos niveaux techniques."}
+                                            <div className="text-sm text-slate-600 font-medium leading-relaxed text-justify">
+                                                {activity.pedagogie ? activity.pedagogie : "Une progression individualisée grâce au livret de voile FFV. Nos moniteurs diplômés vous accompagnent vers l'autonomie en validant vos niveaux techniques. Matériel récent, renouvelé régulièrement pour garantir sécurité et performance."}
                                             </div>
                                         </div>
 

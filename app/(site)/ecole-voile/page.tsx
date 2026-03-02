@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 
 import { motion } from 'framer-motion';
+import { PageHero } from '@/components/PageHero';
 
 // --- DATA: PLANNING ROWS ---
 const PLANNING_ROWS = [
@@ -364,70 +365,37 @@ export const EcoleVoilePage: React.FC = () => {
   return (
     <div className="w-full font-sans bg-white">
 
-      {/* 1. HERO HEADER - IMMERSIF */}
-      <section className="relative h-[80vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-abysse">
-        <div className="absolute inset-0 z-0">
-          <img
-            src="/images/imgBank/CataPharePointeAgon.jpg"
-            className="w-full h-full object-cover opacity-50 scale-105"
-            alt="Sailing School"
-          />
-          <div className="absolute inset-0 bg-linear-to-b from-abysse/80 via-abysse/40 to-white"></div>
-        </div>
-
-        <div className="relative z-10 container mx-auto px-6 max-w-[1400px] mt-20">
-          <div className="flex flex-col items-center text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-2 rounded-full mb-8"
-            >
-              <span className="text-white text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                <GraduationCap size={14} className="text-turquoise" /> École Française de Voile
-              </span>
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-6xl md:text-8xl lg:text-9xl text-white leading-[0.8] mb-12"
-            >
-              L'École de <br />
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-turquoise to-white">La Mer.</span>
-            </motion.h1>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex flex-wrap justify-center gap-6"
-            >
-              <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-[300px]">
-                <div className="size-16 rounded-2xl bg-abysse flex items-center justify-center text-white shadow-lg shrink-0">
-                  <Anchor size={32} />
-                </div>
-                <div className="text-left">
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Fondée en</p>
-                  <p className="text-4xl font-black text-abysse tracking-tighter">1978</p>
-                  <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">Savoir-faire historique</p>
-                </div>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-[300px]">
-                <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center text-white shrink-0">
-                  <CheckCircle2 size={32} />
-                </div>
-                <div className="text-left">
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">Label</p>
-                  <p className="text-2xl font-black text-white uppercase italic leading-none">Qualité FFV</p>
-                  <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">Stages tous niveaux</p>
-                </div>
-              </div>
-            </motion.div>
+      {/* 1. HERO HEADER */}
+      <PageHero
+        image="/images/imgBank/CataPharePointeAgon.jpg"
+        imageAlt="Sailing School"
+        tagIcon={<GraduationCap size={14} />}
+        tagText="École Française de Voile"
+        title="L'École de"
+        subtitle="La Mer."
+      >
+        <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-[300px]">
+          <div className="size-16 rounded-2xl bg-abysse flex items-center justify-center text-white shadow-lg shrink-0">
+            <Anchor size={32} />
+          </div>
+          <div className="text-left">
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Fondée en</p>
+            <p className="text-4xl font-black text-abysse tracking-tighter">1978</p>
+            <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">Savoir-faire historique</p>
           </div>
         </div>
-      </section>
+
+        <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-[300px]">
+          <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center text-white shrink-0">
+            <CheckCircle2 size={32} />
+          </div>
+          <div className="text-left">
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">Label</p>
+            <p className="text-2xl font-black text-white uppercase italic leading-none">Qualité FFV</p>
+            <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">Stages tous niveaux</p>
+          </div>
+        </div>
+      </PageHero>
 
       {/* 2. MENU SECONDAIRE STICKY (Style Harmonisé) */}
       <SecondaryNav sections={[

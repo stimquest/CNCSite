@@ -13,13 +13,13 @@ import {
     Navigation,
     Eye,
     ArrowRight,
-    Droplets,
     Activity,
     Compass,
     AlertTriangle,
     Info
 } from 'lucide-react';
 import Link from 'next/link';
+import { PageHero } from '@/components/PageHero';
 
 export const SpotPage: React.FC = () => {
     const {
@@ -34,52 +34,17 @@ export const SpotPage: React.FC = () => {
         <div className="min-h-screen bg-slate-50 font-sans selection:bg-turquoise selection:text-white">
 
             {/* HERO SECTION */}
-            <section className="relative h-[55vh] min-h-[450px] w-full flex items-center justify-center overflow-hidden bg-abysse">
-                <div className="absolute inset-0 z-0">
-                    <img
-                        src={hero?.heroImage || "https://images.unsplash.com/photo-1544198365-f5d60b6d8190?q=80&w=2000"}
-                        className="w-full h-full object-cover opacity-40 scale-105"
-                        alt="Spot Background"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-b from-abysse/90 via-abysse/50 to-slate-50"></div>
-                </div>
-
-                <div className="relative z-10 container mx-auto px-6 max-w-[1400px] flex flex-col items-center text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-2 rounded-full mb-8"
-                    >
-                        <span className="text-white text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                            <Activity size={14} className="text-turquoise" /> Temps Réel • Agon-Coutainville
-                        </span>
-                    </motion.div>
-
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-6xl md:text-8xl lg:text-9xl text-white leading-[0.8] mb-8"
-                    >
-                        {hero?.title || "Le"} <span className="text-transparent bg-clip-text bg-linear-to-r from-turquoise to-white pt-4 block">{hero?.subtitle || "Spot."}</span>
-                    </motion.h1>
-
-                    {(hero?.description || statusMessage) && (
-                        <motion.p
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className="text-white/40 text-sm font-medium italic max-w-md"
-                        >
-                            "{hero?.description || statusMessage}"
-                        </motion.p>
-                    )}
-                </div>
-
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce opacity-20 hidden lg:block">
-                    <ArrowRight size={32} className="rotate-90 text-white" />
-                </div>
-            </section>
+            <PageHero
+                image={hero?.heroImage || "https://images.unsplash.com/photo-1544198365-f5d60b6d8190?q=80&w=2000"}
+                imageAlt="Spot Background"
+                tagIcon={<Activity size={14} />}
+                tagText="Temps Réel • Agon-Coutainville"
+                title={hero?.title || "Le"}
+                subtitle={hero?.subtitle || "Spot."}
+                description={hero?.description || statusMessage}
+                size="compact"
+                bottomColor="slate"
+            />
 
             {/* MAIN CONTENT */}
             <main className="container mx-auto px-6 max-w-[1600px] pt-12 relative z-20 pb-32">
@@ -104,16 +69,7 @@ export const SpotPage: React.FC = () => {
                                             <div className="size-1.5 rounded-full bg-turquoise"></div>
                                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Onde de Marée</span>
                                         </div>
-                                        <h2 className="text-4xl text-abysse leading-none">Mouvements<br />des Eaux.</h2>
-                                    </div>
-                                    <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-2xl border border-slate-100">
-                                        <div className="size-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-turquoise">
-                                            <Droplets size={20} />
-                                        </div>
-                                        <div className="pr-4">
-                                            <span className="text-[9px] font-black uppercase text-slate-400 block tracking-widest">Eau</span>
-                                            <span className="text-lg font-black text-abysse">14.2°C</span>
-                                        </div>
+                                        <h2 className="text-4xl text-abysse leading-none">Mouvements des Eaux.</h2>
                                     </div>
                                 </div>
                                 <SpotTideChart />

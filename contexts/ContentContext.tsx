@@ -243,13 +243,33 @@ const queries = {
       "description": hero.description, 
       "heroImage": hero.heroImage.asset->url 
     },
+    heroStats,
+    identityTitle,
     values,
-    vision,
-    managerQuote,
-    facilities,
-    handicapLabel,
-    membershipPrices,
-    licensePrices
+    storytelling[] {
+      chapterLabel, title, highlightText, quote, isFinalChapter,
+      "image": image.asset->url
+    },
+    storytellingCta,
+    "team": team {
+      tag, title,
+      "members": members[] {
+        name, role,
+        "image": image.asset->url
+      }
+    },
+    "site": site {
+      title, description, facilities, imageCaption, imageSublabel,
+      "image": image.asset->url
+    },
+    "fleet": fleet {
+      title,
+      "items": items[] {
+        name, subtitle, description, crew, stats,
+        "gallery": gallery[].asset->url
+      }
+    },
+    cta
   }`,
   homePage: `*[_type == "homePage"][0] {
     "hero": { 

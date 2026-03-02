@@ -12,7 +12,7 @@ export const activitiesPage = defineType({
             fields: [
                 { name: 'title', type: 'string', title: 'Titre' },
                 { name: 'subtitle', type: 'string', title: 'Sous-titre' },
-                { name: 'heroImage', type: 'image', title: 'Image de fond (Hero)' },
+                { name: 'heroImage', type: 'image', title: 'Image de fond (Hero)', options: { hotspot: true } },
             ],
         }),
     ],

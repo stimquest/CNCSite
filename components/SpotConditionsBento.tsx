@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useContent } from '../contexts/ContentContext';
-import { Wind, Waves, Thermometer, Info, ChevronRight, Navigation, Eye, Bell, Calendar, AlertCircle } from 'lucide-react';
+import { Wind, Waves, Info, ChevronRight, Navigation, Eye, Bell, Calendar, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { motion } from 'framer-motion';
@@ -121,14 +121,6 @@ export const SpotConditionsBento: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Water Temp */}
-                    <div className="flex flex-col group border-t border-abysse/5 pt-2">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-abysse/40 block">Eau</span>
-                        <div className="flex items-baseline leading-none">
-                            <span className="text-2xl font-black text-abysse italic tracking-tighter tabular-nums">{weather.waterTemp || 12}</span>
-                            <span className="ml-1 text-[8px] font-bold text-abysse/30 uppercase italic">°C</span>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Middle-Left: Activity Statuses (Col 4/12) */}

@@ -13,7 +13,7 @@ export const groupsPage = defineType({
                 { name: 'title', type: 'string', title: 'Titre' },
                 { name: 'subtitle', type: 'string', title: 'Sous-titre' },
                 { name: 'description', type: 'text', title: 'Description' },
-                { name: 'heroImage', type: 'image', title: 'Image de fond (Hero)' },
+                { name: 'heroImage', type: 'image', title: 'Image de fond (Hero)', options: { hotspot: true } },
             ],
         }),
         defineField({

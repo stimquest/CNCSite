@@ -24,6 +24,7 @@ import {
 import { motion } from 'framer-motion';
 import { useContent } from '@/contexts/ContentContext';
 import Link from 'next/link';
+import { PageHero } from '@/components/PageHero';
 
 export const GroupesPage: React.FC = () => {
     const { groupsData } = useContent();
@@ -33,73 +34,40 @@ export const GroupesPage: React.FC = () => {
     return (
         <div className="min-h-screen bg-white font-sans selection:bg-turquoise selection:text-white">
 
-            {/* HERO SECTION - IMMERSIF & STATS */}
-            <section className="relative h-[80vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-abysse">
-                <div className="absolute inset-0 z-0">
-                    <img
-                        src={hero?.heroImage || "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2000"}
-                        className="w-full h-full object-cover opacity-50 scale-105"
-                        alt="Corporate Retreat"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-b from-abysse/80 via-abysse/40 to-white"></div>
-                </div>
-
-                <div className="relative z-10 container mx-auto px-6 max-w-[1400px] mt-20">
-                    <div className="flex flex-col items-center text-center">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-2 rounded-full mb-8"
-                        >
-                            <span className="text-white text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                                <Briefcase size={14} className="text-turquoise" /> Séminaires • Teambuilding • Privé
-                            </span>
-                        </motion.div>
-
-                        <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="text-6xl md:text-8xl lg:text-9xl text-white leading-[0.8] mb-12"
-                        >
-                            {hero?.title || "Vivre le"} <br />
-                            <span className="text-transparent bg-clip-text bg-linear-to-r from-turquoise to-white">{hero?.subtitle || "Collectif."}</span>
-                        </motion.h1>
-
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="flex flex-wrap justify-center gap-6"
-                        >
-                            <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-[320px]">
-                                <div className="size-16 rounded-2xl bg-abysse flex items-center justify-center text-white shadow-lg shrink-0">
-                                    <Users size={32} />
-                                </div>
-                                <div className="text-left">
-                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Capacité</p>
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-5xl font-black text-abysse tracking-tighter">{groupsData?.capacity || "120"}</span>
-                                        <span className="text-lg font-bold text-slate-400 uppercase italic">pers.</span>
-                                    </div>
-                                    <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">Infrastructure modulable</p>
-                                </div>
-                            </div>
-
-                            <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-[280px]">
-                                <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center text-white shrink-0">
-                                    <Presentation size={32} />
-                                </div>
-                                <div className="text-left">
-                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">Services</p>
-                                    <p className="text-3xl font-black text-white uppercase italic leading-none">Full-Tech</p>
-                                    <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">Fibre • Visio • Traiteur</p>
-                                </div>
-                            </div>
-                        </motion.div>
+            {/* HERO SECTION */}
+            <PageHero
+                image={hero?.heroImage || "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2000"}
+                imageAlt="Corporate Retreat"
+                tagIcon={<Briefcase size={14} />}
+                tagText="Séminaires • Teambuilding • Privé"
+                title={hero?.title || "Vivre le"}
+                subtitle={hero?.subtitle || "Collectif."}
+            >
+                <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-[320px]">
+                    <div className="size-16 rounded-2xl bg-abysse flex items-center justify-center text-white shadow-lg shrink-0">
+                        <Users size={32} />
+                    </div>
+                    <div className="text-left">
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Capacité</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-5xl font-black text-abysse tracking-tighter">{groupsData?.capacity || "120"}</span>
+                            <span className="text-lg font-bold text-slate-400 uppercase italic">pers.</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">Infrastructure modulable</p>
                     </div>
                 </div>
-            </section>
+
+                <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-[280px]">
+                    <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center text-white shrink-0">
+                        <Presentation size={32} />
+                    </div>
+                    <div className="text-left">
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">Services</p>
+                        <p className="text-3xl font-black text-white uppercase italic leading-none">Full-Tech</p>
+                        <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">Fibre • Visio • Traiteur</p>
+                    </div>
+                </div>
+            </PageHero>
 
             {/* SECTION 1: ENTREPRISES - SÉMINAIRES */}
             <section className="container mx-auto px-6 max-w-[1500px] -mt-20 relative z-20 pb-24">
