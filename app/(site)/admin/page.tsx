@@ -87,8 +87,8 @@ export default function AdminPage() {
         category: 'info',
         targetGroups: ['all'],
         isPinned: false,
-        sendPush: false,
-        externalLink: ''
+        externalLink: '',
+        expiresAt: '',
     });
 
     // SELECTORS
@@ -483,7 +483,8 @@ export default function AdminPage() {
                     type: 'CREATE_INFO',
                     patch: {
                         ...vigieMsg,
-                        publishedAt: new Date().toISOString()
+                        publishedAt: new Date().toISOString(),
+                        expiresAt: vigieMsg.expiresAt ? new Date(vigieMsg.expiresAt).toISOString() : undefined,
                     }
                 })
             });
@@ -495,8 +496,8 @@ export default function AdminPage() {
                     category: 'info',
                     targetGroups: ['all'],
                     isPinned: false,
-                    sendPush: false,
-                    externalLink: ''
+                    externalLink: '',
+                    expiresAt: '',
                 });
                 refreshData();
             } else {
@@ -1387,6 +1388,21 @@ export default function AdminPage() {
                                         </div>
                                     </div>
 
+                                    {/* Expiration */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider px-1">Expiration (Optionnel)</label>
+                                        <input
+                                            type="datetime-local"
+                                            value={vigieMsg.expiresAt}
+                                            onChange={(e) => setVigieMsg({ ...vigieMsg, expiresAt: e.target.value })}
+                                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-turquoise font-medium text-abysse"
+                                        />
+                                        <p className="text-[9px] text-slate-400 px-1">
+                                            Laisser vide = auto ·
+                                            {vigieMsg.category === 'info' || vigieMsg.category === 'event' ? ' 30 jours (Info/Événement)' : ' 7 jours (Alerte/Météo/Vibe)'}
+                                        </p>
+                                    </div>
+
                                     {/* Toggles */}
                                     <div className="flex flex-col md:flex-row gap-4 pt-4">
                                         <label className={`flex-1 flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${vigieMsg.isPinned ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
@@ -1395,14 +1411,6 @@ export default function AdminPage() {
                                                 <span className={`text-[11px] font-black uppercase ${vigieMsg.isPinned ? 'text-amber-700' : 'text-slate-500'}`}>Épingler en haut</span>
                                             </div>
                                             <input type="checkbox" checked={vigieMsg.isPinned} onChange={e => setVigieMsg({ ...vigieMsg, isPinned: e.target.checked })} className="size-5 accent-amber-500" />
-                                        </label>
-
-                                        <label className={`flex-1 flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${vigieMsg.sendPush ? 'bg-turquoise/10 border-turquoise/20' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
-                                            <div className="flex items-center gap-3">
-                                                <Zap size={18} className={vigieMsg.sendPush ? 'text-turquoise' : 'text-slate-400'} />
-                                                <span className={`text-[11px] font-black uppercase ${vigieMsg.sendPush ? 'text-turquoise' : 'text-slate-500'}`}>Notification Push (OneSignal)</span>
-                                            </div>
-                                            <input type="checkbox" checked={vigieMsg.sendPush} onChange={e => setVigieMsg({ ...vigieMsg, sendPush: e.target.checked })} className="size-5 accent-turquoise" />
                                         </label>
                                     </div>
                                 </div>
@@ -1417,30 +1425,7 @@ export default function AdminPage() {
                                 </button>
                             </form>
 
-                            {/* SECTION DE TEST DE SECOURS */}
-                            <div className="mt-12 pt-8 border-t-2 border-dashed border-slate-100">
-                                <h4 className="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest text-center italic">Zone de Diagnostic de Secours</h4>
-                                <div className="flex flex-col md:flex-row gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Collez votre User ID ici (ex: e7e1ae51...)"
-                                        value={testPushId}
-                                        onChange={(e) => setTestPushId(e.target.value)}
-                                        className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-mono outline-none focus:border-turquoise transition-all"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleTestPush}
-                                        disabled={isTestingPush || !testPushId}
-                                        className="px-6 py-3 bg-slate-800 text-white rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-turquoise transition-all disabled:opacity-30"
-                                    >
-                                        {isTestingPush ? 'Envoi...' : 'Tester Push Direct'}
-                                    </button>
-                                </div>
-                                <p className="mt-2 text-[9px] text-slate-400 text-center">
-                                    Ce bouton ignore les segments et envoie directement au device. Utile pour vérifier la clé REST API.
-                                </p>
-                            </div>
+
                         </div>
                     </div>
                 )}

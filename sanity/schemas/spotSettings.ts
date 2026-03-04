@@ -125,6 +125,95 @@ export const spotSettings = defineType({
       type: 'array',
       of: [{ type: 'string' }],
     }),
+
+    // --- STAGES ---
+    defineField({
+      name: 'stagesMiniMoussesStatus',
+      title: 'Statut Stages Mini-Mousses (5-7 ans)',
+      type: 'string',
+      options: {
+        list: [
+          { title: '🟢 Maintenu', value: 'OPEN' },
+          { title: '🟡 Adapté', value: 'RESTRICTED' },
+          { title: '🔴 Annulé', value: 'CLOSED' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'OPEN',
+    }),
+    defineField({
+      name: 'stagesMiniMoussesMessage',
+      title: 'Note Mini-Mousses',
+      type: 'string',
+      description: 'Ex: Annulé — vent trop fort',
+    }),
+
+    defineField({
+      name: 'stagesMoussaillonsStatus',
+      title: 'Statut Stages Moussaillons (8-9 ans)',
+      type: 'string',
+      options: {
+        list: [
+          { title: '🟢 Maintenu', value: 'OPEN' },
+          { title: '🟡 Adapté', value: 'RESTRICTED' },
+          { title: '🔴 Annulé', value: 'CLOSED' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'OPEN',
+    }),
+    defineField({
+      name: 'stagesMoussaillonsMessage',
+      title: 'Note Moussaillons',
+      type: 'string',
+    }),
+
+    defineField({
+      name: 'stagesInitiationStatus',
+      title: 'Statut Stages Initiation (10-16 ans)',
+      type: 'string',
+      options: {
+        list: [
+          { title: '🟢 Maintenu', value: 'OPEN' },
+          { title: '🟡 Adapté', value: 'RESTRICTED' },
+          { title: '🔴 Annulé', value: 'CLOSED' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'OPEN',
+    }),
+    defineField({
+      name: 'stagesInitiationMessage',
+      title: 'Note Initiation',
+      type: 'string',
+    }),
+
+    defineField({
+      name: 'stagesPerfStatus',
+      title: 'Statut Stages Perfectionnement (10-16 ans)',
+      type: 'string',
+      options: {
+        list: [
+          { title: '🟢 Maintenu', value: 'OPEN' },
+          { title: '🟡 Adapté', value: 'RESTRICTED' },
+          { title: '🔴 Annulé', value: 'CLOSED' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'OPEN',
+    }),
+    defineField({
+      name: 'stagesPerfMessage',
+      title: 'Note Perfectionnement',
+      type: 'string',
+    }),
+
+    defineField({
+      name: 'lastPublishedAt',
+      title: 'Dernière publication (chef de base)',
+      description: 'Mis à jour automatiquement à chaque publication via le cockpit ou l\'admin.',
+      type: 'datetime',
+    }),
   ],
   preview: {
     select: {

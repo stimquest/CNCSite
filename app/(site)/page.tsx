@@ -3,11 +3,14 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useContent } from '../../contexts/ContentContext';
 
-import { Compass, Wind, Leaf, Zap, Users, ArrowRight, LifeBuoy, GraduationCap, Briefcase, Medal, Siren, CheckCircle2, Wifi, ShoppingBag, Image, Radio, Bird, Waves, Youtube, Play } from 'lucide-react';
+import { Compass, Wind, Leaf, Zap, Users, ArrowRight, LifeBuoy, GraduationCap, Briefcase, Medal, Siren, CheckCircle2, Wifi, ShoppingBag, Image, Radio, Bird, Waves, Youtube, Play, Navigation } from 'lucide-react';
 import { PhotoWallGallery } from '../../components/PhotoWallGallery';
 import { GamesSlideshow } from '../../components/GamesSlideshow';
 import PillarStory from '../../components/PillarStory';
+import { YouTubeBackground } from '../../components/YouTubeBackground';
 import PageNavigation from '../../components/PageNavigation';
+import { StatusDashboard } from '@/components/StatusDashboard';
+import { FreshnessIndicator } from '@/components/FreshnessIndicator';
 import { SpotConditionsBento } from '../../components/SpotConditionsBento';
 import { LogoComponent } from '../../components/Logo';
 import Link from 'next/link';
@@ -79,10 +82,13 @@ const PARTNERS = [
 export const HomePage: React.FC = () => {
     const {
         weather, statusMessage, news, homeGallery, infoMessages,
-        spotStatus,
-        charStatus, charMessage,
+        spotStatus, lastPublishedAt,
+        charStatus, charMessage, nautiqueStatus, nautiqueMessage,
         marcheStatus, marcheMessage,
-        nautiqueStatus, nautiqueMessage,
+        stagesMiniMoussesStatus, stagesMiniMoussesMessage,
+        stagesMoussaillonsStatus, stagesMoussaillonsMessage,
+        stagesInitiationStatus, stagesInitiationMessage,
+        stagesPerfStatus, stagesPerfMessage,
         homePageData
     } = useContent();
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -204,27 +210,31 @@ export const HomePage: React.FC = () => {
                 onMouseMove={handleMouseMove}
                 onMouseLeave={() => setMousePos({ x: 0, y: 0 })}
             >
-                {/* Background Slideshow - Parallaxe & Ken Burns subtil restauré */}
+                {/* Background: Video or Slideshow */}
                 <div className="absolute inset-0 w-full h-full overflow-hidden bg-abysse">
-                    <AnimatePresence mode="popLayout">
-                        <motion.div
-                            key={HERO_IMAGES[currentHeroIndex]}
-                            className="absolute inset-0 w-full h-full"
-                            initial={{ opacity: 0, scale: 1.06 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{
-                                opacity: { duration: 2.5, ease: "easeInOut" },
-                                scale: { duration: 15, ease: "easeOut" }
-                            }}
-                            style={{
-                                backgroundImage: `url('${HERO_IMAGES[currentHeroIndex]}')`,
-                                backgroundSize: 'cover',
-                                backgroundPositionX: 'center',
-                                backgroundPositionY: photoYPos,
-                            }}
-                        />
-                    </AnimatePresence>
+                    {homePageData?.hero?.videoUrl ? (
+                        <YouTubeBackground videoUrl={homePageData.hero.videoUrl} />
+                    ) : (
+                        <AnimatePresence mode="popLayout">
+                            <motion.div
+                                key={HERO_IMAGES[currentHeroIndex]}
+                                className="absolute inset-0 w-full h-full"
+                                initial={{ opacity: 0, scale: 1.06 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{
+                                    opacity: { duration: 2.5, ease: "easeInOut" },
+                                    scale: { duration: 15, ease: "easeOut" }
+                                }}
+                                style={{
+                                    backgroundImage: `url('${HERO_IMAGES[currentHeroIndex]}')`,
+                                    backgroundSize: 'cover',
+                                    backgroundPositionX: 'center',
+                                    backgroundPositionY: photoYPos,
+                                }}
+                            />
+                        </AnimatePresence>
+                    )}
                 </div>
 
                 {/* Overlay sombre pour le contraste (Texte blanc sur image) */}
@@ -305,8 +315,119 @@ export const HomePage: React.FC = () => {
                 </div>
             </section>
 
-            {/* NOUVELLE LIGNE : SPOT CONDITIONS BENTO */}
-            <SpotConditionsBento />
+            {/* BENTO ACCUEIL — une ligne style SpotConditionsBento */}
+            <section className="max-w-[1600px] mx-auto px-6 pt-10 pb-4 relative z-10">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+                    {/* COL 1 : Météo */}
+                    <div className="lg:col-span-1 flex flex-row lg:flex-col justify-between lg:justify-start gap-4 border-r border-abysse/5 pr-4">
+                        <div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-abysse/40 block mb-0.5">Vent</span>
+                            <div className="flex items-baseline leading-none">
+                                <span className="text-5xl font-black text-abysse italic tracking-tighter tabular-nums">{weather.windSpeed}</span>
+                                <span className="ml-1 text-[10px] font-black text-abysse/30 uppercase italic">NDS</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-1">
+                                <motion.div animate={{ rotate: (weather.windBearing || 0) + 135 }} className="text-turquoise">
+                                    <Navigation size={12} fill="currentColor" strokeWidth={3} />
+                                </motion.div>
+                                <span className="text-[9px] font-black italic text-abysse/60">
+                                    {['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'][Math.round((weather.windBearing || 0) / 45) % 8]}
+                                    <span className="text-abysse/20 ml-1">{weather.windBearing || 0}°</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div className="border-t border-abysse/5 pt-2">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-abysse/40 block">Rafales</span>
+                            <div className="flex items-baseline leading-none">
+                                <span className="text-2xl font-black text-abysse italic tracking-tighter tabular-nums">{weather.gusts || weather.windSpeed + 5}</span>
+                                <span className="ml-1 text-[8px] font-bold text-abysse/30 uppercase italic">NDS</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* COL 2–5 : Programme du jour */}
+                    <div className="lg:col-span-4 border-r border-abysse/5 px-2">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-abysse/40">Programme du jour</span>
+                            <Link href="/fil-info" className="text-[9px] font-black text-turquoise uppercase tracking-widest hover:underline">La Vigie →</Link>
+                        </div>
+                        {(() => {
+                            const activities = [
+                                { label: 'Char à Voile', status: charStatus, msg: charMessage },
+                                { label: 'Sports Nautiques', status: nautiqueStatus, msg: nautiqueMessage },
+                                { label: 'Mini-Mousses', status: stagesMiniMoussesStatus, msg: stagesMiniMoussesMessage },
+                                { label: 'Moussaillons', status: stagesMoussaillonsStatus, msg: stagesMoussaillonsMessage },
+                                { label: 'Initiation', status: stagesInitiationStatus, msg: stagesInitiationMessage },
+                                { label: 'Perfectionnement', status: stagesPerfStatus, msg: stagesPerfMessage },
+                            ];
+                            const getActCfg = (s: string) => {
+                                if (s === 'OPEN' || s === 'IDEAL' || s === 'FAVORABLE') return { dot: 'bg-emerald-500', label: 'Maintenu', color: 'text-emerald-600' };
+                                if (s === 'RESTRICTED' || s === 'VARIABLE') return { dot: 'bg-amber-400', label: 'Adapté', color: 'text-amber-600' };
+                                return { dot: 'bg-rose-500', label: 'Annulé', color: 'text-rose-600' };
+                            };
+                            return (
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                                    {activities.map((act, i) => {
+                                        const cfg = getActCfg(act.status);
+                                        return (
+                                            <div key={i} className="flex flex-col gap-0.5 border-b border-abysse/5 pb-2">
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-abysse/30 italic">{act.label}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className={`size-1.5 rounded-full shrink-0 ${cfg.dot}`} />
+                                                    <span className={`text-[13px] font-black uppercase italic leading-none tracking-tight ${cfg.color}`}>{cfg.label}</span>
+                                                </div>
+                                                {act.msg && <p className="text-[8px] text-abysse/35 font-medium leading-snug truncate">{act.msg}</p>}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        })()}
+                        {lastPublishedAt && (
+                            <p className="text-[8px] text-abysse/25 font-medium mt-2 italic">
+                                Mis à jour · {new Date(lastPublishedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} à {new Date(lastPublishedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* COL 6–9 : Flash Infos */}
+                    <div className="lg:col-span-4 border-r border-abysse/5 px-2">
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="size-1.5 rounded-full bg-turquoise animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-abysse/40">Flash Infos</span>
+                        </div>
+                        <div className="space-y-3">
+                            {news && news.length > 0 ? news.slice(0, 4).map((msg, idx) => (
+                                <div key={msg._id} className={`flex flex-col gap-0.5 border-b border-abysse/5 pb-2 last:border-0 ${idx === 0 ? 'opacity-100' : 'opacity-50 hover:opacity-80 transition-opacity'}`}>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[7px] font-black uppercase tracking-wider text-turquoise/70">{msg.category}</span>
+                                        {msg.publishedAt && <span className="text-[7px] text-abysse/20 italic">{new Date(msg.publishedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>}
+                                    </div>
+                                    <p className="text-[12px] font-black text-abysse uppercase italic tracking-tighter leading-tight">{msg.title}</p>
+                                </div>
+                            )) : (
+                                <p className="text-[10px] text-abysse/20 font-black italic uppercase tracking-wider">Aucun message</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* COL 10–12 : Webcam */}
+                    <div className="lg:col-span-3">
+                        <div className="relative rounded-2xl overflow-hidden shadow-lg group min-h-[200px]">
+                            <img src="/images/imgBank/CamLive.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Live Cam" />
+                            <div className="absolute inset-0 bg-linear-to-t from-abysse/60 via-transparent to-transparent" />
+                            <div className="absolute top-2 left-2">
+                                <span className="bg-red-600 text-white text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded flex items-center gap-1">
+                                    <span className="size-1 bg-white rounded-full animate-pulse" /> Direct
+                                </span>
+                            </div>
+                            <p className="absolute bottom-2 left-2 text-white text-[8px] font-black uppercase tracking-widest">Plage Nord</p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
 
             {/* SECTION : L'ESPRIT DU CLUB */}
             <section id="esprit-club" className="py-24 max-w-[1600px] mx-auto px-6 relative z-10">
@@ -405,10 +526,10 @@ export const HomePage: React.FC = () => {
                     })}
 
                 </div>
-            </section>
+            </section >
 
             {/* SECTION : FOCUS ACTIVITÉ (Le Char à Voile) */}
-            <section id="vitesse" className="py-12 max-w-[1600px] mx-auto px-6 relative z-10">
+            < section id="vitesse" className="py-12 max-w-[1600px] mx-auto px-6 relative z-10" >
                 <div className="group relative overflow-hidden rounded-[3rem] bg-abysse shadow-2xl flex flex-col lg:flex-row min-h-[550px]">
                     {/* Contenu Texte */}
                     <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">

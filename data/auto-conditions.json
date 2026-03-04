@@ -1,22 +1,26 @@
 {
   "enabled": true,
   "checkHour": 6,
-  "lastCheck": "2026-02-23T15:01:51.492Z",
+  "lastCheck": "2026-03-03T07:37:55.359Z",
   "lastCheckResult": {
     "weather": {
-      "wind": 11.1,
-      "gusts": 17.9,
-      "cape": 10,
+      "wind": 6.3,
+      "gusts": 11.9,
+      "cape": 50,
       "visibility": 24140,
-      "waveHeight": 0.66,
-      "wavePeriod": 8.55,
-      "waterTemp": 8.8
+      "waveHeight": 0.38,
+      "wavePeriod": 12.65,
+      "waterTemp": 9.9
     },
     "char": {
-      "status": "OPEN",
-      "message": "Bonnes conditions pour le char à voile.",
-      "tags": [],
-      "causes": []
+      "status": "RESTRICTED",
+      "message": "Vent faible, roulage possible mais technique.",
+      "tags": [
+        "Vent faible"
+      ],
+      "causes": [
+        "wind"
+      ]
     },
     "nautique": {
       "status": "OPEN",
@@ -26,16 +30,17 @@
     },
     "marche": {
       "status": "RESTRICTED",
-      "message": "Eau très froide, équipement grand froid obligatoire.",
+      "message": "Houle trop importante pour la pratique.",
       "tags": [
-        "Eau froide"
+        "Vagues"
       ],
       "causes": [
+        "waves",
         "waterTemp"
       ]
     }
   },
-  "manualOverride": false,
+  "manualOverride": true,
   "activities": {
     "char": {
       "enabled": true,

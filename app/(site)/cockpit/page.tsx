@@ -3,323 +3,299 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useContent } from '@/contexts/ContentContext';
-import { Check, AlertCircle, XCircle, Loader2, ArrowLeft, Home, Bell, Save, Star, Waves, Wind } from 'lucide-react';
+import { Check, XCircle, Loader2, ArrowLeft, Home, Save, Waves } from 'lucide-react';
 import Link from 'next/link';
 
 const MAGIC_KEY = "CNC2026";
 
-const TAGS_OPTIONS = [
-    { label: 'Vent fort', icon: '💨' },
-    { label: 'Vent faible', icon: '🌬' },
-    { label: 'Clapot', icon: '🌊' },
-    { label: 'Pluie', icon: '🌧' },
-    { label: 'Rafales', icon: '⚠️' },
-    { label: 'Marée basse', icon: '⛵' },
-    { label: 'Marée haute', icon: '🌊' },
+// ─── Types ────────────────────────────────────────────────────────
+type StatusKey = 'OPEN' | 'RESTRICTED' | 'CLOSED';
+
+const STATUS_OPTIONS: { id: StatusKey; label: string; short: string; bg: string; activeBg: string; ring: string }[] = [
+    { id: 'OPEN', label: 'Ouverte', short: 'OK', bg: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20', activeBg: 'bg-emerald-500 text-white border-emerald-400', ring: 'ring-emerald-500/30' },
+    { id: 'RESTRICTED', label: 'Adapté', short: '~', bg: 'bg-amber-400/10 text-amber-500 border-amber-400/20', activeBg: 'bg-amber-400 text-slate-900 border-amber-300', ring: 'ring-amber-400/30' },
+    { id: 'CLOSED', label: 'Annulé', short: '✕', bg: 'bg-rose-500/10 text-rose-500 border-rose-500/20', activeBg: 'bg-rose-500 text-white border-rose-400', ring: 'ring-rose-500/30' },
 ];
 
-const STATUS_LEVELS = [
-    { id: 'OPEN', label: 'Ouverte', color: 'bg-emerald-500', border: 'border-emerald-400', icon: <Check size={16} /> },
-    { id: 'RESTRICTED', label: 'Adaptée', color: 'bg-amber-400', border: 'border-amber-300', icon: <Waves size={16} /> },
-    { id: 'CLOSED', label: 'Suspendue', color: 'bg-rose-500', border: 'border-rose-400', icon: <XCircle size={16} /> }
+// All activities managed from the cockpit
+const ACTIVITIES = [
+    { key: 'char', label: 'Char à Voile', statusField: 'charStatus', msgField: 'charMessage', category: 'autonome' },
+    { key: 'nautique', label: 'Sports Nautiques', statusField: 'nautiqueStatus', msgField: 'nautiqueMessage', category: 'autonome' },
+    { key: 'marche', label: 'Marche Aquatique', statusField: 'marcheStatus', msgField: 'marcheMessage', category: 'autonome' },
+    { key: 'minimousses', label: 'Mini-Mousses', statusField: 'stagesMiniMoussesStatus', msgField: 'stagesMiniMoussesMessage', category: 'stage' },
+    { key: 'moussaillons', label: 'Moussaillons', statusField: 'stagesMoussaillonsStatus', msgField: 'stagesMoussaillonsMessage', category: 'stage' },
+    { key: 'initiation', label: 'Initiation', statusField: 'stagesInitiationStatus', msgField: 'stagesInitiationMessage', category: 'stage' },
+    { key: 'perf', label: 'Perfectionnement', statusField: 'stagesPerfStatus', msgField: 'stagesPerfMessage', category: 'stage' },
 ];
 
+// ─── Main Cockpit ─────────────────────────────────────────────────
 function CockpitContent() {
     const searchParams = useSearchParams();
     const key = searchParams.get('key');
-    const {
-        spotStatus, statusMessage,
-        charStatus, charMessage, charTags,
-        marcheStatus, marcheMessage, marcheTags,
-        nautiqueStatus, nautiqueMessage, nautiqueTags,
-        setSpotStatus, setStatusMessage,
-        setCharStatus, setCharMessage, setCharTags,
-        setMarcheStatus, setMarcheMessage, setMarcheTags,
-        setNautiqueStatus, setNautiqueMessage, setNautiqueTags,
-        refreshData
-    } = useContent();
+    const content = useContent();
 
-    const [isSaving, setIsSaving] = useState(false);
+    const [isSaving, setIsSaving] = useState<string | null>(null);
+    const [editingMsg, setEditingMsg] = useState<string | null>(null);
+    const [localMsg, setLocalMsg] = useState('');
+    const [localVibeMsg, setLocalVibeMsg] = useState(content.statusMessage || '');
+    const [toast, setToast] = useState<string | null>(null);
 
-    // Local state for textareas
-    const [localMessage, setLocalMessage] = useState(statusMessage || '');
-    const [localCharMsg, setLocalCharMsg] = useState(charMessage || '');
-    const [localMarcheMsg, setLocalMarcheMsg] = useState(marcheMessage || '');
-    const [localNautiqueMsg, setLocalNautiqueMsg] = useState(nautiqueMessage || '');
-
-    const [activeTab, setActiveTab] = useState<'GENERAL' | 'CHAR' | 'MARCHE' | 'NAUTIQUE'>('GENERAL');
-
-    useEffect(() => {
-        setLocalMessage(statusMessage || '');
-        setLocalCharMsg(charMessage || '');
-        setLocalMarcheMsg(marcheMessage || '');
-        setLocalNautiqueMsg(nautiqueMessage || '');
-    }, [statusMessage, charMessage, marcheMessage, nautiqueMessage]);
+    useEffect(() => { setLocalVibeMsg(content.statusMessage || ''); }, [content.statusMessage]);
 
     const isAuthorized = key === MAGIC_KEY;
 
-    const optimisticUpdate = (field: string, value: any) => {
-        switch (field) {
-            case 'spotStatus': setSpotStatus(value); break;
-            case 'statusMessage': setStatusMessage(value); break;
-            case 'charStatus': setCharStatus(value); break;
-            case 'charMessage': setCharMessage(value); break;
-            case 'charTags': setCharTags(value); break;
-            case 'marcheStatus': setMarcheStatus(value); break;
-            case 'marcheMessage': setMarcheMessage(value); break;
-            case 'marcheTags': setMarcheTags(value); break;
-            case 'nautiqueStatus': setNautiqueStatus(value); break;
-            case 'nautiqueMessage': setNautiqueMessage(value); break;
-            case 'nautiqueTags': setNautiqueTags(value); break;
-        }
+    // Generic setter lookup
+    const setters: Record<string, (v: any) => void> = {
+        spotStatus: content.setSpotStatus,
+        statusMessage: content.setStatusMessage,
+        charStatus: content.setCharStatus, charMessage: content.setCharMessage,
+        nautiqueStatus: content.setNautiqueStatus, nautiqueMessage: content.setNautiqueMessage,
+        marcheStatus: content.setMarcheStatus, marcheMessage: content.setMarcheMessage,
+        stagesMiniMoussesStatus: content.setStagesMiniMoussesStatus, stagesMiniMoussesMessage: content.setStagesMiniMoussesMessage,
+        stagesMoussaillonsStatus: content.setStagesMoussaillonsStatus, stagesMoussaillonsMessage: content.setStagesMoussaillonsMessage,
+        stagesInitiationStatus: content.setStagesInitiationStatus, stagesInitiationMessage: content.setStagesInitiationMessage,
+        stagesPerfStatus: content.setStagesPerfStatus, stagesPerfMessage: content.setStagesPerfMessage,
     };
 
-    const handleQuickUpdate = async (field: string, value: any, extraFields?: Record<string, any>) => {
-        optimisticUpdate(field, value);
-        if (extraFields) {
-            Object.entries(extraFields).forEach(([f, v]) => optimisticUpdate(f, v));
-        }
-
-        setIsSaving(true);
+    const save = async (patch: Record<string, any>, label?: string) => {
+        const savingKey = Object.keys(patch)[0];
+        setIsSaving(savingKey);
+        // Optimistic update
+        Object.entries(patch).forEach(([k, v]) => { if (setters[k]) setters[k](v); });
         try {
-            const patch: any = { [field]: value };
-            if (extraFields) {
-                Object.assign(patch, extraFields);
-            }
-
             const res = await fetch('/api/cockpit/direct', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'PATCH', patch })
             });
-
-            if (!res.ok) throw new Error('Update failed');
-            // No alert for simple status changes, but alert for saves with messages
-            if (extraFields) alert("✅ Changement enregistré");
-        } catch (err) {
-            console.error("Cockpit Error:", err);
+            if (!res.ok) throw new Error('Erreur serveur');
+            setToast(label || '✓ Enregistré');
+            setTimeout(() => setToast(null), 2000);
+        } catch {
             alert("⚠️ Erreur lors de l'enregistrement.");
         } finally {
-            setIsSaving(false);
+            setIsSaving(null);
         }
     };
 
-    const handleNotify = async (activity: string, status: string, message: string) => {
-        const levelLabel = STATUS_LEVELS.find(l => l.id === status)?.label || status;
-        const confirmMsg = `Envoyer une alerte Push : ${activity} -> ${levelLabel} ?`;
-        if (!confirm(confirmMsg)) return;
+    // Bulk actions
+    const setAllStatus = (status: StatusKey) => {
+        const patch: Record<string, any> = {};
+        ACTIVITIES.forEach(act => { patch[act.statusField] = status; });
+        save(patch, `Tout → ${STATUS_OPTIONS.find(o => o.id === status)?.label}`);
+    };
 
-        setIsSaving(true);
-        try {
-            const title = `Direct ${activity} : ${levelLabel}`;
-            const content = message || `Le statut pour ${activity} est passé à : ${levelLabel}. Consultez le site pour plus de détails.`;
-
-            const res = await fetch('/api/cockpit/direct', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'PATCH',
-                    patch: {},
-                    notify: { title, content }
-                })
-            });
-
-            if (!res.ok) throw new Error('Notification failed');
-            alert("🚀 Push envoyé !");
-        } catch (err) {
-            console.error("Notify Error:", err);
-            alert("❌ Erreur alertes OneSignal");
-        } finally {
-            setIsSaving(false);
-        }
+    const setGroupStatus = (category: string, status: StatusKey) => {
+        const patch: Record<string, any> = {};
+        ACTIVITIES.filter(a => a.category === category).forEach(act => { patch[act.statusField] = status; });
+        save(patch, `${category === 'autonome' ? 'Autonomes' : 'Stages'} → ${STATUS_OPTIONS.find(o => o.id === status)?.label}`);
     };
 
     if (!isAuthorized) {
         return (
             <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center text-white">
-                <div className="size-20 bg-red-500/20 rounded-full flex items-center justify-center text-red-500 mb-6 font-bold">
-                    <XCircle size={40} />
-                </div>
+                <div className="size-20 bg-red-500/20 rounded-full flex items-center justify-center text-red-500 mb-6"><XCircle size={40} /></div>
                 <h1 className="text-2xl font-black uppercase italic tracking-tighter mb-4">Accès Refusé</h1>
                 <Link href="/" className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold text-xs uppercase tracking-widest">Retour Accueil</Link>
             </div>
         );
     }
 
-    const NuancedSelector = ({ current, onSelect }: { current: string, onSelect: (id: string) => void }) => (
-        <div className="grid grid-cols-1 gap-2">
-            {STATUS_LEVELS.map((level) => (
-                <button
-                    key={level.id}
-                    onClick={() => onSelect(level.id)}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border transition-all active:scale-95 ${current === level.id
-                        ? `${level.color} ${level.border} text-abysse shadow-lg`
-                        : 'bg-white/5 border-white/10 text-slate-400 opacity-60'
-                        }`}
-                >
-                    <div className={`size-8 rounded-full flex items-center justify-center ${current === level.id ? 'bg-white/30' : 'bg-white/10'}`}>
-                        {level.icon}
-                    </div>
-                    <span className="text-xs font-black uppercase italic tracking-widest">{level.label}</span>
-                    {current === level.id && <Check className="ml-auto" size={16} strokeWidth={3} />}
-                </button>
-            ))}
-        </div>
-    );
-
-    const TagSelector = ({ tags, onToggle }: { tags: string[], onToggle: (newTags: string[]) => void }) => (
-        <div className="flex flex-wrap gap-2">
-            {TAGS_OPTIONS.map((tag) => {
-                const isSelected = (tags || []).includes(tag.label);
-                return (
-                    <button
-                        key={tag.label}
-                        onClick={() => {
-                            const next = isSelected
-                                ? tags.filter(t => t !== tag.label)
-                                : [...(tags || []), tag.label];
-                            onToggle(next);
-                        }}
-                        className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight flex items-center gap-2 border transition-all ${isSelected
-                                ? 'bg-turquoise border-turquoise text-abysse shadow-md'
-                                : 'bg-white/5 border-white/10 text-slate-500 hover:bg-white/10'
-                            }`}
-                    >
-                        <span>{tag.icon}</span>
-                        {tag.label}
-                    </button>
-                );
-            })}
-        </div>
-    );
-
     return (
-        <div className="min-h-screen bg-slate-950 text-white font-sans p-4 flex flex-col max-w-md mx-auto overflow-hidden">
+        <div className="min-h-screen bg-slate-950 text-white font-sans">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6 pt-4 shrink-0">
-                <div className="flex items-center gap-2 text-turquoise">
-                    <Home size={24} />
-                    <h1 className="text-lg font-black uppercase italic tracking-tighter leading-none">Cockpit Cmd</h1>
-                </div>
-                <div className="flex items-center gap-2">
-                    {isSaving && <Loader2 className="animate-spin text-turquoise" size={16} />}
-                    <Link href="/" className="size-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-400">
-                        <ArrowLeft size={20} />
-                    </Link>
-                </div>
-            </div>
-
-            {/* Navigation Tabs */}
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar whitespace-nowrap shrink-0">
-                {[
-                    { id: 'GENERAL', label: 'Vibe Générale' },
-                    { id: 'CHAR', label: 'Char' },
-                    { id: 'MARCHE', label: 'Marche' },
-                    { id: 'NAUTIQUE', label: 'Nautique' }
-                ].map(tab => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id as any)}
-                        className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-turquoise text-abysse' : 'bg-white/5 text-slate-500 border border-white/10'}`}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
-
-            <div className="flex-1 space-y-6 overflow-y-auto no-scrollbar pb-20">
-                {/* --- TAB: GENERAL (Spot Vibe) --- */}
-                {activeTab === 'GENERAL' && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-2 block">Vibe du plan d'eau</label>
-                            <NuancedSelector current={spotStatus} onSelect={(s) => handleQuickUpdate('spotStatus', s)} />
-                        </div>
-
-                        <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 space-y-4">
-                            <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">Message de La Vigie</label>
-                            <textarea
-                                value={localMessage}
-                                onChange={(e) => setLocalMessage(e.target.value)}
-                                className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-sm text-white outline-none focus:border-turquoise transition-colors h-32"
-                                placeholder="Conditions météo, ambiance, conseils..."
-                            />
-                            <button
-                                onClick={() => handleQuickUpdate('spotStatus', spotStatus, { statusMessage: localMessage })}
-                                disabled={isSaving || localMessage === statusMessage}
-                                className="w-full py-4 bg-white/10 rounded-xl font-black uppercase text-xs hover:bg-turquoise hover:text-abysse transition-all disabled:opacity-20 flex items-center justify-center gap-2"
-                            >
-                                <Save size={14} /> Enregistrer la Vibe
-                            </button>
-                        </div>
+            <div className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl border-b border-white/5 px-4 py-4">
+                <div className="max-w-2xl mx-auto flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Home size={20} className="text-turquoise" />
+                        <h1 className="text-sm font-black uppercase italic tracking-tighter">Cockpit</h1>
+                        {isSaving && <Loader2 className="animate-spin text-turquoise" size={14} />}
                     </div>
-                )}
+                    <div className="flex items-center gap-2">
+                        {toast && (
+                            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest animate-in fade-in">{toast}</span>
+                        )}
+                        <Link href="/" className="size-8 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-400">
+                            <ArrowLeft size={16} />
+                        </Link>
+                    </div>
+                </div>
+            </div>
 
-                {/* --- TAB: ACTIVITÉS --- */}
-                {['CHAR', 'MARCHE', 'NAUTIQUE'].includes(activeTab) && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                        {(() => {
-                            const configs = {
-                                CHAR: { label: 'Décision Char à Voile', status: charStatus, field: 'charStatus', msg: localCharMsg, setMsg: setLocalCharMsg, dbMsg: charMessage, msgField: 'charMessage', tags: charTags, tagsField: 'charTags' },
-                                MARCHE: { label: 'Décision Marche Aquat.', status: marcheStatus, field: 'marcheStatus', msg: localMarcheMsg, setMsg: setLocalMarcheMsg, dbMsg: marcheMessage, msgField: 'marcheMessage', tags: marcheTags, tagsField: 'marcheTags' },
-                                NAUTIQUE: { label: 'Décision Voile / Nautique', status: nautiqueStatus, field: 'nautiqueStatus', msg: localNautiqueMsg, setMsg: setLocalNautiqueMsg, dbMsg: nautiqueMessage, msgField: 'nautiqueMessage', tags: nautiqueTags, tagsField: 'nautiqueTags' }
-                            };
-                            const config = configs[activeTab as keyof typeof configs];
+            <div className="max-w-2xl mx-auto px-4 py-6 space-y-8">
+
+                {/* ── SECTION 1 : ACTIONS RAPIDES ── */}
+                <div className="space-y-3">
+                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 block">Actions rapides</span>
+                    <div className="grid grid-cols-3 gap-2">
+                        {STATUS_OPTIONS.map(opt => (
+                            <button
+                                key={opt.id}
+                                onClick={() => setAllStatus(opt.id)}
+                                className={`py-3 rounded-xl border text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 ${opt.bg} hover:opacity-80`}
+                            >
+                                Tout → {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        <button onClick={() => setGroupStatus('autonome', 'CLOSED')} className="py-2.5 rounded-xl border border-white/10 bg-white/5 text-[9px] font-black text-slate-400 uppercase tracking-wider hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 transition-all active:scale-95">
+                            Autonomes → Annulé
+                        </button>
+                        <button onClick={() => setGroupStatus('stage', 'CLOSED')} className="py-2.5 rounded-xl border border-white/10 bg-white/5 text-[9px] font-black text-slate-400 uppercase tracking-wider hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 transition-all active:scale-95">
+                            Stages → Annulé
+                        </button>
+                    </div>
+                </div>
+
+                {/* ── SECTION 2 : TOUTES LES ACTIVITÉS ── */}
+                <div className="space-y-2">
+                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 block">Pratiques autonomes</span>
+                    <div className="bg-white/[0.03] border border-white/5 rounded-2xl divide-y divide-white/5 overflow-hidden">
+                        {ACTIVITIES.filter(a => a.category === 'autonome').map(act => {
+                            const currentStatus = (content as any)[act.statusField] as string || 'OPEN';
+                            const currentMsg = (content as any)[act.msgField] as string || '';
+                            const isEditing = editingMsg === act.key;
 
                             return (
-                                <>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-2 block">{config.label}</label>
-                                        <NuancedSelector current={config.status || 'OPEN'} onSelect={(s) => handleQuickUpdate(config.field, s)} />
-                                    </div>
-
-                                    <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 space-y-6">
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">Badges (Automates)</label>
-                                            <TagSelector
-                                                tags={config.tags}
-                                                onToggle={(next) => handleQuickUpdate(config.tagsField, next)}
-                                            />
+                                <div key={act.key} className="px-4 py-3">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-sm font-bold text-white flex-1 min-w-0 truncate">{act.label}</span>
+                                        <div className="flex gap-1 shrink-0">
+                                            {STATUS_OPTIONS.map(opt => (
+                                                <button
+                                                    key={opt.id}
+                                                    onClick={() => save({ [act.statusField]: opt.id }, `${act.label} → ${opt.label}`)}
+                                                    disabled={isSaving === act.statusField}
+                                                    className={`px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-wide transition-all active:scale-90 ${currentStatus === opt.id ? opt.activeBg + ' ring-2 ' + opt.ring : opt.bg + ' opacity-40 hover:opacity-70'}`}
+                                                >
+                                                    {opt.label}
+                                                </button>
+                                            ))}
                                         </div>
-
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">Note Précise (Raison / Décalage)</label>
-                                            <textarea
-                                                placeholder="Ex: Vent trop faible pour rouler..."
-                                                value={config.msg}
-                                                onChange={(e) => config.setMsg(e.target.value)}
-                                                className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-sm text-white outline-none focus:border-turquoise transition-colors h-24"
-                                            />
-                                        </div>
-
                                         <button
-                                            onClick={() => handleQuickUpdate(config.field, (config.status || 'OPEN'), { [config.msgField]: config.msg })}
-                                            disabled={isSaving || config.msg === config.dbMsg}
-                                            className="w-full py-4 bg-white/10 rounded-xl font-black uppercase text-xs hover:bg-turquoise hover:text-abysse transition-all disabled:opacity-20 flex items-center justify-center gap-2"
+                                            onClick={() => { setEditingMsg(isEditing ? null : act.key); setLocalMsg(currentMsg); }}
+                                            className={`text-[9px] font-bold px-2 py-1 rounded-lg transition-all ${isEditing ? 'bg-turquoise/20 text-turquoise' : 'text-slate-600 hover:text-slate-400'}`}
                                         >
-                                            <Save size={14} /> Enregistrer la note
+                                            {isEditing ? 'Fermer' : 'Note'}
                                         </button>
-
-                                        <div className="pt-6 border-t border-white/10 space-y-3">
-                                            <p className="text-[9px] font-bold text-slate-500 text-center uppercase tracking-widest leading-tight">Envoyer info aux clients</p>
+                                    </div>
+                                    {isEditing && (
+                                        <div className="mt-3 flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={localMsg}
+                                                onChange={e => setLocalMsg(e.target.value)}
+                                                placeholder="Raison ou note..."
+                                                className="flex-1 bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-turquoise"
+                                            />
                                             <button
-                                                onClick={() => handleNotify(activeTab, (config.status || 'OPEN'), config.msg)}
-                                                disabled={isSaving}
-                                                className="w-full py-5 bg-abysse text-white border border-white/10 rounded-3xl font-black uppercase tracking-[0.2em] text-xs shadow-lg flex items-center justify-center gap-3 active:scale-95 disabled:opacity-30 transition-all hover:bg-turquoise hover:text-abysse"
+                                                onClick={() => { save({ [act.msgField]: localMsg }); setEditingMsg(null); }}
+                                                disabled={localMsg === currentMsg}
+                                                className="px-3 py-2 bg-turquoise text-abysse rounded-lg text-[10px] font-black uppercase disabled:opacity-20"
                                             >
-                                                <Bell size={18} /> Alerter les Clients
+                                                <Save size={12} />
                                             </button>
                                         </div>
-                                    </div>
-                                </>
+                                    )}
+                                </div>
                             );
-                        })()}
+                        })}
                     </div>
-                )}
-            </div>
+                </div>
 
-            <div className="py-6 text-center shrink-0 mb-4 opacity-30">
-                <p className="text-[8px] font-black uppercase tracking-[0.4em]">CNC Cockpit 2.0 • Decisional Mode</p>
+                <div className="space-y-2">
+                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 block">Stages encadrés</span>
+                    <div className="bg-white/[0.03] border border-white/5 rounded-2xl divide-y divide-white/5 overflow-hidden">
+                        {ACTIVITIES.filter(a => a.category === 'stage').map(act => {
+                            const currentStatus = (content as any)[act.statusField] as string || 'OPEN';
+                            const currentMsg = (content as any)[act.msgField] as string || '';
+                            const isEditing = editingMsg === act.key;
+
+                            return (
+                                <div key={act.key} className="px-4 py-3">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-sm font-bold text-white flex-1 min-w-0 truncate">{act.label}</span>
+                                        <div className="flex gap-1 shrink-0">
+                                            {STATUS_OPTIONS.map(opt => (
+                                                <button
+                                                    key={opt.id}
+                                                    onClick={() => save({ [act.statusField]: opt.id }, `${act.label} → ${opt.label}`)}
+                                                    disabled={isSaving === act.statusField}
+                                                    className={`px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-wide transition-all active:scale-90 ${currentStatus === opt.id ? opt.activeBg + ' ring-2 ' + opt.ring : opt.bg + ' opacity-40 hover:opacity-70'}`}
+                                                >
+                                                    {opt.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <button
+                                            onClick={() => { setEditingMsg(isEditing ? null : act.key); setLocalMsg(currentMsg); }}
+                                            className={`text-[9px] font-bold px-2 py-1 rounded-lg transition-all ${isEditing ? 'bg-turquoise/20 text-turquoise' : 'text-slate-600 hover:text-slate-400'}`}
+                                        >
+                                            {isEditing ? 'Fermer' : 'Note'}
+                                        </button>
+                                    </div>
+                                    {isEditing && (
+                                        <div className="mt-3 flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={localMsg}
+                                                onChange={e => setLocalMsg(e.target.value)}
+                                                placeholder="Raison ou note..."
+                                                className="flex-1 bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-turquoise"
+                                            />
+                                            <button
+                                                onClick={() => { save({ [act.msgField]: localMsg }); setEditingMsg(null); }}
+                                                disabled={localMsg === currentMsg}
+                                                className="px-3 py-2 bg-turquoise text-abysse rounded-lg text-[10px] font-black uppercase disabled:opacity-20"
+                                            >
+                                                <Save size={12} />
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* ── SECTION 3 : MESSAGE VIGIE ── */}
+                <div className="space-y-3">
+                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 block">Message de la vigie</span>
+                    <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 space-y-3">
+                        <div className="flex gap-1 mb-2">
+                            {STATUS_OPTIONS.map(opt => {
+                                const isActive = content.spotStatus === opt.id;
+                                return (
+                                    <button
+                                        key={opt.id}
+                                        onClick={() => save({ spotStatus: opt.id }, `Vibe → ${opt.label}`)}
+                                        className={`flex-1 py-2 rounded-lg border text-[9px] font-black uppercase tracking-wider transition-all active:scale-95 ${isActive ? opt.activeBg + ' ring-2 ' + opt.ring : opt.bg + ' opacity-40 hover:opacity-70'}`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <textarea
+                            value={localVibeMsg}
+                            onChange={e => setLocalVibeMsg(e.target.value)}
+                            className="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-turquoise transition-colors h-20 resize-none"
+                            placeholder="Conditions, ambiance, conseils..."
+                        />
+                        <button
+                            onClick={() => save({ statusMessage: localVibeMsg }, 'Message vigie enregistré')}
+                            disabled={localVibeMsg === content.statusMessage}
+                            className="w-full py-3 bg-white/10 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-turquoise hover:text-abysse transition-all disabled:opacity-20 flex items-center justify-center gap-2"
+                        >
+                            <Save size={12} /> Enregistrer le message
+                        </button>
+                    </div>
+                </div>
+
+                <div className="py-6 text-center opacity-20">
+                    <p className="text-[8px] font-black uppercase tracking-[0.4em]">CNC Cockpit 3.0 • Vue unifiée</p>
+                </div>
             </div>
         </div>
     );

@@ -19,6 +19,7 @@ import { planningMarche } from './planningMarche';
 import { naturePage } from './naturePage';
 import { natureEntity } from './natureEntity';
 
+import { autoConditionsConfig } from './autoConditionsConfig';
 import homePage from "./homePage";
 import infosPage from "./infosPage";
 import { signageSlide } from './signageSlide';
@@ -29,6 +30,7 @@ export const schemaTypes = [
   infosPage,
   activity,
   spotSettings,
+  autoConditionsConfig,
   news,
   teamMember,
   fleetItem,

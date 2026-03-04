@@ -1,73 +1,54 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { createClient } from '@sanity/client';
 
-export const revalidate = 60; // Cache on server for 1 minute
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-const DATA_PATH = path.join(process.cwd(), 'data', 'cockpit.json');
+const serverClient = createClient({
+    projectId: 'df7iwkkw',
+    dataset: 'production',
+    apiVersion: '2024-03-15',
+    token: process.env.NEXT_PUBLIC_SANITY_WRITE_TOKEN || process.env.SANITY_WRITE_TOKEN || '',
+    useCdn: false,
+});
 
-// Helper to read JSON safely
-const readData = () => {
-    try {
-        const content = fs.readFileSync(DATA_PATH, 'utf-8');
-        return JSON.parse(content);
-    } catch (e) {
-        return null;
-    }
-};
-
-// Helper to write JSON safely
-const writeData = (data: any) => {
-    fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
-};
+const SINGLETON_ID = 'singleton-spot-settings';
 
 export async function GET() {
-    const data = readData();
-    if (!data) return NextResponse.json({ error: 'Data not found' }, { status: 404 });
-    return NextResponse.json(data);
+    try {
+        const data = await serverClient.fetch(
+            `*[_type == "spotSettings" && !(_id in path('drafts.**'))][0] {
+                spotStatus, statusMessage,
+                charStatus, charMessage, charTags,
+                marcheStatus, marcheMessage, marcheTags,
+                nautiqueStatus, nautiqueMessage, nautiqueTags,
+                stagesMiniMoussesStatus, stagesMiniMoussesMessage,
+                stagesMoussaillonsStatus, stagesMoussaillonsMessage,
+                stagesInitiationStatus, stagesInitiationMessage,
+                stagesPerfStatus, stagesPerfMessage,
+                lastPublishedAt
+            }`,
+            {},
+            { useCdn: false }
+        );
+        if (!data) return NextResponse.json({ error: 'Data not found' }, { status: 404 });
+        return NextResponse.json(data);
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 }
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { type, patch, notify } = body;
-
-        let currentData = readData() || {};
+        const { type, patch } = body;
 
         if (type === 'PATCH') {
-            const updatedData = {
-                ...currentData,
+            await serverClient.patch(SINGLETON_ID).set({
                 ...patch,
-                lastUpdated: new Date().toISOString()
-            };
-            writeData(updatedData);
-
-            // Optional OneSignal Notification
-            if (notify) {
-                const ONESIGNAL_APP_ID = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
-                const ONESIGNAL_API_KEY = process.env.ONESIGNAL_REST_API_KEY;
-
-                if (ONESIGNAL_APP_ID && ONESIGNAL_API_KEY) {
-                    const { title, content } = notify;
-                    const osRes = await fetch('https://onesignal.com/api/v1/notifications', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json; charset=utf-8',
-                            'Authorization': `Basic ${ONESIGNAL_API_KEY}`,
-                        },
-                        body: JSON.stringify({
-                            app_id: ONESIGNAL_APP_ID,
-                            headings: { fr: title },
-                            contents: { fr: content },
-                            included_segments: ['Total Subscriptions', 'Subscribed Users'],
-                        }),
-                    });
-                    const osResult = await osRes.json();
-                    console.log("OneSignal: Direct Push Result:", { status: osRes.status, data: osResult });
-                }
-            }
-
-            return NextResponse.json({ success: true, data: updatedData });
+                lastPublishedAt: new Date().toISOString()
+            }).commit();
+            return NextResponse.json({ success: true });
         }
 
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 });

@@ -7,7 +7,7 @@ import { Footer } from '@/components/Footer';
 import { FloatingActions } from '@/components/FloatingActions';
 import { SmoothScroll } from '@/components/SmoothScroll';
 import { CookieBanner } from '@/components/CookieBanner';
-import { OneSignalProvider } from '@/components/OneSignalProvider';
+
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -93,19 +93,17 @@ export default function SiteLayout({
       />
       <div className={`${outfit.variable} ${syncopate.variable} ${shrikhand.variable} font-sans text-abysse antialiased selection:bg-turquoise selection:text-white`}>
         <ContentProvider>
-          <OneSignalProvider>
-            <SmoothScroll>
-              <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="grow pt-16">
-                  {children}
-                </main>
-                <Footer />
-                <FloatingActions />
-                <CookieBanner />
-              </div>
-            </SmoothScroll>
-          </OneSignalProvider>
+          <SmoothScroll>
+            <div className="min-h-screen flex flex-col">
+              <Header />
+              <main className="grow pt-16">
+                {children}
+              </main>
+              <Footer />
+              <FloatingActions />
+              <CookieBanner />
+            </div>
+          </SmoothScroll>
         </ContentProvider>
       </div>
     </>

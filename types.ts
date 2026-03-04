@@ -268,7 +268,6 @@ export interface InfoMessage {
   publishedAt: string;
   isPinned: boolean;
   externalLink?: string;
-  sendPush?: boolean;
 }
 
 export interface VibeMessage {
@@ -405,11 +404,38 @@ export interface AutoConditionActivity {
   messages: ActivityMessages;
 }
 
+export interface AutoConditionResult {
+  status: string;
+  message: string;
+  tags?: string[];
+  causes?: string[];
+  details?: any;
+}
+
+export interface AutoConditionsPendingResult {
+  checkedAt: string;
+  weather: {
+    windSpeed?: number;
+    gusts?: number;
+    waveHeight?: number;
+    wavePeriod?: number;
+    cape?: number;
+    visibility?: number;
+    waterTemp?: number;
+  };
+  results: {
+    char?: AutoConditionResult;
+    nautique?: AutoConditionResult;
+    marche?: AutoConditionResult;
+  };
+}
+
 export interface AutoConditionsConfig {
   enabled: boolean;
   checkHour: number;
   lastCheck: string | null;
-  lastCheckResult: Record<string, { status: string; message: string; tags?: string[]; causes?: string[]; details?: any }> | null;
+  lastCheckResult: Record<string, AutoConditionResult> | null;
+  pendingResult: AutoConditionsPendingResult | null;
   manualOverride: boolean;
   activities: {
     char: AutoConditionActivity;
@@ -436,6 +462,7 @@ export interface HomePageData {
     title: string;
     subtitle?: string;
     images: string[];
+    videoUrl?: string;
   };
   spirit: {
     title: string;

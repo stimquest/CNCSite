@@ -35,6 +35,20 @@ interface ContentState {
   nautiqueMessage: string;
   nautiqueTags: string[];
 
+  stagesMiniMoussesStatus: SpotStatus;
+  stagesMiniMoussesMessage: string;
+
+  stagesMoussaillonsStatus: SpotStatus;
+  stagesMoussaillonsMessage: string;
+
+  stagesInitiationStatus: SpotStatus;
+  stagesInitiationMessage: string;
+
+  stagesPerfStatus: SpotStatus;
+  stagesPerfMessage: string;
+
+  lastPublishedAt: string | null;
+
   vibeMessages: VibeMessage[];
   clubData: ClubPageData | null;
   groupsData: GroupsPageData | null;
@@ -65,6 +79,15 @@ interface ContentContextType extends ContentState {
   setNautiqueStatus: React.Dispatch<React.SetStateAction<SpotStatus>>;
   setNautiqueMessage: React.Dispatch<React.SetStateAction<string>>;
   setNautiqueTags: React.Dispatch<React.SetStateAction<string[]>>;
+
+  setStagesMiniMoussesStatus: React.Dispatch<React.SetStateAction<SpotStatus>>;
+  setStagesMiniMoussesMessage: React.Dispatch<React.SetStateAction<string>>;
+  setStagesMoussaillonsStatus: React.Dispatch<React.SetStateAction<SpotStatus>>;
+  setStagesMoussaillonsMessage: React.Dispatch<React.SetStateAction<string>>;
+  setStagesInitiationStatus: React.Dispatch<React.SetStateAction<SpotStatus>>;
+  setStagesInitiationMessage: React.Dispatch<React.SetStateAction<string>>;
+  setStagesPerfStatus: React.Dispatch<React.SetStateAction<SpotStatus>>;
+  setStagesPerfMessage: React.Dispatch<React.SetStateAction<string>>;
 
   resetToDefaults: () => void;
   saveToLocal: () => void;
@@ -108,9 +131,21 @@ const queries = {
         marcheTags,
         nautiqueStatus,
         nautiqueMessage,
-        nautiqueTags
+        nautiqueTags,
+        stagesMiniMoussesStatus,
+        stagesMiniMoussesMessage,
+        stagesMoussaillonsStatus,
+        stagesMoussaillonsMessage,
+        stagesInitiationStatus,
+        stagesInitiationMessage,
+        stagesPerfStatus,
+        stagesPerfMessage,
+        lastPublishedAt
     }`,
-  news: `*[_type == "news"] | order(publishedAt desc) {
+  news: `*[_type == "news" && (
+    (category in ["alert", "weather", "vibe"] && publishedAt > now() - 60*60*24*7) ||
+    (category in ["event", "info"] && publishedAt > now() - 60*60*24*30)
+  )] | order(publishedAt desc) {
         _id,
         title,
         category,
@@ -216,14 +251,20 @@ const queries = {
     description,
     "image": image.asset -> url
 } `,
-  infoMessages: `* [_type == "infoMessage"] | order(publishedAt desc) {
+  infoMessages: `*[_type == "infoMessage" && (
+    (!defined(expiresAt) && category in ["alert", "weather", "vibe"] && publishedAt > now() - 60*60*24*7) ||
+    (!defined(expiresAt) && category in ["event", "info"] && publishedAt > now() - 60*60*24*30) ||
+    (defined(expiresAt) && expiresAt > now())
+  )] | order(isPinned desc, publishedAt desc) {
   _id,
     title,
     content,
     category,
     isPinned,
+    targetGroups,
     externalLink,
-    publishedAt
+    publishedAt,
+    expiresAt
 } `,
   vibeMessages: `* [_type == "vibeMessage" && isActive == true] | order(priority desc) {
   _id,
@@ -275,7 +316,8 @@ const queries = {
     "hero": { 
       "title": heroTitle,
       "subtitle": heroSubtitle,
-      "images": heroImages[].asset->url
+      "images": heroImages[].asset->url,
+      "videoUrl": heroVideoUrl
     },
     "spirit": {
       "title": spiritTitle,
@@ -402,6 +444,16 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [nautiqueMessage, setNautiqueMessage] = useState('');
   const [nautiqueTags, setNautiqueTags] = useState<string[]>([]);
 
+  const [stagesMiniMoussesStatus, setStagesMiniMoussesStatus] = useState<SpotStatus>(SpotStatus.OPEN);
+  const [stagesMiniMoussesMessage, setStagesMiniMoussesMessage] = useState('');
+  const [stagesMoussaillonsStatus, setStagesMoussaillonsStatus] = useState<SpotStatus>(SpotStatus.OPEN);
+  const [stagesMoussaillonsMessage, setStagesMoussaillonsMessage] = useState('');
+  const [stagesInitiationStatus, setStagesInitiationStatus] = useState<SpotStatus>(SpotStatus.OPEN);
+  const [stagesInitiationMessage, setStagesInitiationMessage] = useState('');
+  const [stagesPerfStatus, setStagesPerfStatus] = useState<SpotStatus>(SpotStatus.OPEN);
+  const [stagesPerfMessage, setStagesPerfMessage] = useState('');
+  const [lastPublishedAt, setLastPublishedAt] = useState<string | null>(null);
+
   const [vibeMessages, setVibeMessages] = useState<VibeMessage[]>([]);
   const [clubData, setClubData] = useState<ClubPageData | null>(null);
   const [groupsData, setGroupsData] = useState<GroupsPageData | null>(null);
@@ -417,24 +469,32 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const refreshData = async () => {
     setIsLoading(true);
 
-    // FETCH DIRECT STATUS (BYPASS SANITY)
+    // FETCH DIRECT STATUS — lit depuis Sanity via /api/cockpit/direct
     const directPromise = fetch('/api/cockpit/direct')
       .then(res => res.json())
       .then(data => {
         if (data && !data.error) {
-          setSpotStatus(data.spotStatus);
-          setStatusMessage(data.statusMessage);
-          setCharStatus(data.charStatus);
-          setCharMessage(data.charMessage);
-          // Tags are currently only in Sanity, not in the direct cockpit.json local file
-          setMarcheStatus(data.marcheStatus);
-          setMarcheMessage(data.marcheMessage);
-          setNautiqueStatus(data.nautiqueStatus);
-          setNautiqueMessage(data.nautiqueMessage);
+          if (data.spotStatus) setSpotStatus(data.spotStatus);
+          if (data.statusMessage) setStatusMessage(data.statusMessage);
+          if (data.charStatus) setCharStatus(data.charStatus);
+          if (data.charMessage !== undefined) setCharMessage(data.charMessage);
+          if (data.marcheStatus) setMarcheStatus(data.marcheStatus);
+          if (data.marcheMessage !== undefined) setMarcheMessage(data.marcheMessage);
+          if (data.nautiqueStatus) setNautiqueStatus(data.nautiqueStatus);
+          if (data.nautiqueMessage !== undefined) setNautiqueMessage(data.nautiqueMessage);
+          if (data.stagesMiniMoussesStatus) setStagesMiniMoussesStatus(data.stagesMiniMoussesStatus);
+          if (data.stagesMiniMoussesMessage !== undefined) setStagesMiniMoussesMessage(data.stagesMiniMoussesMessage);
+          if (data.stagesMoussaillonsStatus) setStagesMoussaillonsStatus(data.stagesMoussaillonsStatus);
+          if (data.stagesMoussaillonsMessage !== undefined) setStagesMoussaillonsMessage(data.stagesMoussaillonsMessage);
+          if (data.stagesInitiationStatus) setStagesInitiationStatus(data.stagesInitiationStatus);
+          if (data.stagesInitiationMessage !== undefined) setStagesInitiationMessage(data.stagesInitiationMessage);
+          if (data.stagesPerfStatus) setStagesPerfStatus(data.stagesPerfStatus);
+          if (data.stagesPerfMessage !== undefined) setStagesPerfMessage(data.stagesPerfMessage);
+          if (data.lastPublishedAt) setLastPublishedAt(data.lastPublishedAt);
           return data;
         }
       })
-      .catch(e => console.warn("Direct status fetch failed:", e));
+      .catch(e => console.warn('Direct status fetch failed:', e));
 
     const weatherPromise = fetchRealtimeWeather()
       .then(async (data) => {
@@ -628,6 +688,16 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setNautiqueStatus(prev => sanitySettings.nautiqueStatus || prev);
           setNautiqueMessage(prev => sanitySettings.nautiqueMessage || prev);
           setNautiqueTags(prev => sanitySettings.nautiqueTags || []);
+
+          if (sanitySettings.stagesMiniMoussesStatus) setStagesMiniMoussesStatus(sanitySettings.stagesMiniMoussesStatus);
+          if (sanitySettings.stagesMiniMoussesMessage !== undefined) setStagesMiniMoussesMessage(sanitySettings.stagesMiniMoussesMessage || '');
+          if (sanitySettings.stagesMoussaillonsStatus) setStagesMoussaillonsStatus(sanitySettings.stagesMoussaillonsStatus);
+          if (sanitySettings.stagesMoussaillonsMessage !== undefined) setStagesMoussaillonsMessage(sanitySettings.stagesMoussaillonsMessage || '');
+          if (sanitySettings.stagesInitiationStatus) setStagesInitiationStatus(sanitySettings.stagesInitiationStatus);
+          if (sanitySettings.stagesInitiationMessage !== undefined) setStagesInitiationMessage(sanitySettings.stagesInitiationMessage || '');
+          if (sanitySettings.stagesPerfStatus) setStagesPerfStatus(sanitySettings.stagesPerfStatus);
+          if (sanitySettings.stagesPerfMessage !== undefined) setStagesPerfMessage(sanitySettings.stagesPerfMessage || '');
+          if (sanitySettings.lastPublishedAt) setLastPublishedAt(sanitySettings.lastPublishedAt);
         }
         if (sanityNews?.length > 0) setNews(sanityNews);
         if (sanityTeam?.length > 0) setTeam(sanityTeam);
@@ -673,10 +743,15 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             .then(res => res.json())
             .then(data => {
               if (data && !data.error) {
-                setSpotStatus(data.spotStatus);
-                setCharStatus(data.charStatus);
-                setMarcheStatus(data.marcheStatus);
-                setNautiqueStatus(data.nautiqueStatus);
+                if (data.spotStatus) setSpotStatus(data.spotStatus);
+                if (data.charStatus) setCharStatus(data.charStatus);
+                if (data.marcheStatus) setMarcheStatus(data.marcheStatus);
+                if (data.nautiqueStatus) setNautiqueStatus(data.nautiqueStatus);
+                if (data.stagesMiniMoussesStatus) setStagesMiniMoussesStatus(data.stagesMiniMoussesStatus);
+                if (data.stagesMoussaillonsStatus) setStagesMoussaillonsStatus(data.stagesMoussaillonsStatus);
+                if (data.stagesInitiationStatus) setStagesInitiationStatus(data.stagesInitiationStatus);
+                if (data.stagesPerfStatus) setStagesPerfStatus(data.stagesPerfStatus);
+                if (data.lastPublishedAt) setLastPublishedAt(data.lastPublishedAt);
               }
             })
             .catch(() => { });
@@ -691,12 +766,18 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           .then(res => res.json())
           .then(data => {
             if (data && !data.error) {
-              setSpotStatus(data.spotStatus);
-              setCharStatus(data.charStatus);
-              setMarcheStatus(data.marcheStatus);
-              setNautiqueStatus(data.nautiqueStatus);
+              if (data.spotStatus) setSpotStatus(data.spotStatus);
+              if (data.charStatus) setCharStatus(data.charStatus);
+              if (data.marcheStatus) setMarcheStatus(data.marcheStatus);
+              if (data.nautiqueStatus) setNautiqueStatus(data.nautiqueStatus);
+              if (data.stagesMiniMoussesStatus) setStagesMiniMoussesStatus(data.stagesMiniMoussesStatus);
+              if (data.stagesMoussaillonsStatus) setStagesMoussaillonsStatus(data.stagesMoussaillonsStatus);
+              if (data.stagesInitiationStatus) setStagesInitiationStatus(data.stagesInitiationStatus);
+              if (data.stagesPerfStatus) setStagesPerfStatus(data.stagesPerfStatus);
+              if (data.lastPublishedAt) setLastPublishedAt(data.lastPublishedAt);
             }
-          }).catch(() => { });
+          })
+          .catch(() => { });
         startPolling();
       } else {
         if (interval) clearInterval(interval);
@@ -760,6 +841,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       charStatus, charMessage, charTags,
       marcheStatus, marcheMessage, marcheTags,
       nautiqueStatus, nautiqueMessage, nautiqueTags,
+      stagesMiniMoussesStatus, stagesMiniMoussesMessage,
+      stagesMoussaillonsStatus, stagesMoussaillonsMessage,
+      stagesInitiationStatus, stagesInitiationMessage,
+      stagesPerfStatus, stagesPerfMessage,
+      lastPublishedAt,
       vibeMessages, currentVibe,
       clubData, groupsData, activitiesData, leSpotData, natureData, homePageData,
       updateWeather, updateActivity, updateStatus,
@@ -767,6 +853,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setCharStatus, setCharMessage, setCharTags,
       setMarcheStatus, setMarcheMessage, setMarcheTags,
       setNautiqueStatus, setNautiqueMessage, setNautiqueTags,
+      setStagesMiniMoussesStatus, setStagesMiniMoussesMessage,
+      setStagesMoussaillonsStatus, setStagesMoussaillonsMessage,
+      setStagesInitiationStatus, setStagesInitiationMessage,
+      setStagesPerfStatus, setStagesPerfMessage,
       resetToDefaults,
       saveToLocal, refreshData, fetchFromSanity: refreshData,
       lastUpdated, isLoading,

@@ -36,7 +36,19 @@ export default defineType({
             type: 'array',
             group: 'hero',
             of: [{ type: 'image', options: { hotspot: true } }],
-            description: 'Images défilantes en fond d\'écran',
+            description: 'Images défilantes en fond d\'écran (ignorées si une vidéo YouTube est définie)',
+        }),
+        defineField({
+            name: 'heroVideoUrl',
+            title: 'Vidéo YouTube (Fond Hero)',
+            type: 'url',
+            group: 'hero',
+            description: 'Collez l\'URL YouTube ici pour remplacer le diaporama par une vidéo en fond. Laissez vide pour garder les images.',
+            validation: Rule => Rule.uri({ scheme: ['https'] }).custom((url) => {
+                if (!url) return true;
+                if (url.includes('youtube.com') || url.includes('youtu.be')) return true;
+                return 'L\'URL doit être une vidéo YouTube valide';
+            }),
         }),
 
         // SPIRIT SECTION (Esprit Club)

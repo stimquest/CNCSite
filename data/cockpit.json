@@ -1,16 +1,18 @@
 {
   "spotStatus": "RESTRICTED",
   "statusMessage": "Plan d'eau calme, mais vent faible",
-  "charStatus": "OPEN",
-  "charMessage": "Bonnes conditions pour le char à voile.",
+  "charStatus": "RESTRICTED",
+  "charMessage": "Vent faible, roulage possible mais technique.",
   "marcheStatus": "RESTRICTED",
-  "marcheMessage": "Eau très froide, équipement grand froid obligatoire.",
+  "marcheMessage": "Houle trop importante pour la pratique.",
   "nautiqueStatus": "OPEN",
   "nautiqueMessage": "Bonnes conditions nautiques.",
-  "lastUpdated": "2026-02-23T15:01:51.491Z",
-  "charTags": [],
+  "lastUpdated": "2026-03-03T07:37:55.359Z",
+  "charTags": [
+    "Vent faible"
+  ],
   "marcheTags": [
-    "Eau froide"
+    "Vagues"
   ],
   "nautiqueTags": []
 }

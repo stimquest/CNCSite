@@ -246,7 +246,7 @@ export const DigitalSignagePage: React.FC = () => {
             </div>
 
             <div className="absolute bottom-16 flex flex-col items-center gap-4">
-              <p className="text-turquoise font-black uppercase text-xl tracking-[0.3em]">CVC • Soutien & Engagement</p>
+              <p className="text-turquoise font-black uppercase text-xl tracking-[0.3em]">CNC • Soutien & Engagement</p>
             </div>
           </div>
         )}

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useContent } from '../../../contexts/ContentContext';
 import { SpotTideChart } from '../../../components/SpotTideChart';
+import { SpotConditionsBento } from '../../../components/SpotConditionsBento';
 import { AgonNavigationCard } from '../../../components/AgonNavigationCard';
 import { WeatherExpert } from '../../../components/WeatherExpert';
 import { SpotStatus } from '../../../types';
@@ -53,6 +54,17 @@ export const SpotPage: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     {/* COLONNE GAUCHE (8) */}
                     <div className="lg:col-span-8 space-y-8">
+                        {/* 0. CONDITIONS DE PRATIQUE */}
+                        <div>
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="size-1.5 rounded-full bg-amber-400" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Conditions de pratique</span>
+                                <div className="flex-1 h-px bg-slate-100" />
+                                <span className="text-[9px] text-slate-400 font-medium">Pour navigants autonomes</span>
+                            </div>
+                            <SpotConditionsBento mode="conditions" />
+                        </div>
+
                         {/* 1. MÉTÉO EXPERTE (Arome HD) */}
                         <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
                             <div className="p-8 md:p-12">

@@ -69,18 +69,17 @@ export const infoMessage = defineType({
             initialValue: false,
         }),
         defineField({
-            name: 'sendPush',
-            title: '🚀 Envoyer une Notification Push',
-            description: 'Si activé, une notification sera envoyée via OneSignal lors de la publication.',
-            type: 'boolean',
-            initialValue: false,
-        }),
-        defineField({
             name: 'externalLink',
             title: 'Lien Externe (Optionnel)',
             description: 'Lien vers un post Facebook ou une page de détail.',
             type: 'url',
-        })
+        }),
+        defineField({
+            name: 'expiresAt',
+            title: 'Expiration (Optionnel)',
+            description: 'Laisser vide = expiration automatique (7j alertes/météo, 30j événements). Renseigner pour forcer une date précise.',
+            type: 'datetime',
+        }),
     ],
     preview: {
         select: {
@@ -88,19 +87,22 @@ export const infoMessage = defineType({
             category: 'category',
             publishedAt: 'publishedAt',
             isPinned: 'isPinned',
-            push: 'sendPush',
+            expiresAt: 'expiresAt',
         },
-        prepare({ title, category, publishedAt, isPinned, push }) {
+        prepare({ title, category, publishedAt, isPinned, expiresAt }) {
             const date = new Date(publishedAt).toLocaleDateString('fr-FR', {
                 day: '2-digit',
                 month: '2-digit',
                 hour: '2-digit',
                 minute: '2-digit',
             });
-            const icon = isPinned ? '📌' : (push ? '🚀' : '📝');
+            const expiry = expiresAt
+                ? ` · expire ${new Date(expiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`
+                : '';
+            const icon = isPinned ? '📌' : '📝';
             return {
                 title: `${icon} ${title}`,
-                subtitle: `[${category}] - ${date}`,
+                subtitle: `[${category}] · ${date}${expiry}`,
             };
         },
     },
