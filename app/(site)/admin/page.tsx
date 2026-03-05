@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, ActivityType, CharWeek, CharDay, CharSession, AutoConditionsConfig, ActivityThresholds, ActivityMessages } from '@/types';
 import { client, writeClient } from '@/lib/sanity';
+import Link from 'next/link';
 
 // --- CONSTANTS ---
 const ACTIVITY_OPTIONS: { label: string, value: ActivityType }[] = [
@@ -69,8 +70,6 @@ export default function AdminPage() {
         plannings, charPlannings, marchePlannings, refreshData
     } = useContent();
 
-    const [password, setPassword] = useState('');
-    const [isAuthorized, setIsAuthorized] = useState(false);
     const [activeTab, setActiveTab] = useState<'STAGES' | 'CHAR' | 'MARCHE' | 'CONDITIONS' | 'VIGIE'>('STAGES');
     const [isSaving, setIsSaving] = useState(false);
 
@@ -98,21 +97,6 @@ export default function AdminPage() {
     const [selectedMarchePeriod, setSelectedMarchePeriod] = useState<PlanningMarche | null>(null);
     const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
 
-    // AUTH
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (password === 'CNC2026') {
-            setIsAuthorized(true);
-            if (typeof window !== 'undefined') localStorage.setItem('CNC_ADMIN_SESSION', 'true');
-        } else { alert("Mot de passe incorrect"); }
-    };
-
-    useEffect(() => {
-        if (typeof window !== 'undefined' && localStorage.getItem('CNC_ADMIN_SESSION') === 'true') {
-            setIsAuthorized(true);
-        }
-    }, []);
-
     // --- AUTO CONDITIONS: FETCH CONFIG ---
     const fetchAutoConfig = useCallback(async () => {
         try {
@@ -123,8 +107,8 @@ export default function AdminPage() {
     }, []);
 
     useEffect(() => {
-        if (isAuthorized) fetchAutoConfig();
-    }, [isAuthorized, fetchAutoConfig]);
+        fetchAutoConfig();
+    }, [fetchAutoConfig]);
 
     // --- AUTO CONDITIONS: SAVE CONFIG ---
     const saveAutoConfig = async () => {
@@ -228,7 +212,7 @@ export default function AdminPage() {
             isRaidDay: false,
             raidTarget: 'none' as const,
             miniMousses: { time: '10h - 12h', activity: 'optimist' as ActivityType, description: '' },
-            mousses: { time: '10h - 12h', activity: 'optimist' as ActivityType, description: '' },
+            mousses: { time: '10h - 13h', activity: 'optimist' as ActivityType, description: '' },
             initiation: '14h - 17h',
             perfectionnement: '14h - 17h'
         }));
@@ -267,7 +251,7 @@ export default function AdminPage() {
                 isRaidDay: false,
                 raidTarget: 'none' as const,
                 miniMousses: { time: '10h - 12h', activity: 'optimist' as ActivityType, description: '' },
-                mousses: { time: '10h - 12h', activity: 'optimist' as ActivityType, description: '' },
+                mousses: { time: '10h - 13h', activity: 'optimist' as ActivityType, description: '' },
                 initiation: '14h - 17h',
                 perfectionnement: '14h - 17h'
             };
@@ -279,6 +263,9 @@ export default function AdminPage() {
     };
 
 
+    const SINGLETON_ID = 'singleton-spot-settings';
+    const touchPlanningsTimestamp = () =>
+        writeClient.patch(SINGLETON_ID).set({ planningsLastUpdatedAt: new Date().toISOString() }).commit().catch(() => { });
 
     const saveStage = async () => {
         if (!selectedStage) return;
@@ -288,6 +275,7 @@ export default function AdminPage() {
             if (selectedStage._id) await writeClient.createOrReplace({ ...doc, _id: selectedStage._id! });
             else await writeClient.create(doc);
 
+            await touchPlanningsTimestamp();
             await refreshData();
             alert("Planning enregistré !");
         } catch (err) { console.error(err); alert("Erreur sauvegarde"); }
@@ -355,6 +343,7 @@ export default function AdminPage() {
                 await writeClient.createOrReplace({ ...doc, _id: selectedCharPeriod._id! });
             }
             else await writeClient.create(doc);
+            await touchPlanningsTimestamp();
             await refreshData();
             alert("Planning Char enregistré !");
         } catch (err) { console.error(err); alert("Erreur sauvegarde"); }
@@ -420,6 +409,7 @@ export default function AdminPage() {
                 await writeClient.createOrReplace({ ...doc, _id: selectedMarchePeriod._id! });
             }
             else await writeClient.create(doc);
+            await touchPlanningsTimestamp();
             await refreshData();
             alert("Planning Marche enregistré !");
         } catch (err) { console.error(err); alert("Erreur sauvegarde Marche"); }
@@ -512,21 +502,6 @@ export default function AdminPage() {
     };
 
 
-    // --- RENDER LOGIN ---
-    if (!isAuthorized) {
-        return (
-            <div className="min-h-screen bg-abysse flex items-center justify-center p-6 italic">
-                <div className="w-full max-w-md bg-white rounded-[2rem] p-10 shadow-2xl">
-                    <h1 className="text-2xl font-black text-abysse uppercase text-center mb-8">Admin CNC</h1>
-                    <form onSubmit={handleLogin} className="space-y-6">
-                        <input type="password" autoFocus value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-center" placeholder="CODE" />
-                        <button className="w-full py-4 bg-abysse text-white rounded-xl font-black uppercase tracking-widest hover:bg-turquoise transition-all">Accéder</button>
-                    </form>
-                </div>
-            </div>
-        );
-    }
-
     // --- RENDER DASHBOARD ---
     return (
         <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
@@ -541,6 +516,9 @@ export default function AdminPage() {
                             <button onClick={() => setActiveTab('MARCHE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'MARCHE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Marche</button>
                             <button onClick={() => setActiveTab('CONDITIONS')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'CONDITIONS' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Zap size={12} /> Conditions Auto</button>
                             <button onClick={() => setActiveTab('VIGIE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'VIGIE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Bell size={12} /> Vigie Direct</button>
+                            <Link href="/cockpit?key=CNC2026" target="_blank" className="ml-2 px-4 py-2 rounded-lg bg-turquoise/10 text-turquoise hover:bg-turquoise/20 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
+                                🚀 Cockpit
+                            </Link>
                         </nav>
                     </div>
                     {isSaving && <span className="text-[10px] font-black text-turquoise animate-pulse uppercase">Sauvegarde...</span>}
@@ -674,7 +652,8 @@ export default function AdminPage() {
                                                                             value={(session?.time || '').split(' - ')[0]}
                                                                             onChange={(e) => {
                                                                                 const nd = [...selectedStage.days];
-                                                                                const newRange = calculateTimeRange(e.target.value, 3);
+                                                                                const defaultDur = group.id === 'miniMousses' ? 2 : 3;
+                                                                                const newRange = calculateTimeRange(e.target.value, defaultDur);
                                                                                 (nd[dIdx] as any)[group.id].time = newRange;
                                                                                 setSelectedStage({ ...selectedStage, days: nd });
                                                                             }}
@@ -683,23 +662,22 @@ export default function AdminPage() {
                                                                             <option value="">Début</option>
                                                                             {START_HOURS.map(h => <option key={h} value={h}>{h}</option>)}
                                                                         </select>
-                                                                        <div className="flex gap-0.5">
-                                                                            {[2, 3, 4].map(d => (
-                                                                                <button
-                                                                                    key={d}
-                                                                                    type="button"
-                                                                                    onClick={() => {
-                                                                                        const start = (session?.time || '').split(' - ')[0] || "14h00";
-                                                                                        const nd = [...selectedStage.days];
-                                                                                        (nd[dIdx] as any)[group.id].time = calculateTimeRange(start, d);
-                                                                                        setSelectedStage({ ...selectedStage, days: nd });
-                                                                                    }}
-                                                                                    className={`px-1 rounded text-[8px] font-black transition-colors ${(session?.time || '').includes(` - `) && (parseInt((session?.time || '').split(' - ')[1].split('h')[0]) - parseInt((session?.time || '').split(' - ')[0].split('h')[0]) === d) ? 'bg-turquoise text-white' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
-                                                                                >
-                                                                                    {d}h
-                                                                                </button>
-                                                                            ))}
-                                                                        </div>
+                                                                        <select
+                                                                            value={(() => {
+                                                                                const parts = (session?.time || '').split(' - ');
+                                                                                if (parts.length < 2) return group.id === 'miniMousses' ? '2' : '3';
+                                                                                return String(parseInt(parts[1].split('h')[0]) - parseInt(parts[0].split('h')[0]));
+                                                                            })()}
+                                                                            onChange={(e) => {
+                                                                                const start = (session?.time || '').split(' - ')[0] || '14h00';
+                                                                                const nd = [...selectedStage.days];
+                                                                                (nd[dIdx] as any)[group.id].time = calculateTimeRange(start, parseInt(e.target.value));
+                                                                                setSelectedStage({ ...selectedStage, days: nd });
+                                                                            }}
+                                                                            className="w-12 p-1 bg-turquoise/10 border border-turquoise/20 rounded text-[9px] font-black text-turquoise-700 outline-none focus:border-turquoise"
+                                                                        >
+                                                                            {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d}h</option>)}
+                                                                        </select>
 
                                                                         <select value={session?.activity || 'optimist'} onChange={(e) => {
                                                                             const nd = [...selectedStage.days]; (nd[dIdx] as any)[group.id].activity = e.target.value; setSelectedStage({ ...selectedStage, days: nd });
@@ -730,22 +708,22 @@ export default function AdminPage() {
                                                                                 <option value="">Début</option>
                                                                                 {START_HOURS.map(h => <option key={h} value={h}>{h}</option>)}
                                                                             </select>
-                                                                            <div className="flex gap-0.5">
-                                                                                {[2, 3, 4].map(d => (
-                                                                                    <button
-                                                                                        key={d}
-                                                                                        onClick={() => {
-                                                                                            const start = (value || '').split(' - ')[0] || "14h00";
-                                                                                            const nd = [...selectedStage.days];
-                                                                                            (nd[dIdx] as any)[group.id] = calculateTimeRange(start, d);
-                                                                                            setSelectedStage({ ...selectedStage, days: nd });
-                                                                                        }}
-                                                                                        className={`px-2 py-1 rounded text-[9px] font-black transition-colors ${(value || '').includes(` - `) && (parseInt((value || '').split(' - ')[1].split('h')[0]) - parseInt((value || '').split(' - ')[0].split('h')[0]) === d) ? 'bg-abysse text-white' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
-                                                                                    >
-                                                                                        {d}h
-                                                                                    </button>
-                                                                                ))}
-                                                                            </div>
+                                                                            <select
+                                                                                value={(() => {
+                                                                                    const parts = (value || '').split(' - ');
+                                                                                    if (parts.length < 2) return '3';
+                                                                                    return String(parseInt(parts[1].split('h')[0]) - parseInt(parts[0].split('h')[0]));
+                                                                                })()}
+                                                                                onChange={(e) => {
+                                                                                    const start = (value || '').split(' - ')[0] || '14h00';
+                                                                                    const nd = [...selectedStage.days];
+                                                                                    (nd[dIdx] as any)[group.id] = calculateTimeRange(start, parseInt(e.target.value));
+                                                                                    setSelectedStage({ ...selectedStage, days: nd });
+                                                                                }}
+                                                                                className="w-12 p-1 bg-abysse/10 border border-abysse/20 rounded text-[9px] font-black text-abysse outline-none focus:border-abysse"
+                                                                            >
+                                                                                {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d}h</option>)}
+                                                                            </select>
                                                                         </div>
                                                                     </div>
                                                                 </div>

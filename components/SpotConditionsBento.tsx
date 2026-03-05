@@ -79,7 +79,7 @@ export const SpotConditionsBento: React.FC<SpotConditionsBentoProps> = ({ mode =
         charStatus, charMessage, charTags,
         marcheStatus, marcheMessage, marcheTags,
         nautiqueStatus, nautiqueMessage, nautiqueTags,
-        news
+        infoMessages: news
     } = useContent();
 
     const activityData = [
@@ -184,7 +184,7 @@ export const SpotConditionsBento: React.FC<SpotConditionsBentoProps> = ({ mode =
                                                     {msg.category}
                                                 </span>
                                                 <span className="text-[8px] font-black text-abysse/20 whitespace-nowrap shrink-0 italic uppercase tracking-wider">
-                                                    {msg.date || (msg.publishedAt ? formatDistanceToNow(new Date(msg.publishedAt), { addSuffix: true, locale: fr }) : '')}
+                                                    {msg.publishedAt ? formatDistanceToNow(new Date(msg.publishedAt), { addSuffix: true, locale: fr }) : ''}
                                                 </span>
                                             </div>
                                             <div className="mb-0.5">

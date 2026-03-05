@@ -26,7 +26,7 @@ export async function GET() {
                 stagesMoussaillonsStatus, stagesMoussaillonsMessage,
                 stagesInitiationStatus, stagesInitiationMessage,
                 stagesPerfStatus, stagesPerfMessage,
-                lastPublishedAt
+                lastPublishedAt, lastConfirmedAt, planningsLastUpdatedAt
             }`,
             {},
             { useCdn: false }
@@ -47,6 +47,14 @@ export async function POST(req: Request) {
             await serverClient.patch(SINGLETON_ID).set({
                 ...patch,
                 lastPublishedAt: new Date().toISOString()
+            }).commit();
+            return NextResponse.json({ success: true });
+        }
+
+        if (type === 'CONFIRM') {
+            // Chef de base confirms all is OK without changing any status
+            await serverClient.patch(SINGLETON_ID).set({
+                lastConfirmedAt: new Date().toISOString()
             }).commit();
             return NextResponse.json({ success: true });
         }

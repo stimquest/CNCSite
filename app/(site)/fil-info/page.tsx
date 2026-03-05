@@ -9,10 +9,14 @@ import { FreshnessIndicator } from '@/components/FreshnessIndicator';
 
 const GROUPS = [
     { id: 'all', label: 'Tout' },
-    { id: 'stages', label: 'Stages' },
+    { id: 'club', label: 'Le Club' },
     { id: 'char-voile', label: 'Char à Voile' },
-    { id: 'nautique', label: 'Nautique' },
-    { id: 'club', label: 'Club' },
+    { id: 'stage-minimousses', label: 'Mini-Mousses' },
+    { id: 'stage-moussaillons', label: 'Moussaillons' },
+    { id: 'stage-initiation', label: 'Stages Initiation' },
+    { id: 'stage-perfectionnement', label: 'Stages Perf.' },
+    { id: 'marche-aquatique', label: 'Marche Aquatique' },
+    { id: 'pratique-libre', label: 'Pratique Libre' },
 ];
 
 const CATEGORY_CONFIG: Record<string, { dot: string; color: string; label: string }> = {
@@ -39,13 +43,6 @@ export const FilInfoPage: React.FC = () => {
     const filteredMessages = useMemo(() => {
         if (!infoMessages) return [];
         if (selectedGroup === 'all') return infoMessages;
-        if (selectedGroup === 'stages') {
-            const IDS = ['stage-minimousses', 'stage-moussaillons', 'stage-initiation', 'stage-perfectionnement'];
-            return infoMessages.filter(m => m.targetGroups?.some(g => IDS.includes(g)) || m.targetGroups?.includes('all'));
-        }
-        if (selectedGroup === 'char-voile') return infoMessages.filter(m => m.targetGroups?.includes('char-voile') || m.targetGroups?.includes('all'));
-        if (selectedGroup === 'nautique') return infoMessages.filter(m => m.targetGroups?.some(g => ['glisses', 'club-sportif'].includes(g)) || m.targetGroups?.includes('all'));
-        if (selectedGroup === 'club') return infoMessages.filter(m => m.targetGroups?.includes('all'));
         return infoMessages.filter(m => m.targetGroups?.includes(selectedGroup) || m.targetGroups?.includes('all'));
     }, [infoMessages, selectedGroup]);
 
@@ -80,18 +77,31 @@ export const FilInfoPage: React.FC = () => {
             {/* FILTRES — sticky, toutes tailles */}
             <div className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-100 overflow-x-auto no-scrollbar">
                 <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-1">
-                    {GROUPS.map(g => (
-                        <button
-                            key={g.id}
-                            onClick={() => setSelectedGroup(g.id)}
-                            className={`shrink-0 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${selectedGroup === g.id
-                                    ? 'bg-abysse text-white'
-                                    : 'text-slate-500 hover:text-slate-800'
-                                }`}
-                        >
-                            {g.label}
-                        </button>
-                    ))}
+                    {GROUPS.map(g => {
+                        const isSelected = selectedGroup === g.id;
+                        const isStage = g.id.startsWith('stage-');
+                        const isChar = g.id === 'char-voile';
+
+                        let colorClasses = 'text-slate-500 hover:text-slate-800 bg-transparent';
+                        if (isSelected) {
+                            if (isStage) colorClasses = 'bg-turquoise text-white shadow-sm';
+                            else if (isChar) colorClasses = 'bg-orange-500 text-white shadow-sm';
+                            else colorClasses = 'bg-abysse text-white shadow-sm';
+                        } else {
+                            if (isStage) colorClasses = 'text-turquoise hover:bg-turquoise/10';
+                            else if (isChar) colorClasses = 'text-orange-500 hover:bg-orange-500/10';
+                        }
+
+                        return (
+                            <button
+                                key={g.id}
+                                onClick={() => setSelectedGroup(g.id)}
+                                className={`shrink-0 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${colorClasses}`}
+                            >
+                                {g.label}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 

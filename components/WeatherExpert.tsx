@@ -150,7 +150,7 @@ export const WeatherExpert: React.FC = () => {
             <div className="space-y-6">
                 <div className="flex items-center gap-3 px-4">
                     <Zap size={22} className="text-turquoise" />
-                    <h3 className="text-sm font-black uppercase tracking-widest text-abysse">Direct AROME HD (1.3km) — 12H</h3>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-abysse">Direct AROME HD (1.3km)</h3>
                 </div>
 
                 {(() => {
@@ -258,7 +258,7 @@ export const WeatherExpert: React.FC = () => {
                                                     }}
                                                     axisLine={false} tickLine={false} interval={1}
                                                 />
-                                                <YAxis tick={{ fill: 'rgba(255,255,255,0.25)', fontSize: 10 }} axisLine={false} tickLine={false} width={28} />
+                                                <YAxis tick={{ fill: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: 'bold' }} axisLine={false} tickLine={false} width={32} />
                                                 <RechartsTooltip contentStyle={tooltipStyle} labelStyle={labelStyle} formatter={(v: any, n?: string) => [`${v} nds`, n === 'vent' ? 'Vent' : 'Rafales']} labelFormatter={() => ''} />
                                                 <Area type="monotone" dataKey="rafales" stroke="#fb923c" strokeWidth={2} fill="url(#gradRafales2)" dot={false} animationDuration={1200} />
                                                 <Area type="monotone" dataKey="vent" stroke="#00e5cc" strokeWidth={3} fill="url(#gradVent2)" dot={{ r: 2, fill: '#00e5cc', strokeWidth: 0 }} activeDot={{ r: 5 }} animationDuration={1200} />

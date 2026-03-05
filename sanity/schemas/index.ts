@@ -6,7 +6,7 @@ import { fleetItem } from './fleetItem';
 import { weeklyPlanning } from './weeklyPlanning';
 import { planningCharAVoile } from './planningCharAVoile';
 import { gallery } from './gallery';
-import { schoolStage } from './schoolStage';
+import schoolPage from './schoolPage';
 import { activitiesPage } from './activitiesPage';
 import { leSpotPage } from './leSpotPage';
 import { clubPage } from './clubPage';
@@ -38,7 +38,7 @@ export const schemaTypes = [
   planningCharAVoile,
   planningMarche,
   gallery,
-  schoolStage,
+  schoolPage,
   clubPage,
   groupsPage,
   activitiesPage,

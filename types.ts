@@ -497,3 +497,69 @@ export interface HomePageData {
   focusGlisse?: FocusSection;
   focusBienEtre?: FocusSection;
 }
+
+export interface SchoolStage {
+  id: string;
+  title: string;
+  subtitle?: string;
+  age?: string;
+  price?: string;
+  priceDetail?: string;
+  description?: string;
+  longDescription?: string;
+  step?: string;
+  phase?: string;
+  hook?: string;
+  officialName?: string;
+  logistique?: string[];
+  color?: string;
+  bgColor?: string;
+  iconName?: string;
+  image?: string;
+  pricingTiers?: { label: string; value: string; }[];
+  gallery?: string[];
+}
+
+export interface SchoolPageData {
+  hero: {
+    title: string;
+    subtitle?: string;
+    image?: string;
+    tagText?: string;
+  };
+  heroStats?: {
+    label: string;
+    value: string;
+    sublabel: string;
+    iconName: string;
+    style?: 'solid' | 'glass';
+  }[];
+  intro?: {
+    title?: string;
+    content?: string;
+  };
+  heroBadges?: {
+    label: string;
+    value: string;
+    sublabel: string;
+    iconName: string;
+    style?: 'solid' | 'glass';
+  }[];
+  stages?: SchoolStage[];
+  practicalInfo?: {
+    title: string;
+    subtitle?: string;
+    description?: string;
+  };
+  equipmentProvided?: string[];
+  toBring?: string[];
+  safetyInfo?: {
+    title: string;
+    description?: string;
+    footerText?: string;
+  };
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+  };
+}

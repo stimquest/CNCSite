@@ -1,0 +1,59 @@
+[93m[4mUnused files[24m[39m (27)
+clean-sanity.mjs                    
+eslint.config.mjs                   
+full-migrate.mjs                    
+migrate-plannings.mjs               
+migrate.mjs                         
+sanity.cli.ts                       
+components/OneSignalProvider.tsx    
+components/TideChart.tsx            
+public/OneSignalSDKWorker.js        
+schemaTypes/index.ts                
+scripts/add-more-nature.mjs         
+scripts/check-field-names.mjs       
+scripts/clean-exploration-data.mjs  
+scripts/debug-sanity-data.mjs       
+scripts/deep-reset-exploration.mjs  
+scripts/diagnose-exploration.mjs    
+scripts/fix-readonly-perspective.mjs
+scripts/migrate-activities.ts       
+scripts/migrate-exploration.mjs     
+scripts/migrate-focus-sections.ts   
+scripts/migrate-home-spirit.ts      
+scripts/seed-all.mjs                
+scripts/seed-sanity.mjs             
+scripts/seed-school-intro.mjs       
+scripts/seed-school-page.mjs        
+scripts/test-sanity.mjs             
+sanity/schemas/schoolStage.ts       
+[93m[4mUnused dependencies[24m[39m (1)
+@sanity/dashboard  package.json:15:6
+[93m[4mUnused devDependencies[24m[39m (2)
+dotenv              package.json:41:6
+eslint-config-next  package.json:42:6
+[93m[4mUnused exports[24m[39m (9)
+default                                components/StatusDashboard.tsx:113:16    
+default                                components/FreshnessIndicator.tsx:72:16  
+default                                components/SpotConditionsBento.tsx:241:16
+urlFor                       function  lib/sanity.ts:69:17                      
+queries                                lib/sanity.ts:76:14                      
+default                                components/ActivityGallery.tsx:105:16    
+APP_NAME                               constants.ts:4:14                        
+TIDE_DATA                              constants.ts:19:14                       
+calculateThresholdCrossings  function  lib/tide-utils.ts:13:17                  
+[93m[4mUnused exported types[24m[39m (3)
+KidSession  interface  types.ts:151:18       
+NavItem     interface  types.ts:225:18       
+TideWindow  interface  lib/tide-utils.ts:3:18
+[93m[4mUnused exported enum members[24m[39m (4)
+WEATHER   SignageSlideType  types.ts:231:3
+PROMO     SignageSlideType  types.ts:232:3
+PARTNERS  SignageSlideType  types.ts:233:3
+INFO      SignageSlideType  types.ts:234:3
+[93m[4mDuplicate exports[24m[39m (5)
+StatusDashboard|default      components/StatusDashboard.tsx    
+FreshnessIndicator|default   components/FreshnessIndicator.tsx 
+SpotConditionsBento|default  components/SpotConditionsBento.tsx
+ActivityGallery|default      components/ActivityGallery.tsx    
+NatureMap|default            components/NatureMap.tsx          
+[33m[4mConfiguration hints[24m (1)[39m

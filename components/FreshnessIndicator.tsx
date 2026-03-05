@@ -40,8 +40,8 @@ export const FreshnessIndicator: React.FC<FreshnessIndicatorProps> = ({
     if (hoursAgo < 12) {
         return (
             <div className={`px-4 py-3 rounded-xl border text-[10px] font-bold uppercase tracking-widest ${showBanner
-                    ? 'bg-amber-50 border-amber-200 text-amber-700'
-                    : 'text-amber-600'
+                ? 'bg-amber-50 border-amber-200 text-amber-700'
+                : 'text-amber-600'
                 }`}>
                 Données non actualisées depuis {hoursAgo}h
                 {showBanner && (
@@ -56,8 +56,8 @@ export const FreshnessIndicator: React.FC<FreshnessIndicatorProps> = ({
     // Très vieux > 12h — alerte
     return (
         <div className={`px-4 py-3 rounded-xl border text-[10px] font-black uppercase tracking-widest ${showBanner
-                ? 'bg-rose-50 border-rose-200 text-rose-700'
-                : 'text-rose-600'
+            ? 'bg-rose-50 border-rose-200 text-rose-700'
+            : 'text-rose-600'
             }`}>
             Informations non confirmées pour aujourd'hui
             {showBanner && (

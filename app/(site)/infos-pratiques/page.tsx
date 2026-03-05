@@ -369,8 +369,16 @@ export const InfosPratiquesPage: React.FC = () => {
         const initMap = async () => {
             if (!mapRef.current || mapInstance.current) return;
             const L = (await import('leaflet')).default;
+
+            // Check again after dynamic import
+            if (!mapRef.current || mapInstance.current) return;
+
             // @ts-ignore - CSS import has no type declarations
             await import('leaflet/dist/leaflet.css');
+
+            // Final check before initialization
+            if (!mapRef.current || mapInstance.current) return;
+
             map = L.map(mapRef.current).setView([49.030384, -1.595904], 17);
             L.tileLayer('https://data.geopf.fr/wmts?&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&TILEMATRIXSET=PM&LAYER={ignLayer}&STYLE={style}&FORMAT={format}&TILECOL={x}&TILEROW={y}&TILEMATRIX={z}', {
                 ignLayer: 'ORTHOIMAGERY.ORTHOPHOTOS', style: 'normal', format: 'image/jpeg', attribution: '© IGN'

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MOCK_WEATHER, ACTIVITIES, STATUS_MESSAGE, CURRENT_STATUS } from '../constants';
-import { Activity, WeatherData, SpotStatus, NewsItem, TeamMember, FleetItem, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, HomeGallery, MerchItem, OccazItem, InfoMessage, TideData, VibeMessage, ClubPageData, GroupsPageData, ActivitiesPageData, LeSpotPageData, NaturePageData, HomePageData, SignageSlide } from '../types';
+import { Activity, WeatherData, SpotStatus, NewsItem, TeamMember, FleetItem, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, HomeGallery, MerchItem, OccazItem, InfoMessage, TideData, VibeMessage, ClubPageData, GroupsPageData, ActivitiesPageData, LeSpotPageData, NaturePageData, HomePageData, SignageSlide, SchoolPageData, SchoolStage } from '../types';
 import { client } from '../lib/sanity';
 import { fetchRealtimeWeather } from '../lib/weather';
 
@@ -57,6 +57,7 @@ interface ContentState {
   natureData: NaturePageData | null;
   homePageData: HomePageData | null;
   signageSlides: SignageSlide[];
+  schoolPageData: SchoolPageData | null;
 }
 
 interface ContentContextType extends ContentState {
@@ -142,10 +143,7 @@ const queries = {
         stagesPerfMessage,
         lastPublishedAt
     }`,
-  news: `*[_type == "news" && (
-    (category in ["alert", "weather", "vibe"] && publishedAt > now() - 60*60*24*7) ||
-    (category in ["event", "info"] && publishedAt > now() - 60*60*24*30)
-  )] | order(publishedAt desc) {
+  news: `*[_type == "news"] | order(publishedAt desc)[0...30] {
         _id,
         title,
         category,
@@ -180,6 +178,7 @@ const queries = {
             name,
             date,
             isRaidDay,
+            raidTarget,
             miniMousses { time, activity, description },
             mousses { time, activity, description },
             initiation,
@@ -251,11 +250,7 @@ const queries = {
     description,
     "image": image.asset -> url
 } `,
-  infoMessages: `*[_type == "infoMessage" && (
-    (!defined(expiresAt) && category in ["alert", "weather", "vibe"] && publishedAt > now() - 60*60*24*7) ||
-    (!defined(expiresAt) && category in ["event", "info"] && publishedAt > now() - 60*60*24*30) ||
-    (defined(expiresAt) && expiresAt > now())
-  )] | order(isPinned desc, publishedAt desc) {
+  infoMessages: `*[_type == "infoMessage" && (!defined(expiresAt) || expiresAt > now())] | order(isPinned desc, publishedAt desc)[0...50] {
   _id,
     title,
     content,
@@ -412,7 +407,20 @@ const queries = {
     infoContent {
       title, message, category
     }
-  }`
+  }`,
+  schoolPage: `*[_type == "schoolPage"][0]{
+      ...,
+      intro,
+      hero {
+        ...,
+        "image": image.asset->url
+      },
+      heroBadges,
+      stages[] {
+        ...,
+        "image": image.asset->url
+      }
+    }`,
 };
 
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -462,6 +470,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [natureData, setNatureData] = useState<NaturePageData | null>(null);
   const [homePageData, setHomePageData] = useState<HomePageData | null>(null);
   const [signageSlides, setSignageSlides] = useState<SignageSlide[]>([]);
+  const [schoolPageData, setSchoolPageData] = useState<SchoolPageData | null>(null);
 
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -634,9 +643,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           sanityNews,
           sanityTeam,
           sanityFleet,
-          sanityPlannings,
-          sanityCharPlannings,
-          sanityMarchePlannings,
           sanityGallery,
           sanityMerch,
           sanityOccaz,
@@ -648,16 +654,14 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           sanityActivitiesPage,
           sanityLeSpotPage,
           sanityNaturePage,
-          sanitySignageSlides
+          sanitySignageSlides,
+          sanitySchoolPage,
         ] = await Promise.all([
           client.fetch(queries.activities),
           client.fetch(queries.settings, {}, { useCdn: false }),
           client.fetch(queries.news),
           client.fetch(queries.team),
           client.fetch(queries.fleet),
-          client.fetch(queries.plannings),
-          client.fetch(queries.charPlannings),
-          client.fetch(queries.marchePlannings),
           client.fetch(queries.homeGallery),
           client.fetch(queries.merchItems),
           client.fetch(queries.occazItems),
@@ -669,8 +673,15 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           client.fetch(queries.activitiesPage),
           client.fetch(queries.leSpotPage),
           client.fetch(queries.naturePage),
-          client.fetch(queries.signageSlides)
+          client.fetch(queries.signageSlides),
+          client.fetch(queries.schoolPage),
         ]);
+
+        // Load plannings from server-side API (always fresh, no CDN/browser cache)
+        const planningsData = await fetch('/api/plannings').then(r => r.json()).catch(() => ({}));
+        if (planningsData.plannings) setPlannings(planningsData.plannings);
+        if (planningsData.charPlannings) setCharPlannings(planningsData.charPlannings);
+        if (planningsData.marchePlannings) setMarchePlannings(planningsData.marchePlannings);
 
         if (sanityActivities?.length > 0) setActivities(sanityActivities);
         if (sanitySettings) {
@@ -702,9 +713,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (sanityNews?.length > 0) setNews(sanityNews);
         if (sanityTeam?.length > 0) setTeam(sanityTeam);
         if (sanityFleet?.length > 0) setFleet(sanityFleet);
-        if (sanityPlannings) setPlannings(sanityPlannings);
-        if (sanityCharPlannings) setCharPlannings(sanityCharPlannings);
-        if (sanityMarchePlannings) setMarchePlannings(sanityMarchePlannings);
         if (sanityGallery) setHomeGallery(sanityGallery);
         if (sanityMerch?.length > 0) setMerchItems(sanityMerch);
         if (sanityOccaz?.length > 0) setOccazItems(sanityOccaz);
@@ -714,11 +722,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (sanityGroups) setGroupsData(sanityGroups);
         if (sanityActivitiesPage) setActivitiesData(sanityActivitiesPage);
         if (sanityLeSpotPage) setLeSpotData(sanityLeSpotPage);
-        if (sanityNaturePage) {
-          setNatureData(sanityNaturePage);
-        }
+        if (sanityNaturePage) setNatureData(sanityNaturePage);
         if (sanityHomePage) setHomePageData(sanityHomePage);
         if (sanitySignageSlides) setSignageSlides(sanitySignageSlides);
+        if (sanitySchoolPage) setSchoolPageData(sanitySchoolPage);
 
       } catch (err) {
         console.warn("Sanity indisponible:", err);
@@ -735,10 +742,23 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     let interval: NodeJS.Timeout;
 
+    const refreshPlannings = () =>
+      fetch('/api/plannings')
+        .then(res => res.json())
+        .then(data => {
+          if (data && !data.error) {
+            if (data.plannings) setPlannings(data.plannings);
+            if (data.charPlannings) setCharPlannings(data.charPlannings);
+            if (data.marchePlannings) setMarchePlannings(data.marchePlannings);
+          }
+        })
+        .catch(() => { });
+
     const startPolling = () => {
       if (interval) clearInterval(interval);
       interval = setInterval(() => {
         if (document.visibilityState === 'visible') {
+          // Refresh statuses from cockpit API
           fetch('/api/cockpit/direct')
             .then(res => res.json())
             .then(data => {
@@ -755,13 +775,16 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
               }
             })
             .catch(() => { });
+
+          // Always refresh plannings directly from server (no CDN, no cache)
+          refreshPlannings();
         }
-      }, 300000); // 5 minutes
+      }, 30000); // 30 seconds
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // Fast refresh on focus for direct cockpit data
+        // Refresh status on tab focus
         fetch('/api/cockpit/direct')
           .then(res => res.json())
           .then(data => {
@@ -778,6 +801,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             }
           })
           .catch(() => { });
+        // Refresh plannings on tab focus (picks up admin changes immediately)
+        refreshPlannings();
         startPolling();
       } else {
         if (interval) clearInterval(interval);
@@ -848,6 +873,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       lastPublishedAt,
       vibeMessages, currentVibe,
       clubData, groupsData, activitiesData, leSpotData, natureData, homePageData,
+      schoolPageData,
       updateWeather, updateActivity, updateStatus,
       setSpotStatus, setStatusMessage,
       setCharStatus, setCharMessage, setCharTags,

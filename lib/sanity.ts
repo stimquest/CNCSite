@@ -9,57 +9,21 @@ type SanityImageSource = any;
  * Project ID: df7iwkkw
  * Dataset: production
  */
+// Client lecture — contenu publié uniquement
 export const client = createClient({
   projectId: 'df7iwkkw',
   dataset: 'production',
-  useCdn: false, // Désactiver le CDN pour éviter les problèmes de cache (temporaire ou définitif pour ce site à faible trafic)
+  useCdn: false,
   apiVersion: '2024-03-15',
-  // Pas de token ici pour éviter les coûts API inutiles
 });
 
-// ... (skip to queries)
-
-// Page Nature (Avec projection intelligente : on garde les titres du singleton, mais on remplit la liste avec les documents natureEntity)
-naturePage: `*[_type == "naturePage"][0] {
-      ...,
-      "hero": { ..., "heroImage": hero.heroImage.asset->url },
-      "estran": {
-          ...,
-          "cards": estran.cards[] { ..., "iconName": iconName }
-      },
-      "habitants": {
-          "tag": habitants.tag,
-          "title": habitants.title,
-          "subtitle": habitants.subtitle,
-          "list": *[_type == "natureEntity"] | order(name asc) {
-              name,
-              scientificName,
-              "image": image.asset->url,
-              tags,
-              tagColor,
-              description
-          }
-      },
-      "peche": { ... },
-      "observations": observations[]{
-          ...,
-          "images": images[].asset->url
-      },
-      "exploration": {
-          ...,
-          "cards": exploration.cards[]{
-             ...,
-             "image": image.asset->url
-          }
-      }
-  }`
-
+// Client écriture — token serveur uniquement (jamais exposé au navigateur)
 export const writeClient = createClient({
   projectId: 'df7iwkkw',
   dataset: 'production',
-  useCdn: false, // Jamais de CDN pour l'écriture
+  useCdn: false,
   apiVersion: '2024-03-15',
-  token: process.env.NEXT_PUBLIC_SANITY_WRITE_TOKEN || '',
+  token: process.env.SANITY_WRITE_TOKEN || '',
 });
 
 // Image URL Builder

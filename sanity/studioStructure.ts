@@ -68,6 +68,15 @@ export const structure: StructureResolver = (S) =>
                         .documentId('naturePage')
                         .title('Contenu Page Nature')
                 ),
+            S.listItem()
+                .title('Contenu Page Ecole')
+                .id('schoolPage')
+                .child(
+                    S.document()
+                        .schemaType('schoolPage')
+                        .documentId('schoolPage')
+                        .title('Contenu Page Ecole')
+                ),
 
             S.listItem()
                 .title('Galerie Accueil')
@@ -83,6 +92,6 @@ export const structure: StructureResolver = (S) =>
 
             // Regular document types
             ...S.documentTypeListItems().filter(
-                (listItem) => !['naturePage', 'clubPage', 'groupsPage', 'activitiesPage', 'leSpotPage', 'homeGallery', 'spotSettings', 'homePage', 'infosPage'].includes(listItem.getId() || '')
+                (listItem) => !['naturePage', 'clubPage', 'groupsPage', 'activitiesPage', 'leSpotPage', 'homeGallery', 'spotSettings', 'homePage', 'infosPage', 'schoolPage'].includes(listItem.getId() || '')
             ),
         ]);

@@ -52,9 +52,9 @@ export const spotSettings = defineType({
       type: 'string',
       options: {
         list: [
-          { title: '🟢 Ouverte', value: 'OPEN' },
-          { title: '🟡 Adaptée', value: 'RESTRICTED' },
-          { title: '🔴 Suspendue', value: 'CLOSED' },
+          { title: '🟢 Confirmée', value: 'OPEN' },
+          { title: '🟡 Confirmée – conditions techniques', value: 'RESTRICTED' },
+          { title: '🔴 Annulée', value: 'CLOSED' },
         ],
         layout: 'radio',
       },
@@ -79,9 +79,9 @@ export const spotSettings = defineType({
       type: 'string',
       options: {
         list: [
-          { title: '🟢 Ouverte', value: 'OPEN' },
-          { title: '🟡 Adaptée', value: 'RESTRICTED' },
-          { title: '🔴 Suspendue', value: 'CLOSED' },
+          { title: '🟢 Activité confirmée', value: 'OPEN' },
+          { title: '🟡 Parcours adapté aux conditions', value: 'RESTRICTED' },
+          { title: '🔴 Sortie reportée', value: 'CLOSED' },
         ],
         layout: 'radio',
       },
@@ -106,9 +106,9 @@ export const spotSettings = defineType({
       type: 'string',
       options: {
         list: [
-          { title: '🟢 Ouverte', value: 'OPEN' },
-          { title: '🟡 Adaptée', value: 'RESTRICTED' },
-          { title: '🔴 Suspendue', value: 'CLOSED' },
+          { title: '🟢 Conditions favorables', value: 'OPEN' },
+          { title: '🟡 Conditions techniques – pratiquants expérimentés', value: 'RESTRICTED' },
+          { title: '🔴 Sortie déconseillée', value: 'CLOSED' },
         ],
         layout: 'radio',
       },
@@ -133,9 +133,9 @@ export const spotSettings = defineType({
       type: 'string',
       options: {
         list: [
-          { title: '🟢 Maintenu', value: 'OPEN' },
-          { title: '🟡 Adapté', value: 'RESTRICTED' },
-          { title: '🔴 Annulé', value: 'CLOSED' },
+          { title: '🟢 Confirmée', value: 'OPEN' },
+          { title: '🟡 Confirmée – conditions techniques', value: 'RESTRICTED' },
+          { title: '🔴 Annulée', value: 'CLOSED' },
         ],
         layout: 'radio',
       },
@@ -154,9 +154,9 @@ export const spotSettings = defineType({
       type: 'string',
       options: {
         list: [
-          { title: '🟢 Maintenu', value: 'OPEN' },
-          { title: '🟡 Adapté', value: 'RESTRICTED' },
-          { title: '🔴 Annulé', value: 'CLOSED' },
+          { title: '🟢 Confirmée', value: 'OPEN' },
+          { title: '🟡 Confirmée – conditions techniques', value: 'RESTRICTED' },
+          { title: '🔴 Annulée', value: 'CLOSED' },
         ],
         layout: 'radio',
       },
@@ -174,9 +174,9 @@ export const spotSettings = defineType({
       type: 'string',
       options: {
         list: [
-          { title: '🟢 Maintenu', value: 'OPEN' },
-          { title: '🟡 Adapté', value: 'RESTRICTED' },
-          { title: '🔴 Annulé', value: 'CLOSED' },
+          { title: '🟢 Confirmée', value: 'OPEN' },
+          { title: '🟡 Confirmée – conditions techniques', value: 'RESTRICTED' },
+          { title: '🔴 Annulée', value: 'CLOSED' },
         ],
         layout: 'radio',
       },
@@ -194,9 +194,9 @@ export const spotSettings = defineType({
       type: 'string',
       options: {
         list: [
-          { title: '🟢 Maintenu', value: 'OPEN' },
-          { title: '🟡 Adapté', value: 'RESTRICTED' },
-          { title: '🔴 Annulé', value: 'CLOSED' },
+          { title: '🟢 Confirmée', value: 'OPEN' },
+          { title: '🟡 Confirmée – conditions techniques', value: 'RESTRICTED' },
+          { title: '🔴 Reportée', value: 'CLOSED' },
         ],
         layout: 'radio',
       },
@@ -210,8 +210,14 @@ export const spotSettings = defineType({
 
     defineField({
       name: 'lastPublishedAt',
-      title: 'Dernière publication (chef de base)',
-      description: 'Mis à jour automatiquement à chaque publication via le cockpit ou l\'admin.',
+      title: 'Dernière mise à jour (chef de base)',
+      description: 'Mis à jour à chaque modification de statut via le cockpit.',
+      type: 'datetime',
+    }),
+    defineField({
+      name: 'lastConfirmedAt',
+      title: 'Dernière confirmation (chef de base)',
+      description: 'Mis à jour quand le chef de base confirme que tout est OK sans changement.',
       type: 'datetime',
     }),
   ],

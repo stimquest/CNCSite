@@ -71,7 +71,22 @@ const PLANNING_ROWS = [
 ];
 
 // --- DATA: NIVEAUX D'ENSEIGNEMENT (STORYTELLING VERSION) ---
-const SCHOOL_STORY = [
+// --- HELPERS: ICON MAPPING ---
+const getIcon = (iconName: string, size = 24) => {
+  const icons: { [key: string]: React.ReactNode } = {
+    'Sun': <Sun size={size} />,
+    'Anchor': <Anchor size={size} />,
+    'Wind': <Wind size={size} />,
+    'Waves': <Waves size={size} />,
+    'GraduationCap': <GraduationCap size={size} />,
+    'Compass': <Compass size={size} />,
+    'Ship': <Ship size={size} />,
+    'LifeBuoy': <LifeBuoy size={size} />
+  };
+  return icons[iconName] || <Wind size={size} />;
+};
+
+const DEFAULT_STAGES = [
   {
     id: "mini-mousses",
     step: "01",
@@ -87,12 +102,12 @@ const SCHOOL_STORY = [
     
     Le programme est riche et varié : deux séances de deux heures du Lundi au Vendredi. Le stage est modulable : l'activité est choisie la veille en fonction du groupe et de la météo. L'effectif est limité à 8 enfants avec un matériel spécialement adapté aux plus petits.`,
     price: "163 €",
-    prices: [{ label: "Stage Semaine (Tout Inclus)", value: "163 €" }],
+    pricingTiers: [{ label: "Stage Semaine (Tout Inclus)", value: "163 €" }],
     logistique: ["Gilet de sauvetage fourni", "Combinaison adaptée fournie", "Bassin marin sécurisé", "Carnet de voile offert"],
     image: "/images/imgBank/minimousse.jpg",
     color: "text-orange-500",
     bgColor: "bg-orange-500",
-    icon: <Sun size={24} />
+    iconName: "Sun"
   },
   {
     id: "moussaillons",
@@ -109,12 +124,12 @@ const SCHOOL_STORY = [
     
     Le reste de la semaine, les séances de 2h permettent une progression ludique vers l'autonomie. Toujours à la carte selon la météo : Optimist, Trimaran, Catamaran ou Chars à voile. 8 enfants maximum par moniteur.`,
     price: "168 €",
-    prices: [{ label: "Stage Semaine (Tout Inclus)", value: "168 €" }],
+    pricingTiers: [{ label: "Stage Semaine (Tout Inclus)", value: "168 €" }],
     logistique: ["Initiation sur lac incluse", "Matériel sécurisé FFV", "Passage de niveaux", "Combinaison fournie"],
     image: "/images/imgBank/moussaillon.jpg",
     color: "text-turquoise",
     bgColor: "bg-turquoise",
-    icon: <Anchor size={24} />
+    iconName: "Anchor"
   },
   {
     id: "catamaran",
@@ -133,7 +148,7 @@ const SCHOOL_STORY = [
     - 14/16 pieds : Perf et adultes
     Le tarif inclut systématiquement le passeport voile et l'adhésion club.`,
     price: "Dès 183 €",
-    prices: [
+    pricingTiers: [
       { label: "Cata 10-12 pieds (8-12 ans)", value: "183 €" },
       { label: "Cata 14 pieds (13-15 ans)", value: "203 €" },
       { label: "Cata 16 pieds (Adultes)", value: "233 €" }
@@ -142,7 +157,7 @@ const SCHOOL_STORY = [
     image: "/images/imgBank/Cata001.jpg",
     color: "text-blue-600",
     bgColor: "bg-blue-600",
-    icon: <Wind size={24} />
+    iconName: "Wind"
   },
   {
     id: "planche",
@@ -158,12 +173,12 @@ const SCHOOL_STORY = [
     longDescription: `Accessible dès 10 ans. Matériel récent F-One et Duotone. Boards larges pour débuter, voiles légères pour les jeunes. 
     5 séances de 3h du lundi au vendredi. Progression individualisée validée sur livret FFV.`,
     price: "183 €",
-    prices: [{ label: "Stage Semaine (Tout Inclus)", value: "183 €" }],
+    pricingTiers: [{ label: "Stage Semaine (Tout Inclus)", value: "183 €" }],
     logistique: ["Planches larges haute stabilité", "Gréements légers spécial jeunes", "Encadrement expert", "Combinaison renforcée"],
     image: "/images/imgBank/WindsurfandKite.jpg",
     color: "text-purple-500",
     bgColor: "bg-purple-500",
-    icon: <Waves size={24} />
+    iconName: "Waves"
   },
   {
     id: "formation",
@@ -182,7 +197,7 @@ const SCHOOL_STORY = [
     Conditions d'accès : 16 ans min, Niveau 4 FFVoile, PSC1, Permis Bateau Côtier.
     Pour toute question sur le PSC1 (secourisme) ou le recyclage, contactez-nous par mail à contact@cncoutainville.fr`,
     price: "Frais Pédago : Nous contacter",
-    prices: [
+    pricingTiers: [
       { label: "CQP Initiateur Voile", value: "Sur Devis" },
       { label: "Formation PSC1 / Recyclage", value: "Nous contacter" }
     ],
@@ -196,7 +211,7 @@ const SCHOOL_STORY = [
     image: "/images/imgBank/Secourisme.jpg",
     color: "text-slate-900",
     bgColor: "bg-slate-900",
-    icon: <GraduationCap size={24} />
+    iconName: "GraduationCap"
   }
 ];
 
@@ -233,7 +248,7 @@ const StorySection: React.FC<{ item: any; index: number }> = ({ item, index }) =
                   </span>
                 </div>
                 <div className={`size-12 md:size-14 rounded-2xl flex items-center justify-center text-white shadow-xl ${item.bgColor} border-2 border-white/20 shrink-0`}>
-                  {React.cloneElement(item.icon as React.ReactElement<any>, { size: 24 })}
+                  {getIcon(item.iconName, 24)}
                 </div>
               </div>
             </div>
@@ -288,7 +303,7 @@ const StorySection: React.FC<{ item: any; index: number }> = ({ item, index }) =
                         <Euro size={16} /> Tarifs
                       </h4>
                       <div className="space-y-4">
-                        {item.prices.map((p: any, i: number) => (
+                        {item.pricingTiers?.map((p: any, i: number) => (
                           <div key={i} className="flex justify-between items-center">
                             <span className="text-xs font-bold text-slate-400 uppercase">{p.label}</span>
                             <span className="text-lg font-black text-white">{p.value}</span>
@@ -330,7 +345,7 @@ const StorySection: React.FC<{ item: any; index: number }> = ({ item, index }) =
 
 // --- PAGE PRINCIPALE ---
 export const EcoleVoilePage: React.FC = () => {
-  const { plannings: rawPlannings, isLoading } = useContent();
+  const { plannings: rawPlannings, isLoading, schoolPageData } = useContent();
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
   const [isWeekSelectorOpen, setIsWeekSelectorOpen] = useState(false);
 
@@ -365,47 +380,108 @@ export const EcoleVoilePage: React.FC = () => {
   return (
     <div className="w-full font-sans bg-white">
 
-      {/* 1. HERO HEADER */}
       <PageHero
-        image="/images/imgBank/CataPharePointeAgon.jpg"
+        image={schoolPageData?.hero?.image || "/images/imgBank/CataPharePointeAgon.jpg"}
         imageAlt="Sailing School"
         tagIcon={<GraduationCap size={14} />}
-        tagText="École Française de Voile"
-        title="L'École de"
-        subtitle="La Mer."
+        tagText={schoolPageData?.hero?.tagText || "École Française de Voile"}
+        title={schoolPageData?.hero?.title || "L'École de"}
+        subtitle={schoolPageData?.hero?.subtitle || "La Mer."}
       >
-        <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-[300px]">
-          <div className="size-16 rounded-2xl bg-abysse flex items-center justify-center text-white shadow-lg shrink-0">
-            <Anchor size={32} />
-          </div>
-          <div className="text-left">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Fondée en</p>
-            <p className="text-4xl font-black text-abysse tracking-tighter">1978</p>
-            <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">Savoir-faire historique</p>
-          </div>
-        </div>
+        {schoolPageData?.heroBadges?.map((badge, idx) => {
+          const isGlass = badge.style === 'glass';
+          const containerClass = isGlass
+            ? "bg-white/10 backdrop-blur-xl border-white/10 text-white"
+            : "bg-white border-slate-100 text-abysse shadow-2xl";
+          const iconContainerClass = isGlass
+            ? "bg-white/10 text-white"
+            : "bg-abysse text-white shadow-lg";
+          const labelClass = isGlass ? "text-white/40" : "text-slate-400";
+          const sublabelClass = isGlass ? "text-white/60" : "text-slate-400";
 
-        <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-[300px]">
-          <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center text-white shrink-0">
-            <CheckCircle2 size={32} />
-          </div>
-          <div className="text-left">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">Label</p>
-            <p className="text-2xl font-black text-white uppercase italic leading-none">Qualité FFV</p>
-            <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">Stages tous niveaux</p>
-          </div>
-        </div>
+          return (
+            <div key={idx} className={`${containerClass} rounded-[2rem] p-8 border flex items-center gap-8 min-w-[300px]`}>
+              <div className={`size-16 rounded-2xl flex items-center justify-center shrink-0 ${iconContainerClass}`}>
+                {getIcon(badge.iconName || (idx === 0 ? 'Anchor' : 'CheckCircle2'), 32)}
+              </div>
+              <div className="text-left">
+                <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 ${labelClass}`}>
+                  {badge.label}
+                </p>
+                <p className={`text-4xl font-black tracking-tighter ${isGlass ? 'text-white italic' : ''}`}>
+                  {badge.value}
+                </p>
+                <p className={`text-[10px] font-bold mt-1 uppercase ${sublabelClass}`}>
+                  {badge.sublabel}
+                </p>
+              </div>
+            </div>
+          );
+        }) || (
+            <>
+              <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-[300px]">
+                <div className="size-16 rounded-2xl bg-abysse flex items-center justify-center text-white shadow-lg shrink-0">
+                  <Anchor size={32} />
+                </div>
+                <div className="text-left">
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Fondée en</p>
+                  <p className="text-4xl font-black text-abysse tracking-tighter">1978</p>
+                  <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">Savoir-faire historique</p>
+                </div>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-[300px]">
+                <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center text-white shrink-0">
+                  <CheckCircle2 size={32} />
+                </div>
+                <div className="text-left">
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">Label</p>
+                  <p className="text-2xl font-black text-white uppercase italic leading-none">Qualité FFV</p>
+                  <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">Stages tous niveaux</p>
+                </div>
+              </div>
+            </>
+          )}
       </PageHero>
 
       {/* 2. MENU SECONDAIRE STICKY (Style Harmonisé) */}
-      <SecondaryNav sections={[
-        { id: 'mini-mousses', label: '5-7 ans' },
-        { id: 'moussaillons', label: '8-9 ans' },
-        { id: 'catamaran', label: 'Catamaran' },
-        { id: 'planche', label: 'Planche' },
-        { id: 'formation', label: 'Formation' },
-        { id: 'planning', label: 'Planning' },
-      ]} />
+      <SecondaryNav sections={(schoolPageData?.stages?.length ? schoolPageData.stages : DEFAULT_STAGES).map(s => ({
+        id: s.id,
+        label: s.officialName || s.title
+      })).concat([{ id: 'planning', label: 'Planning' }])} />
+
+      {/* NEW: SECTION INTRO / PRÉSENTATION */}
+      <section className="py-12 bg-white relative overflow-hidden">
+        <div className="max-w-[960px] mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="space-y-4"
+          >
+            <div className="w-16 h-1.5 bg-turquoise mx-auto rounded-full"></div>
+
+            <h2 className="text-2xl md:text-4xl text-abysse leading-tight italic font-black tracking-tighter">
+              {schoolPageData?.intro?.title || "À Coutainville, la voile fait partie de l’histoire du littoral."}
+            </h2>
+
+            <div className="text-lg md:text-xl text-slate-600 font-medium leading-relaxed max-w-4xl mx-auto whitespace-pre-line">
+              {schoolPageData?.intro?.content || (
+                <>
+                  Depuis <span className="text-abysse font-black italic">1929</span>, une école de voile permet aux générations de navigateurs de découvrir et d’apprendre la navigation face à la Manche.{"\n\n"}
+                  Aujourd’hui encore, l’école accueille enfants, adolescents et adultes pour vivre leurs premières sensations sur l’eau et progresser dans la pratique de la voile.
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-center gap-4 pt-4">
+              <div className="size-2 rounded-full bg-slate-200"></div>
+              <div className="size-2 rounded-full bg-turquoise"></div>
+              <div className="size-2 rounded-full bg-slate-200"></div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       <div className="relative z-20"></div>
 
@@ -414,7 +490,7 @@ export const EcoleVoilePage: React.FC = () => {
         {/* The Connector line (Journey Line) */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-full bg-linear-to-b from-turquoise/0 via-turquoise to-turquoise/0 hidden lg:block opacity-20"></div>
 
-        {SCHOOL_STORY.map((item, index) => (
+        {(schoolPageData?.stages?.length ? schoolPageData.stages : DEFAULT_STAGES).map((item, index) => (
           <StorySection key={item.id} item={item} index={index} />
         ))}
       </section>
@@ -428,13 +504,15 @@ export const EcoleVoilePage: React.FC = () => {
         <div className="max-w-[1400px] mx-auto relative z-10">
           <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
             <div>
-              <span className="text-turquoise text-[10px] font-black uppercase tracking-[0.4em] mb-4 block">Le Sac de Bord</span>
+              <span className="text-turquoise text-[10px] font-black uppercase tracking-[0.4em] mb-4 block">
+                {schoolPageData?.practicalInfo?.subtitle || "Le Sac de Bord"}
+              </span>
               <h2 className="text-4xl md:text-6xl leading-none">
-                Prêt pour<br />Le Grand Saut ?
+                {schoolPageData?.practicalInfo?.title || "Prêt pour Le Grand Saut ?"}
               </h2>
             </div>
             <div className="max-w-xs text-slate-400 text-sm font-medium leading-relaxed border-l-2 border-turquoise pl-6">
-              Nous nous occupons de la technique, vous apportez l'enthousiasme. Voici tout ce qu'il faut savoir avant d'embarquer.
+              {schoolPageData?.practicalInfo?.description || "Nous nous occupons de la technique, vous apportez l'enthousiasme. Voici tout ce qu'il faut savoir avant d'embarquer."}
             </div>
           </div>
 
@@ -446,7 +524,7 @@ export const EcoleVoilePage: React.FC = () => {
               </div>
               <h3 className="text-2xl mb-6">Matériel Fourni</h3>
               <ul className="space-y-4">
-                {["Combinaisons intégrales", "Gilets de sauvetage", "Harnais de trapèze", "Coupe-vent"].map((item, i) => (
+                {(schoolPageData?.equipmentProvided || ["Combinaisons intégrales", "Gilets de sauvetage", "Harnais de trapèze", "Coupe-vent"]).map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-slate-300 font-bold text-sm tracking-wide">
                     <CheckCircle2 size={18} className="text-turquoise" />
                     {item}
@@ -462,12 +540,12 @@ export const EcoleVoilePage: React.FC = () => {
               </div>
               <h3 className="text-2xl mb-6">À Prévoir</h3>
               <ul className="space-y-4">
-                {[
+                {(schoolPageData?.toBring || [
                   "Maillot de bain",
                   "Chaussures fermées sacrifiables",
                   "Crème solaire & Lunettes",
                   "Serviette & Rechange"
-                ].map((item, i) => (
+                ]).map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-slate-300 font-bold text-sm tracking-wide">
                     <span className="text-turquoise font-black text-xs">{i + 1}.</span>
                     {item}
@@ -479,13 +557,13 @@ export const EcoleVoilePage: React.FC = () => {
             {/* Safety/Weather */}
             <div className="bg-turquoise text-abysse p-10 rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col justify-center">
               <AlertTriangle size={64} className="opacity-10 absolute -top-4 -right-4" />
-              <h3 className="text-2xl mb-6">Météo & Sécurité</h3>
+              <h3 className="text-2xl mb-6">{schoolPageData?.safetyInfo?.title || "Météo & Sécurité"}</h3>
               <p className="font-bold leading-relaxed mb-8">
-                La mer décide toujours. En cas de tempête, la séance est maintenue à terre (théorie, noeuds, matelotage) ou reportée au samedi.
+                {schoolPageData?.safetyInfo?.description || "La mer décide toujours. En cas de tempête, la séance est maintenue à terre (théorie, noeuds, matelotage) ou reportée au samedi."}
               </p>
               <div className="p-6 bg-abysse/10 rounded-2xl border border-abysse/10 font-black text-[10px] uppercase tracking-widest leading-loose">
                 <Compass size={20} className="mb-2" />
-                École labellisée Fédération Française de Voile depuis 1978.
+                {schoolPageData?.safetyInfo?.footerText || "École labellisée Fédération Française de Voile depuis 1978."}
               </div>
             </div>
           </div>

@@ -178,15 +178,14 @@ export const PlanningWidget: React.FC = () => {
 
                                     return (
                                         <td key={dayIdx} className={`p-1 ${isVisible ? 'block' : 'hidden'} md:table-cell`}>
-                                            <div className={`rounded-xl h-full min-h-[50px] flex flex-col items-center justify-center text-center shadow-sm transition-colors ${isRaid ? 'bg-orange-500' : 'bg-white border border-slate-100 hover:border-turquoise/50 p-2'}`}>
-                                                {isRaid ? (
-                                                    <span className="text-white text-[10px] font-black uppercase tracking-widest">RAID</span>
-                                                ) : (
-                                                    <>
-                                                        <span className="text-[11px] font-black text-abysse leading-none">{time}</span>
-                                                        {desc && <span className="text-[8px] font-bold text-slate-400 uppercase mt-1 line-clamp-1">{desc}</span>}
-                                                    </>
+                                            <div className={`rounded-xl h-full min-h-[50px] flex flex-col items-center justify-center text-center shadow-sm transition-colors bg-white border ${isRaid ? 'border-orange-200' : 'border-slate-100 hover:border-turquoise/50'} p-2`}>
+                                                {isRaid && (
+                                                    <span className="mb-1 px-1.5 py-0.5 bg-orange-500 text-white text-[8px] font-black uppercase tracking-widest rounded-md">
+                                                        🗺️ Raid
+                                                    </span>
                                                 )}
+                                                <span className="text-[11px] font-black text-abysse leading-none">{time}</span>
+                                                {desc && <span className="text-[8px] font-bold text-slate-400 uppercase mt-1 line-clamp-1">{desc}</span>}
                                             </div>
                                         </td>
                                     );

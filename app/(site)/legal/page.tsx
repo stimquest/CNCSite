@@ -50,13 +50,13 @@ export default function LegalPage() {
                             </div>
                             <ul className="space-y-4 list-disc pl-5">
                                 <li>
-                                    <strong className="text-abysse uppercase text-[11px] tracking-wider">OneSignal (Alertes) :</strong> Utilisé pour gérer votre abonnement aux notifications push. Sans ce cookie, nous ne pouvons pas vous envoyer les alertes de votre groupe.
+                                    <strong className="text-abysse uppercase text-[11px] tracking-wider">Sanity (Contenu) :</strong> Permet d'assurer la cohérence du contenu dynamique affiché sur le site. Aucune donnée personnelle n'est collectée.
                                 </li>
                                 <li>
-                                    <strong className="text-abysse uppercase text-[11px] tracking-wider">Sanity (Contenu) :</strong> Permet d'assurer la cohérence du contenu dynamique affiché sur le site.
+                                    <strong className="text-abysse uppercase text-[11px] tracking-wider">LocalStorage (Admin) :</strong> Uniquement si vous accédez à l'espace administration du club. Stocké uniquement en local sur votre appareil.
                                 </li>
                                 <li>
-                                    <strong className="text-abysse uppercase text-[11px] tracking-wider">LocalStorage (Admin) :</strong> Uniquement si vous accédez à l'espace administration du club.
+                                    <strong className="text-abysse uppercase text-[11px] tracking-wider">SessionStorage (Météo) :</strong> Utilisé pour limiter les appels API météo et marée. Effacé à la fermeture de l'onglet.
                                 </li>
                             </ul>
                         </section>
@@ -68,7 +68,8 @@ export default function LegalPage() {
                                 <h2 className="text-lg text-abysse">Vos Droits</h2>
                             </div>
                             <p>
-                                Conformément au **RGPD**, vous pouvez à tout moment refuser ou supprimer vos abonnements aux notifications directement dans les réglages de votre navigateur ou via la page **La Vigie**.
+                                Conformément au <strong>RGPD</strong>, ce site ne collecte aucune donnée personnelle identifiable.
+                                Aucun cookie de tracking, de publicité ou de profilage n'est utilisé.
                                 Pour toute question, contactez-nous au club !
                             </p>
                         </section>

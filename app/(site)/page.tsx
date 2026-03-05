@@ -24,6 +24,14 @@ const HERO_IMAGES = [
     '/images/Hero/upscaled_char3.JPEG'
 ];
 
+const CATEGORY_CONFIG: Record<string, { dot: string; color: string; label: string }> = {
+    alert: { dot: 'bg-amber-400', color: 'text-amber-600', label: 'Alerte' },
+    weather: { dot: 'bg-cyan-400', color: 'text-cyan-600', label: 'Météo' },
+    event: { dot: 'bg-purple-400', color: 'text-purple-600', label: 'Événement' },
+    vibe: { dot: 'bg-emerald-400', color: 'text-emerald-600', label: 'Ambiance' },
+    info: { dot: 'bg-slate-300', color: 'text-slate-400', label: 'Info' },
+};
+
 if (typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
 }
@@ -353,61 +361,130 @@ export const HomePage: React.FC = () => {
                             <Link href="/fil-info" className="text-[9px] font-black text-turquoise uppercase tracking-widest hover:underline">La Vigie →</Link>
                         </div>
                         {(() => {
-                            const activities = [
-                                { label: 'Char à Voile', status: charStatus, msg: charMessage },
-                                { label: 'Sports Nautiques', status: nautiqueStatus, msg: nautiqueMessage },
-                                { label: 'Mini-Mousses', status: stagesMiniMoussesStatus, msg: stagesMiniMoussesMessage },
-                                { label: 'Moussaillons', status: stagesMoussaillonsStatus, msg: stagesMoussaillonsMessage },
-                                { label: 'Initiation', status: stagesInitiationStatus, msg: stagesInitiationMessage },
-                                { label: 'Perfectionnement', status: stagesPerfStatus, msg: stagesPerfMessage },
+                            const activites = [
+                                { label: 'Char à Voile', status: charStatus, msg: charMessage, category: 'encadree' as const },
+                                { label: 'Sports Nautiques', status: nautiqueStatus, msg: nautiqueMessage, category: 'autonome_voile' as const },
                             ];
-                            const getActCfg = (s: string) => {
-                                if (s === 'OPEN' || s === 'IDEAL' || s === 'FAVORABLE') return { dot: 'bg-emerald-500', label: 'Maintenu', color: 'text-emerald-600' };
-                                if (s === 'RESTRICTED' || s === 'VARIABLE') return { dot: 'bg-amber-400', label: 'Adapté', color: 'text-amber-600' };
-                                return { dot: 'bg-rose-500', label: 'Annulé', color: 'text-rose-600' };
+                            const stages = [
+                                { label: 'Mini-Mousses', status: stagesMiniMoussesStatus, msg: stagesMiniMoussesMessage, category: 'encadree' as const },
+                                { label: 'Moussaillons', status: stagesMoussaillonsStatus, msg: stagesMoussaillonsMessage, category: 'encadree' as const },
+                                { label: 'Initiation', status: stagesInitiationStatus, msg: stagesInitiationMessage, category: 'encadree' as const },
+                                { label: 'Perfectionnement', status: stagesPerfStatus, msg: stagesPerfMessage, category: 'encadree' as const },
+                            ];
+                            const getActCfg = (s: string, category: 'encadree' | 'autonome_voile' | 'marche') => {
+                                let label = '';
+                                if (s === 'OPEN' || s === 'IDEAL' || s === 'FAVORABLE') {
+                                    if (category === 'autonome_voile') label = 'Favorables';
+                                    else label = 'Confirmée';
+                                    return { dot: 'bg-emerald-500', label, color: 'text-emerald-600' };
+                                }
+                                if (s === 'RESTRICTED' || s === 'VARIABLE') {
+                                    if (category === 'autonome_voile') label = 'Techniques (Exp.)';
+                                    else if (category === 'marche') label = 'Parcours adapté';
+                                    else label = 'Cond. techniques';
+                                    return { dot: 'bg-amber-400', label, color: 'text-amber-600' };
+                                }
+                                if (category === 'autonome_voile') label = 'Déconseillée';
+                                else if (category === 'marche') label = 'Reportée';
+                                else label = 'Annulée';
+                                return { dot: 'bg-rose-500', label, color: 'text-rose-600' };
+                            };
+                            const ActivityCard = ({ act }: { act: { label: string; status: string; msg?: string; category: 'encadree' | 'autonome_voile' | 'marche' } }) => {
+                                const cfg = getActCfg(act.status, act.category);
+                                return (
+                                    <div className="flex flex-col gap-0.5 pb-2">
+                                        <span className="text-[11px] font-black uppercase tracking-widest text-abysse/40 italic">{act.label}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className={`size-2 rounded-full shrink-0 ${cfg.dot}`} />
+                                            <span className={`text-[14px] font-black uppercase italic leading-none tracking-tight ${cfg.color}`}>{cfg.label}</span>
+                                        </div>
+                                        {act.msg && <p className="text-[10px] text-abysse/40 font-medium leading-snug truncate">{act.msg}</p>}
+                                    </div>
+                                );
                             };
                             return (
-                                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                                    {activities.map((act, i) => {
-                                        const cfg = getActCfg(act.status);
-                                        return (
-                                            <div key={i} className="flex flex-col gap-0.5 border-b border-abysse/5 pb-2">
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-abysse/30 italic">{act.label}</span>
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className={`size-1.5 rounded-full shrink-0 ${cfg.dot}`} />
-                                                    <span className={`text-[13px] font-black uppercase italic leading-none tracking-tight ${cfg.color}`}>{cfg.label}</span>
-                                                </div>
-                                                {act.msg && <p className="text-[8px] text-abysse/35 font-medium leading-snug truncate">{act.msg}</p>}
-                                            </div>
-                                        );
-                                    })}
+                                <div className="flex flex-col gap-3">
+                                    {/* Groupe 1 : Activités libres */}
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 border-b border-abysse/10 pb-3">
+                                        {activites.map((act, i) => <ActivityCard key={i} act={act} />)}
+                                    </div>
+                                    {/* Groupe 2 : Stages */}
+                                    <div>
+                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-abysse/20 mb-2 block">Stages</span>
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                            {stages.map((act, i) => <ActivityCard key={i} act={act} />)}
+                                        </div>
+                                    </div>
                                 </div>
                             );
                         })()}
-                        {lastPublishedAt && (
-                            <p className="text-[8px] text-abysse/25 font-medium mt-2 italic">
-                                Mis à jour · {new Date(lastPublishedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} à {new Date(lastPublishedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                        )}
+                        {lastPublishedAt && (() => {
+                            const pub = new Date(lastPublishedAt);
+                            const now = new Date();
+                            const isToday = pub.toDateString() === now.toDateString();
+                            const dateLabel = isToday
+                                ? 'Aujourd\'hui'
+                                : pub.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                            return (
+                                <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-abysse/10">
+                                    <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                                    <p className="text-[11px] text-abysse/60 font-semibold">
+                                        Mis à jour · <span className="font-black text-abysse/80">{dateLabel} à {pub.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                    </p>
+                                </div>
+                            );
+                        })()}
                     </div>
 
                     {/* COL 6–9 : Flash Infos */}
-                    <div className="lg:col-span-4 border-r border-abysse/5 px-2">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="size-1.5 rounded-full bg-turquoise animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-abysse/40">Flash Infos</span>
+                    <div className="lg:col-span-4 border-r border-abysse/5 px-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <span className="size-1.5 rounded-full bg-turquoise animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-abysse/40">Flash Infos</span>
+                            </div>
+                            <Link href="/fil-info" className="text-[9px] font-black text-turquoise uppercase tracking-widest hover:underline">Voir tout →</Link>
                         </div>
                         <div className="space-y-3">
-                            {news && news.length > 0 ? news.slice(0, 4).map((msg, idx) => (
-                                <div key={msg._id} className={`flex flex-col gap-0.5 border-b border-abysse/5 pb-2 last:border-0 ${idx === 0 ? 'opacity-100' : 'opacity-50 hover:opacity-80 transition-opacity'}`}>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[7px] font-black uppercase tracking-wider text-turquoise/70">{msg.category}</span>
-                                        {msg.publishedAt && <span className="text-[7px] text-abysse/20 italic">{new Date(msg.publishedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>}
-                                    </div>
-                                    <p className="text-[12px] font-black text-abysse uppercase italic tracking-tighter leading-tight">{msg.title}</p>
+                            {infoMessages && infoMessages.length > 0 ? infoMessages.slice(0, 3).map((msg, idx) => {
+                                // Détermination de la couleur en fonction de la catégorie
+                                const catColors: Record<string, string> = {
+                                    alert: 'bg-amber-100/50 text-amber-700 border-amber-200',
+                                    weather: 'bg-cyan-100/50 text-cyan-700 border-cyan-200',
+                                    event: 'bg-purple-100/50 text-purple-700 border-purple-200',
+                                    vibe: 'bg-emerald-100/50 text-emerald-700 border-emerald-200',
+                                };
+                                const colorClass = catColors[msg.category || ''] || 'bg-slate-100 border-slate-200 text-slate-600';
+                                const catLabel = msg.category ? (CATEGORY_CONFIG[msg.category]?.label || msg.category) : 'Info';
+
+                                return (
+                                    <Link href="/fil-info" key={msg._id} className="block group">
+                                        <div className="p-3 rounded-xl border border-slate-100 bg-white shadow-xs hover:border-turquoise/30 hover:shadow-md transition-all">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className={`px-2 py-0.5 rounded-md border text-[9px] font-black uppercase tracking-widest ${colorClass}`}>
+                                                    {catLabel}
+                                                </span>
+                                                {msg.publishedAt && (
+                                                    <span className="text-[9px] text-slate-400 font-medium tracking-wide">
+                                                        {new Date(msg.publishedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <h4 className="text-[13px] font-bold text-abysse leading-snug group-hover:text-turquoise transition-colors line-clamp-2">
+                                                {msg.title}
+                                            </h4>
+                                            {msg.content && (
+                                                <p className="mt-1.5 text-[11px] text-slate-500 line-clamp-2 leading-relaxed font-medium">
+                                                    {msg.content}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </Link>
+                                )
+                            }) : (
+                                <div className="p-4 rounded-xl border border-dashed border-slate-200 text-center">
+                                    <p className="text-[10px] text-slate-400 font-black italic uppercase tracking-wider">Aucune info récente</p>
                                 </div>
-                            )) : (
-                                <p className="text-[10px] text-abysse/20 font-black italic uppercase tracking-wider">Aucun message</p>
                             )}
                         </div>
                     </div>
