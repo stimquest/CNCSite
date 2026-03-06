@@ -408,7 +408,7 @@ const ClubPage: React.FC = () => {
                             {siteData.description}
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {siteData.facilities.map((item, i) => (
+                            {siteData.facilities?.map((item, i) => (
                                 <div key={i} className="flex items-center gap-3 font-black text-abysse text-[10px] uppercase tracking-widest">
                                     <CheckCircle2 size={16} className="text-turquoise" /> {item}
                                 </div>
@@ -429,7 +429,7 @@ const ClubPage: React.FC = () => {
             <section id="fleet" className="mb-20 px-6 max-w-[1600px] mx-auto text-center">
                 <h2 className="text-3xl md:text-4xl text-abysse mb-12">{fleetTitle}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {fleetItems.slice(0, 3).map((fleet, idx) => (
+                    {fleetItems?.slice(0, 3).map((fleet, idx) => (
                         <div key={idx} className="bg-slate-50 rounded-4xl overflow-hidden border border-slate-100 group">
                             <div className="h-64 overflow-hidden">
                                 <img src={fleet.gallery?.[0] || ''} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={fleet.name} />
