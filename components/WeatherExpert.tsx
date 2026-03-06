@@ -53,7 +53,9 @@ export const WeatherExpert: React.FC = () => {
 
         fetchData();
         // Refresh every 60 minutes
-        const interval = setInterval(fetchData, 60 * 60 * 1000);
+        const interval = setInterval(() => {
+            if (!document.hidden) fetchData();
+        }, 60 * 60 * 1000);
         return () => clearInterval(interval);
     }, []);
 

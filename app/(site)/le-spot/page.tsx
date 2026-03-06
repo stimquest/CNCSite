@@ -82,31 +82,13 @@ export const SpotPage: React.FC = () => {
                     <div className="lg:col-span-4 space-y-8">
                         <div className="sticky top-24 space-y-8">
                             {/* WEBCAM CARD */}
-                            <div className="bg-abysse rounded-[2.5rem] overflow-hidden relative aspect-4/3 shadow-2xl group border border-slate-900">
-                                <img
-                                    src="https://picsum.photos/800/600?grayscale"
-                                    className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-1000"
-                                    alt="Live Webcam"
+                            <div className="bg-abysse rounded-[2.5rem] overflow-hidden relative aspect-4/3 lg:aspect-video shadow-2xl border border-slate-900">
+                                <iframe
+                                    src="https://www.skaping.com/coutances/agon-coutainville/video"
+                                    className="absolute inset-0 w-full h-full border-0"
+                                    allow="autoplay; fullscreen"
+                                    title="Live Webcam Agon-Coutainville"
                                 />
-                                <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-transparent to-transparent"></div>
-
-                                <div className="absolute top-6 left-6 flex items-center gap-3">
-                                    <div className="bg-red-600 px-3 py-1.5 rounded text-[9px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg">
-                                        <span className="size-2 bg-white rounded-full animate-pulse"></span> DIRECT
-                                    </div>
-                                    <span className="text-white text-[10px] font-black tracking-widest bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 uppercase">Plage Nord</span>
-                                </div>
-
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                                    <div className="size-16 rounded-full bg-white/20 backdrop-blur-xl flex items-center justify-center text-white border border-white/30">
-                                        <Eye size={24} />
-                                    </div>
-                                </div>
-
-                                <div className="absolute bottom-8 left-8">
-                                    <p className="text-white text-2xl mb-1 leading-none">Webcam Live</p>
-                                    <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest">Vue panoramique sur le havre</p>
-                                </div>
                             </div>
 
                             {/* AGON WINDOWS */}

@@ -26,7 +26,9 @@ export const ActivityGallery: React.FC<ActivityGalleryProps> = ({ images = [], d
 
         const timeout = setTimeout(() => {
             interval = setInterval(() => {
-                setCurrentIndex((prev) => (prev + 1) % galleryItems.length);
+                if (!document.hidden) {
+                    setCurrentIndex((prev) => (prev + 1) % galleryItems.length);
+                }
             }, 5000 + Math.random() * 1000); // Slightly varied intervals too
         }, initialDelay);
 

@@ -147,13 +147,34 @@ export const clubPage = defineType({
                 { name: 'tag', type: 'string', title: 'Tag supérieur', description: 'Ex: "L\'Humain avant tout"' },
                 { name: 'title', type: 'string', title: 'Titre', description: 'Ex: "Une Équipe D\'Experts"' },
                 {
-                    name: 'members',
+                    name: 'boardMembers',
                     type: 'array',
-                    title: 'Membres',
+                    title: 'Le Bureau (Association)',
+                    description: 'Membres élus de l\'association. La photo est optionnelle.',
                     of: [
                         {
                             type: 'object',
-                            title: 'Membre',
+                            title: 'Membre du Bureau',
+                            fields: [
+                                { name: 'name', type: 'string', title: 'Nom' },
+                                { name: 'role', type: 'string', title: 'Rôle' },
+                                { name: 'image', type: 'image', title: 'Photo (optionnelle)', options: { hotspot: true } },
+                            ],
+                            preview: {
+                                select: { title: 'name', subtitle: 'role', media: 'image' }
+                            }
+                        }
+                    ]
+                },
+                {
+                    name: 'proTeam',
+                    type: 'array',
+                    title: 'L\'Équipe Sportive (Opérationnelle)',
+                    description: 'Salariés, moniteurs et encadrants. Photo recommandée.',
+                    of: [
+                        {
+                            type: 'object',
+                            title: 'Membre de l\'Équipe',
                             fields: [
                                 { name: 'name', type: 'string', title: 'Nom' },
                                 { name: 'role', type: 'string', title: 'Rôle' },

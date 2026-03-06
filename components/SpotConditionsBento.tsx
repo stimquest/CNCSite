@@ -224,10 +224,11 @@ export const SpotConditionsBento: React.FC<SpotConditionsBentoProps> = ({ mode =
                 {showSocial && (
                     <div className="lg:col-span-3 p-0 relative group/live flex flex-col transition-all h-full">
                         <div className="relative flex-1 group rounded-[2.5rem] overflow-hidden shadow-2xl min-h-[220px] aspect-video lg:aspect-auto">
-                            <img
-                                src="/images/imgBank/CamLive.png"
-                                className="w-full h-full object-cover group-hover/live:scale-105 transition-transform duration-2000"
-                                alt="Live Cam"
+                            <iframe
+                                src="https://www.skaping.com/coutances/agon-coutainville/video"
+                                className="absolute inset-0 w-full h-full border-0"
+                                allow="autoplay; fullscreen"
+                                title="Live Cam Agon-Coutainville"
                             />
                         </div>
                     </div>

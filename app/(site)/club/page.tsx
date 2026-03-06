@@ -28,7 +28,8 @@ import {
     Compass,
     Zap,
     Sprout,
-    Sparkles
+    Sparkles,
+    Waves
 } from 'lucide-react';
 
 import { motion } from 'framer-motion';
@@ -75,11 +76,16 @@ const FALLBACK_STORYTELLING = [
 const FALLBACK_TEAM = {
     tag: "L'Humain avant tout",
     title: "Une Équipe D'Experts",
-    members: [
+    boardMembers: [
         { name: "Jean-Pierre Marin", role: "Président", image: "https://i.pravatar.cc/150?u=jp" },
-        { name: "Marie Loic", role: "Trésorière", image: "https://i.pravatar.cc/150?u=marie" },
-        { name: "Paul Dubreuil", role: "Secrétaire", image: "https://i.pravatar.cc/150?u=paul" },
-        { name: "Sophie Mer", role: "Resp. Sportif", image: "https://i.pravatar.cc/150?u=sophie" },
+        { name: "Marie Loic", role: "Trésorière" },
+        { name: "Paul Dubreuil", role: "Secrétaire" },
+    ],
+    proTeam: [
+        { name: "Sophie Mer", role: "Chef de Base", image: "https://i.pravatar.cc/150?u=sophie" },
+        { name: "Thomas Vent", role: "Second de Base", image: "https://i.pravatar.cc/150?u=thomas" },
+        { name: "Lucie Glisse", role: "Monitrice", image: "https://i.pravatar.cc/150?u=lucie" },
+        { name: "Marc Flot", role: "Équipier", image: "https://i.pravatar.cc/150?u=marc" },
     ]
 };
 
@@ -326,25 +332,69 @@ const ClubPage: React.FC = () => {
             {/* 4. ÉQUIPE */}
             <section id="team" className="py-24 px-6 bg-white">
                 <div className="max-w-[1400px] mx-auto">
-                    <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-8">
-                        <div>
-                            <span className="text-turquoise font-black uppercase tracking-widest text-[9px] mb-3 block">{teamData.tag}</span>
-                            <h2 className="text-3xl md:text-4xl text-abysse leading-none">{teamData.title}</h2>
-                        </div>
+                    <div className="mb-16">
+                        <span className="text-turquoise font-black uppercase tracking-widest text-[9px] mb-3 block">{teamData.tag}</span>
+                        <h2 className="text-3xl md:text-5xl text-abysse leading-none mb-6">{teamData.title}</h2>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-                        {teamData.members.map((member, i) => (
-                            <div key={i} className="bg-slate-50 p-8 rounded-[2rem] shadow-sm border border-slate-100 text-center hover:shadow-xl transition-all group">
-                                <div className="size-24 mx-auto rounded-full overflow-hidden mb-6 border-4 border-slate-50 group-hover:border-turquoise transition-colors shadow-inner">
-                                    <img src={member.image || 'https://i.pravatar.cc/150'} alt={member.name} className="w-full h-full object-cover" />
-                                </div>
-                                <h5 className="text-abysse text-xl leading-tight mb-2">{member.name}</h5>
-                                <div className="inline-block px-3 py-1 rounded-full bg-white border border-slate-100 text-[9px] font-black text-turquoise uppercase tracking-widest hover:bg-turquoise hover:text-white transition-all">
-                                    {member.role}
-                                </div>
+
+                    {/* --- LE BUREAU --- */}
+                    {teamData.boardMembers && teamData.boardMembers.length > 0 && (
+                        <div className="mb-24">
+                            <div className="flex items-center gap-4 mb-8">
+                                <Users size={24} className="text-turquoise" />
+                                <h3 className="text-2xl font-black text-abysse uppercase italic tracking-tighter">Le Bureau de l'Association</h3>
+                                <div className="flex-1 h-px bg-slate-100" />
                             </div>
-                        ))}
-                    </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                                {teamData.boardMembers.map((member, i) => (
+                                    <div key={i} className="group relative bg-slate-50/50 p-6 rounded-3xl border border-slate-100 hover:bg-white hover:shadow-xl transition-all duration-500">
+                                        <div className="size-20 mx-auto mb-4 relative">
+                                            {member.image ? (
+                                                <img src={member.image} alt={member.name} className="w-full h-full object-cover rounded-2xl shadow-md border-2 border-white group-hover:border-turquoise transition-colors" />
+                                            ) : (
+                                                <div className="w-full h-full rounded-2xl bg-linear-to-br from-slate-100 to-slate-200 flex items-center justify-center border-2 border-white group-hover:border-turquoise transition-all">
+                                                    <span className="text-xl font-black text-slate-400 group-hover:text-turquoise transition-colors">
+                                                        {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="text-center">
+                                            <h5 className="text-abysse font-bold text-base leading-tight mb-1">{member.name}</h5>
+                                            <p className="text-[10px] font-black text-turquoise uppercase tracking-widest">{member.role}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- L'ÉQUIPE SPORTIVE --- */}
+                    {teamData.proTeam && teamData.proTeam.length > 0 && (
+                        <div>
+                            <div className="flex items-center gap-4 mb-8">
+                                <Waves size={24} className="text-turquoise" />
+                                <h3 className="text-2xl font-black text-abysse uppercase italic tracking-tighter">L'Équipe Sportive & Opérationnelle</h3>
+                                <div className="flex-1 h-px bg-slate-100" />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {teamData.proTeam.map((member, i) => (
+                                    <div key={i} className="group relative aspect-4/5 rounded-[2.5rem] overflow-hidden shadow-lg border border-slate-100">
+                                        {member.image ? (
+                                            <img src={member.image} alt={member.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                                        ) : (
+                                            <div className="absolute inset-0 bg-slate-200" />
+                                        )}
+                                        <div className="absolute inset-0 bg-linear-to-t from-abysse via-abysse/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+                                        <div className="absolute bottom-0 left-0 w-full p-8 text-white">
+                                            <p className="text-turquoise font-black uppercase tracking-[0.2em] text-[10px] mb-2">{member.role}</p>
+                                            <h5 className="text-2xl font-black uppercase italic tracking-tighter">{member.name}</h5>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </section>
 

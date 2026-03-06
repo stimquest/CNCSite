@@ -296,7 +296,7 @@ export interface ClubPageData {
   values: { title: string; description: string; iconName: string; }[];
   storytelling?: { chapterLabel: string; title: string; highlightText: string; quote: string; image?: string; isFinalChapter?: boolean; }[];
   storytellingCta?: { label: string; link: string; };
-  team?: { tag: string; title: string; members: { name: string; role: string; image?: string; }[]; };
+  team?: { tag: string; title: string; boardMembers?: { name: string; role: string; image?: string; }[]; proTeam?: { name: string; role: string; image?: string; }[]; };
   site?: { title: string; description: string; facilities: string[]; image?: string; imageCaption?: string; imageSublabel?: string; };
   fleet?: { title: string; items: { name: string; subtitle: string; description: string; crew: string; gallery: string[]; stats: { speed: number; difficulty: number; adrenaline: number; }; }[]; };
   cta?: { title: string; highlightText: string; buttonLabel: string; buttonLink: string; };
@@ -463,6 +463,7 @@ export interface HomePageData {
     subtitle?: string;
     images: string[];
     videoUrl?: string;
+    spotImage?: string;
   };
   spirit: {
     title: string;

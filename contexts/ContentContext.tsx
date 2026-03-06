@@ -407,7 +407,8 @@ const queries = {
       "title": heroTitle,
       "subtitle": heroSubtitle,
       "images": heroImages[].asset->url,
-      "videoUrl": heroVideoUrl
+      "videoUrl": heroVideoUrl,
+      "spotImage": spotImage.asset->url
     },
     "spirit": {
       "title": spiritTitle,

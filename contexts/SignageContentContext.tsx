@@ -151,6 +151,10 @@ export const SignageContentProvider: React.FC<{ children: React.ReactNode }> = (
 
   useEffect(() => {
     refreshData();
+    const interval = setInterval(() => {
+      if (!document.hidden) refreshData();
+    }, 30000); // Rafraîchir toutes les 30s
+    return () => clearInterval(interval);
   }, [refreshData]);
 
   const value = React.useMemo<SignageContentContextType>(() => ({

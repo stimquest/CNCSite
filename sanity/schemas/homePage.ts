@@ -118,7 +118,16 @@ export default defineType({
             validation: Rule => Rule.max(3).warning('Idéalement 3 cartes pour respecter le design.'),
         }),
 
-        // FOCUS SECTIONS (Char, Glisse, Bien-être)
+        // SPOT SECTION
+        defineField({
+            name: 'spotImage',
+            title: 'Image de Fond Tuile "Le Spot"',
+            type: 'image',
+            group: 'hero', // Adding to hero group for simplicity as it's top level, or create a 'spot' group
+            options: { hotspot: true },
+            description: 'Image de fond pour la tuile de droite sur la grille d\'accueil',
+        }),
+
         defineField({
             name: 'focusChar',
             title: 'Section Focus : Char à Voile',

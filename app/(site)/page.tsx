@@ -325,99 +325,73 @@ export const HomePage: React.FC = () => {
 
             {/* BENTO ACCUEIL — une ligne style SpotConditionsBento */}
             <section className="max-w-[1600px] mx-auto px-6 pt-10 pb-4 relative z-10">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 items-stretch">
 
-                    {/* COL 1 : Météo */}
-                    <div className="lg:col-span-1 flex flex-row lg:flex-col justify-between lg:justify-start gap-4 border-r border-abysse/5 pr-4">
+                    {/* COL 1-4 : Programme du jour */}
+                    <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-abysse/5 pb-6 lg:pb-0 px-2 flex flex-col justify-between">
                         <div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-abysse/40 block mb-0.5">Vent</span>
-                            <div className="flex items-baseline leading-none">
-                                <span className="text-5xl font-black text-abysse italic tracking-tighter tabular-nums">{weather.windSpeed}</span>
-                                <span className="ml-1 text-[10px] font-black text-abysse/30 uppercase italic">NDS</span>
+                            <div className="flex items-center justify-between mb-3">
+                                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-abysse/40">Programme du jour</span>
+                                <Link href="/fil-info" className="text-[9px] font-black text-turquoise uppercase tracking-widest hover:underline">La Vigie →</Link>
                             </div>
-                            <div className="flex items-center gap-1.5 mt-1">
-                                <motion.div animate={{ rotate: (weather.windBearing || 0) + 135 }} className="text-turquoise">
-                                    <Navigation size={12} fill="currentColor" strokeWidth={3} />
-                                </motion.div>
-                                <span className="text-[9px] font-black italic text-abysse/60">
-                                    {['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'][Math.round((weather.windBearing || 0) / 45) % 8]}
-                                    <span className="text-abysse/20 ml-1">{weather.windBearing || 0}°</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div className="border-t border-abysse/5 pt-2">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-abysse/40 block">Rafales</span>
-                            <div className="flex items-baseline leading-none">
-                                <span className="text-2xl font-black text-abysse italic tracking-tighter tabular-nums">{weather.gusts || weather.windSpeed + 5}</span>
-                                <span className="ml-1 text-[8px] font-bold text-abysse/30 uppercase italic">NDS</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* COL 2–5 : Programme du jour */}
-                    <div className="lg:col-span-4 border-r border-abysse/5 px-2">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-abysse/40">Programme du jour</span>
-                            <Link href="/fil-info" className="text-[9px] font-black text-turquoise uppercase tracking-widest hover:underline">La Vigie →</Link>
-                        </div>
-                        {(() => {
-                            const activites = [
-                                { label: 'Char à Voile', status: charStatus, msg: charMessage, category: 'encadree' as const },
-                                { label: 'Sports Nautiques', status: nautiqueStatus, msg: nautiqueMessage, category: 'autonome_voile' as const },
-                            ];
-                            const stages = [
-                                { label: 'Mini-Mousses', status: stagesMiniMoussesStatus, msg: stagesMiniMoussesMessage, category: 'encadree' as const },
-                                { label: 'Moussaillons', status: stagesMoussaillonsStatus, msg: stagesMoussaillonsMessage, category: 'encadree' as const },
-                                { label: 'Initiation', status: stagesInitiationStatus, msg: stagesInitiationMessage, category: 'encadree' as const },
-                                { label: 'Perfectionnement', status: stagesPerfStatus, msg: stagesPerfMessage, category: 'encadree' as const },
-                            ];
-                            const getActCfg = (s: string, category: 'encadree' | 'autonome_voile' | 'marche') => {
-                                let label = '';
-                                if (s === 'OPEN' || s === 'IDEAL' || s === 'FAVORABLE') {
-                                    if (category === 'autonome_voile') label = 'Favorables';
-                                    else label = 'Confirmée';
-                                    return { dot: 'bg-emerald-500', label, color: 'text-emerald-600' };
-                                }
-                                if (s === 'RESTRICTED' || s === 'VARIABLE') {
-                                    if (category === 'autonome_voile') label = 'Techniques (Exp.)';
-                                    else if (category === 'marche') label = 'Parcours adapté';
-                                    else label = 'Cond. techniques';
-                                    return { dot: 'bg-amber-400', label, color: 'text-amber-600' };
-                                }
-                                if (category === 'autonome_voile') label = 'Déconseillée';
-                                else if (category === 'marche') label = 'Reportée';
-                                else label = 'Annulée';
-                                return { dot: 'bg-rose-500', label, color: 'text-rose-600' };
-                            };
-                            const ActivityCard = ({ act }: { act: { label: string; status: string; msg?: string; category: 'encadree' | 'autonome_voile' | 'marche' } }) => {
-                                const cfg = getActCfg(act.status, act.category);
-                                return (
-                                    <div className="flex flex-col gap-0.5 pb-2">
-                                        <span className="text-[11px] font-black uppercase tracking-widest text-abysse/40 italic">{act.label}</span>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className={`size-2 rounded-full shrink-0 ${cfg.dot}`} />
-                                            <span className={`text-[14px] font-black uppercase italic leading-none tracking-tight ${cfg.color}`}>{cfg.label}</span>
+                            {(() => {
+                                const activites = [
+                                    { label: 'Char à Voile', status: charStatus, msg: charMessage, category: 'encadree' as const },
+                                    { label: 'Sports Nautiques', status: nautiqueStatus, msg: nautiqueMessage, category: 'autonome_voile' as const },
+                                ];
+                                const stages = [
+                                    { label: 'Mini-Mousses', status: stagesMiniMoussesStatus, msg: stagesMiniMoussesMessage, category: 'encadree' as const },
+                                    { label: 'Moussaillons', status: stagesMoussaillonsStatus, msg: stagesMoussaillonsMessage, category: 'encadree' as const },
+                                    { label: 'Initiation', status: stagesInitiationStatus, msg: stagesInitiationMessage, category: 'encadree' as const },
+                                    { label: 'Perfectionnement', status: stagesPerfStatus, msg: stagesPerfMessage, category: 'encadree' as const },
+                                ];
+                                const getActCfg = (s: string, category: 'encadree' | 'autonome_voile' | 'marche') => {
+                                    let label = '';
+                                    if (s === 'OPEN' || s === 'IDEAL' || s === 'FAVORABLE') {
+                                        if (category === 'autonome_voile') label = 'Favorables';
+                                        else label = 'Confirmée';
+                                        return { dot: 'bg-emerald-500', label, color: 'text-emerald-600' };
+                                    }
+                                    if (s === 'RESTRICTED' || s === 'VARIABLE') {
+                                        if (category === 'autonome_voile') label = 'Techniques';
+                                        else if (category === 'marche') label = 'Adaptée';
+                                        else label = 'Cond. techniques';
+                                        return { dot: 'bg-amber-400', label, color: 'text-amber-600' };
+                                    }
+                                    if (category === 'autonome_voile') label = 'Déconseillée';
+                                    else if (category === 'marche') label = 'Reportée';
+                                    else label = 'Annulée';
+                                    return { dot: 'bg-rose-500', label, color: 'text-rose-600' };
+                                };
+                                const ActivityCard = ({ act }: { act: { label: string; status: string; msg?: string; category: 'encadree' | 'autonome_voile' | 'marche' } }) => {
+                                    const cfg = getActCfg(act.status, act.category);
+                                    return (
+                                        <div className="flex flex-col gap-0.5 pb-2">
+                                            <span className="text-[11px] font-black uppercase tracking-widest text-abysse/40 italic">{act.label}</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className={`size-2 rounded-full shrink-0 ${cfg.dot}`} />
+                                                <span className={`text-[12px] xl:text-[14px] font-black uppercase italic leading-none tracking-tight truncate ${cfg.color}`}>{cfg.label}</span>
+                                            </div>
                                         </div>
-                                        {act.msg && <p className="text-[10px] text-abysse/40 font-medium leading-snug truncate">{act.msg}</p>}
+                                    );
+                                };
+                                return (
+                                    <div className="flex flex-col gap-3">
+                                        {/* Groupe 1 : Activités libres */}
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 border-b border-abysse/10 pb-3">
+                                            {activites.map((act, i) => <ActivityCard key={i} act={act} />)}
+                                        </div>
+                                        {/* Groupe 2 : Stages */}
+                                        <div>
+                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-abysse/20 mb-2 block">Stages en cours</span>
+                                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                                {stages.map((act, i) => <ActivityCard key={i} act={act} />)}
+                                            </div>
+                                        </div>
                                     </div>
                                 );
-                            };
-                            return (
-                                <div className="flex flex-col gap-3">
-                                    {/* Groupe 1 : Activités libres */}
-                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 border-b border-abysse/10 pb-3">
-                                        {activites.map((act, i) => <ActivityCard key={i} act={act} />)}
-                                    </div>
-                                    {/* Groupe 2 : Stages */}
-                                    <div>
-                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-abysse/20 mb-2 block">Stages</span>
-                                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                            {stages.map((act, i) => <ActivityCard key={i} act={act} />)}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })()}
+                            })()}
+                        </div>
                         {lastPublishedAt && (() => {
                             const latest = [lastPublishedAt, lastConfirmedAt].filter(Boolean) as string[];
                             const date = new Date(Math.max(...latest.map(d => new Date(d).getTime())));
@@ -429,16 +403,16 @@ export const HomePage: React.FC = () => {
                             return (
                                 <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-abysse/10">
                                     <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                                    <p className="text-[11px] text-abysse/60 font-semibold">
-                                        Mis à jour · <span className="font-black text-abysse/80">{dateLabel} à {date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                    <p className="text-[10px] lg:text-[11px] text-abysse/60 font-semibold truncate">
+                                        MàJ · <span className="font-black text-abysse/80">{dateLabel} à {date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
                                     </p>
                                 </div>
                             );
                         })()}
                     </div>
 
-                    {/* COL 6–9 : Flash Infos */}
-                    <div className="lg:col-span-4 border-r border-abysse/5 px-4">
+                    {/* COL 5-8 : Flash Infos */}
+                    <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-abysse/5 pb-6 lg:pb-0 px-4">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <span className="size-1.5 rounded-full bg-turquoise animate-pulse" />
@@ -448,7 +422,6 @@ export const HomePage: React.FC = () => {
                         </div>
                         <div className="space-y-3">
                             {infoMessages && infoMessages.length > 0 ? infoMessages.slice(0, 3).map((msg, idx) => {
-                                // Détermination de la couleur en fonction de la catégorie
                                 const catColors: Record<string, string> = {
                                     alert: 'bg-amber-100/50 text-amber-700 border-amber-200',
                                     weather: 'bg-cyan-100/50 text-cyan-700 border-cyan-200',
@@ -460,48 +433,74 @@ export const HomePage: React.FC = () => {
 
                                 return (
                                     <Link href="/fil-info" key={msg._id} className="block group">
-                                        <div className="p-3 rounded-xl border border-slate-100 bg-white shadow-xs hover:border-turquoise/30 hover:shadow-md transition-all">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className={`px-2 py-0.5 rounded-md border text-[9px] font-black uppercase tracking-widest ${colorClass}`}>
+                                        <div className="p-3 rounded-xl border border-slate-100 bg-white shadow-xs hover:border-turquoise/30 hover:shadow-md transition-all h-[76px] flex flex-col justify-center">
+                                            <div className="flex items-center justify-between mb-1.5">
+                                                <span className={`px-2 py-0.5 rounded-md border text-[8px] font-black uppercase tracking-widest ${colorClass}`}>
                                                     {catLabel}
                                                 </span>
                                                 {msg.publishedAt && (
-                                                    <span className="text-[9px] text-slate-400 font-medium tracking-wide">
+                                                    <span className="text-[8px] text-slate-400 font-medium tracking-wide">
                                                         {new Date(msg.publishedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                                                     </span>
                                                 )}
                                             </div>
-                                            <h4 className="text-[13px] font-bold text-abysse leading-snug group-hover:text-turquoise transition-colors line-clamp-2">
+                                            <h4 className="text-[12px] font-bold text-abysse leading-snug group-hover:text-turquoise transition-colors line-clamp-1">
                                                 {msg.title}
                                             </h4>
-                                            {msg.content && (
-                                                <p className="mt-1.5 text-[11px] text-slate-500 line-clamp-2 leading-relaxed font-medium">
-                                                    {msg.content}
-                                                </p>
-                                            )}
                                         </div>
                                     </Link>
                                 )
                             }) : (
-                                <div className="p-4 rounded-xl border border-dashed border-slate-200 text-center">
+                                <div className="p-4 rounded-xl border border-dashed border-slate-200 text-center flex items-center justify-center h-[200px]">
                                     <p className="text-[10px] text-slate-400 font-black italic uppercase tracking-wider">Aucune info récente</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    {/* COL 10–12 : Webcam */}
-                    <div className="lg:col-span-3">
-                        <div className="relative rounded-2xl overflow-hidden shadow-lg group min-h-[200px]">
-                            <img src="/images/imgBank/CamLive.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Live Cam" />
-                            <div className="absolute inset-0 bg-linear-to-t from-abysse/60 via-transparent to-transparent" />
-                            <div className="absolute top-2 left-2">
-                                <span className="bg-red-600 text-white text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded flex items-center gap-1">
-                                    <span className="size-1 bg-white rounded-full animate-pulse" /> Direct
-                                </span>
+                    {/* COL 9-12 : Le Spot / Météo (Tuile cliquable) */}
+                    <div className="lg:col-span-4 px-2 h-full">
+                        <Link href="/le-spot" className="block relative rounded-[2rem] overflow-hidden shadow-xl group h-full min-h-[220px] bg-abysse border border-slate-900 transition-all">
+                            <img src={homePageData?.hero?.spotImage || "https://images.unsplash.com/photo-1544198365-f5d60b6d8190?q=80&w=800"} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 group-hover:opacity-60 transition-all duration-1000 grayscale/50 group-hover:grayscale-0" alt="Le Spot" />
+                            <div className="absolute inset-0 bg-linear-to-b from-abysse/90 via-abysse/30 to-abysse/90 group-hover:opacity-80 transition-opacity" />
+
+                            <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                                {/* Header */}
+                                <div className="flex justify-between items-start">
+                                    <h3 className="text-white text-3xl font-black italic uppercase tracking-tighter leading-none">Le <br />Spot.</h3>
+                                    <div className="size-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white group-hover:bg-turquoise group-hover:text-abysse transition-all shadow-lg group-hover:scale-110">
+                                        <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                                    </div>
+                                </div>
+
+                                {/* Data Footer */}
+                                <div className="mt-8 flex items-end justify-between">
+                                    <div>
+                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-turquoise mb-1 block">Live Météo</span>
+                                        <div className="flex flex-wrap items-end gap-2">
+                                            <div className="flex items-baseline leading-none">
+                                                <span className="text-5xl lg:text-5xl font-black text-white italic tracking-tighter tabular-nums">{weather.windSpeed || "--"}</span>
+                                                <span className="ml-1 text-[10px] font-black text-white/50 uppercase italic">NDS</span>
+                                            </div>
+
+                                            <div className="flex gap-2">
+                                                <div className="bg-white/10 backdrop-blur-sm px-2 py-1 rounded-md border border-white/10 text-white flex items-center gap-1.5 h-6">
+                                                    <motion.div animate={{ rotate: (weather.windBearing || 0) + 135 }} className="text-turquoise">
+                                                        <Navigation size={10} fill="currentColor" strokeWidth={3} />
+                                                    </motion.div>
+                                                    <span className="text-[9px] font-black italic">
+                                                        {['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'][Math.round((weather.windBearing || 0) / 45) % 8] || "--"}
+                                                    </span>
+                                                </div>
+                                                <div className="bg-orange-500/20 backdrop-blur-sm px-2 py-1 rounded-md border border-orange-500/20 text-orange-400 flex items-center h-6">
+                                                    <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">Raf. {weather.gusts || (weather.windSpeed ? weather.windSpeed + 5 : "--")}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <p className="absolute bottom-2 left-2 text-white text-[8px] font-black uppercase tracking-widest">Plage Nord</p>
-                        </div>
+                        </Link>
                     </div>
 
                 </div>

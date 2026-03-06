@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSignageContent } from '@/contexts/SignageContentContext';
 import { SignageSlideType } from '@/types';
 import { SignageTideChart } from '@/components/SignageTideChart';
@@ -19,16 +19,16 @@ export const DigitalSignagePage: React.FC = () => {
   const [progress, setProgress] = useState(0);
 
   // Dynamic sequence: Start with Weather, then all Sanity slides
-  const SEQUENCE: SequenceItem[] = [
+  const SEQUENCE = useMemo((): SequenceItem[] => [
     { type: 'WEATHER', duration: 15000 },
     ...signageSlides.map(slide => ({
       type: slide.type.toUpperCase(),
-      duration: slide.duration || 15000,
+      duration: Math.max(slide.duration || 15000, 5000), // Minimum 5s
       data: slide
     }))
-  ];
+  ], [signageSlides]);
 
-  const currentSlide = SEQUENCE[currentSlideIndex];
+  const currentSlide = SEQUENCE[currentSlideIndex] || SEQUENCE[0];
 
   useEffect(() => {
     if (!currentSlide) return;
@@ -49,7 +49,7 @@ export const DigitalSignagePage: React.FC = () => {
     }, 100);
 
     return () => clearInterval(timer);
-  }, [currentSlideIndex, SEQUENCE.length, currentSlide]);
+  }, [currentSlideIndex, SEQUENCE]);
 
   if (!currentSlide) return null;
 
