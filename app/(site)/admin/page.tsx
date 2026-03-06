@@ -25,7 +25,6 @@ import {
     Bell
 } from 'lucide-react';
 import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, ActivityType, CharWeek, CharDay, CharSession, AutoConditionsConfig, ActivityThresholds, ActivityMessages } from '@/types';
-import { client, writeClient } from '@/lib/sanity';
 import Link from 'next/link';
 
 // --- CONSTANTS ---
@@ -263,19 +262,52 @@ export default function AdminPage() {
     };
 
 
-    const SINGLETON_ID = 'singleton-spot-settings';
-    const touchPlanningsTimestamp = () =>
-        writeClient.patch(SINGLETON_ID).set({ planningsLastUpdatedAt: new Date().toISOString() }).commit().catch(() => { });
+    const upsertPlanning = async (document: WeeklyPlanning | PlanningCharAVoile | PlanningMarche) => {
+        const res = await fetch('/api/cockpit/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'UPSERT_PLANNING',
+                document,
+                touchTimestamp: true,
+            }),
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok) {
+            throw new Error(data?.error || 'Erreur sauvegarde planning');
+        }
+
+        return data;
+    };
+
+    const deletePlanning = async (_id: string) => {
+        const res = await fetch('/api/cockpit/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'DELETE_PLANNING',
+                _id,
+                touchTimestamp: true,
+            }),
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok) {
+            throw new Error(data?.error || 'Erreur suppression planning');
+        }
+
+        return data;
+    };
 
     const saveStage = async () => {
         if (!selectedStage) return;
         setIsSaving(true);
         try {
-            const doc = { ...selectedStage, _type: 'weeklyPlanning' };
-            if (selectedStage._id) await writeClient.createOrReplace({ ...doc, _id: selectedStage._id! });
-            else await writeClient.create(doc);
-
-            await touchPlanningsTimestamp();
+            const doc = { ...selectedStage, _type: 'weeklyPlanning' as const };
+            await upsertPlanning(doc);
             await refreshData();
             alert("Planning enregistré !");
         } catch (err) { console.error(err); alert("Erreur sauvegarde"); }
@@ -286,7 +318,7 @@ export default function AdminPage() {
         if (!selectedStage?._id || !confirm("Supprimer ce planning ?")) return;
         setIsSaving(true);
         try {
-            await writeClient.delete(selectedStage._id);
+            await deletePlanning(selectedStage._id);
             setSelectedStage(null);
             await refreshData();
         } catch (err) { console.error(err); } finally { setIsSaving(false); }
@@ -338,12 +370,8 @@ export default function AdminPage() {
         if (!selectedCharPeriod) return;
         setIsSaving(true);
         try {
-            const doc = { ...selectedCharPeriod, _type: 'planningCharAVoile' };
-            if (selectedCharPeriod._id) {
-                await writeClient.createOrReplace({ ...doc, _id: selectedCharPeriod._id! });
-            }
-            else await writeClient.create(doc);
-            await touchPlanningsTimestamp();
+            const doc = { ...selectedCharPeriod, _type: 'planningCharAVoile' as const };
+            await upsertPlanning(doc);
             await refreshData();
             alert("Planning Char enregistré !");
         } catch (err) { console.error(err); alert("Erreur sauvegarde"); }
@@ -353,11 +381,12 @@ export default function AdminPage() {
     const deleteCharPeriod = async () => {
         if (!selectedCharPeriod?._id) return;
         if (!confirm("Supprimer cette période ?")) return;
+        setIsSaving(true);
         try {
-            await writeClient.delete(selectedCharPeriod._id);
+            await deletePlanning(selectedCharPeriod._id);
             setSelectedCharPeriod(null);
             await refreshData();
-        } catch (err) { console.error(err); }
+        } catch (err) { console.error(err); } finally { setIsSaving(false); }
     }
 
     // --- HANDLERS: MARCHE AQUATIQUE ---
@@ -404,12 +433,8 @@ export default function AdminPage() {
         if (!selectedMarchePeriod) return;
         setIsSaving(true);
         try {
-            const doc = { ...selectedMarchePeriod, _type: 'planningMarche' };
-            if (selectedMarchePeriod._id) {
-                await writeClient.createOrReplace({ ...doc, _id: selectedMarchePeriod._id! });
-            }
-            else await writeClient.create(doc);
-            await touchPlanningsTimestamp();
+            const doc = { ...selectedMarchePeriod, _type: 'planningMarche' as const };
+            await upsertPlanning(doc);
             await refreshData();
             alert("Planning Marche enregistré !");
         } catch (err) { console.error(err); alert("Erreur sauvegarde Marche"); }
@@ -419,11 +444,12 @@ export default function AdminPage() {
     const deleteMarchePeriod = async () => {
         if (!selectedMarchePeriod?._id) return;
         if (!confirm("Supprimer cette période ?")) return;
+        setIsSaving(true);
         try {
-            await writeClient.delete(selectedMarchePeriod._id);
+            await deletePlanning(selectedMarchePeriod._id);
             setSelectedMarchePeriod(null);
             await refreshData();
-        } catch (err) { console.error(err); }
+        } catch (err) { console.error(err); } finally { setIsSaving(false); }
     }
 
 
@@ -516,7 +542,7 @@ export default function AdminPage() {
                             <button onClick={() => setActiveTab('MARCHE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'MARCHE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Marche</button>
                             <button onClick={() => setActiveTab('CONDITIONS')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'CONDITIONS' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Zap size={12} /> Conditions Auto</button>
                             <button onClick={() => setActiveTab('VIGIE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'VIGIE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Bell size={12} /> Vigie Direct</button>
-                            <Link href="/cockpit?key=CNC2026" target="_blank" className="ml-2 px-4 py-2 rounded-lg bg-turquoise/10 text-turquoise hover:bg-turquoise/20 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
+                            <Link href="/cockpit" target="_blank" className="ml-2 px-4 py-2 rounded-lg bg-turquoise/10 text-turquoise hover:bg-turquoise/20 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
                                 🚀 Cockpit
                             </Link>
                         </nav>

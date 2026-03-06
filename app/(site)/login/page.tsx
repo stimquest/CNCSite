@@ -5,10 +5,21 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Anchor, Lock, Eye, EyeOff, Wind } from 'lucide-react';
 import { Suspense } from 'react';
 
+const getSafeAdminDestination = (value: string | null) => {
+    if (!value || !value.startsWith('/') || value.startsWith('//')) {
+        return '/admin';
+    }
+
+    const allowedPrefixes = ['/admin', '/cockpit', '/studio'];
+    const isAllowed = allowedPrefixes.some((prefix) => value === prefix || value.startsWith(`${prefix}/`) || value.startsWith(`${prefix}?`));
+
+    return isAllowed ? value : '/admin';
+};
+
 function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const from = searchParams.get('from') || '/admin';
+    const from = getSafeAdminDestination(searchParams.get('from'));
 
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -28,7 +39,7 @@ function LoginForm() {
             });
 
             if (res.ok) {
-                router.push(from);
+                router.replace(from);
             } else {
                 setError('Code incorrect. Réessayez.');
                 setPassword('');

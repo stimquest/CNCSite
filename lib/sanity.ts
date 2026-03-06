@@ -1,5 +1,5 @@
 import { createClient } from '@sanity/client';
-import imageUrlBuilder from '@sanity/image-url';
+import { createImageUrlBuilder } from '@sanity/image-url';
 
 // Définition simplifiée pour éviter les erreurs de modules internes
 type SanityImageSource = any;
@@ -17,17 +17,10 @@ export const client = createClient({
   apiVersion: '2024-03-15',
 });
 
-// Client écriture — token serveur uniquement (jamais exposé au navigateur)
-export const writeClient = createClient({
-  projectId: 'df7iwkkw',
-  dataset: 'production',
-  useCdn: false,
-  apiVersion: '2024-03-15',
-  token: process.env.SANITY_WRITE_TOKEN || '',
-});
+// Les écritures Sanity doivent passer par `getServerWriteClient()` côté serveur.
 
 // Image URL Builder
-const builder = imageUrlBuilder(client);
+const builder = createImageUrlBuilder(client);
 
 export function urlFor(source: SanityImageSource) {
   return builder.image(source);

@@ -1,22 +1,16 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@sanity/client';
+
+import { client } from '@/lib/sanity';
+import { getServerWriteClient } from '@/lib/sanity.server';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-const serverClient = createClient({
-    projectId: 'df7iwkkw',
-    dataset: 'production',
-    apiVersion: '2024-03-15',
-    token: process.env.NEXT_PUBLIC_SANITY_WRITE_TOKEN || process.env.SANITY_WRITE_TOKEN || '',
-    useCdn: false,
-});
 
 const SINGLETON_ID = 'singleton-spot-settings';
 
 export async function GET() {
     try {
-        const data = await serverClient.fetch(
+        const data = await client.fetch(
             `*[_type == "spotSettings" && !(_id in path('drafts.**'))][0] {
                 spotStatus, statusMessage,
                 charStatus, charMessage, charTags,
@@ -40,6 +34,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const serverClient = getServerWriteClient();
         const body = await req.json();
         const { type, patch } = body;
 

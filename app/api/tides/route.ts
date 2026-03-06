@@ -6,7 +6,7 @@ import path from 'path';
 
 // Configuration API WorldTides
 // Note: Utilisation de variables d'environnement recommandées pour la clé API en production
-const WORLDTIDES_API_KEY = process.env.WORLDTIDES_API_KEY || "4b319f80-cfc7-45e5-a7b5-3c81be0b20bb";
+const WORLDTIDES_API_KEY = process.env.WORLDTIDES_API_KEY?.trim();
 const LAT = 49.017;
 const LON = -1.55;
 
@@ -16,6 +16,16 @@ export const revalidate = 86400; // Aligné sur 24h pour plus de sécurité
 export async function GET() {
   try {
     const coeffPath = path.join(process.cwd(), 'lib/data/marees_2026.json');
+
+    if (!WORLDTIDES_API_KEY) {
+      return NextResponse.json({
+        tides: [],
+        coefficients: await getStaticCoefficients(coeffPath),
+        error: 'WorldTides API key not configured'
+      }, {
+        status: 200
+      });
+    }
 
     // 1. Appel API WorldTides
     const url = `https://www.worldtides.info/api/v3?heights&extremes&lat=${LAT}&lon=${LON}&key=${WORLDTIDES_API_KEY}&days=7&datum=CD&step=900`;

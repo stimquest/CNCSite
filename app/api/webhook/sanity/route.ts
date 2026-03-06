@@ -19,10 +19,14 @@ export async function POST(req: Request) {
         const fallbackSecret = req.headers.get('x-webhook-secret')?.trim();
         const trimmedSecret = WEBHOOK_SECRET?.trim();
 
-        const isAuthorized = (trimmedSecret && authHeader === `Bearer ${trimmedSecret}`) ||
-            (trimmedSecret && fallbackSecret === trimmedSecret);
+        if (!trimmedSecret) {
+            return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+        }
 
-        if (trimmedSecret && !isAuthorized) {
+        const isAuthorized = authHeader === `Bearer ${trimmedSecret}` ||
+            fallbackSecret === trimmedSecret;
+
+        if (!isAuthorized) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
