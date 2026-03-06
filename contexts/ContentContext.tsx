@@ -384,7 +384,11 @@ const queries = {
     storytellingCta,
     "team": team {
       tag, title,
-      "members": members[] {
+      "boardMembers": boardMembers[] {
+        name, role,
+        "image": image.asset->url
+      },
+      "proTeam": proTeam[] {
         name, role,
         "image": image.asset->url
       }
