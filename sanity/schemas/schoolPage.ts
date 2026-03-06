@@ -40,7 +40,7 @@ export default defineType({
             group: 'intro',
             fields: [
                 { name: 'title', type: 'string', title: 'Titre' },
-                { name: 'content', type: 'text', title: 'Texte de présentation' },
+                { name: 'content', type: 'basicRichText', title: 'Texte de présentation' },
             ]
         }),
         defineField({
@@ -85,8 +85,8 @@ export default defineType({
                     { name: 'officialName', type: 'string', title: 'Nom officiel du stage' },
                     { name: 'age', type: 'string', title: 'Tranche d\'âge' },
                     { name: 'hook', type: 'string', title: 'Accroche (Citation)' },
-                    { name: 'description', type: 'text', title: 'Description courte (Colonnes)' },
-                    { name: 'longDescription', type: 'text', title: 'Description longue (Détails)' },
+                    { name: 'description', type: 'basicRichText', title: 'Description courte (Colonnes)' },
+                    { name: 'longDescription', type: 'basicRichText', title: 'Description longue (Détails)' },
                     { name: 'logistique', type: 'array', title: 'Logistique & Pratique', of: [{ type: 'string' }] },
                     { name: 'image', type: 'image', title: 'Image d\'illustration' },
                     { name: 'color', type: 'string', title: 'Couleur du texte (ex: text-orange-500)' },
@@ -122,7 +122,7 @@ export default defineType({
             fields: [
                 { name: 'title', type: 'string', title: 'Titre Section' },
                 { name: 'subtitle', type: 'string', title: 'Sous-titre Section' },
-                { name: 'description', type: 'text', title: 'Description courte' },
+                { name: 'description', type: 'basicRichText', title: 'Description courte' },
             ]
         }),
         defineField({
@@ -146,7 +146,7 @@ export default defineType({
             group: 'practical',
             fields: [
                 { name: 'title', type: 'string', title: 'Titre' },
-                { name: 'description', type: 'text', title: 'Texte' },
+                { name: 'description', type: 'basicRichText', title: 'Texte' },
                 { name: 'footerText', type: 'string', title: 'Texte de pied (Label FFV)' },
             ]
         }),

@@ -1,6 +1,30 @@
 import { defineType, defineField } from 'sanity';
 import { IconPicker } from '../components/IconPicker';
 
+// --- BASIC RICH TEXT DEFINITION ---
+const basicRichText = {
+    type: 'array',
+    of: [
+        {
+            type: 'block',
+            styles: [{ title: 'Normal', value: 'normal' }],
+            lists: [{ title: 'Puces', value: 'bullet' }],
+            marks: {
+                decorators: [
+                    { title: 'Gras', value: 'strong' },
+                    { title: 'Italique', value: 'em' }
+                ],
+                annotations: [
+                    {
+                        name: 'link', type: 'object', title: 'Lien',
+                        fields: [{ name: 'href', type: 'url', title: 'URL' }]
+                    }
+                ]
+            }
+        }
+    ]
+};
+
 export const clubPage = defineType({
     name: 'clubPage',
     title: 'Contenu Page Club',
@@ -26,7 +50,7 @@ export const clubPage = defineType({
             fields: [
                 { name: 'title', type: 'string', title: 'Titre (ligne 1)', description: 'Ex: "Bienvenue au"' },
                 { name: 'subtitle', type: 'string', title: 'Sous-titre (ligne 2, en dégradé)', description: 'Ex: "Club Nautique."' },
-                { name: 'description', type: 'text', title: 'Description (section Identité)' },
+                { name: 'description', ...basicRichText, title: 'Description (section Identité)' },
                 { name: 'heroImage', type: 'image', title: 'Image de fond (Hero)', options: { hotspot: true } },
             ],
         }),
@@ -81,7 +105,7 @@ export const clubPage = defineType({
                     title: 'Valeur',
                     fields: [
                         { name: 'title', type: 'string', title: 'Titre' },
-                        { name: 'description', type: 'text', title: 'Description' },
+                        { name: 'description', type: 'basicRichText', title: 'Description' },
                         defineField({
                             name: 'iconName',
                             type: 'string',
@@ -206,7 +230,7 @@ export const clubPage = defineType({
             group: 'site',
             fields: [
                 { name: 'title', type: 'string', title: 'Titre', description: 'Ex: "Un Balcon sur la Mer"' },
-                { name: 'description', type: 'text', title: 'Description' },
+                { name: 'description', ...basicRichText, title: 'Description' },
                 {
                     name: 'facilities',
                     type: 'array',

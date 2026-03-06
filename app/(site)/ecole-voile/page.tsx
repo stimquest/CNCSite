@@ -29,6 +29,19 @@ import {
 
 import { motion } from 'framer-motion';
 import { PageHero } from '@/components/PageHero';
+import { PortableText } from '@portabletext/react';
+
+const RenderText = ({ content, className, fallback = null }: { content: string | any[] | undefined, className?: string, fallback?: React.ReactNode }) => {
+  if (!content) return fallback ? <div className={className}>{fallback}</div> : null;
+  if (typeof content === 'string') {
+    return <div className={className}>{content}</div>;
+  }
+  return (
+    <div className={`prose prose-slate max-w-none ${className}`}>
+      <PortableText value={content} />
+    </div>
+  );
+};
 
 // --- DATA: PLANNING ROWS ---
 const PLANNING_ROWS = [
@@ -270,9 +283,7 @@ const StorySection: React.FC<{ item: any; index: number }> = ({ item, index }) =
               "{item.hook}"
             </p>
 
-            <div className="text-slate-600 text-lg font-medium leading-relaxed text-justify mb-10 whitespace-pre-line">
-              {item.description}
-            </div>
+            <RenderText content={item.description} className="text-slate-600 text-lg font-medium leading-relaxed text-justify mb-10 whitespace-pre-line" />
 
             {/* Actions */}
             <div className="flex flex-wrap gap-4">
@@ -327,9 +338,7 @@ const StorySection: React.FC<{ item: any; index: number }> = ({ item, index }) =
                         ))}
                       </ul>
                       <div className="mt-8 pt-6 border-t border-white/10">
-                        <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
-                          {item.longDescription}
-                        </p>
+                        <RenderText content={item.longDescription} className="text-[10px] text-slate-400 font-medium leading-relaxed" />
                       </div>
                     </div>
                   </div>
@@ -466,14 +475,16 @@ export const EcoleVoilePage: React.FC = () => {
               {schoolPageData?.intro?.title || "À Coutainville, la voile fait partie de l’histoire du littoral."}
             </h2>
 
-            <div className="text-lg md:text-xl text-slate-600 font-medium leading-relaxed max-w-4xl mx-auto whitespace-pre-line">
-              {schoolPageData?.intro?.content || (
+            <RenderText
+              content={schoolPageData?.intro?.content}
+              className="text-lg md:text-xl text-slate-600 font-medium leading-relaxed max-w-4xl mx-auto whitespace-pre-line"
+              fallback={
                 <>
                   Depuis <span className="text-abysse font-black italic">1929</span>, une école de voile permet aux générations de navigateurs de découvrir et d’apprendre la navigation face à la Manche.{"\n\n"}
                   Aujourd’hui encore, l’école accueille enfants, adolescents et adultes pour vivre leurs premières sensations sur l’eau et progresser dans la pratique de la voile.
                 </>
-              )}
-            </div>
+              }
+            />
 
             <div className="flex justify-center gap-4 pt-4">
               <div className="size-2 rounded-full bg-slate-200"></div>
@@ -512,9 +523,11 @@ export const EcoleVoilePage: React.FC = () => {
                 {schoolPageData?.practicalInfo?.title || "Prêt pour Le Grand Saut ?"}
               </h2>
             </div>
-            <div className="max-w-xs text-slate-400 text-sm font-medium leading-relaxed border-l-2 border-turquoise pl-6">
-              {schoolPageData?.practicalInfo?.description || "Nous nous occupons de la technique, vous apportez l'enthousiasme. Voici tout ce qu'il faut savoir avant d'embarquer."}
-            </div>
+            <RenderText
+              content={schoolPageData?.practicalInfo?.description}
+              className="max-w-xs text-slate-400 text-sm font-medium leading-relaxed border-l-2 border-turquoise pl-6"
+              fallback="Nous nous occupons de la technique, vous apportez l'enthousiasme. Voici tout ce qu'il faut savoir avant d'embarquer."
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -559,9 +572,11 @@ export const EcoleVoilePage: React.FC = () => {
             <div className="bg-turquoise text-abysse p-10 rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col justify-center">
               <AlertTriangle size={64} className="opacity-10 absolute -top-4 -right-4" />
               <h3 className="text-2xl mb-6">{schoolPageData?.safetyInfo?.title || "Météo & Sécurité"}</h3>
-              <p className="font-bold leading-relaxed mb-8">
-                {schoolPageData?.safetyInfo?.description || "La mer décide toujours. En cas de tempête, la séance est maintenue à terre (théorie, noeuds, matelotage) ou reportée au samedi."}
-              </p>
+              <RenderText
+                content={schoolPageData?.safetyInfo?.description}
+                className="font-bold leading-relaxed mb-8"
+                fallback="La mer décide toujours. En cas de tempête, la séance est maintenue à terre (théorie, noeuds, matelotage) ou reportée au samedi."
+              />
               <div className="p-6 bg-abysse/10 rounded-2xl border border-abysse/10 font-black text-[10px] uppercase tracking-widest leading-loose">
                 <Compass size={20} className="mb-2" />
                 {schoolPageData?.safetyInfo?.footerText || "École labellisée Fédération Française de Voile depuis 1978."}

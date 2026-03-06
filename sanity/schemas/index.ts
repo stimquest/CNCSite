@@ -23,8 +23,10 @@ import { autoConditionsConfig } from './autoConditionsConfig';
 import homePage from "./homePage";
 import infosPage from "./infosPage";
 import { signageSlide } from './signageSlide';
+import { basicRichText } from './basicRichText';
 
 export const schemaTypes = [
+  basicRichText,
   // Pages Content
   homePage,
   infosPage,

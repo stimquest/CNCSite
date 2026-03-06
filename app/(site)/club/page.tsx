@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import React, { useState, useEffect, useRef } from 'react';
+import { PortableText } from '@portabletext/react';
 import {
     Anchor,
     Users,
@@ -31,6 +32,7 @@ import {
     Sparkles,
     Waves
 } from 'lucide-react';
+import * as AllLucideIcons from 'lucide-react';
 
 import { motion } from 'framer-motion';
 import { SecondaryNav } from '@/components/SecondaryNav';
@@ -43,6 +45,18 @@ if (typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
 }
 
+const RenderText = ({ content, className, fallback = null }: { content: string | any[] | undefined, className?: string, fallback?: React.ReactNode }) => {
+    if (!content) return fallback ? <div className={className}>{fallback}</div> : null;
+    if (typeof content === 'string') {
+        return <div className={className}>{content}</div>;
+    }
+    return (
+        <div className={`prose prose-slate max-w-none ${className}`}>
+            <PortableText value={content} />
+        </div>
+    );
+};
+
 // --- ICON RESOLVER ---
 const ICON_MAP: Record<string, React.FC<{ size?: number }>> = {
     History, Users, Anchor, Trophy, GraduationCap, Accessibility, ShieldCheck, Leaf, Compass, Zap, Sprout, Sparkles,
@@ -50,7 +64,10 @@ const ICON_MAP: Record<string, React.FC<{ size?: number }>> = {
 };
 
 const resolveIcon = (name?: string, fallback?: React.FC<{ size?: number }>) => {
-    if (name && ICON_MAP[name]) return ICON_MAP[name];
+    if (!name) return fallback || null;
+    if (ICON_MAP[name]) return ICON_MAP[name];
+    const DynamicIcon = (AllLucideIcons as any)[name];
+    if (DynamicIcon) return DynamicIcon;
     return fallback || null;
 };
 
@@ -69,8 +86,7 @@ const FALLBACK_VALUES = [
 const FALLBACK_STORYTELLING = [
     { chapterLabel: 'Chapitre I', title: "L'Appel du", highlightText: 'Large.', quote: '"Depuis 1978, notre cœur bat au rythme des marées. Une institution née de la passion pure."', image: '/images/imgBank/CataPharePointeAgon.jpg' },
     { chapterLabel: 'Chapitre II', title: 'Vibration', highlightText: 'Brute.', quote: '"Le sel sur la peau, le vent qui siffle. Ici, on fusionne avec les éléments."', image: '/images/imgBank/naviguer.jpg' },
-    { chapterLabel: 'Chapitre III', title: 'Cœur de', highlightText: 'Transmission.', quote: '"Au CNC, le savoir se transmet comme un héritage précieux. Nous formons les capitaines de demain."', image: '/images/imgBank/minimousse.jpg' },
-    { chapterLabel: '', title: 'Écrire', highlightText: '', quote: '"Un sillage durable, inclusif et audacieux."', image: '/images/imgBank/Sauvetage.jpg', isFinalChapter: true },
+    { chapterLabel: 'Chapitre III', title: 'Cap sur', highlightText: 'L\'Avenir.', quote: '"Un sillage durable, inclusif et audacieux. Rejoignez The Club Nautique de Coutainville."', image: '/images/imgBank/Sauvetage.jpg', isFinalChapter: true },
 ];
 
 const FALLBACK_TEAM = {
@@ -232,24 +248,26 @@ const ClubPage: React.FC = () => {
                     <h2 className="text-3xl md:text-4xl text-abysse mb-6 leading-[0.9] whitespace-pre-line">
                         {identityTitle}
                     </h2>
-                    <p className="text-slate-600 text-lg font-medium max-w-2xl leading-relaxed">
-                        {hero?.description || "Au Club Nautique de Coutainville (CNC), notre passion pour la mer s'exprime à travers un projet associatif solide et une vision moderne du nautisme."}
-                    </p>
+                    <RenderText
+                        content={hero?.description}
+                        className="text-slate-600 text-lg font-medium max-w-2xl leading-relaxed"
+                        fallback="Au Club Nautique de Coutainville (CNC), notre passion pour la mer s'exprime à travers un projet associatif solide et une vision moderne du nautisme."
+                    />
                 </div>
 
                 <div className="mb-24">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className={`grid grid-cols-1 ${values.length === 1 ? 'md:grid-cols-1 max-w-4xl mx-auto' : values.length === 2 ? 'md:grid-cols-2 max-w-5xl mx-auto' : 'md:grid-cols-3'} gap-8`}>
                         {values.map((val, idx) => {
                             const IconComp = resolveIcon(val.iconName);
                             return (
-                                <div key={idx} className="bg-slate-50 p-10 rounded-4xl border border-slate-100 relative group hover:bg-white hover:shadow-2xl transition-all duration-500">
-                                    <div className="size-14 bg-white rounded-2xl flex items-center justify-center text-abysse shadow-lg mb-6 group-hover:bg-abysse group-hover:text-white transition-colors">
-                                        {IconComp && <IconComp size={28} />}
-                                    </div>
-                                    <h4 className="text-2xl text-abysse mb-3">{val.title}</h4>
-                                    <p className="text-slate-600 font-medium leading-relaxed">
-                                        {val.description}
-                                    </p>
+                                <div key={idx} className="bg-slate-50 p-8 md:p-12 rounded-[2.5rem] border border-slate-100 relative group hover:bg-white hover:shadow-2xl transition-all duration-500">
+                                    {IconComp && (
+                                        <div className="size-16 bg-white rounded-2xl flex items-center justify-center text-abysse shadow-lg mb-8 group-hover:bg-abysse group-hover:text-white transition-colors">
+                                            <IconComp size={32} />
+                                        </div>
+                                    )}
+                                    <h4 className="text-3xl font-black italic tracking-tight uppercase text-abysse mb-6">{val.title}</h4>
+                                    <RenderText content={val.description} className="text-slate-600 font-medium leading-relaxed prose-lg" />
                                 </div>
                             );
                         })}
@@ -284,30 +302,27 @@ const ClubPage: React.FC = () => {
                                     key={idx}
                                     className={`story-step-${idx + 1} absolute text-center px-6 max-w-5xl ${idx > 0 ? 'opacity-0 translate-y-24' : ''}`}
                                 >
-                                    {ch.isFinalChapter ? (
-                                        <>
-                                            <Sparkles className="text-turquoise mx-auto mb-8" size={48} />
-                                            <h3 className="text-6xl md:text-9xl font-black text-white uppercase italic tracking-tighter leading-[0.75] mb-10">
-                                                {ch.title} <br />L'Avenir.
-                                            </h3>
-                                            <p className="text-slate-300 text-2xl md:text-4xl font-medium italic max-w-4xl mx-auto mb-16">
-                                                {ch.quote}
-                                            </p>
+                                    <>
+                                        {ch.chapterLabel && (
+                                            <span className="text-turquoise font-black uppercase tracking-[0.4em] text-[10px] py-2 px-4 border border-turquoise/30 rounded-full mb-8 inline-block">
+                                                {ch.chapterLabel}
+                                            </span>
+                                        )}
+                                        <h3 className="text-5xl md:text-[7.5rem] font-black text-white uppercase italic tracking-tighter leading-[0.8] mb-10">
+                                            {ch.title} <br />
+                                            <span className="text-transparent bg-clip-text bg-linear-to-r from-turquoise to-white">
+                                                {ch.highlightText}
+                                            </span>
+                                        </h3>
+                                        <p className={`text-slate-300 text-xl md:text-2xl font-medium italic max-w-3xl mx-auto leading-relaxed ${ch.isFinalChapter ? 'mb-12' : ''}`}>
+                                            {ch.quote}
+                                        </p>
+                                        {ch.isFinalChapter && storytellingCta?.link && (
                                             <Link href={storytellingCta.link} className="inline-flex items-center gap-4 bg-turquoise text-abysse px-10 py-5 rounded-2xl font-black uppercase text-xs hover:bg-white transition-all shadow-2xl">
-                                                {storytellingCta.label} <ArrowRight size={18} />
+                                                {storytellingCta.label || 'Nous Rejoindre'} <ArrowRight size={18} />
                                             </Link>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span className="text-turquoise font-black uppercase tracking-[0.4em] text-[10px] py-2 px-4 border border-turquoise/30 rounded-full mb-8 inline-block">{ch.chapterLabel}</span>
-                                            <h3 className="text-6xl md:text-9xl font-black text-white uppercase italic tracking-tighter leading-[0.8] mb-10">
-                                                {ch.title} <br /><span className="text-transparent bg-clip-text bg-linear-to-r from-turquoise to-white">{ch.highlightText}</span>
-                                            </h3>
-                                            <p className="text-slate-300 text-xl md:text-3xl font-medium italic max-w-3xl mx-auto leading-relaxed">
-                                                {ch.quote}
-                                            </p>
-                                        </>
-                                    )}
+                                        )}
+                                    </>
                                 </div>
                             ))}
                         </div>
@@ -422,9 +437,13 @@ const ClubPage: React.FC = () => {
                     <div>
                         <div className="w-12 h-1 bg-turquoise mb-6"></div>
                         <h2 className="text-3xl md:text-4xl text-abysse leading-none mb-6">{siteData.title}</h2>
-                        <p className="text-slate-600 font-medium leading-relaxed mb-8 text-lg">
-                            {siteData.description}
-                        </p>
+                        <div className="text-slate-600 font-medium leading-relaxed mb-8 text-lg whitespace-pre-line prose prose-slate max-w-[80%]">
+                            {typeof siteData.description === 'string' ? (
+                                <p>{siteData.description}</p>
+                            ) : (
+                                <PortableText value={siteData.description as any} />
+                            )}
+                        </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {siteData.facilities?.map((item, i) => (
                                 <div key={i} className="flex items-center gap-3 font-black text-abysse text-[10px] uppercase tracking-widest">

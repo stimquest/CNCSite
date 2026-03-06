@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { PortableText } from '@portabletext/react';
 
 interface PageHeroProps {
     /** Background image URL */
@@ -16,7 +17,7 @@ interface PageHeroProps {
     /** Title line 2 (turquoise → white gradient) */
     subtitle: string;
     /** Optional italic description below the title */
-    description?: string;
+    description?: string | any[];
     /** Optional stat cards / content below title */
     children?: React.ReactNode;
     /** Height variant */
@@ -87,14 +88,18 @@ export const PageHero: React.FC<PageHeroProps> = ({
 
                     {/* Description */}
                     {description && (
-                        <motion.p
+                        <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.3 }}
-                            className="text-white/70 text-sm font-medium italic max-w-md mb-8"
+                            className="text-white/70 text-sm font-medium italic max-w-md mb-8 whitespace-pre-line"
                         >
-                            &ldquo;{description}&rdquo;
-                        </motion.p>
+                            {typeof description === 'string' ? (
+                                <>&ldquo;{description}&rdquo;</>
+                            ) : (
+                                <PortableText value={description} />
+                            )}
+                        </motion.div>
                     )}
 
                     {/* Stat cards */}

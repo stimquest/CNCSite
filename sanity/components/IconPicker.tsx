@@ -3,30 +3,31 @@ import { Card, Stack, Text, TextInput, Grid, Button, Box, Flex } from '@sanity/u
 import { set, unset } from 'sanity';
 import * as LucideIcons from 'lucide-react';
 
-// Liste d'icônes recommandées pour le CNC
-const RECOMMENDED_ICONS = [
-    'Anchor', 'Wind', 'Waves', 'Compass', 'MapPin', 'Calendar', 'Clock', 'Phone', 'Mail',
-    'Users', 'Info', 'Shield', 'Trophy', 'LifeBuoy', 'Ship', 'Sun', 'Cloud', 'Droplets',
-    'Activity', 'Target', 'Zap', 'Star', 'Heart', 'HelpCircle', 'GraduationCap', 'CheckCircle2'
-];
-
 export const IconPicker = (props: any) => {
-    const { elementProps, onChange, value = '' } = props;
+    const { elementProps, onChange, value = '', readOnly } = props;
     const [search, setSearch] = useState('');
 
-    // Filtrer toutes les icônes Lucide disponibles
-    const allIconNames = Object.keys(LucideIcons).filter(
-        (name) => typeof (LucideIcons as any)[name] === 'function' || typeof (LucideIcons as any)[name] === 'object'
-    );
+    const allIconNames = useMemo(() => {
+        return Object.keys(LucideIcons).filter(
+            // On ne garde que les composants React (qui commencent par une MAJUSCULE)
+            (name) => /^[A-Z]/.test(name)
+                && !name.endsWith('Icon')
+                && !name.startsWith('Lucide')
+                && (typeof (LucideIcons as any)[name] === 'function' || typeof (LucideIcons as any)[name] === 'object')
+        );
+    }, []);
 
     const filteredIcons = useMemo(() => {
-        if (!search) return RECOMMENDED_ICONS;
+        if (!search) return allIconNames.slice(0, 150);
+        // On enlève les tirets et espaces de la recherche
+        const cleanSearch = search.toLowerCase().replace(/[-\s]/g, '');
         return allIconNames
-            .filter((name) => name.toLowerCase().includes(search.toLowerCase()))
-            .slice(0, 30); // Limiter pour la performance
-    }, [search]);
+            .filter((name) => name.toLowerCase().includes(cleanSearch))
+            .slice(0, 150);
+    }, [search, allIconNames]);
 
     const handleChange = (iconName: string) => {
+        if (readOnly) return;
         onChange(iconName ? set(iconName) : unset());
     };
 
@@ -51,6 +52,7 @@ export const IconPicker = (props: any) => {
                                 mode="bleed"
                                 tone="critical"
                                 text="Effacer"
+                                disabled={readOnly}
                                 onClick={() => handleChange('')}
                             />
                         )}
@@ -62,7 +64,7 @@ export const IconPicker = (props: any) => {
                     placeholder="Rechercher une icône (ex: sailboat, wind...)"
                     value={search}
                     onChange={(event) => setSearch(event.currentTarget.value)}
-                    {...elementProps}
+                    readOnly={readOnly}
                 />
 
                 {/* Grille d'icônes */}
@@ -76,6 +78,7 @@ export const IconPicker = (props: any) => {
                                     key={iconName}
                                     mode={value === iconName ? 'default' : 'ghost'}
                                     tone={value === iconName ? 'primary' : 'default'}
+                                    disabled={readOnly}
                                     onClick={() => handleChange(iconName)}
                                     title={iconName}
                                     padding={2}

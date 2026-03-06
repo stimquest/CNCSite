@@ -285,7 +285,7 @@ export interface VibeMessage {
 export interface PageHero {
   title?: string;
   subtitle?: string;
-  description?: string;
+  description?: string | any[];
   heroImage?: string;
 }
 
@@ -293,11 +293,11 @@ export interface ClubPageData {
   hero: PageHero;
   heroStats?: { label: string; value: string; sublabel: string; iconName: string; style: 'solid' | 'glass'; }[];
   identityTitle?: string;
-  values: { title: string; description: string; iconName: string; }[];
+  values: { title: string; description: string | any[]; iconName: string; }[];
   storytelling?: { chapterLabel: string; title: string; highlightText: string; quote: string; image?: string; isFinalChapter?: boolean; }[];
   storytellingCta?: { label: string; link: string; };
   team?: { tag: string; title: string; boardMembers?: { name: string; role: string; image?: string; }[]; caMembers?: string[]; proTeam?: { name: string; role: string; image?: string; }[]; };
-  site?: { title: string; description: string; facilities: string[]; image?: string; imageCaption?: string; imageSublabel?: string; };
+  site?: { title: string; description: string | any[]; facilities: string[]; image?: string; imageCaption?: string; imageSublabel?: string; };
   fleet?: { title: string; items: { name: string; subtitle: string; description: string; crew: string; gallery: string[]; stats: { speed: number; difficulty: number; adrenaline: number; }; }[]; };
   cta?: { title: string; highlightText: string; buttonLabel: string; buttonLink: string; };
 }
@@ -506,8 +506,8 @@ export interface SchoolStage {
   age?: string;
   price?: string;
   priceDetail?: string;
-  description?: string;
-  longDescription?: string;
+  description?: string | any[];
+  longDescription?: string | any[];
   step?: string;
   phase?: string;
   hook?: string;
@@ -537,7 +537,7 @@ export interface SchoolPageData {
   }[];
   intro?: {
     title?: string;
-    content?: string;
+    content?: string | any[];
   };
   heroBadges?: {
     label: string;
@@ -550,13 +550,13 @@ export interface SchoolPageData {
   practicalInfo?: {
     title: string;
     subtitle?: string;
-    description?: string;
+    description?: string | any[];
   };
   equipmentProvided?: string[];
   toBring?: string[];
   safetyInfo?: {
     title: string;
-    description?: string;
+    description?: string | any[];
     footerText?: string;
   };
   seo?: {
