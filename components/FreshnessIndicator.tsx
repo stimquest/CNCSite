@@ -6,14 +6,18 @@ import { fr } from 'date-fns/locale';
 
 interface FreshnessIndicatorProps {
     lastPublishedAt: string | null;
+    lastConfirmedAt?: string | null;
     showBanner?: boolean;
 }
 
 export const FreshnessIndicator: React.FC<FreshnessIndicatorProps> = ({
     lastPublishedAt,
+    lastConfirmedAt,
     showBanner = true,
 }) => {
-    if (!lastPublishedAt) {
+    const dates = [lastPublishedAt, lastConfirmedAt].filter(Boolean) as string[];
+
+    if (dates.length === 0) {
         return showBanner ? (
             <p className="text-[10px] text-slate-400 font-medium text-center py-1">
                 Informations non encore publiées aujourd'hui.
@@ -21,7 +25,8 @@ export const FreshnessIndicator: React.FC<FreshnessIndicatorProps> = ({
         ) : null;
     }
 
-    const date = new Date(lastPublishedAt);
+    // Prendre la date la plus récente
+    const date = new Date(Math.max(...dates.map(d => new Date(d).getTime())));
     const hoursAgo = differenceInHours(new Date(), date);
     const formattedTime = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     const formattedDate = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });

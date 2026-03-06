@@ -37,7 +37,7 @@ function relDate(iso: string) {
 }
 
 export const FilInfoPage: React.FC = () => {
-    const { infoMessages, isLoading, lastPublishedAt } = useContent();
+    const { infoMessages, isLoading, lastPublishedAt, lastConfirmedAt } = useContent();
     const [selectedGroup, setSelectedGroup] = useState('all');
 
     const filteredMessages = useMemo(() => {
@@ -111,7 +111,11 @@ export const FilInfoPage: React.FC = () => {
                 {/* SIDEBAR — sticky sur desktop, empilé sur mobile */}
                 <aside className="lg:w-72 lg:shrink-0 lg:sticky lg:top-16 space-y-4 mb-6 lg:mb-0">
                     <StatusDashboard />
-                    <FreshnessIndicator lastPublishedAt={lastPublishedAt} showBanner />
+                    <FreshnessIndicator
+                        lastPublishedAt={lastPublishedAt}
+                        lastConfirmedAt={lastConfirmedAt}
+                        showBanner
+                    />
                 </aside>
 
                 {/* FEED */}
@@ -122,12 +126,16 @@ export const FilInfoPage: React.FC = () => {
                         <span className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">
                             {filteredMessages.length} message{filteredMessages.length !== 1 ? 's' : ''}
                         </span>
-                        {lastPublishedAt && (
-                            <span className="text-[9px] text-slate-400 font-medium">
-                                Mis à jour · {new Date(lastPublishedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                                {' '}le {new Date(lastPublishedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                            </span>
-                        )}
+                        {lastPublishedAt && (() => {
+                            const latest = [lastPublishedAt, lastConfirmedAt].filter(Boolean) as string[];
+                            const date = new Date(Math.max(...latest.map(d => new Date(d).getTime())));
+                            return (
+                                <span className="text-[9px] text-slate-400 font-medium">
+                                    Mis à jour · {date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                    {' '}le {date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                                </span>
+                            );
+                        })()}
                         <div className="flex-1 h-px bg-slate-200 hidden sm:block" />
                     </div>
 

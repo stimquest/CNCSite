@@ -48,6 +48,7 @@ interface ContentState {
   stagesPerfMessage: string;
 
   lastPublishedAt: string | null;
+  lastConfirmedAt: string | null;
 
   vibeMessages: VibeMessage[];
   clubData: ClubPageData | null;
@@ -120,6 +121,7 @@ type LiveContentContextType = Pick<ContentContextType,
   | 'stagesPerfStatus'
   | 'stagesPerfMessage'
   | 'lastPublishedAt'
+  | 'lastConfirmedAt'
   | 'currentVibe'
 >;
 
@@ -540,6 +542,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [stagesPerfStatus, setStagesPerfStatus] = useState<SpotStatus>(SpotStatus.OPEN);
   const [stagesPerfMessage, setStagesPerfMessage] = useState('');
   const [lastPublishedAt, setLastPublishedAt] = useState<string | null>(null);
+  const [lastConfirmedAt, setLastConfirmedAt] = useState<string | null>(null);
 
   const [vibeMessages, setVibeMessages] = useState<VibeMessage[]>([]);
   const [clubData, setClubData] = useState<ClubPageData | null>(null);
@@ -557,7 +560,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsLoading(true);
 
     // FETCH DIRECT STATUS — lit depuis Sanity via /api/cockpit/direct
-    const directPromise = fetch('/api/cockpit/direct')
+    const directPromise = fetch('/api/cockpit/direct', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data && !data.error) {
@@ -578,6 +581,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           if (data.stagesPerfStatus) setStagesPerfStatus(data.stagesPerfStatus);
           if (data.stagesPerfMessage !== undefined) setStagesPerfMessage(data.stagesPerfMessage);
           if (data.lastPublishedAt) setLastPublishedAt(data.lastPublishedAt);
+          if (data.lastConfirmedAt) setLastConfirmedAt(data.lastConfirmedAt);
           return data;
         }
       })
@@ -834,7 +838,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       interval = setInterval(() => {
         if (document.visibilityState === 'visible') {
           // Refresh statuses from cockpit API
-          fetch('/api/cockpit/direct')
+          fetch('/api/cockpit/direct', { cache: 'no-store' })
             .then(res => res.json())
             .then(data => {
               if (data && !data.error) {
@@ -847,6 +851,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 if (data.stagesInitiationStatus) setStagesInitiationStatus(data.stagesInitiationStatus);
                 if (data.stagesPerfStatus) setStagesPerfStatus(data.stagesPerfStatus);
                 if (data.lastPublishedAt) setLastPublishedAt(data.lastPublishedAt);
+                if (data.lastConfirmedAt) setLastConfirmedAt(data.lastConfirmedAt);
               }
             })
             .catch(() => { });
@@ -857,7 +862,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         // Refresh status on tab focus
-        fetch('/api/cockpit/direct')
+        fetch('/api/cockpit/direct', { cache: 'no-store' })
           .then(res => res.json())
           .then(data => {
             if (data && !data.error) {
@@ -870,6 +875,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
               if (data.stagesInitiationStatus) setStagesInitiationStatus(data.stagesInitiationStatus);
               if (data.stagesPerfStatus) setStagesPerfStatus(data.stagesPerfStatus);
               if (data.lastPublishedAt) setLastPublishedAt(data.lastPublishedAt);
+              if (data.lastConfirmedAt) setLastConfirmedAt(data.lastConfirmedAt);
             }
           })
           .catch(() => { });
@@ -954,6 +960,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     stagesPerfStatus,
     stagesPerfMessage,
     lastPublishedAt,
+    lastConfirmedAt,
     currentVibe,
   }), [
     weather,
@@ -978,6 +985,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     stagesPerfStatus,
     stagesPerfMessage,
     lastPublishedAt,
+    lastConfirmedAt,
     currentVibe,
   ]);
 

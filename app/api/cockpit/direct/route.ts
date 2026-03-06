@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 
 import { client } from '@/lib/sanity';
 import { getServerWriteClient } from '@/lib/sanity.server';
@@ -43,6 +44,8 @@ export async function POST(req: Request) {
                 ...patch,
                 lastPublishedAt: new Date().toISOString()
             }).commit();
+            revalidatePath('/');
+            revalidatePath('/fil-info');
             return NextResponse.json({ success: true });
         }
 
@@ -51,6 +54,8 @@ export async function POST(req: Request) {
             await serverClient.patch(SINGLETON_ID).set({
                 lastConfirmedAt: new Date().toISOString()
             }).commit();
+            revalidatePath('/');
+            revalidatePath('/fil-info');
             return NextResponse.json({ success: true });
         }
 

@@ -90,7 +90,7 @@ const PARTNERS = [
 export const HomePage: React.FC = () => {
     const {
         weather, statusMessage, news, homeGallery, infoMessages,
-        spotStatus, lastPublishedAt,
+        spotStatus, lastPublishedAt, lastConfirmedAt,
         charStatus, charMessage, nautiqueStatus, nautiqueMessage,
         marcheStatus, marcheMessage,
         stagesMiniMoussesStatus, stagesMiniMoussesMessage,
@@ -419,17 +419,18 @@ export const HomePage: React.FC = () => {
                             );
                         })()}
                         {lastPublishedAt && (() => {
-                            const pub = new Date(lastPublishedAt);
+                            const latest = [lastPublishedAt, lastConfirmedAt].filter(Boolean) as string[];
+                            const date = new Date(Math.max(...latest.map(d => new Date(d).getTime())));
                             const now = new Date();
-                            const isToday = pub.toDateString() === now.toDateString();
+                            const isToday = date.toDateString() === now.toDateString();
                             const dateLabel = isToday
                                 ? 'Aujourd\'hui'
-                                : pub.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                                : date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
                             return (
                                 <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-abysse/10">
                                     <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                                     <p className="text-[11px] text-abysse/60 font-semibold">
-                                        Mis à jour · <span className="font-black text-abysse/80">{dateLabel} à {pub.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                        Mis à jour · <span className="font-black text-abysse/80">{dateLabel} à {date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
                                     </p>
                                 </div>
                             );
