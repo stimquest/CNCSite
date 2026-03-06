@@ -1,6 +1,7 @@
 
 import { defineField, defineType } from 'sanity';
 import { Home, Image as ImageIcon, Briefcase, Users, Layout } from 'lucide-react';
+import { IconPicker } from '../components/IconPicker';
 
 export default defineType({
     name: 'homePage',
@@ -90,7 +91,12 @@ export default defineType({
                         defineField({ name: 'image', title: 'Image de fond', type: 'image', options: { hotspot: true } }),
                         defineField({ name: 'link', title: 'Lien du bouton', type: 'string' }),
                         defineField({ name: 'buttonText', title: 'Texte du bouton', type: 'string' }),
-                        defineField({ name: 'iconName', title: 'Nom Icône Lucide', type: 'string' }),
+                        defineField({
+                            name: 'iconName',
+                            title: 'Icône (Lucide)',
+                            type: 'string',
+                            components: { input: IconPicker }
+                        }),
                         defineField({
                             name: 'colorTheme',
                             title: 'Thème Couleur',

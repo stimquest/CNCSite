@@ -533,7 +533,7 @@ export default function AdminPage() {
         <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
             {/* HEADER */}
             <header className="bg-white border-b border-slate-200 h-20 sticky top-0 z-50">
-                <div className="max-w-[1600px] mx-auto px-6 h-full flex items-center justify-between">
+                <div className="max-w-400 mx-auto px-6 h-full flex items-center justify-between">
                     <div className="flex items-center gap-6">
                         <h2 className="text-2xl font-black uppercase tracking-tighter text-abysse">CNC <span className="text-turquoise">CONTROL</span></h2>
                         <nav className="flex gap-1 bg-slate-100 p-1 rounded-xl">
@@ -551,7 +551,7 @@ export default function AdminPage() {
                 </div>
             </header>
 
-            <main className="flex-1 w-full max-w-[1600px] mx-auto p-6 md:p-10">
+            <main className="flex-1 w-full max-w-400 mx-auto p-6 md:p-10">
 
 
                 {/* TAB: STAGES */}
@@ -562,7 +562,7 @@ export default function AdminPage() {
                         <div className="xl:w-72 shrink-0 flex flex-col gap-4">
                             <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
                                 <h3 className="text-sm font-black uppercase text-abysse mb-3 px-1">Plannings</h3>
-                                <div className="space-y-1 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="space-y-1 max-h-100 overflow-y-auto pr-2 custom-scrollbar">
                                     {(plannings || []).map(p => (
                                         <button
                                             key={p._id}
@@ -594,7 +594,7 @@ export default function AdminPage() {
                         {/* MAIN EDITOR */}
                         <div className="flex-1 min-w-0">
                             {!selectedStage ? (
-                                <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-white/50">
+                                <div className="h-full min-h-75 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-white/50">
                                     <CalendarDays size={40} className="mb-3 opacity-30" />
                                     <p className="font-bold uppercase tracking-widest text-[10px]">Sélectionnez ou créez un planning</p>
                                 </div>
@@ -621,7 +621,7 @@ export default function AdminPage() {
 
                                     {/* COMPACT TABLE GRID */}
                                     <div className="overflow-x-auto -mx-4 px-4 pb-4">
-                                        <div className="min-w-[800px] border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+                                        <div className="min-w-200 border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
                                             {/* HEADER ROW */}
                                             <div className="grid grid-cols-[180px_repeat(auto-fit,minmax(120px,1fr))] bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
                                                 <div className="p-3 font-black text-[10px] uppercase text-slate-400 flex items-center">Groupe / Jour</div>
@@ -788,7 +788,7 @@ export default function AdminPage() {
                 {/* TAB: CHAR A VOILE */}
                 {activeTab === 'CHAR' && (
                     <div className="flex flex-col lg:flex-row gap-10">
-                        <div className="lg:w-[320px] shrink-0 space-y-4">
+                        <div className="lg:w-80 shrink-0 space-y-4">
                             <button onClick={createNewCharPeriod} className="w-full py-4 bg-orange-500 text-white rounded-xl font-black uppercase tracking-widest hover:bg-abysse transition-all shadow-md flex items-center justify-center gap-2"><Plus size={18} /> Nouvelle Période</button>
                             <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                                 {(charPlannings || []).map((period) => (
@@ -888,7 +888,7 @@ export default function AdminPage() {
                 {/* TAB: MARCHE AQUATIQUE */}
                 {activeTab === 'MARCHE' && (
                     <div className="flex flex-col lg:flex-row gap-10">
-                        <div className="lg:w-[320px] shrink-0 space-y-4">
+                        <div className="lg:w-80 shrink-0 space-y-4">
                             <button onClick={createNewMarchePeriod} className="w-full py-4 bg-turquoise text-white rounded-xl font-black uppercase tracking-widest hover:bg-abysse transition-all shadow-md flex items-center justify-center gap-2"><Plus size={18} /> Nouvelle Période</button>
                             <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                                 {(marchePlannings || []).map((period) => (
@@ -986,7 +986,7 @@ export default function AdminPage() {
 
                 {/* TAB: CONDITIONS AUTO */}
                 {activeTab === 'CONDITIONS' && autoConfig && (
-                    <div className="space-y-6 max-w-[1200px]">
+                    <div className="space-y-6 max-w-300">
 
                         {/* HEADER PANEL */}
                         <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
@@ -1022,7 +1022,7 @@ export default function AdminPage() {
                                     </div>
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" checked={autoConfig.enabled} onChange={(e) => setAutoConfig({ ...autoConfig, enabled: e.target.checked })} className="sr-only peer" />
-                                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
                                     </label>
                                 </div>
 
@@ -1058,7 +1058,7 @@ export default function AdminPage() {
                                     </div>
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" checked={autoConfig.manualOverride} onChange={(e) => setAutoConfig({ ...autoConfig, manualOverride: e.target.checked })} className="sr-only peer" />
-                                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
                                     </label>
                                 </div>
                             </div>
@@ -1170,7 +1170,7 @@ export default function AdminPage() {
                                                             updated.activities[key] = { ...activity, enabled: e.target.checked };
                                                             setAutoConfig(updated);
                                                         }} className="sr-only peer" />
-                                                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                                                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
                                                     </div>
                                                 </div>
                                                 <button className="p-2 text-slate-400 hover:text-turquoise transition-colors">

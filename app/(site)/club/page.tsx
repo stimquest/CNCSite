@@ -36,7 +36,7 @@ import { SecondaryNav } from '@/components/SecondaryNav';
 import { PageHero } from '@/components/PageHero';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import { useContent } from '@/contexts/ContentContext';
+import { useCmsContent } from '@/contexts/ContentContext';
 
 if (typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
@@ -123,7 +123,7 @@ const SECTIONS = [
 ];
 
 const ClubPage: React.FC = () => {
-    const { clubData } = useContent();
+    const { clubData } = useCmsContent();
 
     // Resolve data with fallbacks
     const hero = clubData?.hero;

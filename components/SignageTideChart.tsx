@@ -11,10 +11,10 @@ import {
     CartesianGrid
 } from "recharts";
 import { format, startOfDay, addDays } from "date-fns";
-import { useContent } from "@/contexts/ContentContext";
+import { useSignageContent } from "@/contexts/SignageContentContext";
 
 export function SignageTideChart() {
-    const { tides, weather } = useContent();
+    const { tides, weather } = useSignageContent();
     const now = Date.now();
     const todayStart = startOfDay(now).getTime();
     const todayEnd = addDays(todayStart, 1).getTime();

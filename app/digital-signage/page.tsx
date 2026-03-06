@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useContent } from '@/contexts/ContentContext';
+import { useSignageContent } from '@/contexts/SignageContentContext';
 import { SignageSlideType } from '@/types';
 import { SignageTideChart } from '@/components/SignageTideChart';
 import { Wind, Anchor, X, QrCode, Waves, Thermometer, MapPin, Info } from 'lucide-react';
@@ -14,7 +14,7 @@ interface SequenceItem {
 }
 
 export const DigitalSignagePage: React.FC = () => {
-  const { weather, signageSlides } = useContent();
+  const { weather, signageSlides } = useSignageContent();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 

@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { IconPicker } from '../components/IconPicker';
 
 export const naturePage = defineType({
     name: 'naturePage',
@@ -44,7 +45,12 @@ export const naturePage = defineType({
                             fields: [
                                 { name: 'title', type: 'string', title: 'Titre' },
                                 { name: 'description', type: 'text', title: 'Description' },
-                                { name: 'iconName', type: 'string', title: 'Nom Icône (Lucide)' },
+                                defineField({
+                                    name: 'iconName',
+                                    type: 'string',
+                                    title: 'Icône (Lucide)',
+                                    components: { input: IconPicker }
+                                }),
                                 { name: 'color', type: 'string', title: 'Couleur (ex: text-abysse, text-orange-600)' },
                             ]
                         }

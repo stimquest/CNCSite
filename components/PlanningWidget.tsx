@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useContent } from '@/contexts/ContentContext';
+import { usePlanningContent } from '@/contexts/ContentContext';
 import { ActivityType } from '@/types';
 import {
     Calendar, ChevronLeft, ChevronRight, Wind, Waves, Info,
@@ -60,7 +60,7 @@ const getActivityIcon = (type: ActivityType) => {
 };
 
 export const PlanningWidget: React.FC = () => {
-    const { plannings, charPlannings, marchePlannings, isLoading } = useContent();
+    const { plannings, charPlannings, marchePlannings, isLoading } = usePlanningContent();
     const [activeTab, setActiveTab] = useState<'voile' | 'char' | 'marche'>('voile');
     const [currentIdx, setCurrentIdx] = useState(0);
     const [isWeekSelectorOpen, setIsWeekSelectorOpen] = useState(false);

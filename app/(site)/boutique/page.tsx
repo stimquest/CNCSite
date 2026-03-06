@@ -8,7 +8,7 @@ import {
     Trophy, Sparkles, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
-import { useContent } from '../../../contexts/ContentContext';
+import { useCmsContent } from '../../../contexts/ContentContext';
 
 // Helper: extract plain text from Portable Text blocks or return string as-is
 function toPlainText(value: any): string {
@@ -124,7 +124,7 @@ const MOCK_OCCAZ = [
 ];
 
 export const BoutiquePage: React.FC = () => {
-    const { merchItems, occazItems, isLoading } = useContent();
+    const { merchItems, occazItems, isLoading } = useCmsContent();
 
     const merchToShow = merchItems.length > 0 ? merchItems : (isLoading ? [] : MOCK_MERCH);
     const occazToShow = occazItems.length > 0 ? occazItems : (isLoading ? [] : MOCK_OCCAZ);

@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { IconPicker } from '../components/IconPicker';
 
 export const clubPage = defineType({
     name: 'clubPage',
@@ -43,7 +44,13 @@ export const clubPage = defineType({
                         { name: 'label', type: 'string', title: 'Label supérieur', description: 'Ex: "Depuis", "Communauté"' },
                         { name: 'value', type: 'string', title: 'Valeur principale', description: 'Ex: "1978", "450 Adhérents"' },
                         { name: 'sublabel', type: 'string', title: 'Sous-label', description: 'Ex: "Héritage marin", "Une grande famille"' },
-                        { name: 'iconName', type: 'string', title: 'Nom Icône (Lucide)', description: 'Ex: "History", "Users"' },
+                        defineField({
+                            name: 'iconName',
+                            type: 'string',
+                            title: 'Icône (Lucide)',
+                            description: 'Ex: "History", "Users"',
+                            components: { input: IconPicker }
+                        }),
                         { name: 'style', type: 'string', title: 'Style visuel', options: { list: [{ title: 'Carte blanche (solide)', value: 'solid' }, { title: 'Carte transparente (glass)', value: 'glass' }] } },
                     ],
                     preview: {
@@ -75,7 +82,13 @@ export const clubPage = defineType({
                     fields: [
                         { name: 'title', type: 'string', title: 'Titre' },
                         { name: 'description', type: 'text', title: 'Description' },
-                        { name: 'iconName', type: 'string', title: 'Nom Icône (Lucide)', description: 'Ex: GraduationCap, Accessibility, ShieldCheck' },
+                        defineField({
+                            name: 'iconName',
+                            type: 'string',
+                            title: 'Icône (Lucide)',
+                            description: 'Ex: GraduationCap, Accessibility, ShieldCheck',
+                            components: { input: IconPicker }
+                        }),
                     ],
                     preview: {
                         select: { title: 'title', subtitle: 'description' }

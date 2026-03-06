@@ -14,7 +14,7 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { ObservationPoint } from '../../../components/NatureMap';
-import { useContent } from '@/contexts/ContentContext';
+import { useCmsContent } from '@/contexts/ContentContext';
 
 // Helper to get Lucide icon from string name
 const getIconByName = (name: string, size = 24) => {
@@ -92,7 +92,7 @@ const FALLBACK_HABITANTS = [
 ];
 
 export const NaturePage: React.FC = () => {
-    const { natureData, isLoading } = useContent();
+    const { natureData } = useCmsContent();
     const [activePoint, setActivePoint] = useState<ObservationPoint | null>(null);
     const [currentSlide, setCurrentSlide] = useState(0);
     const estranRef = useRef<HTMLDivElement>(null);

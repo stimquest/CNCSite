@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { SecondaryNav } from '@/components/SecondaryNav';
-import { useContent } from '@/contexts/ContentContext';
+import { useCmsContent, usePlanningContent } from '@/contexts/ContentContext';
 import {
   ChevronLeft,
   ChevronRight,
@@ -225,7 +225,7 @@ const StorySection: React.FC<{ item: any; index: number }> = ({ item, index }) =
       {/* Background Decor */}
       <div className={`absolute top-0 ${isEven ? 'right-0' : 'left-0'} w-1/2 h-full bg-slate-50 -z-10 hidden lg:block opacity-50`}></div>
 
-      <div className="max-w-[1400px] mx-auto px-6">
+      <div className="max-w-350 mx-auto px-6">
         <div className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-12 lg:gap-24 items-center`}>
 
           {/* Visual Column */}
@@ -236,7 +236,7 @@ const StorySection: React.FC<{ item: any; index: number }> = ({ item, index }) =
 
               {/* Floating Badge */}
               <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
-                <div className="bg-white/95 backdrop-blur-xl p-4 rounded-[2rem] shadow-xl border border-white/40 flex flex-col min-w-[140px]">
+                <div className="bg-white/95 backdrop-blur-xl p-4 rounded-[2rem] shadow-xl border border-white/40 flex flex-col min-w-35">
                   <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1">Public</span>
                   <div className="flex items-baseline gap-2 mb-1">
                     <span className={`text-2xl md:text-3xl font-black ${item.color} uppercase italic tracking-tighter leading-none`}>
@@ -345,7 +345,8 @@ const StorySection: React.FC<{ item: any; index: number }> = ({ item, index }) =
 
 // --- PAGE PRINCIPALE ---
 export const EcoleVoilePage: React.FC = () => {
-  const { plannings: rawPlannings, isLoading, schoolPageData } = useContent();
+  const { plannings: rawPlannings, isLoading } = usePlanningContent();
+  const { schoolPageData } = useCmsContent();
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
   const [isWeekSelectorOpen, setIsWeekSelectorOpen] = useState(false);
 
@@ -400,7 +401,7 @@ export const EcoleVoilePage: React.FC = () => {
           const sublabelClass = isGlass ? "text-white/60" : "text-slate-400";
 
           return (
-            <div key={idx} className={`${containerClass} rounded-[2rem] p-8 border flex items-center gap-8 min-w-[300px]`}>
+            <div key={idx} className={`${containerClass} rounded-[2rem] p-8 border flex items-center gap-8 min-w-75`}>
               <div className={`size-16 rounded-2xl flex items-center justify-center shrink-0 ${iconContainerClass}`}>
                 {getIcon(badge.iconName || (idx === 0 ? 'Anchor' : 'CheckCircle2'), 32)}
               </div>
@@ -419,7 +420,7 @@ export const EcoleVoilePage: React.FC = () => {
           );
         }) || (
             <>
-              <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-[300px]">
+              <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-75">
                 <div className="size-16 rounded-2xl bg-abysse flex items-center justify-center text-white shadow-lg shrink-0">
                   <Anchor size={32} />
                 </div>
@@ -430,7 +431,7 @@ export const EcoleVoilePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-[300px]">
+              <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-75">
                 <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center text-white shrink-0">
                   <CheckCircle2 size={32} />
                 </div>
@@ -452,7 +453,7 @@ export const EcoleVoilePage: React.FC = () => {
 
       {/* NEW: SECTION INTRO / PRÉSENTATION */}
       <section className="py-12 bg-white relative overflow-hidden">
-        <div className="max-w-[960px] mx-auto px-6 text-center">
+        <div className="max-w-240 mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -501,7 +502,7 @@ export const EcoleVoilePage: React.FC = () => {
         <div className="absolute -top-40 -left-40 size-96 bg-turquoise/10 rounded-full blur-[100px]"></div>
         <div className="absolute -bottom-40 -right-40 size-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
 
-        <div className="max-w-[1400px] mx-auto relative z-10">
+        <div className="max-w-350 mx-auto relative z-10">
           <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
             <div>
               <span className="text-turquoise text-[10px] font-black uppercase tracking-[0.4em] mb-4 block">
@@ -572,7 +573,7 @@ export const EcoleVoilePage: React.FC = () => {
 
       {/* 4. PLANNING & DISPO (COMPACT AT BOTTOM) */}
       <section id="planning" className="py-24 px-6 bg-white border-t border-slate-100 scroll-mt-24">
-        <div className="max-w-[1400px] mx-auto">
+        <div className="max-w-350 mx-auto">
           <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-8">
             <div>
               <div className="inline-flex items-center gap-2 mb-4 text-[10px] font-black uppercase tracking-[0.3em] text-turquoise">
@@ -585,7 +586,7 @@ export const EcoleVoilePage: React.FC = () => {
 
             {/* Week Selector */}
             {plannings && plannings.length > 0 && (
-              <div className="flex items-center bg-slate-50 p-2 rounded-2xl border border-slate-100 shadow-sm min-w-[320px]">
+              <div className="flex items-center bg-slate-50 p-2 rounded-2xl border border-slate-100 shadow-sm min-w-80">
                 <button onClick={prevWeek} className="size-12 flex items-center justify-center hover:bg-white rounded-xl transition-all text-slate-400 hover:text-abysse">
                   <ChevronLeft size={20} />
                 </button>
@@ -601,13 +602,13 @@ export const EcoleVoilePage: React.FC = () => {
                     <>
                       {/* Backdrop to close on click outside */}
                       <div className="fixed inset-0 z-40" onClick={() => setIsWeekSelectorOpen(false)} />
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[280px] bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-70 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 overflow-hidden">
                         {/* Header with current position indicator */}
                         <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
                           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sélectionner une semaine</span>
                         </div>
                         {/* Scrollable list with max 5 visible items */}
-                        <div className="max-h-[220px] overflow-y-auto py-1">
+                        <div className="max-h-55 overflow-y-auto py-1">
                           {plannings.map((p, idx) => (
                             <button
                               key={idx}
@@ -645,7 +646,7 @@ export const EcoleVoilePage: React.FC = () => {
           {currentWeek && (
             <div className="bg-slate-50 rounded-[3rem] p-4 md:p-8 border border-slate-100 shadow-inner overflow-hidden">
               <div className="overflow-x-auto no-scrollbar">
-                <table className="w-full min-w-[1000px] border-separate border-spacing-2">
+                <table className="w-full min-w-250 border-separate border-spacing-2">
                   <thead>
                     <tr>
                       <th className="p-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest border-b-2 border-slate-200">Parcours</th>

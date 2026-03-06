@@ -22,12 +22,12 @@ import {
     Compass
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useContent } from '@/contexts/ContentContext';
+import { useCmsContent } from '@/contexts/ContentContext';
 import Link from 'next/link';
 import { PageHero } from '@/components/PageHero';
 
 export const GroupesPage: React.FC = () => {
-    const { groupsData } = useContent();
+    const { groupsData } = useCmsContent();
 
     const hero = groupsData?.hero;
 

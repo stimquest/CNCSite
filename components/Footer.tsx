@@ -27,10 +27,10 @@ export const Footer: React.FC = () => {
                {/* Brand - 4 columns */}
                <div className="lg:col-span-4">
                   <div className="flex items-center gap-4 mb-6">
-                     <h2 className="text-4xl font-black uppercase tracking-tighter text-white">CNC</h2>
+                     <h2 className="text-4xl font-black uppercase tracking-tighter text-white">CNC2s</h2>
                   </div>
                   <p className="text-slate-400 max-w-sm font-medium leading-relaxed mb-6">
-                     Club Nautique de Coutainville, école de référence sur la côte Ouest du Cotentin depuis 1978. Labellisé Ecole Française de Voile.
+                     Club Nautique de Coutainville, école de référence sur la côte Ouest du Cotentin depuis 1929. Labellisé Ecole Française de Voile.
                   </p>
                   <div className="flex gap-4">
                      <a
@@ -73,10 +73,11 @@ export const Footer: React.FC = () => {
                   <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-turquoise mb-8">Contact</h4>
                   <ul className="space-y-4 text-slate-400 font-bold text-xs uppercase tracking-wider">
                      <li className="normal-case tracking-normal font-medium italic text-slate-500 mb-6 leading-relaxed">
-                        Plage Nord<br />
+                        104 rue des Dunes<br />
                         50230 Agon-Coutainville
                      </li>
-                     <li><a href="mailto:contact@cnc-voile.fr" className="text-white hover:text-turquoise transition-colors underline underline-offset-8 decoration-turquoise/30">contact@cnc-voile.fr</a></li>
+                     <li><a href="tel:+33233471481" className="hover:text-white transition-colors">02 33 47 14 81</a></li>
+                     <li><a href="mailto:contact@cncoutainville.fr" className="text-white hover:text-turquoise transition-colors underline underline-offset-8 decoration-turquoise/30">contact@cncoutainville.fr</a></li>
                   </ul>
                </div>
             </div>
@@ -84,7 +85,7 @@ export const Footer: React.FC = () => {
             <div className="mt-20 pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-black uppercase tracking-widest text-slate-500">
                <p>© 2026 Club Nautique de Coutainville. Tous droits réservés.</p>
                <div className="flex gap-8">
-                  <a href="#" className="hover:text-white transition-colors">Mentions Légales</a>
+                  <Link href="/legal" className="hover:text-white transition-colors">Mentions Légales</Link>
                   <Link href="/digital-signage" className="text-abysse bg-white px-2 py-1 rounded hover:bg-turquoise hover:text-white transition-colors">Mode Écran</Link>
                   <Link href="/admin" className="text-slate-600 hover:text-white transition-colors">Admin</Link>
                </div>

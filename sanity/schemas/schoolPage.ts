@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { IconPicker } from '../components/IconPicker';
 
 export default defineType({
     name: 'schoolPage',
@@ -54,7 +55,12 @@ export default defineType({
                     { name: 'label', type: 'string', title: 'Libellé (ex: Fondée en)' },
                     { name: 'value', type: 'string', title: 'Valeur (ex: 1978)' },
                     { name: 'sublabel', type: 'string', title: 'Sous-libellé' },
-                    { name: 'iconName', type: 'string', title: 'Nom de l\'icône Lucide' },
+                    defineField({
+                        name: 'iconName',
+                        type: 'string',
+                        title: 'Icône (Lucide)',
+                        components: { input: IconPicker }
+                    }),
                     {
                         name: 'style',
                         type: 'string',
@@ -85,7 +91,12 @@ export default defineType({
                     { name: 'image', type: 'image', title: 'Image d\'illustration' },
                     { name: 'color', type: 'string', title: 'Couleur du texte (ex: text-orange-500)' },
                     { name: 'bgColor', type: 'string', title: 'Couleur de fond (ex: bg-orange-500)' },
-                    { name: 'iconName', type: 'string', title: 'Nom de l\'icône Lucide' },
+                    defineField({
+                        name: 'iconName',
+                        type: 'string',
+                        title: 'Icône (Lucide)',
+                        components: { input: IconPicker }
+                    }),
                     {
                         name: 'pricingTiers',
                         type: 'array',

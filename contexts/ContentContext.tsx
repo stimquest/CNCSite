@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MOCK_WEATHER, ACTIVITIES, STATUS_MESSAGE, CURRENT_STATUS } from '../constants';
-import { Activity, WeatherData, SpotStatus, NewsItem, TeamMember, FleetItem, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, HomeGallery, MerchItem, OccazItem, InfoMessage, TideData, VibeMessage, ClubPageData, GroupsPageData, ActivitiesPageData, LeSpotPageData, NaturePageData, HomePageData, SignageSlide, SchoolPageData, SchoolStage } from '../types';
+import { Activity, WeatherData, SpotStatus, NewsItem, TeamMember, FleetItem, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, HomeGallery, MerchItem, OccazItem, InfoMessage, TideData, VibeMessage, ClubPageData, GroupsPageData, ActivitiesPageData, LeSpotPageData, NaturePageData, HomePageData, SchoolPageData, SchoolStage } from '../types';
 import { client } from '../lib/sanity';
 import { fetchRealtimeWeather } from '../lib/weather';
 
@@ -56,7 +56,6 @@ interface ContentState {
   leSpotData: LeSpotPageData | null;
   natureData: NaturePageData | null;
   homePageData: HomePageData | null;
-  signageSlides: SignageSlide[];
   schoolPageData: SchoolPageData | null;
 }
 
@@ -98,7 +97,101 @@ interface ContentContextType extends ContentState {
   isLoading: boolean;
 }
 
-const ContentContext = createContext<ContentContextType | undefined>(undefined);
+type LiveContentContextType = Pick<ContentContextType,
+  'weather'
+  | 'statusMessage'
+  | 'spotStatus'
+  | 'tides'
+  | 'charStatus'
+  | 'charMessage'
+  | 'charTags'
+  | 'marcheStatus'
+  | 'marcheMessage'
+  | 'marcheTags'
+  | 'nautiqueStatus'
+  | 'nautiqueMessage'
+  | 'nautiqueTags'
+  | 'stagesMiniMoussesStatus'
+  | 'stagesMiniMoussesMessage'
+  | 'stagesMoussaillonsStatus'
+  | 'stagesMoussaillonsMessage'
+  | 'stagesInitiationStatus'
+  | 'stagesInitiationMessage'
+  | 'stagesPerfStatus'
+  | 'stagesPerfMessage'
+  | 'lastPublishedAt'
+  | 'currentVibe'
+>;
+
+type CmsContentContextType = Pick<ContentContextType,
+  'activities'
+  | 'news'
+  | 'team'
+  | 'fleet'
+  | 'homeGallery'
+  | 'merchItems'
+  | 'occazItems'
+  | 'infoMessages'
+  | 'vibeMessages'
+  | 'clubData'
+  | 'groupsData'
+  | 'activitiesData'
+  | 'leSpotData'
+  | 'natureData'
+  | 'homePageData'
+  | 'schoolPageData'
+  | 'isLoading'
+>;
+
+type PlanningContentContextType = Pick<ContentContextType,
+  'plannings'
+  | 'charPlannings'
+  | 'marchePlannings'
+  | 'isLoading'
+>;
+
+type ContentActionsContextType = Pick<ContentContextType,
+  'updateWeather'
+  | 'updateActivity'
+  | 'updateStatus'
+  | 'setSpotStatus'
+  | 'setStatusMessage'
+  | 'setCharStatus'
+  | 'setCharMessage'
+  | 'setCharTags'
+  | 'setMarcheStatus'
+  | 'setMarcheMessage'
+  | 'setMarcheTags'
+  | 'setNautiqueStatus'
+  | 'setNautiqueMessage'
+  | 'setNautiqueTags'
+  | 'setStagesMiniMoussesStatus'
+  | 'setStagesMiniMoussesMessage'
+  | 'setStagesMoussaillonsStatus'
+  | 'setStagesMoussaillonsMessage'
+  | 'setStagesInitiationStatus'
+  | 'setStagesInitiationMessage'
+  | 'setStagesPerfStatus'
+  | 'setStagesPerfMessage'
+  | 'resetToDefaults'
+  | 'saveToLocal'
+  | 'refreshData'
+  | 'fetchFromSanity'
+  | 'lastUpdated'
+>;
+
+const ContentLiveContext = createContext<LiveContentContextType | undefined>(undefined);
+const ContentCmsContext = createContext<CmsContentContextType | undefined>(undefined);
+const ContentPlanningContext = createContext<PlanningContentContextType | undefined>(undefined);
+const ContentActionsContext = createContext<ContentActionsContextType | undefined>(undefined);
+
+const useRequiredContext = <T,>(context: React.Context<T | undefined>, hookName: string) => {
+  const value = useContext(context);
+  if (value === undefined) {
+    throw new Error(`${hookName} must be used within a ContentProvider`);
+  }
+  return value;
+};
 
 const queries = {
   activities: `*[_type == "activity" && !(_id in path('drafts.**'))] | order(order asc, title asc) {
@@ -394,20 +487,6 @@ const queries = {
             }
         }
     }`,
-  signageSlides: `*[_type == "signageSlide" && isActive == true] | order(order asc) {
-    _id, title, type, duration, order, isActive,
-    promoContent {
-      tag, title, description, showQrCode,
-      "image": image.asset->url
-    },
-    partnersContent {
-      title,
-      list[] { name, "logo": logo.asset->url }
-    },
-    infoContent {
-      title, message, category
-    }
-  }`,
   schoolPage: `*[_type == "schoolPage"][0]{
       ...,
       intro,
@@ -469,13 +548,12 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [leSpotData, setLeSpotData] = useState<LeSpotPageData | null>(null);
   const [natureData, setNatureData] = useState<NaturePageData | null>(null);
   const [homePageData, setHomePageData] = useState<HomePageData | null>(null);
-  const [signageSlides, setSignageSlides] = useState<SignageSlide[]>([]);
   const [schoolPageData, setSchoolPageData] = useState<SchoolPageData | null>(null);
 
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const refreshData = async () => {
+  const refreshData = React.useCallback(async () => {
     setIsLoading(true);
 
     // FETCH DIRECT STATUS — lit depuis Sanity via /api/cockpit/direct
@@ -654,7 +732,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           sanityActivitiesPage,
           sanityLeSpotPage,
           sanityNaturePage,
-          sanitySignageSlides,
           sanitySchoolPage,
         ] = await Promise.all([
           client.fetch(queries.activities),
@@ -673,7 +750,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           client.fetch(queries.activitiesPage),
           client.fetch(queries.leSpotPage),
           client.fetch(queries.naturePage),
-          client.fetch(queries.signageSlides),
           client.fetch(queries.schoolPage),
         ]);
 
@@ -724,7 +800,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (sanityLeSpotPage) setLeSpotData(sanityLeSpotPage);
         if (sanityNaturePage) setNatureData(sanityNaturePage);
         if (sanityHomePage) setHomePageData(sanityHomePage);
-        if (sanitySignageSlides) setSignageSlides(sanitySignageSlides);
         if (sanitySchoolPage) setSchoolPageData(sanitySchoolPage);
 
       } catch (err) {
@@ -735,7 +810,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await Promise.all([directPromise, weatherPromise, expertWeatherPromise, sanityPromise]);
     setLastUpdated(Date.now());
     setIsLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     refreshData();
@@ -775,9 +850,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
               }
             })
             .catch(() => { });
-
-          // Always refresh plannings directly from server (no CDN, no cache)
-          refreshPlannings();
         }
       }, 30000); // 30 seconds
     };
@@ -816,30 +888,30 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (interval) clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [refreshData]);
 
-  const updateWeather = (data: WeatherData) => setWeather(data);
-  const updateActivity = (id: string, data: Partial<Activity>) => {
+  const updateWeather = React.useCallback((data: WeatherData) => setWeather(data), []);
+  const updateActivity = React.useCallback((id: string, data: Partial<Activity>) => {
     setActivities(prev => prev.map(a => a.id === id ? { ...a, ...data } : a));
-  };
-  const updateStatus = (status: SpotStatus, message: string) => {
+  }, []);
+  const updateStatus = React.useCallback((status: SpotStatus, message: string) => {
     setSpotStatus(status);
     setStatusMessage(message);
-  };
+  }, []);
 
-  const resetToDefaults = () => {
+  const resetToDefaults = React.useCallback(() => {
     if (confirm("Réinitialiser toutes les données ?")) {
       setWeather(MOCK_WEATHER);
       refreshData();
     }
-  };
+  }, [refreshData]);
 
-  const saveToLocal = () => {
+  const saveToLocal = React.useCallback(() => {
     const data = { weather, activities, statusMessage, spotStatus, news, team, fleet, plannings, charPlannings, merchItems, occazItems, timestamp: Date.now() };
     localStorage.setItem('CNC_CONTENT_DATA', JSON.stringify(data));
     setLastUpdated(Date.now());
     alert("Données sauvegardées !");
-  };
+  }, [weather, activities, statusMessage, spotStatus, news, team, fleet, plannings, charPlannings, merchItems, occazItems]);
 
   const currentVibe = React.useMemo(() => {
     if (!vibeMessages || vibeMessages.length === 0) return null;
@@ -859,44 +931,168 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return matched[0] || vibeMessages.find(v => v.conditionType === 'default') || null;
   }, [vibeMessages, weather]);
 
+  const liveValue = React.useMemo<LiveContentContextType>(() => ({
+    weather,
+    statusMessage,
+    spotStatus,
+    tides,
+    charStatus,
+    charMessage,
+    charTags,
+    marcheStatus,
+    marcheMessage,
+    marcheTags,
+    nautiqueStatus,
+    nautiqueMessage,
+    nautiqueTags,
+    stagesMiniMoussesStatus,
+    stagesMiniMoussesMessage,
+    stagesMoussaillonsStatus,
+    stagesMoussaillonsMessage,
+    stagesInitiationStatus,
+    stagesInitiationMessage,
+    stagesPerfStatus,
+    stagesPerfMessage,
+    lastPublishedAt,
+    currentVibe,
+  }), [
+    weather,
+    statusMessage,
+    spotStatus,
+    tides,
+    charStatus,
+    charMessage,
+    charTags,
+    marcheStatus,
+    marcheMessage,
+    marcheTags,
+    nautiqueStatus,
+    nautiqueMessage,
+    nautiqueTags,
+    stagesMiniMoussesStatus,
+    stagesMiniMoussesMessage,
+    stagesMoussaillonsStatus,
+    stagesMoussaillonsMessage,
+    stagesInitiationStatus,
+    stagesInitiationMessage,
+    stagesPerfStatus,
+    stagesPerfMessage,
+    lastPublishedAt,
+    currentVibe,
+  ]);
+
+  const cmsValue = React.useMemo<CmsContentContextType>(() => ({
+    activities,
+    news,
+    team,
+    fleet,
+    homeGallery,
+    merchItems,
+    occazItems,
+    infoMessages,
+    vibeMessages,
+    clubData,
+    groupsData,
+    activitiesData,
+    leSpotData,
+    natureData,
+    homePageData,
+    schoolPageData,
+    isLoading,
+  }), [
+    activities,
+    news,
+    team,
+    fleet,
+    homeGallery,
+    merchItems,
+    occazItems,
+    infoMessages,
+    vibeMessages,
+    clubData,
+    groupsData,
+    activitiesData,
+    leSpotData,
+    natureData,
+    homePageData,
+    schoolPageData,
+    isLoading,
+  ]);
+
+  const planningValue = React.useMemo<PlanningContentContextType>(() => ({
+    plannings,
+    charPlannings,
+    marchePlannings,
+    isLoading,
+  }), [plannings, charPlannings, marchePlannings, isLoading]);
+
+  const actionsValue = React.useMemo<ContentActionsContextType>(() => ({
+    updateWeather,
+    updateActivity,
+    updateStatus,
+    setSpotStatus,
+    setStatusMessage,
+    setCharStatus,
+    setCharMessage,
+    setCharTags,
+    setMarcheStatus,
+    setMarcheMessage,
+    setMarcheTags,
+    setNautiqueStatus,
+    setNautiqueMessage,
+    setNautiqueTags,
+    setStagesMiniMoussesStatus,
+    setStagesMiniMoussesMessage,
+    setStagesMoussaillonsStatus,
+    setStagesMoussaillonsMessage,
+    setStagesInitiationStatus,
+    setStagesInitiationMessage,
+    setStagesPerfStatus,
+    setStagesPerfMessage,
+    resetToDefaults,
+    saveToLocal,
+    refreshData,
+    fetchFromSanity: refreshData,
+    lastUpdated,
+  }), [
+    updateWeather,
+    updateActivity,
+    updateStatus,
+    resetToDefaults,
+    saveToLocal,
+    refreshData,
+    lastUpdated,
+  ]);
+
   return (
-    <ContentContext.Provider value={{
-      weather, activities, statusMessage, spotStatus, news, team, fleet, plannings, charPlannings, marchePlannings, homeGallery,
-      merchItems, occazItems, infoMessages, tides,
-      charStatus, charMessage, charTags,
-      marcheStatus, marcheMessage, marcheTags,
-      nautiqueStatus, nautiqueMessage, nautiqueTags,
-      stagesMiniMoussesStatus, stagesMiniMoussesMessage,
-      stagesMoussaillonsStatus, stagesMoussaillonsMessage,
-      stagesInitiationStatus, stagesInitiationMessage,
-      stagesPerfStatus, stagesPerfMessage,
-      lastPublishedAt,
-      vibeMessages, currentVibe,
-      clubData, groupsData, activitiesData, leSpotData, natureData, homePageData,
-      schoolPageData,
-      updateWeather, updateActivity, updateStatus,
-      setSpotStatus, setStatusMessage,
-      setCharStatus, setCharMessage, setCharTags,
-      setMarcheStatus, setMarcheMessage, setMarcheTags,
-      setNautiqueStatus, setNautiqueMessage, setNautiqueTags,
-      setStagesMiniMoussesStatus, setStagesMiniMoussesMessage,
-      setStagesMoussaillonsStatus, setStagesMoussaillonsMessage,
-      setStagesInitiationStatus, setStagesInitiationMessage,
-      setStagesPerfStatus, setStagesPerfMessage,
-      resetToDefaults,
-      saveToLocal, refreshData, fetchFromSanity: refreshData,
-      lastUpdated, isLoading,
-      signageSlides
-    }}>
-      {children}
-    </ContentContext.Provider>
+    <ContentActionsContext.Provider value={actionsValue}>
+      <ContentLiveContext.Provider value={liveValue}>
+        <ContentCmsContext.Provider value={cmsValue}>
+          <ContentPlanningContext.Provider value={planningValue}>
+            {children}
+          </ContentPlanningContext.Provider>
+        </ContentCmsContext.Provider>
+      </ContentLiveContext.Provider>
+    </ContentActionsContext.Provider>
   );
 };
 
-export const useContent = () => {
-  const context = useContext(ContentContext);
-  if (context === undefined) {
-    throw new Error('useContent must be used within a ContentProvider');
-  }
-  return context;
+export const useLiveContent = () => useRequiredContext(ContentLiveContext, 'useLiveContent');
+
+export const useCmsContent = () => useRequiredContext(ContentCmsContext, 'useCmsContent');
+
+export const usePlanningContent = () => useRequiredContext(ContentPlanningContext, 'usePlanningContent');
+
+export const useContent = (): ContentContextType => {
+  const live = useRequiredContext(ContentLiveContext, 'useContent');
+  const cms = useRequiredContext(ContentCmsContext, 'useContent');
+  const planning = useRequiredContext(ContentPlanningContext, 'useContent');
+  const actions = useRequiredContext(ContentActionsContext, 'useContent');
+
+  return React.useMemo(() => ({
+    ...cms,
+    ...planning,
+    ...live,
+    ...actions,
+  }), [cms, planning, live, actions]);
 };

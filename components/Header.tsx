@@ -5,8 +5,7 @@ import { createPortal } from 'react-dom';
 import { Menu, X } from 'lucide-react';
 import { SpotStatus } from '../types';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useContent } from '../contexts/ContentContext';
+import { usePathname, useRouter } from 'next/navigation';
 import { LogoComponent } from './Logo';
 
 interface HeaderProps {
@@ -17,7 +16,7 @@ export const Header: React.FC<HeaderProps> = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
-  const { spotStatus } = useContent();
+  const router = useRouter();
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -34,6 +33,11 @@ export const Header: React.FC<HeaderProps> = () => {
 
   const handleNavClick = () => {
     setIsMenuOpen(false);
+  };
+
+  const handleLogoDoubleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push('/admin');
   };
 
   const NAV_ITEMS = [
@@ -96,7 +100,12 @@ export const Header: React.FC<HeaderProps> = () => {
 
           {/* Left: Logo */}
           <div className="flex-1 flex justify-start">
-            <Link href="/" onClick={handleNavClick} className="flex items-center gap-3 shrink-0 group">
+            <Link
+              href="/"
+              onClick={handleNavClick}
+              onDoubleClick={handleLogoDoubleClick}
+              className="flex items-center gap-3 shrink-0 group"
+            >
               <LogoComponent className="h-12 w-auto text-abysse fill-current transition-colors group-hover:text-turquoise" />
             </Link>
           </div>

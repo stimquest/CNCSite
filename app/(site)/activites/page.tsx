@@ -20,14 +20,14 @@ import {
     X
 } from 'lucide-react';
 import { Activity, ActivityCategory } from '../../../types';
-import { useContent } from '../../../contexts/ContentContext';
+import { useCmsContent } from '../../../contexts/ContentContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ActivityGallery } from '../../../components/ActivityGallery';
 import { PortableText } from '@portabletext/react';
 import { PageHero } from '@/components/PageHero';
 
 const ActivitiesPageContent: React.FC = () => {
-    const { activities, activitiesData } = useContent();
+    const { activities, activitiesData } = useCmsContent();
     const [activeFilter, setActiveFilter] = useState<ActivityCategory | 'TOUTES'>('TOUTES');
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const searchParams = useSearchParams();
