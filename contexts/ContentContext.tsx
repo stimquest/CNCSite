@@ -388,6 +388,7 @@ const queries = {
         name, role,
         "image": image.asset->url
       },
+      caMembers,
       "proTeam": proTeam[] {
         name, role,
         "image": image.asset->url

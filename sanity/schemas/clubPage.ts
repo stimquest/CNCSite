@@ -167,6 +167,13 @@ export const clubPage = defineType({
                     ]
                 },
                 {
+                    name: 'caMembers',
+                    type: 'array',
+                    title: 'Membres du Conseil d\'Administration (CA)',
+                    description: 'Affichés sous forme de liste simple en dessous du bureau',
+                    of: [{ type: 'string', title: 'Nom du membre' }]
+                },
+                {
                     name: 'proTeam',
                     type: 'array',
                     title: 'L\'Équipe Sportive (Opérationnelle)',

@@ -86,7 +86,8 @@ const FALLBACK_TEAM = {
         { name: "Thomas Vent", role: "Second de Base", image: "https://i.pravatar.cc/150?u=thomas" },
         { name: "Lucie Glisse", role: "Monitrice", image: "https://i.pravatar.cc/150?u=lucie" },
         { name: "Marc Flot", role: "Équipier", image: "https://i.pravatar.cc/150?u=marc" },
-    ]
+    ],
+    caMembers: ["Emmanuel COIFTIER", "Brice LAVARENNE", "Annabelle TANDEO"]
 };
 
 const FALLBACK_SITE = {
@@ -363,6 +364,23 @@ const ClubPage: React.FC = () => {
                                             <h5 className="text-abysse font-bold text-base leading-tight mb-1">{member.name}</h5>
                                             <p className="text-[10px] font-black text-turquoise uppercase tracking-widest">{member.role}</p>
                                         </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- LE CONSEIL D'ADMINISTRATION --- */}
+                    {teamData.caMembers && teamData.caMembers.length > 0 && (
+                        <div className="mb-24">
+                            <div className="flex items-center gap-4 mb-6">
+                                <Users size={16} className="text-slate-300" />
+                                <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest">Conseil d'Administration</h4>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {teamData.caMembers.map((member: string, i: number) => (
+                                    <div key={i} className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-full text-abysse font-bold text-sm hover:bg-white hover:border-turquoise hover:shadow-md transition-all cursor-default">
+                                        {member}
                                     </div>
                                 ))}
                             </div>
