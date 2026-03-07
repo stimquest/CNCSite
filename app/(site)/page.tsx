@@ -13,6 +13,7 @@ import { StatusDashboard } from '@/components/StatusDashboard';
 import { FreshnessIndicator } from '@/components/FreshnessIndicator';
 import { SpotConditionsBento } from '../../components/SpotConditionsBento';
 import { LogoComponent } from '../../components/Logo';
+import { DicoParents } from '../../components/DicoParents';
 import Link from 'next/link';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import gsap from 'gsap';
@@ -97,7 +98,7 @@ export const HomePage: React.FC = () => {
         stagesMoussaillonsStatus, stagesMoussaillonsMessage,
         stagesInitiationStatus, stagesInitiationMessage,
         stagesPerfStatus, stagesPerfMessage,
-        homePageData
+        homePageData, dicoWords
     } = useContent();
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
@@ -845,6 +846,17 @@ export const HomePage: React.FC = () => {
 
             <section className="max-w-[1600px] mx-auto px-6 relative z-10">
                 <div className="h-12"></div>
+            </section>
+
+            {/* --- SECTION : LE DICO DES PARENTS --- */}
+            <section id="dico-parents" className="py-24 bg-slate-50 relative z-10">
+                <div className="max-w-[1600px] mx-auto px-6">
+                    {dicoWords && dicoWords.length > 0 ? (
+                        <DicoParents dicoWords={dicoWords} />
+                    ) : (
+                        <DicoParents /> // Fallback temp if not loaded
+                    )}
+                </div>
             </section>
 
             {/* --- NOUVEAU : LE CLUB EN IMMERSION (Shop & Galerie) --- */}

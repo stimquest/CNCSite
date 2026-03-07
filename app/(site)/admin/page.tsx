@@ -499,6 +499,7 @@ export default function AdminPage() {
                     type: 'CREATE_INFO',
                     patch: {
                         ...vigieMsg,
+                        externalLink: vigieMsg.externalLink ? vigieMsg.externalLink : undefined,
                         publishedAt: new Date().toISOString(),
                         expiresAt: vigieMsg.expiresAt ? new Date(vigieMsg.expiresAt).toISOString() : undefined,
                     }

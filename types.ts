@@ -564,3 +564,15 @@ export interface SchoolPageData {
     metaDescription?: string;
   };
 }
+
+export interface DicoWord {
+  _id: string;
+  word: string;
+  slug: { current: string };
+  pronunciation?: string;
+  childQuote: string;
+  parentFear: string;
+  reality: string;
+  quizAnswers: string[];
+  correctAnswerIdx: number;
+}

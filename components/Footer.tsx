@@ -83,8 +83,14 @@ export const Footer: React.FC = () => {
             </div>
 
             <div className="mt-20 pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-black uppercase tracking-widest text-slate-500">
-               <p>© 2026 Club Nautique de Coutainville. Tous droits réservés.</p>
-               <div className="flex gap-8">
+               <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
+                  <p>© 2026 Club Nautique de Coutainville. Tous droits réservés.</p>
+                  <span className="hidden md:inline text-white/20">|</span>
+                  <a href="https://artyzia.netlify.app" target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-white transition-colors normal-case tracking-normal">
+                     Création par <span className="font-bold text-slate-500 hover:text-white underline decoration-transparent hover:decoration-white/30 underline-offset-4 transition-all">Atyzia-Studio</span>
+                  </a>
+               </div>
+               <div className="flex gap-8 items-center">
                   <Link href="/legal" className="hover:text-white transition-colors">Mentions Légales</Link>
                   <Link href="/digital-signage" className="text-abysse bg-white px-2 py-1 rounded hover:bg-turquoise hover:text-white transition-colors">Mode Écran</Link>
                   <Link href="/admin" className="text-slate-600 hover:text-white transition-colors">Admin</Link>

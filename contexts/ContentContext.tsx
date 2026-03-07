@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MOCK_WEATHER, ACTIVITIES, STATUS_MESSAGE, CURRENT_STATUS } from '../constants';
-import { Activity, WeatherData, SpotStatus, NewsItem, TeamMember, FleetItem, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, HomeGallery, MerchItem, OccazItem, InfoMessage, TideData, VibeMessage, ClubPageData, GroupsPageData, ActivitiesPageData, LeSpotPageData, NaturePageData, HomePageData, SchoolPageData, SchoolStage } from '../types';
+import { Activity, WeatherData, SpotStatus, NewsItem, TeamMember, FleetItem, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, HomeGallery, MerchItem, OccazItem, InfoMessage, TideData, VibeMessage, ClubPageData, GroupsPageData, ActivitiesPageData, LeSpotPageData, NaturePageData, HomePageData, SchoolPageData, SchoolStage, DicoWord } from '../types';
 import { client } from '../lib/sanity';
 import { fetchRealtimeWeather } from '../lib/weather';
 
@@ -58,6 +58,7 @@ interface ContentState {
   natureData: NaturePageData | null;
   homePageData: HomePageData | null;
   schoolPageData: SchoolPageData | null;
+  dicoWords: DicoWord[];
 }
 
 interface ContentContextType extends ContentState {
@@ -142,6 +143,7 @@ type CmsContentContextType = Pick<ContentContextType,
   | 'natureData'
   | 'homePageData'
   | 'schoolPageData'
+  | 'dicoWords'
   | 'isLoading'
 >;
 
@@ -508,6 +510,17 @@ const queries = {
         "image": image.asset->url
       }
     }`,
+  dicoWords: `*[_type == "dicoWord"] | order(word asc) {
+    _id,
+    word,
+    slug,
+    pronunciation,
+    childQuote,
+    parentFear,
+    reality,
+    quizAnswers,
+    correctAnswerIdx
+  }`,
 };
 
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -558,6 +571,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [natureData, setNatureData] = useState<NaturePageData | null>(null);
   const [homePageData, setHomePageData] = useState<HomePageData | null>(null);
   const [schoolPageData, setSchoolPageData] = useState<SchoolPageData | null>(null);
+  const [dicoWords, setDicoWords] = useState<DicoWord[]>([]);
 
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -743,6 +757,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           sanityLeSpotPage,
           sanityNaturePage,
           sanitySchoolPage,
+          sanityDicoWords,
         ] = await Promise.all([
           client.fetch(queries.activities),
           client.fetch(queries.settings, {}, { useCdn: false }),
@@ -761,6 +776,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           client.fetch(queries.leSpotPage),
           client.fetch(queries.naturePage),
           client.fetch(queries.schoolPage),
+          client.fetch(queries.dicoWords),
         ]);
 
         // Load plannings from server-side API (always fresh, no CDN/browser cache)
@@ -811,6 +827,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (sanityNaturePage) setNatureData(sanityNaturePage);
         if (sanityHomePage) setHomePageData(sanityHomePage);
         if (sanitySchoolPage) setSchoolPageData(sanitySchoolPage);
+        if (sanityDicoWords?.length > 0) setDicoWords(sanityDicoWords);
 
       } catch (err) {
         console.warn("Sanity indisponible:", err);
@@ -1012,7 +1029,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     natureData,
     homePageData,
     schoolPageData,
-    isLoading,
+    dicoWords,
+    isLoading
   }), [
     activities,
     news,
@@ -1030,6 +1048,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     natureData,
     homePageData,
     schoolPageData,
+    dicoWords,
     isLoading,
   ]);
 

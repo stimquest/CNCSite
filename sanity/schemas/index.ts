@@ -24,6 +24,7 @@ import homePage from "./homePage";
 import infosPage from "./infosPage";
 import { signageSlide } from './signageSlide';
 import { basicRichText } from './basicRichText';
+import { dicoWord } from './dicoWord';
 
 export const schemaTypes = [
   basicRichText,
@@ -51,5 +52,6 @@ export const schemaTypes = [
   infoMessage,
   naturePage,
   natureEntity,
-  signageSlide
+  signageSlide,
+  dicoWord
 ];
