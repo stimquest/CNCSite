@@ -92,10 +92,10 @@ export const PageHero: React.FC<PageHeroProps> = ({
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.3 }}
-                            className="text-white/70 text-sm font-medium italic max-w-md mb-8 whitespace-pre-line"
+                            className="text-white text-base md:text-lg font-medium italic max-w-2xl mb-8 whitespace-pre-line bg-white/5 backdrop-blur-sm border border-white/10 px-8 py-4 rounded-2xl"
                         >
                             {typeof description === 'string' ? (
-                                <>&ldquo;{description}&rdquo;</>
+                                description
                             ) : (
                                 <PortableText value={description} />
                             )}

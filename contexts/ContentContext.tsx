@@ -464,7 +464,7 @@ const queries = {
         hero { title, subtitle, "heroImage": heroImage.asset -> url }
 } `,
   leSpotPage: `*[_type == "leSpotPage"][0] {
-        hero { title, subtitle, "heroImage": heroImage.asset->url }
+        hero { title, subtitle, description, "heroImage": heroImage.asset->url }
     }`,
   naturePage: `*[_type == "naturePage"][0] {
         hero { title, subtitle, description, "heroImage": heroImage.asset->url },

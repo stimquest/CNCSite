@@ -100,8 +100,8 @@ const PillarStory = () => {
 
                 <div className="flex flex-col lg:flex-row lg:items-stretch gap-12 lg:gap-24 px-2">
 
-                    {/* LEFT: Dynamic Image Showcase */}
-                    <div className="w-full lg:w-[50%] order-2 lg:order-1 flex">
+                    {/* LEFT: Dynamic Image Showcase (Hidden on Mobile) */}
+                    <div className="hidden lg:flex w-full lg:w-[50%] order-2 lg:order-1">
                         <div className="relative w-full h-full min-h-[500px] rounded-[2rem] overflow-hidden bg-slate-200 shadow-2xl shadow-slate-400/20">
                             {CHAPTERS.map((ch, i) => (
                                 <div

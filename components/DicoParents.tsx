@@ -263,6 +263,31 @@ export const DicoParents = ({ dicoWords = [] }: { dicoWords?: DicoWord[] }) => {
     const [dicoPage, setDicoPage] = useState(0);
     const [itemsPerPage, setItemsPerPage] = useState(8);
 
+    const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe) {
+            nextPage();
+        } else if (isRightSwipe) {
+            prevPage();
+        }
+    };
+
     // Initialisation et écoute de la taille de fenêtre pour ajuster la pagination
     useEffect(() => {
         const updateLayout = () => {
@@ -357,7 +382,12 @@ export const DicoParents = ({ dicoWords = [] }: { dicoWords?: DicoWord[] }) => {
                                     <ChevronLeft size={28} />
                                 </button>
 
-                                <div className="w-full relative overflow-hidden overflow-visible-md px-4 md:px-0">
+                                <div
+                                    className="w-full relative overflow-hidden overflow-visible-md px-4 md:px-0 touch-pan-y"
+                                    onTouchStart={onTouchStart}
+                                    onTouchMove={onTouchMove}
+                                    onTouchEnd={onTouchEnd}
+                                >
                                     <AnimatePresence mode="wait">
                                         <motion.div
                                             key={dicoPage}

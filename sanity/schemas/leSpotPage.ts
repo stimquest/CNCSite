@@ -12,6 +12,7 @@ export const leSpotPage = defineType({
             fields: [
                 { name: 'title', type: 'string', title: 'Titre' },
                 { name: 'subtitle', type: 'string', title: 'Sous-titre' },
+                { name: 'description', type: 'text', title: 'Description courte', rows: 3 },
                 { name: 'heroImage', type: 'image', title: 'Image de fond (Hero)', options: { hotspot: true } },
             ],
         }),

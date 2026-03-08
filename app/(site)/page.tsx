@@ -521,8 +521,8 @@ export const HomePage: React.FC = () => {
 
                 <div className="relative rounded-[3rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-[700px] md:h-[600px] group/container">
 
-                    {/* 0. Le Message */}
-                    <div className="absolute top-8 left-8 z-30 pointer-events-none md:max-w-xl">
+                    {/* 0. Le Message - Hidden on Mobile */}
+                    <div className="absolute top-8 left-8 z-30 pointer-events-none md:max-w-xl hidden md:block">
                         <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter leading-[0.9] drop-shadow-lg whitespace-pre-line">
                             {homePageData?.spirit?.message || "Ressentez\nla force\ndu vent."}
                         </h2>
@@ -566,40 +566,55 @@ export const HomePage: React.FC = () => {
                     ]).map((card: any, idx: number) => {
                         // Color Theme Helper
                         const themeColor = card.colorTheme === 'orange' ? 'text-orange-500' : card.colorTheme === 'purple' ? 'text-purple-500' : 'text-turquoise';
-                        const hoverBg = card.colorTheme === 'orange' ? 'hover:bg-orange-500' : card.colorTheme === 'purple' ? 'hover:bg-purple-500' : 'hover:bg-turquoise';
+                        const hoverBg = card.colorTheme === 'orange' ? 'border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white' :
+                            card.colorTheme === 'purple' ? 'border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white' :
+                                'border-turquoise text-turquoise hover:bg-turquoise hover:text-abysse';
+                        const hoverText = card.colorTheme === 'orange' ? 'text-orange-400' : card.colorTheme === 'purple' ? 'text-purple-400' : 'text-turquoise';
 
                         return (
-                            <Link key={idx} href={card.link || '#'} className="relative flex-1 group/panel hover:flex-2 transition-all duration-700 ease-in-out overflow-hidden cursor-pointer">
-                                <div className="absolute inset-0 bg-black/40 group-hover/panel:bg-black/20 transition-colors z-10"></div>
+                            <div
+                                key={idx}
+                                className="group/panel relative flex-1 hover:flex-2 transition-all duration-700 ease-in-out overflow-hidden md:cursor-pointer flex flex-col focus-within:flex-[3]"
+                                tabIndex={0}
+                            >
+                                <div className="absolute inset-0 bg-black/50 group-hover/panel:bg-black/20 group-focus-within/panel:bg-black/20 transition-colors z-10 duration-500"></div>
                                 <img
                                     src={card.image}
-                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-110"
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-110 group-focus-within/panel:scale-110"
                                     alt={card.title}
                                 />
 
-                                <div className="absolute bottom-0 left-0 w-full p-8 z-20 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent">
-                                    <div className="flex items-center gap-4 mb-2">
-                                        <div className={`size-12 bg-white rounded-xl flex items-center justify-center ${themeColor} shadow-lg group-hover/panel:scale-110 transition-transform`}>
-                                            {card.iconName === 'Leaf' && <Leaf size={24} />}
-                                            {card.iconName === 'Zap' && <Zap size={24} />}
-                                            {card.iconName === 'Compass' && <Compass size={24} />}
-                                            {/* Fallback Icon if needed */}
-                                            {!['Leaf', 'Zap', 'Compass'].includes(card.iconName) && <Leaf size={24} />}
+                                <div className="absolute bottom-0 left-0 w-full p-6 md:p-8 z-20 bg-linear-to-t from-abysse via-abysse/60 to-transparent flex flex-col justify-end h-full md:h-auto">
+                                    <div className="flex items-center gap-3 md:gap-4 mb-2 translate-y-2 group-hover/panel:translate-y-0 group-focus-within/panel:translate-y-0 transition-transform duration-300">
+                                        <div className={`size-10 md:size-12 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 flex items-center justify-center ${themeColor} shadow-lg shrink-0`}>
+                                            {card.iconName === 'Leaf' && <Leaf size={20} />}
+                                            {card.iconName === 'Zap' && <Zap size={20} />}
+                                            {card.iconName === 'Compass' && <Compass size={20} />}
+                                            {!['Leaf', 'Zap', 'Compass'].includes(card.iconName) && <Leaf size={20} />}
                                         </div>
-                                        <span className={`${themeColor} font-black uppercase tracking-[0.2em] text-xs`}>{card.tag}</span>
+                                        <span className={`${themeColor} font-black uppercase tracking-[0.2em] text-[10px] md:text-xs`}>{card.tag}</span>
                                     </div>
-                                    <h3 className="text-2xl font-black text-white uppercase italic mb-2 group-hover/panel:text-3xl transition-all">{card.title}</h3>
 
-                                    <div className="h-0 opacity-0 group-hover/panel:h-auto group-hover/panel:opacity-100 overflow-hidden transition-all duration-500 ease-out">
-                                        <p className="text-slate-200 text-sm mb-4 leading-relaxed font-medium">
-                                            {card.description}
-                                        </p>
-                                        <span className={`inline-flex items-center gap-2 bg-white text-abysse px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest ${hoverBg} hover:text-white transition-colors`}>
-                                            {card.buttonText} <ArrowRight size={14} />
-                                        </span>
+                                    <h3 className="text-2xl md:text-3xl font-black text-white uppercase italic mb-1 md:mb-2 group-hover/panel:text-3xl group-focus-within/panel:text-3xl group-focus-within/panel:mb-3 transition-all">
+                                        {card.title}
+                                    </h3>
+
+                                    {/* Contenu extensible : Révélé au survol (desktop) OU au focus (mobile) */}
+                                    <div className="grid grid-rows-[0fr] group-hover/panel:grid-rows-[1fr] group-focus-within/panel:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+                                        <div className="overflow-hidden">
+                                            <p className={`text-slate-200 text-xs md:text-sm mb-4 leading-relaxed font-medium mt-2`}>
+                                                {card.description}
+                                            </p>
+                                            <Link href={card.link || '#'} className={`w-full md:w-auto inline-flex justify-center items-center gap-2 bg-transparent border-2 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-colors mb-2 md:mb-0 ${hoverBg}`}>
+                                                {card.buttonText} <ArrowRight size={14} />
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
-                            </Link>
+
+                                {/* Overlay cliquable (mobile seulement) pour prendre le focus quand on touche n'importe où sur la carte */}
+                                <div className="absolute inset-0 z-10 md:hidden cursor-pointer"></div>
+                            </div>
                         );
                     })}
 
