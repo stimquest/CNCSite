@@ -339,6 +339,7 @@ export const HomePage: React.FC = () => {
                                 const activites = [
                                     { label: 'Char à Voile', status: charStatus, msg: charMessage, category: 'encadree' as const },
                                     { label: 'Sports Nautiques', status: nautiqueStatus, msg: nautiqueMessage, category: 'autonome_voile' as const },
+                                    { label: 'Marche Aqa.', status: marcheStatus, msg: marcheMessage, category: 'marche' as const },
                                 ];
                                 const stages = [
                                     { label: 'Mini-Mousses', status: stagesMiniMoussesStatus, msg: stagesMiniMoussesMessage, category: 'encadree' as const },
@@ -348,6 +349,9 @@ export const HomePage: React.FC = () => {
                                 ];
                                 const getActCfg = (s: string, category: 'encadree' | 'autonome_voile' | 'marche') => {
                                     let label = '';
+                                    if (s === 'INACTIVE') {
+                                        return { dot: 'bg-slate-300', label: 'Hors Période', color: 'text-slate-400' };
+                                    }
                                     if (s === 'OPEN' || s === 'IDEAL' || s === 'FAVORABLE') {
                                         if (category === 'autonome_voile') label = 'Favorables';
                                         else label = 'Confirmée';
@@ -393,23 +397,15 @@ export const HomePage: React.FC = () => {
                                 );
                             })()}
                         </div>
-                        {lastPublishedAt && (() => {
-                            const latest = [lastPublishedAt, lastConfirmedAt].filter(Boolean) as string[];
-                            const date = new Date(Math.max(...latest.map(d => new Date(d).getTime())));
-                            const now = new Date();
-                            const isToday = date.toDateString() === now.toDateString();
-                            const dateLabel = isToday
-                                ? 'Aujourd\'hui'
-                                : date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-                            return (
-                                <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-abysse/10">
-                                    <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                                    <p className="text-[10px] lg:text-[11px] text-abysse/60 font-semibold truncate">
-                                        MàJ · <span className="font-black text-abysse/80">{dateLabel} à {date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
-                                    </p>
-                                </div>
-                            );
-                        })()}
+                        {lastPublishedAt && (
+                            <div className="mt-3 pt-3 border-t border-abysse/10">
+                                <FreshnessIndicator
+                                    lastPublishedAt={lastPublishedAt}
+                                    lastConfirmedAt={lastConfirmedAt}
+                                    showBanner={true}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {/* COL 5-8 : Flash Infos */}

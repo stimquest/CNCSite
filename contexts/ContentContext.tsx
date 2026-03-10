@@ -388,12 +388,12 @@ const queries = {
       tag, title,
       "boardMembers": boardMembers[] {
         name, role,
-        "image": image.asset->url
+        image
       },
       caMembers,
       "proTeam": proTeam[] {
         name, role,
-        "image": image.asset->url
+        image
       }
     },
     "site": site {
@@ -405,6 +405,21 @@ const queries = {
       "items": items[] {
         name, subtitle, description, crew, stats,
         "gallery": gallery[].asset->url
+      }
+    },
+    "agenda": agenda {
+      title, highlightText, description,
+      volunteering,
+      events[] { 
+        title, startDate, badge, time, description,
+        "image": image.asset->url
+      }
+    },
+    "souvenirs": souvenirs {
+      title, highlightText, description,
+      "items": items[] {
+        "image": image.asset->url,
+        title, date, decade
       }
     },
     cta

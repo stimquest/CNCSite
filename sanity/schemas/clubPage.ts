@@ -36,6 +36,8 @@ export const clubPage = defineType({
         { name: 'team', title: '👥 L\'Équipe' },
         { name: 'site', title: '🏗️ Le Site' },
         { name: 'fleet', title: '⛵ La Flotte' },
+        { name: 'agenda', title: '📅 Agenda' },
+        { name: 'souvenirs', title: '📸 Souvenirs' },
         { name: 'cta', title: '🚀 CTA Final' },
     ],
     fields: [
@@ -286,6 +288,103 @@ export const clubPage = defineType({
                             ],
                             preview: {
                                 select: { title: 'name', subtitle: 'subtitle', media: 'gallery.0' }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }),
+
+        // ═══════════════════════════════════════
+        // AGENDA (NOS PROCHAINS RENDEZ-VOUS)
+        // ═══════════════════════════════════════
+        defineField({
+            name: 'agenda',
+            title: 'Section Agenda',
+            type: 'object',
+            group: 'agenda',
+            fields: [
+                { name: 'title', type: 'string', title: 'Titre', description: 'Ex: "Nos prochains"' },
+                { name: 'highlightText', type: 'string', title: 'Texte en surbrillance', description: 'Ex: "rendez-vous"' },
+                { name: 'description', ...basicRichText, title: 'Description' },
+                {
+                    name: 'volunteering',
+                    type: 'object',
+                    title: 'Appel aux Bénévoles',
+                    fields: [
+                        { name: 'title', type: 'string', title: 'Titre' },
+                        { name: 'text', type: 'text', rows: 2, title: 'Texte court' },
+                        { name: 'buttonLabel', type: 'string', title: 'Label bouton' },
+                        { name: 'buttonLink', type: 'string', title: 'Lien bouton' },
+                    ]
+                },
+                {
+                    name: 'events',
+                    type: 'array',
+                    title: 'Événements',
+                    of: [
+                        {
+                            type: 'object',
+                            title: 'Événement',
+                            fields: [
+                                { name: 'image', type: 'image', title: 'Photo (optionnelle)', options: { hotspot: true } },
+                                { name: 'title', type: 'string', title: 'Titre' },
+                                { name: 'startDate', type: 'date', title: 'Date de l\'événement', options: { dateFormat: 'YYYY-MM-DD' } },
+                                { name: 'badge', type: 'string', title: 'Badge / Catégorie', description: 'Ex: "Regate", "Evenement"' },
+                                { name: 'time', type: 'string', title: 'Heure / Durée', description: 'Ex: "14h - 17h"' },
+                                { name: 'description', ...basicRichText, title: 'Description détaillée' },
+                            ],
+                            preview: {
+                                select: { title: 'title', subtitle: 'startDate', media: 'image' }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }),
+
+        // ═══════════════════════════════════════
+        // SOUVENIRS (POLAROID GALLERY)
+        // ═══════════════════════════════════════
+        defineField({
+            name: 'souvenirs',
+            title: 'Section Souvenirs',
+            type: 'object',
+            group: 'souvenirs',
+            fields: [
+                { name: 'title', type: 'string', title: 'Titre', description: 'Ex: "Souvenirs"' },
+                { name: 'highlightText', type: 'string', title: 'Texte en surbrillance', description: 'Ex: "du Club"' },
+                { name: 'description', ...basicRichText, title: 'Description' },
+                {
+                    name: 'items',
+                    type: 'array',
+                    title: 'Photos',
+                    of: [
+                        {
+                            type: 'object',
+                            title: 'Photo Souvenir',
+                            fields: [
+                                { name: 'image', type: 'image', title: 'Photo', options: { hotspot: true } },
+                                { name: 'title', type: 'string', title: 'Titre / Légende' },
+                                { name: 'date', type: 'string', title: 'Année / Date info', description: 'Ex: "1974", "Été 2022"' },
+                                {
+                                    name: 'decade',
+                                    type: 'string',
+                                    title: 'Décennie (pour le filtre)',
+                                    options: {
+                                        list: [
+                                            { title: 'Années 70', value: '70s' },
+                                            { title: 'Années 80', value: '80s' },
+                                            { title: 'Années 90', value: '90s' },
+                                            { title: 'Années 2000', value: '00s' },
+                                            { title: 'Années 2010', value: '10s' },
+                                            { title: 'Années 2020', value: '20s' },
+                                        ]
+                                    }
+                                },
+                            ],
+                            preview: {
+                                select: { title: 'title', subtitle: 'decade', media: 'image' }
                             }
                         }
                     ]

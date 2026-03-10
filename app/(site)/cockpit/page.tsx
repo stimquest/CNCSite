@@ -5,13 +5,14 @@ import { useContent } from '@/contexts/ContentContext';
 import { Check, XCircle, Loader2, ArrowLeft, Home, Save, Waves } from 'lucide-react';
 import Link from 'next/link';
 // ─── Types ────────────────────────────────────────────────────────
-type StatusKey = 'OPEN' | 'RESTRICTED' | 'CLOSED';
+type StatusKey = 'OPEN' | 'RESTRICTED' | 'CLOSED' | 'INACTIVE';
 
 const STATUS_GRIDS = {
     stage: [
         { id: 'OPEN', label: 'Confirmée', short: 'OK', activeBg: 'bg-emerald-500 text-white border-emerald-400' },
         { id: 'RESTRICTED', label: 'Cond. techniques', short: '~', activeBg: 'bg-amber-400 text-slate-900 border-amber-300' },
         { id: 'CLOSED', label: 'Annulée', short: '✕', activeBg: 'bg-rose-500 text-white border-rose-400' },
+        { id: 'INACTIVE', label: 'Hors Période', short: '—', activeBg: 'bg-slate-400 text-white border-slate-300' },
     ],
     autonome_voile: [
         { id: 'OPEN', label: 'Favorables', short: 'OK', activeBg: 'bg-emerald-500 text-white border-emerald-400' },

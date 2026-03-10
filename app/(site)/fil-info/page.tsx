@@ -60,7 +60,7 @@ export const FilInfoPage: React.FC = () => {
             {/* HEADER */}
             <header className="bg-abysse pt-32 pb-14 px-6 relative overflow-hidden">
                 <div className="absolute inset-0 bg-linear-to-b from-turquoise/10 to-transparent pointer-events-none" />
-                <div className="max-w-5xl mx-auto relative z-10">
+                <div className="max-w-6xl mx-auto relative z-10">
                     <div className="flex items-center gap-2.5 mb-5">
                         <span className="size-2 bg-turquoise rounded-full animate-pulse shadow-[0_0_12px_rgba(45,212,191,0.5)]" />
                         <span className="text-turquoise text-[10px] font-black uppercase tracking-[0.35em]">La Vigie Direct</span>
@@ -76,7 +76,7 @@ export const FilInfoPage: React.FC = () => {
 
             {/* FILTRES — sticky, toutes tailles */}
             <div className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-100 overflow-x-auto no-scrollbar">
-                <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-1">
+                <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-1">
                     {GROUPS.map(g => {
                         const isSelected = selectedGroup === g.id;
                         const isStage = g.id.startsWith('stage-');
@@ -106,10 +106,10 @@ export const FilInfoPage: React.FC = () => {
             </div>
 
             {/* LAYOUT PRINCIPAL : sidebar gauche + feed droite sur desktop */}
-            <div className="max-w-5xl mx-auto px-4 py-8 lg:flex lg:gap-8 lg:items-start">
+            <div className="max-w-6xl mx-auto px-4 py-8 lg:flex lg:gap-8 lg:items-start">
 
                 {/* SIDEBAR — sticky sur desktop, empilé sur mobile */}
-                <aside className="lg:w-72 lg:shrink-0 lg:sticky lg:top-16 space-y-4 mb-6 lg:mb-0">
+                <aside className="lg:w-96 lg:shrink-0 lg:sticky lg:top-16 space-y-4 mb-6 lg:mb-0">
                     <StatusDashboard />
                     <FreshnessIndicator
                         lastPublishedAt={lastPublishedAt}

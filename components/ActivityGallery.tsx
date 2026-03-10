@@ -56,7 +56,7 @@ export const ActivityGallery: React.FC<ActivityGalleryProps> = ({ images = [], d
     return (
         <div
             ref={containerRef}
-            className="relative w-full h-full overflow-hidden cursor-crosshair group/gallery"
+            className="absolute inset-0 w-full h-full overflow-hidden cursor-crosshair group/gallery"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => {
                 setIsHovering(false);

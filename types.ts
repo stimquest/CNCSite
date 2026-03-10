@@ -15,7 +15,8 @@ export enum SpotStatus {
   COMPROMISED = 'COMPROMISED',
   OPEN = 'OPEN',  // Legacy/Global
   RESTRICTED = 'RESTRICTED', // Legacy/Global
-  CLOSED = 'CLOSED' // Legacy/Global
+  CLOSED = 'CLOSED', // Legacy/Global
+  INACTIVE = 'INACTIVE' // No stage running
 }
 
 export interface TideData {
@@ -289,6 +290,44 @@ export interface PageHero {
   heroImage?: string;
 }
 
+export interface AgendaEvent {
+  _key?: string;
+  title?: string;
+  startDate?: string;
+  badge?: string;
+  time?: string;
+  description?: string | any[];
+  image?: string;
+  isVolunteerCard?: boolean;
+}
+
+export interface AgendaSection {
+  title: string;
+  highlightText: string;
+  description: string | any[];
+  volunteering?: {
+    title: string;
+    text: string;
+    buttonLabel: string;
+    buttonLink: string;
+  };
+  events: AgendaEvent[];
+}
+
+export interface SouvenirsItem {
+  image: string;
+  title: string;
+  date: string;
+  decade: string;
+}
+
+export interface SouvenirsSection {
+  title: string;
+  highlightText: string;
+  description: string | any[];
+  items: SouvenirsItem[];
+}
+
 export interface ClubPageData {
   hero: PageHero;
   heroStats?: { label: string; value: string; sublabel: string; iconName: string; style: 'solid' | 'glass'; }[];
@@ -299,6 +338,8 @@ export interface ClubPageData {
   team?: { tag: string; title: string; boardMembers?: { name: string; role: string; image?: string; }[]; caMembers?: string[]; proTeam?: { name: string; role: string; image?: string; }[]; };
   site?: { title: string; description: string | any[]; facilities: string[]; image?: string; imageCaption?: string; imageSublabel?: string; };
   fleet?: { title: string; items: { name: string; subtitle: string; description: string; crew: string; gallery: string[]; stats: { speed: number; difficulty: number; adrenaline: number; }; }[]; };
+  agenda?: AgendaSection;
+  souvenirs?: SouvenirsSection;
   cta?: { title: string; highlightText: string; buttonLabel: string; buttonLink: string; };
 }
 

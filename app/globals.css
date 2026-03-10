@@ -168,3 +168,9 @@ html {
 .hero-bg {
   z-index: 1;
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

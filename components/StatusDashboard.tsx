@@ -30,11 +30,13 @@ const STATUS_STYLES = {
     OPEN: { bg: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-500' },
     RESTRICTED: { bg: 'bg-amber-50 text-amber-700 border-amber-100', dot: 'bg-amber-400' },
     CLOSED: { bg: 'bg-rose-50 text-rose-700 border-rose-100', dot: 'bg-rose-500' },
+    INACTIVE: { bg: 'bg-slate-50 text-slate-400 border-slate-100', dot: 'bg-slate-300' },
 };
 
 const getNormalizedStatus = (status: string) => {
     if (!status) return 'CLOSED';
     const s = status.toUpperCase();
+    if (s === 'INACTIVE') return 'INACTIVE';
     if (['OPEN', 'IDEAL', 'FAVORABLE'].includes(s)) return 'OPEN';
     if (['RESTRICTED', 'VARIABLE'].includes(s)) return 'RESTRICTED';
     return 'CLOSED';
@@ -42,6 +44,7 @@ const getNormalizedStatus = (status: string) => {
 
 const getLabel = (cat: string, normalizedStatus: string) => {
     if (cat === 'encadree') {
+        if (normalizedStatus === 'INACTIVE') return 'Hors Période';
         if (normalizedStatus === 'OPEN') return 'Confirmée';
         if (normalizedStatus === 'RESTRICTED') return 'Cond. techniques';
         return 'Annulée';
