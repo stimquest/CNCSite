@@ -1,6 +1,6 @@
 
 import { defineField, defineType } from 'sanity';
-import { Home, Image as ImageIcon, Briefcase, Users, Layout } from 'lucide-react';
+import { Home, Image as ImageIcon, Briefcase, Users, Layout, GraduationCap } from 'lucide-react';
 import { IconPicker } from '../components/IconPicker';
 
 export default defineType({
@@ -11,8 +11,8 @@ export default defineType({
     groups: [
         { name: 'hero', title: 'Hero Section', icon: Layout },
         { name: 'spirit', title: 'Esprit Club (Expérience CVC)', icon: Users },
-        { name: 'activities', title: 'Activités à la Une', icon: ImageIcon },
         { name: 'focus', title: 'Focus Activités', icon: Briefcase },
+        { name: 'campus', title: 'Campus Nautique', icon: GraduationCap },
         { name: 'partners', title: 'Partenaires', icon: Users },
     ],
     fields: [
@@ -188,29 +188,53 @@ export default defineType({
             options: { collapsible: true, collapsed: true }
         }),
 
-        // Featured Activities (The 3 cards at top)
+        // Campus Nautique (Institution)
         defineField({
-            name: 'featuredActivities',
-            title: 'Activités à la Une',
-            type: 'array',
-            group: 'activities',
-            of: [
-                {
-                    type: 'object',
-                    fields: [
-                        defineField({ name: 'title', title: 'Titre', type: 'string' }),
-                        defineField({ name: 'tagline', title: 'Sous-titre', type: 'string' }),
-                        defineField({ name: 'description', title: 'Description', type: 'text', rows: 3 }),
-                        defineField({ name: 'image', title: 'Image', type: 'image', options: { hotspot: true } }),
-                        defineField({ name: 'ctaLabel', title: 'Bouton (Label)', type: 'string' }),
-                        defineField({ name: 'ctaLink', title: 'Bouton (Lien)', type: 'string' }),
-                        defineField({ name: 'badge', title: 'Badge', type: 'string' }),
-                    ],
-                    preview: {
-                        select: { title: 'title', subtitle: 'tagline', media: 'image' },
-                    },
-                },
-            ],
+            name: 'campus',
+            title: 'Campus Nautique (Institution)',
+            type: 'object',
+            group: 'campus',
+            fields: [
+                defineField({ name: 'tagline', title: 'Petit Titre (Tagline)', type: 'string', initialValue: 'Campus Nautique' }),
+                defineField({ name: 'titlePart1', title: 'Titre - Partie 1', type: 'string', initialValue: "Plus qu'un Club," }),
+                defineField({ name: 'titlePart2', title: 'Titre - Partie 2 (Couleur)', type: 'string', initialValue: 'une Institution.' }),
+                defineField({
+                    name: 'chapters',
+                    title: 'Chapitres',
+                    type: 'array',
+                    of: [
+                        {
+                            type: 'object',
+                            fields: [
+                                defineField({ name: 'label', title: 'Label', type: 'string' }),
+                                defineField({ name: 'title', title: 'Titre', type: 'string' }),
+                                defineField({ name: 'titleSpan', title: 'Titre (Couleur)', type: 'string' }),
+                                defineField({ name: 'proof', title: 'Preuve (Court)', type: 'string' }),
+                                defineField({ name: 'desc', title: 'Description', type: 'text', rows: 3 }),
+                                defineField({ name: 'image', title: 'Image', type: 'image', options: { hotspot: true } }),
+                                defineField({ name: 'link', title: 'Lien', type: 'string' }),
+                                defineField({ name: 'linkLabel', title: 'Texte du Lien', type: 'string' }),
+                                defineField({
+                                    name: 'themeColor',
+                                    title: 'Couleur',
+                                    type: 'string',
+                                    options: {
+                                        list: [
+                                            { title: 'Turquoise', value: 'turquoise' },
+                                            { title: 'Émeraude', value: 'emerald' },
+                                            { title: 'Orange', value: 'orange' },
+                                            { title: 'Bleu Marine', value: 'blue' }
+                                        ]
+                                    }
+                                })
+                            ],
+                            preview: {
+                                select: { title: 'title', subtitle: 'label', media: 'image' },
+                            }
+                        }
+                    ]
+                })
+            ]
         }),
 
         // Partners

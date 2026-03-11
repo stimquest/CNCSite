@@ -64,13 +64,53 @@ const CHAPTERS = [
     }
 ];
 
-const PillarStory = () => {
+interface PillarStoryProps {
+    campusData?: any;
+}
+
+const PillarStory = ({ campusData }: PillarStoryProps) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const imagesRef = useRef<(HTMLDivElement | null)[]>([]);
 
+    const displayChapters = campusData?.chapters?.length ? campusData.chapters.map((ch: any, i: number) => {
+        const theme = ch.themeColor || 'turquoise';
+        let accentClass = 'text-turquoise';
+        let borderClass = 'border-turquoise/30 hover:bg-turquoise hover:text-white';
+        let dotColor = 'var(--color-turquoise)';
+        
+        if (theme === 'emerald') {
+            accentClass = 'text-emerald-500';
+            borderClass = 'border-emerald-500/30 hover:bg-emerald-500 hover:text-white';
+            dotColor = '#10b981';
+        } else if (theme === 'orange') {
+            accentClass = 'text-orange-500';
+            borderClass = 'border-orange-500/30 hover:bg-orange-500 hover:text-white';
+            dotColor = '#f97316';
+        } else if (theme === 'blue') {
+            accentClass = 'text-[#014d86]';
+            borderClass = 'border-[#014d86]/30 hover:bg-[#014d86] hover:text-white';
+            dotColor = '#014d86';
+        }
+
+        return {
+            id: `chapter-${i}`,
+            label: ch.label || '',
+            title: ch.title || '',
+            titleSpan: ch.titleSpan || '',
+            proof: ch.proof || '',
+            desc: ch.desc || '',
+            image: ch.image || '/images/imgBank/minimousse.jpg',
+            link: ch.link || '#',
+            linkLabel: ch.linkLabel || 'Découvrir',
+            accentClass,
+            borderClass,
+            dotColor
+        };
+    }) : CHAPTERS;
+
     useEffect(() => {
         // Simple crossfade for images
-        CHAPTERS.forEach((_, i) => {
+        displayChapters.forEach((_: any, i: number) => {
             const img = imagesRef.current[i];
             if (!img) return;
             gsap.to(img, {
@@ -90,11 +130,11 @@ const PillarStory = () => {
                 <div className="mb-12 px-2">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="size-2 rounded-full bg-turquoise"></div>
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Campus Nautique</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{campusData?.tagline || "Campus Nautique"}</span>
                     </div>
                     <h2 className="text-3xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic leading-none">
-                        Plus qu'un Club, <br className="md:hidden" />
-                        <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">une Institution.</span>
+                        {campusData?.titlePart1 || "Plus qu'un Club,"} <br className="md:hidden" />
+                        <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">{campusData?.titlePart2 || "une Institution."}</span>
                     </h2>
                 </div>
 
@@ -103,7 +143,7 @@ const PillarStory = () => {
                     {/* LEFT: Dynamic Image Showcase (Hidden on Mobile) */}
                     <div className="hidden lg:flex w-full lg:w-[50%] order-2 lg:order-1">
                         <div className="relative w-full h-full min-h-[500px] rounded-[2rem] overflow-hidden bg-slate-200 shadow-2xl shadow-slate-400/20">
-                            {CHAPTERS.map((ch, i) => (
+                            {displayChapters.map((ch: any, i: number) => (
                                 <div
                                     key={ch.id}
                                     ref={el => { imagesRef.current[i] = el; }}
@@ -125,7 +165,7 @@ const PillarStory = () => {
                     {/* RIGHT: Interactive Accordion */}
                     <div className="w-full lg:w-[35%] order-1 lg:order-2">
                         <div className="flex flex-col border-t border-slate-200">
-                            {CHAPTERS.map((ch, i) => {
+                            {displayChapters.map((ch: any, i: number) => {
                                 const isActive = activeIndex === i;
                                 return (
                                     <div

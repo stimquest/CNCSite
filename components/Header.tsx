@@ -40,15 +40,34 @@ export const Header: React.FC<HeaderProps> = () => {
     router.push('/admin');
   };
 
-  const NAV_ITEMS = [
-    { label: 'Accueil', href: '/' },
-    { label: 'Le Spot', href: '/le-spot' },
-    { label: 'Activités', href: '/activites' },
-    { label: 'L\'École', href: '/ecole-voile' },
-    { label: 'Le Club', href: '/club' },
-    { label: 'Groupes', href: '/groupes-entreprises' },
-    { label: 'Infos', href: '/infos-pratiques' },
+  const NAV_GROUPS = [
+    {
+      items: [
+        { label: 'Accueil', href: '/' },
+      ]
+    },
+    {
+      items: [
+        { label: 'Le Spot', href: '/le-spot' },
+        { label: 'Environnement', href: '/nature' },
+      ]
+    },
+    {
+      items: [
+        { label: 'Activités', href: '/activites' },
+        { label: 'L\'École', href: '/ecole-voile' },
+        { label: 'Groupes', href: '/groupes-entreprises' },
+      ]
+    },
+    {
+      items: [
+        { label: 'Le Club', href: '/club' },
+        { label: 'Infos', href: '/infos-pratiques' },
+      ]
+    },
   ];
+
+  const allNavItems = NAV_GROUPS.flatMap(g => g.items);
 
   const isActive = (href: string) => {
     if (!pathname) return false;
@@ -72,7 +91,7 @@ export const Header: React.FC<HeaderProps> = () => {
         gap: 24,
       }}
     >
-      {NAV_ITEMS.map((item) => (
+      {allNavItems.map((item) => (
         <Link
           key={item.href}
           href={item.href}
@@ -111,17 +130,26 @@ export const Header: React.FC<HeaderProps> = () => {
           </div>
 
           {/* Center: Desktop Nav */}
-          <nav className="hidden lg:flex items-center justify-center gap-6">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={handleNavClick}
-                className={`text-xs font-extrabold uppercase tracking-widest transition-colors ${isActive(item.href) ? 'text-turquoise' : 'text-abysse hover:text-turquoise'
-                  }`}
-              >
-                {item.label}
-              </Link>
+          <nav className="hidden lg:flex items-center justify-center gap-1">
+            {NAV_GROUPS.map((group, gIdx) => (
+              <div key={gIdx} className="flex items-center">
+                {gIdx > 0 && (
+                  <span className="text-turquoise/40 text-lg font-black mx-2 select-none">~</span>
+                )}
+                <div className="flex items-center gap-5">
+                  {group.items.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={handleNavClick}
+                      className={`text-xs font-extrabold uppercase tracking-widest transition-colors ${isActive(item.href) ? 'text-turquoise' : 'text-abysse hover:text-turquoise'
+                        }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ))}
           </nav>
 

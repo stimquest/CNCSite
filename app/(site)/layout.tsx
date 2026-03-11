@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Outfit, Syncopate, Shrikhand } from 'next/font/google';
 import '../globals.css';
-import { ContentProvider } from '@/contexts/ContentContext';
+
+import { LiveStatusProvider } from '@/contexts/LiveStatusContext';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { FloatingActions } from '@/components/FloatingActions';
@@ -92,19 +93,19 @@ export default function SiteLayout({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className={`${outfit.variable} ${syncopate.variable} ${shrikhand.variable} font-sans text-abysse antialiased selection:bg-turquoise selection:text-white`}>
-        <ContentProvider>
-          <SmoothScroll>
-            <div className="min-h-screen flex flex-col">
-              <Header />
-              <main className="grow pt-16">
-                {children}
-              </main>
-              <Footer />
-              <FloatingActions />
-              <CookieBanner />
-            </div>
-          </SmoothScroll>
-        </ContentProvider>
+          <LiveStatusProvider>
+            <SmoothScroll>
+              <div className="min-h-screen flex flex-col">
+                <Header />
+                <main className="grow pt-16">
+                  {children}
+                </main>
+                <Footer />
+                <FloatingActions />
+                <CookieBanner />
+              </div>
+            </SmoothScroll>
+          </LiveStatusProvider>
       </div>
     </>
   );

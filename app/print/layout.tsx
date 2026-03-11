@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Outfit, Syncopate, Shrikhand } from 'next/font/google';
 import '../globals.css';
-import { ContentProvider } from '@/contexts/ContentContext';
 
 const outfit = Outfit({
     subsets: ['latin'],
@@ -30,9 +29,7 @@ export default function PrintLayout({
 }) {
     return (
         <div className={`${outfit.variable} ${syncopate.variable} ${shrikhand.variable} font-sans text-abysse antialiased min-h-screen bg-white`}>
-            <ContentProvider>
-                {children}
-            </ContentProvider>
+            {children}
         </div>
     );
 }

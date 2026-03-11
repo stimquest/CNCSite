@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useContent } from '@/contexts/ContentContext';
+import { useLiveStatus } from '@/contexts/LiveStatusContext';
 import { Wind, Waves, Navigation, Anchor, Users, Compass, Activity as ActivityIcon } from 'lucide-react';
 
 const SECTIONS = [
@@ -63,7 +63,7 @@ const getLabel = (cat: string, normalizedStatus: string) => {
 };
 
 export const StatusDashboard: React.FC = () => {
-    const content = useContent();
+    const content = useLiveStatus();
 
     return (
         <div className="space-y-4">

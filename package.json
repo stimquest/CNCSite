@@ -25,8 +25,11 @@
     "react-dom": "^19.2.3",
     "react-leaflet": "^5.0.0",
     "recharts": "^3.6.0",
+    "resend": "^6.9.3",
     "sanity": "^5.6.0",
-    "sanity-plugin-media": "^4.1.1"
+    "sanity-plugin-icon-picker": "^4.0.0",
+    "sanity-plugin-media": "^4.1.1",
+    "styled-components": "^6.3.11"
   },
   "devDependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
@@ -36,6 +39,8 @@
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.23",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^16.1.6",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.8.2"

@@ -20,7 +20,7 @@ import {
     Activity
 } from 'lucide-react';
 import Link from 'next/link';
-import { useContent } from '@/contexts/ContentContext';
+import { useLiveStatus } from '@/contexts/LiveStatusContext';
 import { useTides } from '@/lib/hooks/useTides';
 import { getNextCrossing } from '@/lib/tide-utils';
 import { PlanningWidget } from './PlanningWidget';
@@ -37,7 +37,7 @@ export const FloatingActions: React.FC = () => {
         charStatus, charMessage,
         marcheStatus, marcheMessage,
         nautiqueStatus, nautiqueMessage
-    } = useContent();
+    } = useLiveStatus();
     const [isNavHovered, setIsNavHovered] = useState(false);
 
     // Récupération des marées pour les calculs précis (Prochain 5m, etc.)

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useContent } from '../contexts/ContentContext';
+
 import { Wind, Waves, Info, ChevronRight, Navigation, Eye, Bell, Calendar, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -68,6 +68,9 @@ const getCardinal = (angle: number) => {
     return directions[Math.round(angle / 45) % 8];
 };
 
+import { useLiveStatus } from '@/contexts/LiveStatusContext';
+import { client, queries } from '@/lib/sanity';
+
 interface SpotConditionsBentoProps {
     /** 'full' = tout (défaut) | 'conditions' = météo + activités autonomes seulement | 'social' = flash infos + webcam seulement */
     mode?: 'full' | 'conditions' | 'social';
@@ -75,12 +78,21 @@ interface SpotConditionsBentoProps {
 
 export const SpotConditionsBento: React.FC<SpotConditionsBentoProps> = ({ mode = 'full' }) => {
     const {
-        weather, currentVibe,
+        weather,
         charStatus, charMessage, charTags,
         marcheStatus, marcheMessage, marcheTags,
         nautiqueStatus, nautiqueMessage, nautiqueTags,
-        infoMessages: news
-    } = useContent();
+    } = useLiveStatus();
+
+    const [news, setNews] = React.useState<any[]>([]);
+
+    React.useEffect(() => {
+        if (mode === 'full' || mode === 'social') {
+            client.fetch(queries.infoMessages).then((res) => {
+                setNews(res || []);
+            }).catch(console.error);
+        }
+    }, [mode]);
 
     const activityData = [
         { label: 'Char à Voile', status: charStatus, msg: charMessage, tags: charTags, icon: <Wind size={14} /> },

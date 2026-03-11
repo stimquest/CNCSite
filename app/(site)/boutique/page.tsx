@@ -1,6 +1,3 @@
-
-"use client";
-
 import React from 'react';
 import {
     ShoppingBag, ArrowRight,
@@ -8,7 +5,11 @@ import {
     Trophy, Sparkles, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
-import { useCmsContent } from '../../../contexts/ContentContext';
+import { client, queries } from '@/lib/sanity';
+
+export const metadata = {
+    title: 'Boutique & Occaz - CNC Coutainville',
+};
 
 // Helper: extract plain text from Portable Text blocks or return string as-is
 function toPlainText(value: any): string {
@@ -22,112 +23,17 @@ function toPlainText(value: any): string {
     return '';
 }
 
-// --- FALLBACK DATA: MERCHANDISING ---
-const MOCK_MERCH = [
-    {
-        _id: "tshirt-club",
-        name: "T-Shirt Signature CNC",
-        price: "25 €",
-        description: "Coton bio premium, coupe moderne. Le classique du club pour l'été.",
-        image: "/images/shop/Gemini_Generated_Image_rhkmlprhkmlprhkm.png",
-        category: "Vêtements",
-        badge: "Essentiel"
-    },
-    {
-        _id: "cap-cnc",
-        name: "Casquette Trucker",
-        price: "20 €",
-        description: "Visière pré-courbée, mesh respirant. Le logo emblématique en patch tissé.",
-        image: "/images/shop/shop_casquette.png",
-        category: "Accessoires",
-        badge: "Nouveau"
-    },
-    {
-        _id: "dry-bag-15l",
-        name: "Sac Étanche CNC 15L",
-        price: "35 €",
-        description: "PVC renforcé, fermeture par enroulement. Gardez vos affaires au sec pendant vos sorties en mer.",
-        image: "/images/shop/sacetanche.png",
-        category: "Équipement",
-        badge: "Technique"
-    },
-    {
-        _id: "polo-performance",
-        name: "Polo Performance",
-        price: "30 €",
-        description: "Tissu technique respirant, logo coeur. Pour un style impeccable même en régate.",
-        image: "/images/shop/shop_polo.png",
-        category: "Vêtements",
-        badge: null
-    },
-    {
-        _id: "tshirt-sable",
-        name: "T-Shirt Sable Signature",
-        price: "25 €",
-        description: "Coton organique épais, coloris sable minéral. Une pièce exclusive pour l'été CNC.",
-        image: "/images/shop/Tshirt_sable.png",
-        hoverImage: "/images/shop/Tshirt_sable2.png",
-        category: "Vêtements",
-        badge: "Premium"
-    },
-    {
-        _id: "mug-emaille",
-        name: "Mug en Émaille CNC",
-        price: "15 €",
-        description: "Inoxydable, léger et incassable. Parfait pour votre café matinal face à la mer ou en bivouac.",
-        image: "/images/shop/Gemini_Generated_Image_ad073pad073pad07 (1).png",
-        category: "Accessoires",
-        badge: "Nouveau"
-    },
-    {
-        _id: "hoodie-signature",
-        name: "Hoodie Signature CNC",
-        price: "55 €",
-        description: "Molleton épais, intérieur brossé, capuche doublée. L'allié indispensable pour les soirées fraîches après la navigation.",
-        image: "/images/shop/Gemini_Generated_Image_hqapk5hqapk5hqap.png",
-        hoverImage: "/images/shop/Gemini_Generated_Image_lje5xzlje5xzlje5 (1).png",
-        category: "Vêtements",
-        badge: "Premium"
-    },
-    {
-        _id: "tshirt-couleurs",
-        name: "T-Shirt Édition Couleurs",
-        price: "25 €",
-        description: "L'édition limitée en deux coloris vibrants. Coton léger pour un confort optimal en mer comme à terre.",
-        image: "/images/shop/Gemini_Generated_Image_t38cr0t38cr0t38c.png",
-        hoverImage: "/images/shop/Gemini_Generated_Image_3ok6dc3ok6dc3ok6.png",
-        category: "Vêtements",
-        badge: "Série Limitée"
-    }
-];
+// Custom Cache configuration for data
+export const revalidate = 60;
 
-// --- FALLBACK DATA: OCCAZ (Second Hand) ---
-const MOCK_OCCAZ = [
-    {
-        _id: "hobie-cat-16",
-        name: "Hobie Cat 16 (Occasion)",
-        price: "2 800 €",
-        condition: "Bon état",
-        year: "2018",
-        description: "Vendu complet avec voiles, safrans et remorque de mise à l'eau. Révisé par le club.",
-        image: "https://images.unsplash.com/photo-1540946485063-a40da27545f8?q=80&w=800"
-    },
-    {
-        _id: "aile-wing-5m",
-        name: "Aile Wing-Foil 5m²",
-        price: "450 €",
-        condition: "Très bon état",
-        year: "2023",
-        description: "Modèle Duotone Unit. Pas de réparations, valves parfaites.",
-        image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=800"
-    }
-];
+export default async function BoutiquePage() {
+    const [merchItems, occazItems] = await Promise.all([
+        client.fetch(queries.merchItems).catch(() => []),
+        client.fetch(queries.occazItems).catch(() => [])
+    ]);
 
-export const BoutiquePage: React.FC = () => {
-    const { merchItems, occazItems, isLoading } = useCmsContent();
-
-    const merchToShow = merchItems.length > 0 ? merchItems : (isLoading ? [] : MOCK_MERCH);
-    const occazToShow = occazItems.length > 0 ? occazItems : (isLoading ? [] : MOCK_OCCAZ);
+    const merchToShow = merchItems.length > 0 ? merchItems : [];
+    const occazToShow = occazItems.length > 0 ? occazItems : [];
 
     return (
         <div className="w-full font-sans bg-white pb-24">
@@ -173,11 +79,7 @@ export const BoutiquePage: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {isLoading && merchItems.length === 0 ? (
-                            Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="aspect-square bg-slate-100 animate-pulse rounded-[2.5rem]" />
-                            ))
-                        ) : merchToShow.map((item) => (
+                        {merchToShow.map((item: any) => (
                             <div key={item._id} className="group flex flex-col h-full bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2">
                                 <div className="relative aspect-square overflow-hidden bg-slate-100">
                                     <img
@@ -259,12 +161,8 @@ export const BoutiquePage: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {isLoading && occazItems.length === 0 ? (
-                            Array.from({ length: 2 }).map((_, i) => (
-                                <div key={i} className="h-64 bg-white animate-pulse rounded-[3.5rem]" />
-                            ))
-                        ) : occazToShow.length > 0 ? (
-                            occazToShow.map((item) => (
+                        {occazToShow.length > 0 ? (
+                            occazToShow.map((item: any) => (
                                 <div key={item._id} className="bg-white rounded-[3.5rem] border border-slate-200 overflow-hidden flex flex-col md:flex-row shadow-sm hover:shadow-xl transition-all group">
                                     <div className="md:w-1/2 relative bg-slate-100 overflow-hidden">
                                         <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
@@ -318,6 +216,4 @@ export const BoutiquePage: React.FC = () => {
 
         </div>
     );
-};
-
-export default BoutiquePage;
+}

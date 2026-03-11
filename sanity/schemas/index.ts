@@ -26,6 +26,11 @@ import { signageSlide } from './signageSlide';
 import { basicRichText } from './basicRichText';
 import { dicoWord } from './dicoWord';
 
+// Page Builder Sections
+import { heroSection } from './sections/heroSection';
+import { twoColumnsFeature } from './sections/twoColumnsFeature';
+import { gridShowcase } from './sections/gridShowcase';
+import { ctaContact } from './sections/ctaContact';
 export const schemaTypes = [
   basicRichText,
   // Pages Content
@@ -53,5 +58,11 @@ export const schemaTypes = [
   naturePage,
   natureEntity,
   signageSlide,
-  dicoWord
+  dicoWord,
+  
+  // Page Builder Sections
+  heroSection,
+  twoColumnsFeature,
+  gridShowcase,
+  ctaContact
 ];

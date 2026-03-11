@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { usePlanningContent } from '@/contexts/ContentContext';
+
 import { ActivityType } from '@/types';
 import {
     Calendar, ChevronLeft, ChevronRight, Wind, Waves, Info,
@@ -59,8 +59,30 @@ const getActivityIcon = (type: ActivityType) => {
     }
 };
 
+import { client, queries } from '@/lib/sanity';
+
 export const PlanningWidget: React.FC = () => {
-    const { plannings, charPlannings, marchePlannings, isLoading } = usePlanningContent();
+    const [plannings, setPlannings] = useState<any[]>([]);
+    const [charPlannings, setCharPlannings] = useState<any[]>([]);
+    const [marchePlannings, setMarchePlannings] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    React.useEffect(() => {
+        setIsLoading(true);
+        Promise.all([
+            client.fetch(queries.plannings),
+            client.fetch(queries.charPlannings),
+            client.fetch(queries.marchePlannings)
+        ]).then(([p, c, m]) => {
+            setPlannings(p || []);
+            setCharPlannings(c || []);
+            setMarchePlannings(m || []);
+            setIsLoading(false);
+        }).catch(err => {
+            console.error("Error fetching plannings widget", err);
+            setIsLoading(false);
+        });
+    }, []);
     const [activeTab, setActiveTab] = useState<'voile' | 'char' | 'marche'>('voile');
     const [currentIdx, setCurrentIdx] = useState(0);
     const [isWeekSelectorOpen, setIsWeekSelectorOpen] = useState(false);

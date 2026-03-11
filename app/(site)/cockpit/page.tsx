@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useContent } from '@/contexts/ContentContext';
+import { useLiveStatus } from '@/contexts/LiveStatusContext';
 import { Check, XCircle, Loader2, ArrowLeft, Home, Save, Waves } from 'lucide-react';
 import Link from 'next/link';
 // ─── Types ────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ const ACTIVITIES = [
 
 // ─── Main Cockpit ─────────────────────────────────────────────────
 function CockpitContent() {
-    const content = useContent();
+    const content = useLiveStatus();
 
     const [isSaving, setIsSaving] = useState<string | null>(null);
     const [editingMsg, setEditingMsg] = useState<string | null>(null);
@@ -53,19 +53,6 @@ function CockpitContent() {
     const [toast, setToast] = useState<string | null>(null);
 
     useEffect(() => { setLocalVibeMsg(content.statusMessage || ''); }, [content.statusMessage]);
-
-    // Generic setter lookup
-    const setters: Record<string, (v: any) => void> = {
-        spotStatus: content.setSpotStatus,
-        statusMessage: content.setStatusMessage,
-        charStatus: content.setCharStatus, charMessage: content.setCharMessage,
-        nautiqueStatus: content.setNautiqueStatus, nautiqueMessage: content.setNautiqueMessage,
-        marcheStatus: content.setMarcheStatus, marcheMessage: content.setMarcheMessage,
-        stagesMiniMoussesStatus: content.setStagesMiniMoussesStatus, stagesMiniMoussesMessage: content.setStagesMiniMoussesMessage,
-        stagesMoussaillonsStatus: content.setStagesMoussaillonsStatus, stagesMoussaillonsMessage: content.setStagesMoussaillonsMessage,
-        stagesInitiationStatus: content.setStagesInitiationStatus, stagesInitiationMessage: content.setStagesInitiationMessage,
-        stagesPerfStatus: content.setStagesPerfStatus, stagesPerfMessage: content.setStagesPerfMessage,
-    };
 
     const save = async (patch: Record<string, any>, label?: string) => {
         const savingKey = Object.keys(patch)[0];
@@ -80,8 +67,6 @@ function CockpitContent() {
             }
         });
 
-        // Optimistic update
-        Object.entries(enrichedPatch).forEach(([k, v]) => { if (setters[k]) setters[k](v); });
         try {
             const res = await fetch('/api/cockpit/direct', {
                 method: 'POST',
@@ -89,6 +74,7 @@ function CockpitContent() {
                 body: JSON.stringify({ type: 'PATCH', patch: enrichedPatch })
             });
             if (!res.ok) throw new Error('Erreur serveur');
+            await content.refreshData();
             setToast(label || '✓ Enregistré');
             setTimeout(() => setToast(null), 2000);
         } catch {

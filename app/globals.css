@@ -54,7 +54,7 @@ html {
     /* Ensure content isn't clipped by the element box */
   }
 
-  /* Specific fix for italic text with background-clip: text */
+  /* Specific fix for italic text and accents with background-clip: text */
   h1 span,
   h2 span,
   h3 span,
@@ -64,6 +64,9 @@ html {
     display: inline-block;
     padding-right: 0.2em;
     margin-right: -0.2em;
+    padding-top: 0.3em;
+    padding-bottom: 0.1em;
+    margin-top: -0.3em;
     overflow: visible;
   }
 

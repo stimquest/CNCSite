@@ -60,13 +60,16 @@ export const SmoothScroll = ({ children }: SmoothScrollProps) => {
 
         lenis.on("scroll", ScrollTrigger.update);
 
-        gsap.ticker.add((time) => {
+        const handleTicker = (time: number) => {
             lenis.raf(time * 1000);
-        });
+        };
+
+        gsap.ticker.add(handleTicker);
 
         gsap.ticker.lagSmoothing(0);
 
         return () => {
+            gsap.ticker.remove(handleTicker);
             lenis.destroy();
             lenisRef.current = null;
         };

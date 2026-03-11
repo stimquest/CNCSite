@@ -50,7 +50,7 @@ export const Footer: React.FC = () => {
                   <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-turquoise mb-8">Le Club</h4>
                   <ul className="space-y-4 text-slate-400 font-bold text-xs uppercase tracking-wider">
                      <li><Link href="/club" className="hover:text-white transition-colors">Notre Histoire</Link></li>
-                     <li><Link href="/nature" className="hover:text-white transition-colors">Espace Nature</Link></li>
+                     <li><Link href="/nature" className="hover:text-white transition-colors">Environnement</Link></li>
                      <li><Link href="/groupes-entreprises" className="hover:text-white transition-colors">Entreprises</Link></li>
                      <li><Link href="/boutique" className="hover:text-white transition-colors">Boutique</Link></li>
                   </ul>

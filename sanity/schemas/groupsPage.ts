@@ -1,45 +1,38 @@
 import { defineType, defineField } from 'sanity';
+import { Layers } from 'lucide-react';
 
 export const groupsPage = defineType({
     name: 'groupsPage',
-    title: 'Contenu Page Groupes',
+    title: 'Page Groupes & Séminaires',
     type: 'document',
+    icon: Layers,
     fields: [
         defineField({
-            name: 'hero',
-            title: 'Hero Section',
-            type: 'object',
-            fields: [
-                { name: 'title', type: 'string', title: 'Titre' },
-                { name: 'subtitle', type: 'string', title: 'Sous-titre' },
-                { name: 'description', type: 'text', title: 'Description' },
-                { name: 'heroImage', type: 'image', title: 'Image de fond (Hero)', options: { hotspot: true } },
-            ],
+            name: 'title',
+            title: 'Titre de la page (Interne)',
+            type: 'string',
+            initialValue: 'Page Groupes'
         }),
         defineField({
-            name: 'capacity',
-            title: 'Capacité Max (Pers)',
-            type: 'number'
-        }),
-        defineField({
-            name: 'seminars',
-            title: 'Offre Entreprises',
-            type: 'object',
-            fields: [
-                { name: 'title', type: 'string', title: 'Titre' },
-                { name: 'description', type: 'text', title: 'Description' },
-                { name: 'features', type: 'array', of: [{ type: 'string' }] }
-            ]
-        }),
-        defineField({
-            name: 'privateEvents',
-            title: 'Offre Privée',
-            type: 'object',
-            fields: [
-                { name: 'title', type: 'string', title: 'Titre' },
-                { name: 'description', type: 'text', title: 'Description' },
-                { name: 'features', type: 'array', of: [{ type: 'string' }] }
+            name: 'pageBuilder',
+            title: 'Constructeur de Page',
+            type: 'array',
+            of: [
+                { type: 'heroSection' },
+                { type: 'twoColumnsFeature' },
+                { type: 'gridShowcase' },
+                { type: 'ctaContact' }
             ]
         })
     ],
+    preview: {
+        select: { title: 'title' },
+        prepare({ title }) {
+            return {
+                title: title || 'Page Groupes',
+                subtitle: 'Page Builder',
+                media: Layers
+            }
+        }
+    }
 });

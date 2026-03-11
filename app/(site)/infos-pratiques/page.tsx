@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useContent } from '@/contexts/ContentContext';
 import {
     Calendar, Clock, MapPin, Phone, Mail, Download, Info,
     Anchor, FileText, CheckCircle2, ArrowRight, GraduationCap,
@@ -11,6 +10,7 @@ import {
 
 import { PlanningWidget } from '@/components/PlanningWidget';
 import { SecondaryNav } from '@/components/SecondaryNav';
+import { sendContactEmail } from '@/app/actions/contact';
 
 // --- DATA: DOCUMENTS ---
 const DOCUMENTS_DATA = [
@@ -310,6 +310,26 @@ const DocumentManager: React.FC = () => {
 
 // --- COMPONENT: CONTACT FORM ---
 const ContactForm: React.FC = () => {
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [errorMessage, setErrorMessage] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setStatus('loading');
+        setErrorMessage('');
+        
+        const formData = new FormData(e.currentTarget);
+        const result = await sendContactEmail(formData);
+        
+        if (result.error) {
+            setStatus('error');
+            setErrorMessage(result.error);
+        } else {
+            setStatus('success');
+            (e.target as HTMLFormElement).reset();
+        }
+    };
+
     return (
         <div className="bg-white p-8 md:p-12 rounded-[3.5rem] border border-slate-100 shadow-2xl relative overflow-hidden h-full">
             <div className="absolute top-0 right-0 w-32 h-32 bg-turquoise opacity-5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
@@ -319,41 +339,73 @@ const ContactForm: React.FC = () => {
                 Écrivez-nous
             </h2>
 
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Nom Complet</label>
-                        <input type="text" placeholder="Jean Dupont" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-turquoise/20 focus:border-turquoise transition-all" />
+            {status === 'success' ? (
+                <div className="bg-slate-50 text-abysse p-8 rounded-3xl text-center border border-slate-100 flex flex-col items-center justify-center h-64 animate-in zoom-in duration-300">
+                    <CheckCircle2 size={48} className="mb-4 text-turquoise" />
+                    <h3 className="text-xl font-bold mb-2">Message Envoyé !</h3>
+                    <p className="text-sm font-medium text-slate-500">Nous vous répondrons dans les plus brefs délais.</p>
+                    <button 
+                        type="button"
+                        onClick={() => setStatus('idle')}
+                        className="mt-6 text-xs font-black uppercase tracking-widest text-turquoise hover:text-abysse transition-colors cursor-pointer"
+                    >
+                        Envoyer un autre message
+                    </button>
+                </div>
+            ) : (
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                    {status === 'error' && (
+                        <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold border border-red-100">
+                            {errorMessage || "Une erreur est survenue lors de l'envoi."}
+                        </div>
+                    )}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label htmlFor="name" className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Nom Complet</label>
+                            <input type="text" id="name" name="name" required placeholder="Jean Dupont" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-turquoise/20 focus:border-turquoise transition-all" />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="email" className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Email</label>
+                            <input type="email" id="email" name="email" required placeholder="jean@exemple.fr" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-turquoise/20 focus:border-turquoise transition-all" />
+                        </div>
                     </div>
+
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Email</label>
-                        <input type="email" placeholder="jean@exemple.fr" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-turquoise/20 focus:border-turquoise transition-all" />
+                        <label htmlFor="subject" className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Sujet</label>
+                        <select id="subject" name="subject" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-turquoise/20 focus:border-turquoise transition-all appearance-none cursor-pointer">
+                            <option value="Information générale">Information générale</option>
+                            <option value="Inscription Stage">Inscription Stage</option>
+                            <option value="Adhésion Club">Adhésion Club</option>
+                            <option value="Régate / Compétition">Régate / Compétition</option>
+                        </select>
                     </div>
-                </div>
 
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Sujet</label>
-                    <select className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-turquoise/20 focus:border-turquoise transition-all appearance-none cursor-pointer">
-                        <option>Information générale</option>
-                        <option>Inscription Stage</option>
-                        <option>Adhésion Club</option>
-                        <option>Régate / Compétition</option>
-                    </select>
-                </div>
+                    <div className="space-y-2">
+                        <label htmlFor="message" className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Message</label>
+                        <textarea
+                            id="message"
+                            name="message"
+                            rows={4}
+                            required
+                            placeholder="Votre demande..."
+                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-turquoise/20 focus:border-turquoise transition-all resize-none"
+                        ></textarea>
+                    </div>
 
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Message</label>
-                    <textarea
-                        rows={4}
-                        placeholder="Votre demande..."
-                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-turquoise/20 focus:border-turquoise transition-all resize-none"
-                    ></textarea>
-                </div>
-
-                <button className="w-full bg-abysse hover:bg-turquoise text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-3 shadow-xl hover:scale-[1.02] active:scale-95 group">
-                    Envoyer <Send size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                </button>
-            </form>
+                    <button 
+                        type="submit"
+                        disabled={status === 'loading'}
+                        className="w-full bg-abysse hover:bg-turquoise text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-3 shadow-xl hover:scale-[1.02] active:scale-95 group disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                        {status === 'loading' ? (
+                            <span className="flex items-center gap-2">Envoi en cours <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div></span>
+                        ) : (
+                            <>Envoyer <Send size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /></>
+                        )}
+                    </button>
+                </form>
+            )}
         </div>
     );
 };
