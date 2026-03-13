@@ -80,7 +80,7 @@ export default async function BoutiquePage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {merchToShow.map((item: any) => (
-                            <div key={item._id} className="group flex flex-col h-full bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2">
+                            <div key={item._id} className="group flex flex-col h-full bg-white rounded-4xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2">
                                 <div className="relative aspect-square overflow-hidden bg-slate-100">
                                     <img
                                         src={item.image}

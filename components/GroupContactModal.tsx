@@ -94,7 +94,7 @@ export const GroupContactModal: React.FC<GroupContactModalProps> = ({
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-4xl relative overflow-hidden my-auto flex flex-col max-h-[90vh]"
+                            className="bg-white rounded-4xl shadow-2xl w-full max-w-4xl relative overflow-hidden my-auto flex flex-col max-h-[90vh]"
                         >
                             {/* Header */}
                             <div className={`${theme.bg} p-8 md:p-10 text-white relative shrink-0 overflow-hidden`}>

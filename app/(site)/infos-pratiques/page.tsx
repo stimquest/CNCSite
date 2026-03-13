@@ -271,7 +271,7 @@ const DocumentManager: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {filteredDocs.length > 0 ? (
                         filteredDocs.map((doc) => (
-                            <div key={doc.id} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col justify-between hover:-translate-y-1">
+                            <div key={doc.id} className="bg-white p-8 rounded-4xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col justify-between hover:-translate-y-1">
                                 <div>
                                     <div className="flex justify-between items-start mb-6">
                                         <div className="size-14 bg-slate-50 rounded-2xl flex items-center justify-center text-abysse group-hover:bg-turquoise group-hover:text-white transition-colors duration-500">

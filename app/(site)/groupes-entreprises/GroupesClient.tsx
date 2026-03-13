@@ -275,7 +275,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                                                 const iconNameToUse = card.iconName || theme.icon;
 
                                                 return (
-                                                    <div key={idx} className="bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-100 hover:translate-y-[-8px] transition-all group">
+                                                    <div key={idx} className="bg-white p-10 rounded-4xl shadow-xl border border-slate-100 hover:translate-y-[-8px] transition-all group">
                                                         <div className={`size-14 rounded-2xl ${theme.bg} ${theme.text} flex items-center justify-center mb-8 shadow-sm ${theme.groupHoverBg} group-hover:text-white transition-all`}>
                                                             <DynamicIcon name={iconNameToUse} size={28} />
                                                         </div>

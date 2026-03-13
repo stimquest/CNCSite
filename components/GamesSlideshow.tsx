@@ -60,7 +60,7 @@ export const GamesSlideshow: React.FC = () => {
                 </div>
 
                 {/* Right Image */}
-                <div className="relative h-[340px] lg:h-[510px] rounded-[2.5rem] overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-700">
+                <div className="relative h-[340px] lg:h-[510px] rounded-4xl overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-700">
                     <img
                         src="/images/Games/illu_mini_Game2.jpeg"
                         alt="Illustration Mini Jeux"

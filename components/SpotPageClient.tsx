@@ -36,14 +36,14 @@ export const SpotPageClient: React.FC<{ leSpotData: any }> = ({ leSpotData }) =>
                     <div className="lg:col-span-8 space-y-8">
 
                         {/* 1. MÉTÉO EXPERTE (Arome HD) */}
-                        <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+                        <div className="bg-white rounded-4xl shadow-xl border border-slate-100 overflow-hidden">
                             <div className="p-8 md:p-12">
                                 <WeatherExpert />
                             </div>
                         </div>
 
                         {/* 2. MARÉES DÉTAILLÉES */}
-                        <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+                        <div className="bg-white rounded-4xl shadow-xl border border-slate-100 overflow-hidden">
                             <div className="p-8 md:p-12">
                                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                                     <div>
@@ -63,7 +63,7 @@ export const SpotPageClient: React.FC<{ leSpotData: any }> = ({ leSpotData }) =>
                     <div className="lg:col-span-4 space-y-8">
                         <div className="sticky top-24 space-y-8">
                             {/* WEBCAM CARD */}
-                            <div className="bg-abysse rounded-[2.5rem] overflow-hidden relative aspect-4/3 lg:aspect-video shadow-2xl border border-slate-900">
+                            <div className="bg-abysse rounded-4xl overflow-hidden relative aspect-4/3 lg:aspect-video shadow-2xl border border-slate-900">
                                 <iframe
                                     src="https://www.skaping.com/coutances/agon-coutainville/video"
                                     className="absolute inset-0 w-full h-full border-0"
@@ -76,7 +76,7 @@ export const SpotPageClient: React.FC<{ leSpotData: any }> = ({ leSpotData }) =>
                             <AgonNavigationCard />
 
                             {/* SAFETY RULES CARD */}
-                            <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl relative overflow-hidden group">
+                            <div className="bg-white rounded-4xl p-10 border border-slate-100 shadow-xl relative overflow-hidden group">
                                 <div className="absolute -right-6 -top-6 text-slate-50 group-hover:text-turquoise/10 transition-colors">
                                     <Compass size={180} strokeWidth={1} />
                                 </div>

@@ -340,6 +340,9 @@ export const DicoParents = ({ dicoWords = [] }: { dicoWords?: DicoWord[] }) => {
                         Le Dico <br className="hidden md:block" />
                         <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-rose-400">des Parents.</span>
                     </h2>
+                    <p className="mt-4 text-slate-500 font-medium text-sm md:text-base max-w-lg leading-relaxed italic">
+                        « Pour ceux qui hochent la tête en souriant quand leur enfant parle de « choquer », « border » et « empanner »… sans rien capter. »
+                    </p>
                 </div>
 
                 {/* Toggle Button */}

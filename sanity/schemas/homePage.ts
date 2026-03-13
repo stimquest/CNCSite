@@ -14,6 +14,7 @@ export default defineType({
         { name: 'focus', title: 'Focus Activités', icon: Briefcase },
         { name: 'campus', title: 'Campus Nautique', icon: GraduationCap },
         { name: 'partners', title: 'Partenaires', icon: Users },
+        { name: 'immersion', title: 'Club en Immersion', icon: ImageIcon },
     ],
     fields: [
         defineField({
@@ -256,6 +257,66 @@ export default defineType({
                     },
                 },
             ],
+        }),
+        
+        // IMMERSION SECTION
+        defineField({
+            name: 'immersionTitlePart1',
+            title: 'Titre Section Immersion - Partie 1',
+            type: 'string',
+            group: 'immersion',
+            initialValue: 'Le Club',
+        }),
+        defineField({
+            name: 'immersionTitlePart2',
+            title: 'Titre Section Immersion - Partie 2 (Couleur)',
+            type: 'string',
+            group: 'immersion',
+            initialValue: 'en Immersion.',
+        }),
+        defineField({
+            name: 'immersionCards',
+            title: 'Tuiles Immersion',
+            type: 'array',
+            group: 'immersion',
+            of: [
+                {
+                    type: 'object',
+                    fields: [
+                        defineField({ name: 'titlePart1', title: 'Titre - Partie 1', type: 'string' }),
+                        defineField({ name: 'titlePart2', title: 'Titre - Partie 2 (Couleur)', type: 'string' }),
+                        defineField({ name: 'description', title: 'Description', type: 'text', rows: 2 }),
+                        defineField({ name: 'image', title: 'Image de fond', type: 'image', options: { hotspot: true } }),
+                        defineField({ name: 'link', title: 'Lien du bouton', type: 'string' }),
+                        defineField({ name: 'buttonText', title: 'Texte du bouton', type: 'string' }),
+                        defineField({
+                            name: 'iconName',
+                            title: 'Icône (Lucide)',
+                            type: 'string',
+                            components: { input: IconPicker }
+                        }),
+                        defineField({
+                            name: 'iconColor',
+                            title: 'Couleur de l\'icône/bouton (facultatif)',
+                            type: 'string',
+                            options: {
+                                list: [
+                                    { title: 'Bleu', value: 'blue' },
+                                    { title: 'Jaune', value: 'yellow' },
+                                    { title: 'Turquoise', value: 'turquoise' },
+                                    { title: 'Rouge', value: 'red' },
+                                    { title: 'Violet', value: 'violet' },
+                                    { title: 'Gris', value: 'gray' },
+                                ]
+                            }
+                        }),
+                    ],
+                    preview: {
+                        select: { title: 'titlePart1', subtitle: 'description', media: 'image' },
+                    },
+                }
+            ],
+            validation: Rule => Rule.max(4),
         }),
     ],
 });

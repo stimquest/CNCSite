@@ -1,4 +1,6 @@
 import { activity } from './activity';
+import { clubActivity } from './clubActivity';
+import { clubPole } from './clubPole';
 import { spotSettings } from './spotSettings';
 import { news } from './news';
 import { teamMember } from './teamMember';
@@ -25,6 +27,8 @@ import infosPage from "./infosPage";
 import { signageSlide } from './signageSlide';
 import { basicRichText } from './basicRichText';
 import { dicoWord } from './dicoWord';
+import { bookingTemplate } from './bookingTemplate';
+
 
 // Page Builder Sections
 import { heroSection } from './sections/heroSection';
@@ -37,6 +41,8 @@ export const schemaTypes = [
   homePage,
   infosPage,
   activity,
+  clubActivity,
+  clubPole,
   spotSettings,
   autoConditionsConfig,
   news,
@@ -59,6 +65,7 @@ export const schemaTypes = [
   natureEntity,
   signageSlide,
   dicoWord,
+  bookingTemplate,
   
   // Page Builder Sections
   heroSection,

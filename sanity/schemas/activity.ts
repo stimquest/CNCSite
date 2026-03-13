@@ -134,8 +134,15 @@ export const activity = defineType({
             { name: 'type', title: 'Type d\'action', type: 'string', options: { list: [{ title: 'Lien', value: 'link' }, { title: 'Message (Modal)', value: 'modal' }] }, initialValue: 'link' },
             { name: 'url', title: 'Lien Axyomes/Externe', type: 'url', hidden: ({ parent }: any) => parent?.type !== 'link' },
             {
+              name: 'template',
+              title: 'Utiliser un modèle (Pré-configuré)',
+              type: 'reference',
+              to: [{ type: 'bookingTemplate' }],
+              hidden: ({ parent }: any) => parent?.type !== 'modal'
+            },
+            {
               name: 'message',
-              title: 'Message Modal',
+              title: 'Message Manuel (Si pas de modèle)',
               type: 'array',
               of: [{ type: 'block', styles: [], lists: [], marks: { decorators: [{ title: 'Gras', value: 'strong' }] } }],
               hidden: ({ parent }: any) => parent?.type !== 'modal'
@@ -151,8 +158,15 @@ export const activity = defineType({
             { name: 'type', title: 'Type d\'action', type: 'string', options: { list: [{ title: 'Lien', value: 'link' }, { title: 'Message (Modal)', value: 'modal' }] }, initialValue: 'link' },
             { name: 'url', title: 'Lien de réservation', type: 'url', hidden: ({ parent }: any) => parent?.type !== 'link' },
             {
+              name: 'template',
+              title: 'Utiliser un modèle (Pré-configuré)',
+              type: 'reference',
+              to: [{ type: 'bookingTemplate' }],
+              hidden: ({ parent }: any) => parent?.type !== 'modal'
+            },
+            {
               name: 'message',
-              title: 'Message Modal',
+              title: 'Message Manuel (Si pas de modèle)',
               type: 'array',
               of: [{ type: 'block', styles: [], lists: [], marks: { decorators: [{ title: 'Gras', value: 'strong' }] } }],
               hidden: ({ parent }: any) => parent?.type !== 'modal'
@@ -168,8 +182,15 @@ export const activity = defineType({
             { name: 'type', title: 'Type d\'action', type: 'string', options: { list: [{ title: 'Lien', value: 'link' }, { title: 'Message (Modal)', value: 'modal' }] }, initialValue: 'link' },
             { name: 'url', title: 'Lien de location', type: 'url', hidden: ({ parent }: any) => parent?.type !== 'link' },
             {
+              name: 'template',
+              title: 'Utiliser un modèle (Pré-configuré)',
+              type: 'reference',
+              to: [{ type: 'bookingTemplate' }],
+              hidden: ({ parent }: any) => parent?.type !== 'modal'
+            },
+            {
               name: 'message',
-              title: 'Message Modal',
+              title: 'Message Manuel (Si pas de modèle)',
               type: 'array',
               of: [{ type: 'block', styles: [], lists: [], marks: { decorators: [{ title: 'Gras', value: 'strong' }] } }],
               hidden: ({ parent }: any) => parent?.type !== 'modal'

@@ -22,7 +22,12 @@ export const queries = {
     "prices": prices[]{ label, value },
     "image": image.asset->url,
     "gallery": gallery[].asset->url,
-    isTideDependent, bookingUrl, duration, minAge, accroche, planningNote, actions
+    isTideDependent, bookingUrl, duration, minAge, accroche, planningNote,
+    "actions": {
+      "stage": actions.stage { ..., "template": template->{ modalTitle, content } },
+      "reservation": actions.reservation { ..., "template": template->{ modalTitle, content } },
+      "rental": actions.rental { ..., "template": template->{ modalTitle, content } }
+    }
   }`,
   settings: `*[_type == "spotSettings"][0] {
     spotStatus, statusMessage,
@@ -105,7 +110,8 @@ export const queries = {
     "focusChar": focusChar { title, highlightSuffix, tagline, subTagline, description, badgeValue, badgeLabel, "images": images[].asset->url, ctaButton, infoButton },
     "focusGlisse": focusGlisse { title, highlightSuffix, tagline, subTagline, description, badgeValue, badgeLabel, "images": images[].asset->url, ctaButton, infoButton },
     "focusBienEtre": focusBienEtre { title, highlightSuffix, tagline, subTagline, description, badgeValue, badgeLabel, "images": images[].asset->url, ctaButton, infoButton },
-    "campus": campus { tagline, titlePart1, titlePart2, chapters[] { label, title, titleSpan, proof, desc, "image": image.asset->url, link, linkLabel, themeColor } }
+    "campus": campus { tagline, titlePart1, titlePart2, chapters[] { label, title, titleSpan, proof, desc, "image": image.asset->url, link, linkLabel, themeColor } },
+    "immersion": { "titlePart1": immersionTitlePart1, "titlePart2": immersionTitlePart2, "cards": immersionCards[] { titlePart1, titlePart2, description, "image": image.asset->url, link, buttonText, iconName, iconColor } }
   }`,
   groupsPage: `*[_type == "groupsPage"][0] {
     pageBuilder[]{
@@ -129,7 +135,21 @@ export const queries = {
     }
   }`,
   activitiesPage: `*[_type == "activitiesPage"][0] {
-    hero { title, subtitle, "heroImage": heroImage.asset->url }
+    hero { title, subtitle, "heroImage": heroImage.asset->url },
+    yearlyClub {
+        intro,
+        poles[]-> | order(order asc) {
+            title,
+            icon,
+            activities[]-> {
+                title, category, badge, age, price, schedule, description, icon, colorClass
+            }
+        },
+        weatherInfo,
+        footer {
+            title, description, buttonText, buttonPhone, "bgImage": bgImage.asset->url
+        }
+    }
   }`,
   leSpotPage: `*[_type == "leSpotPage"][0] {
     hero { title, subtitle, description, "heroImage": heroImage.asset->url }

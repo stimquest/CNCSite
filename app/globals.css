@@ -10,13 +10,38 @@
 
   --color-abysse: #002B49;
   --color-turquoise: #00A9CE;
+  --color-taupe-50: #f8f7f4;
+  --color-taupe-100: #f0ede6;
+  --color-taupe-200: #e1dacd;
+  --color-taupe-300: #ccbfac;
+  --color-taupe-400: #b2a089;
+  --color-taupe-500: #9e8a71;
+  --color-taupe-600: #8a755d;
+  --color-taupe-700: #715f4e;
+  --color-taupe-800: #5e4f42;
+  --color-taupe-900: #4e4238;
+  --color-taupe-950: #29231e;
+
+  --color-sand-50: #fdfaf6;
+  --color-sand-100: #faf1e4;
+  --color-sand-200: #f3dfc1;
+  --color-sand-300: #e8c492;
+  --color-sand-400: #d9a263;
+  --color-sand-500: #cc8440;
+  --color-sand-600: #b36b33;
+  --color-sand-700: #91542b;
+  --color-sand-800: #734326;
+  --color-sand-900: #5c3621;
+  --color-sand-950: #331b11;
+
   --color-background-light: #F8FAFC;
   --color-background-dark: #020617;
 
   --shadow-card: 0 20px 25px -5px rgba(0, 43, 73, 0.05), 0 8px 10px -6px rgba(0, 43, 73, 0.05);
   --shadow-card-hover: 0 25px 50px -12px rgba(0, 43, 73, 0.15);
 
-  --radius-4xl: 1.5rem;
+  --radius-4xl: 2.5rem;
+  --rotate-135: 135deg;
 }
 
 html {

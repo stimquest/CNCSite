@@ -387,7 +387,7 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
                         {habitants.map((specie: any, idx: number) => (
                             <div
                                 key={idx}
-                                className="bio-card w-[320px] md:w-[420px] shrink-0 bg-white/5 border border-white/10 rounded-[2.5rem] p-5 hover:bg-white/10 transition-all duration-500 hover:border-turquoise/30 group select-none"
+                                className="bio-card w-[320px] md:w-[420px] shrink-0 bg-white/5 border border-white/10 rounded-4xl p-5 hover:bg-white/10 transition-all duration-500 hover:border-turquoise/30 group select-none"
                             >
                                 <div className={`relative rounded-[2rem] overflow-hidden mb-5 bg-white/5 ${idx % 3 === 0 ? 'h-72' : idx % 2 === 0 ? 'h-56' : 'h-64'}`}>
                                     <img

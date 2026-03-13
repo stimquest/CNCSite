@@ -42,13 +42,32 @@ export const structure: StructureResolver = (S) =>
                         .title('Contenu Page Groupes')
                 ),
             S.listItem()
-                .title('Contenu Page Activités')
-                .id('activitiesPage')
+                .title('Club à l\'année')
+                .id('yearlyClubGroup')
+                .icon(() => '⛵')
                 .child(
-                    S.document()
-                        .schemaType('activitiesPage')
-                        .documentId('activitiesPage')
-                        .title('Contenu Page Activités')
+                    S.list()
+                        .title('Gestion Club à l\'année')
+                        .items([
+                            S.listItem()
+                                .title('⚙️ Configuration Page')
+                                .id('activitiesPage')
+                                .child(
+                                    S.document()
+                                        .schemaType('activitiesPage')
+                                        .documentId('activitiesPage')
+                                        .title('Configuration Page')
+                                ),
+                            S.divider(),
+                            S.listItem()
+                                .title('🏗️ Les Pôles')
+                                .schemaType('clubPole')
+                                .child(S.documentTypeList('clubPole').title('Liste des Pôles')),
+                            S.listItem()
+                                .title('🎯 Les Activités')
+                                .schemaType('clubActivity')
+                                .child(S.documentTypeList('clubActivity').title('Liste des Activités')),
+                        ])
                 ),
             S.listItem()
                 .title('Contenu Page Le Spot')

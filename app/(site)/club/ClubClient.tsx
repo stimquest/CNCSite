@@ -399,7 +399,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
                         {values.map((val: any, idx: number) => {
                             const IconComp = resolveIcon(val.iconName);
                             return (
-                                <div key={idx} className="bg-slate-50 p-8 md:p-12 rounded-[2.5rem] border border-slate-100 relative group hover:bg-white hover:shadow-2xl transition-all duration-500">
+                                <div key={idx} className="bg-slate-50 p-8 md:p-12 rounded-4xl border border-slate-100 relative group hover:bg-white hover:shadow-2xl transition-all duration-500">
                                     {IconComp && (
                                         <div className="size-16 bg-white rounded-2xl flex items-center justify-center text-abysse shadow-lg mb-8 group-hover:bg-abysse group-hover:text-white transition-colors">
                                             <IconComp size={32} />
@@ -816,7 +816,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                                 {teamData.proTeam.map((member: any, i: number) => (
-                                    <div key={i} className="group relative aspect-4/5 rounded-[2.5rem] overflow-hidden shadow-lg border border-slate-100">
+                                    <div key={i} className="group relative aspect-4/5 rounded-4xl overflow-hidden shadow-lg border border-slate-100">
                                         {member.image ? (
                                             <img src={typeof member.image === 'string' ? member.image : urlFor(member.image).url()} alt={member.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                                         ) : (
@@ -881,7 +881,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
                             {/* Decorative background element */}
                             <div className="absolute -inset-4 md:-inset-8 bg-slate-50 rounded-[3rem] -z-10 transform rotate-2"></div>
 
-                            <div className="relative aspect-4/3 w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-12 border-white group">
+                            <div className="relative aspect-4/3 w-full rounded-4xl overflow-hidden shadow-2xl border-12 border-white group">
                                 <img
                                     src={siteData.image || ''}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
@@ -925,7 +925,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                     {fleetItems?.map((fleet: any, idx: number) => (
-                        <div key={idx} className="group relative bg-white rounded-[2.5rem] overflow-hidden shadow-lg border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col h-full">
+                        <div key={idx} className="group relative bg-white rounded-4xl overflow-hidden shadow-lg border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col h-full">
                             {/* Image Header with ActivityGallery */}
                             <div className="relative h-72 lg:h-80 shrink-0 w-full bg-slate-100 overflow-hidden">
                                 {fleet.gallery && fleet.gallery.length > 0 ? (

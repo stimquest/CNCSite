@@ -1,41 +1,18 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./contexts/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
-    extend: {
-      fontFamily: {
-        sans: ['var(--font-sans)', 'sans-serif'],
-        display: ['var(--font-display)', 'sans-serif'],
-      },
-      colors: {
-        abysse: "#002B49",
-        turquoise: "#00A9CE",
-        background: {
-          light: "#F8FAFC",
-          dark: "#020617"
-        }
-      },
-      rotate: {
-        '135': '135deg',
-      },
-      boxShadow: {
-        'card': '0 20px 25px -5px rgba(0, 43, 73, 0.05), 0 8px 10px -6px rgba(0, 43, 73, 0.05)',
-        'card-hover': '0 25px 50px -12px rgba(0, 43, 73, 0.15)',
-      },
-      borderRadius: {
-        '4xl': '2.5rem',
-      }
+  // En Tailwind v4, la configuration du thème se fait désormais dans app/globals.css via @theme.
+  // On ne garde ici que la safelist pour les classes générées dynamiquement par le CMS (Sanity).
+  safelist: [
+    {
+      pattern: /bg-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|abysse|turquoise|taupe|sand)-(50|100|200|300|400|500|600|700|800|900|950)/,
     },
-  },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/container-queries'),
+    {
+      pattern: /text-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|abysse|turquoise|taupe|sand)-(50|100|200|300|400|500|600|700|800|900|950)/,
+    },
+    'text-white',
+    'bg-turquoise',
+    'bg-abysse',
   ],
 };
 export default config;

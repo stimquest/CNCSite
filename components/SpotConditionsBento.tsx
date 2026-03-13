@@ -235,7 +235,7 @@ export const SpotConditionsBento: React.FC<SpotConditionsBentoProps> = ({ mode =
                 {/* Right: Live Cam */}
                 {showSocial && (
                     <div className="lg:col-span-3 p-0 relative group/live flex flex-col transition-all h-full">
-                        <div className="relative flex-1 group rounded-[2.5rem] overflow-hidden shadow-2xl min-h-[220px] aspect-video lg:aspect-auto">
+                        <div className="relative flex-1 group rounded-4xl overflow-hidden shadow-2xl min-h-[220px] aspect-video lg:aspect-auto">
                             <iframe
                                 src="https://www.skaping.com/coutances/agon-coutainville/video"
                                 className="absolute inset-0 w-full h-full border-0"

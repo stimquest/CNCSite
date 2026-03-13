@@ -608,12 +608,12 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
                             {/* MAIN EDITOR */}
                             <div className="flex-1 min-w-0">
                                 {!selectedStage ? (
-                                    <div className="h-full min-h-75 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-white/50">
+                                    <div className="h-full min-h-75 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 rounded-4xl bg-white/50">
                                         <CalendarDays size={40} className="mb-3 opacity-30" />
                                         <p className="font-bold uppercase tracking-widest text-[10px]">Sélectionnez ou créez un planning</p>
                                     </div>
                                 ) : (
-                                    <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-2">
+                                    <div className="bg-white p-6 md:p-8 rounded-4xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-2">
                                         <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-8">
                                             <div className="flex-1 space-y-2">
                                                 <input type="text" value={selectedStage.title || ''} onChange={(e) => setSelectedStage({ ...selectedStage, title: e.target.value })} className="w-full bg-transparent text-2xl font-black uppercase italic text-abysse outline-none focus:text-turquoise border-b border-transparent focus:border-slate-100" placeholder="Nom de la période..." />
@@ -1042,7 +1042,7 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
                         <div className="space-y-6 max-w-300">
 
                             {/* HEADER PANEL */}
-                            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                            <div className="bg-white p-6 md:p-8 rounded-4xl shadow-sm border border-slate-200">
                                 <div className="flex flex-col md:flex-row justify-between items-start gap-6">
                                     <div className="space-y-1">
                                         <h3 className="text-2xl font-black uppercase italic text-abysse tracking-tighter flex items-center gap-3">
@@ -1346,7 +1346,7 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
                     {/* TAB: VIGIE DIRECT */}
                     {activeTab === 'VIGIE' && (
                         <div className="max-w-2xl mx-auto no-print">
-                            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl border border-slate-200">
+                            <div className="bg-white p-8 md:p-12 rounded-4xl shadow-xl border border-slate-200">
                                 <div className="flex items-center gap-4 mb-8">
                                     <div className="p-4 bg-turquoise/10 text-turquoise rounded-2xl">
                                         <Bell size={32} />

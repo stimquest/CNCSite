@@ -9,13 +9,15 @@ if (typeof window !== 'undefined') {
 }
 
 const SECTIONS = [
-    { id: 'hero', label: 'Evasion', number: '01', isDark: true },
-    { id: 'esprit-club', label: 'L\'Esprit', number: '02', isDark: false },
-    { id: 'vitesse', label: 'Vitesse', number: '03', isDark: false },
-    { id: 'institution', label: 'L\'Académie', number: '04', isDark: false },
-    { id: 'pedagogie', label: 'Pédagogie', number: '05', isDark: true },
-    { id: 'immersion', label: 'Immersion', number: '06', isDark: false },
-    { id: 'reseau', label: 'Réseau', number: '07', isDark: false }
+    { id: 'hero', label: 'Évasion', number: '01', isDark: true },
+    { id: 'dashboard', label: 'Pilotage', number: '02', isDark: false },
+    { id: 'esprit-club', label: 'L\'Esprit', number: '03', isDark: false },
+    { id: 'focus', label: 'Les Focus', number: '04', isDark: true },
+    { id: 'agenda', label: 'Agenda', number: '05', isDark: false },
+    { id: 'institution', label: 'Académie', number: '06', isDark: false },
+    { id: 'pedagogie', label: 'Apprendre', number: '07', isDark: true },
+    { id: 'dico-parents', label: 'Le Dico', number: '08', isDark: false },
+    { id: 'immersion', label: 'Immersion', number: '09', isDark: false }
 ];
 
 const PageNavigation = () => {

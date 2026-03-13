@@ -195,7 +195,7 @@ export const WeatherExpert: React.FC = () => {
                     const CELL = 'flex-1 flex items-center justify-center border-r border-white/5 text-sm font-black';
 
                     return (
-                        <div className="bg-abysse rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden">
+                        <div className="bg-abysse rounded-4xl border border-white/10 shadow-2xl overflow-hidden">
 
                             {/* Header légende (pas paddinné comme avant) */}
                             <div className="flex items-center gap-8 px-8 pt-8 pb-2">
@@ -349,7 +349,7 @@ export const WeatherExpert: React.FC = () => {
                     <Calendar size={18} className="text-turquoise" />
                     <h3 className="text-xs font-black uppercase tracking-widest text-abysse">Prévisions 3 Jours (Horaires)</h3>
                 </div>
-                <div className="bg-abysse/80 backdrop-blur-xl rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl">
+                <div className="bg-abysse/80 backdrop-blur-xl rounded-4xl overflow-hidden border border-white/10 shadow-2xl">
                     <div className="overflow-x-auto no-scrollbar scroll-smooth">
                         <table className="w-full border-separate border-spacing-0 table-fixed">
                             <thead>
