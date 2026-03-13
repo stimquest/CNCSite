@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 
-const config: Config = {
+const config: any = {
   // En Tailwind v4, la configuration du thème se fait désormais dans app/globals.css via @theme.
   // On ne garde ici que la safelist pour les classes générées dynamiquement par le CMS (Sanity).
   safelist: [
