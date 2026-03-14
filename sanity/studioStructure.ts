@@ -109,8 +109,66 @@ export const structure: StructureResolver = (S) =>
 
             S.divider(),
 
+            // --- NOUVEAU GROUPE : INVENTAIRES & RÉFÉRENTIELS ---
+            S.listItem()
+                .title('🗂️ Bases de Données')
+                .icon(() => '🗄️')
+                .child(
+                    S.list()
+                        .title('Inventaires & Référentiels')
+                        .items([
+                            S.documentTypeListItem('bookingTemplate').title('📝 Modèles de Réservation'),
+                            S.documentTypeListItem('natureEntity').title('🌿 Inventaire Nature'),
+                            S.documentTypeListItem('dicoWord').title('📖 Dico des Parents'),
+                            S.divider(),
+                            S.documentTypeListItem('fleetItem').title('⛵ La Flotte (Inventaire)'),
+                            S.documentTypeListItem('merchItem').title('👕 Boutique & Merch'),
+                            S.documentTypeListItem('occazItem').title('💰 Petites Annonces Occaz'),
+                        ])
+                ),
+
+            // --- NOUVEAU GROUPE : CONFIGURATION & MESSAGES ---
+            S.listItem()
+                .title('⚙️ CONFIG & ALERTES')
+                .icon(() => '🛠️')
+                .child(
+                    S.list()
+                        .title('Configuration & Messages')
+                        .items([
+                            S.listItem()
+                                .title('🚩 Statut du Spot (Cockpit)')
+                                .id('spotSettings')
+                                .child(
+                                    S.document()
+                                        .schemaType('spotSettings')
+                                        .documentId('spotSettings')
+                                        .title('Statut du Spot')
+                                ),
+                            S.documentTypeListItem('infoMessage').title('📢 Messages Info / Alertes'),
+                            S.documentTypeListItem('vibeMessage').title('✨ Messages d\'Ambiance'),
+                            S.documentTypeListItem('signageSlide').title('📺 Écrans (Affichage Public)'),
+                        ])
+                ),
+
+            // --- NOUVEAU GROUPE : PROGRAMMATION & PLANNING ---
+            S.listItem()
+                .title('📅 PROGRAMMATION & PLANNING')
+                .icon(() => '📅')
+                .child(
+                    S.list()
+                        .title('Gestion des Plannings')
+                        .items([
+                            S.documentTypeListItem('weeklyPlanning').title('📅 Planning de la Semaine'),
+                            S.divider(),
+                            S.documentTypeListItem('planningCharAVoile').title('💨 Planning Char à Voile'),
+                            S.documentTypeListItem('planningMarche').title('🚶 Planning Marche Aquatique'),
+                        ])
+                ),
+
+            S.divider(),
+
             // Regular document types
             ...S.documentTypeListItems().filter(
-                (listItem) => !['naturePage', 'clubPage', 'groupsPage', 'activitiesPage', 'leSpotPage', 'homeGallery', 'spotSettings', 'homePage', 'infosPage', 'schoolPage'].includes(listItem.getId() || '')
+                (listItem) => !['naturePage', 'clubPage', 'groupsPage', 'activitiesPage', 'leSpotPage', 'homeGallery', 'spotSettings', 'homePage', 'infosPage', 'schoolPage', 'bookingTemplate', 'natureEntity', 'dicoWord', 'fleetItem', 'merchItem', 'occazItem', 'infoMessage', 'vibeMessage', 'signageSlide', 'clubPole', 'clubActivity', 'weeklyPlanning', 'planningCharAVoile', 'planningMarche'].includes(listItem.getId() || '')
             ),
         ]);

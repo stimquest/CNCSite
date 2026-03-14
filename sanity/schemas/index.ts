@@ -3,7 +3,6 @@ import { clubActivity } from './clubActivity';
 import { clubPole } from './clubPole';
 import { spotSettings } from './spotSettings';
 import { news } from './news';
-import { teamMember } from './teamMember';
 import { fleetItem } from './fleetItem';
 import { weeklyPlanning } from './weeklyPlanning';
 import { planningCharAVoile } from './planningCharAVoile';
@@ -21,7 +20,6 @@ import { planningMarche } from './planningMarche';
 import { naturePage } from './naturePage';
 import { natureEntity } from './natureEntity';
 
-import { autoConditionsConfig } from './autoConditionsConfig';
 import homePage from "./homePage";
 import infosPage from "./infosPage";
 import { signageSlide } from './signageSlide';
@@ -44,9 +42,7 @@ export const schemaTypes = [
   clubActivity,
   clubPole,
   spotSettings,
-  autoConditionsConfig,
   news,
-  teamMember,
   fleetItem,
   weeklyPlanning,
   planningCharAVoile,

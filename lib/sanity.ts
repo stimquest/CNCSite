@@ -43,9 +43,6 @@ export const queries = {
   news: `*[_type == "news"] | order(publishedAt desc)[0...30] {
     _id, title, category, content, externalLink, date, publishedAt
   }`,
-  team: `*[_type == "teamMember"] {
-    name, role, category, diplome, "image": image.asset->url
-  }`,
   fleet: `*[_type == "fleetItem"] {
     id, name, subtitle, description, "gallery": gallery[].asset->url, stats, crew
   }`,

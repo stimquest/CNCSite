@@ -757,6 +757,33 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
                         <h2 className="text-3xl md:text-5xl text-abysse leading-none mb-6">{teamData.title}</h2>
                     </div>
 
+                    {/* --- L'ÉQUIPE SPORTIVE --- */}
+                    {teamData.proTeam && teamData.proTeam.length > 0 && (
+                        <div className="mb-24">
+                            <div className="flex items-center gap-4 mb-8">
+                                <Waves size={24} className="text-turquoise" />
+                                <h3 className="text-2xl font-black text-abysse uppercase italic tracking-tighter">L'Équipe Sportive & Opérationnelle</h3>
+                                <div className="flex-1 h-px bg-slate-100" />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {teamData.proTeam.map((member: any, i: number) => (
+                                    <div key={i} className="group relative aspect-4/5 rounded-4xl overflow-hidden shadow-lg border border-slate-100">
+                                        {member.image ? (
+                                            <img src={typeof member.image === 'string' ? member.image : urlFor(member.image).url()} alt={member.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                                        ) : (
+                                            <div className="absolute inset-0 bg-slate-200" />
+                                        )}
+                                        <div className="absolute inset-0 bg-linear-to-t from-abysse via-abysse/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+                                        <div className="absolute bottom-0 left-0 w-full p-8 text-white">
+                                            <p className="text-turquoise font-black uppercase tracking-[0.2em] text-[10px] mb-2">{member.role}</p>
+                                            <h5 className="text-2xl font-black uppercase italic tracking-tighter">{member.name}</h5>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* --- LE BUREAU --- */}
                     {teamData.boardMembers && teamData.boardMembers.length > 0 && (
                         <div className="mb-24">
@@ -791,7 +818,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
 
                     {/* --- LE CONSEIL D'ADMINISTRATION --- */}
                     {teamData.caMembers && teamData.caMembers.length > 0 && (
-                        <div className="mb-24">
+                        <div>
                             <div className="flex items-center gap-4 mb-6">
                                 <Users size={16} className="text-slate-300" />
                                 <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest">Conseil d'Administration</h4>
@@ -800,33 +827,6 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
                                 {teamData.caMembers.map((member: string, i: number) => (
                                     <div key={i} className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-full text-abysse font-bold text-sm hover:bg-white hover:border-turquoise hover:shadow-md transition-all cursor-default">
                                         {member}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* --- L'ÉQUIPE SPORTIVE --- */}
-                    {teamData.proTeam && teamData.proTeam.length > 0 && (
-                        <div>
-                            <div className="flex items-center gap-4 mb-8">
-                                <Waves size={24} className="text-turquoise" />
-                                <h3 className="text-2xl font-black text-abysse uppercase italic tracking-tighter">L'Équipe Sportive & Opérationnelle</h3>
-                                <div className="flex-1 h-px bg-slate-100" />
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                                {teamData.proTeam.map((member: any, i: number) => (
-                                    <div key={i} className="group relative aspect-4/5 rounded-4xl overflow-hidden shadow-lg border border-slate-100">
-                                        {member.image ? (
-                                            <img src={typeof member.image === 'string' ? member.image : urlFor(member.image).url()} alt={member.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                                        ) : (
-                                            <div className="absolute inset-0 bg-slate-200" />
-                                        )}
-                                        <div className="absolute inset-0 bg-linear-to-t from-abysse via-abysse/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-                                        <div className="absolute bottom-0 left-0 w-full p-8 text-white">
-                                            <p className="text-turquoise font-black uppercase tracking-[0.2em] text-[10px] mb-2">{member.role}</p>
-                                            <h5 className="text-2xl font-black uppercase italic tracking-tighter">{member.name}</h5>
-                                        </div>
                                     </div>
                                 ))}
                             </div>

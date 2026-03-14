@@ -16,6 +16,7 @@ import { LogoComponent } from '../components/Logo';
 import { DicoParents } from '../components/DicoParents';
 import Link from 'next/link';
 import { PortableText } from '@portabletext/react';
+import { CharDiscoveryModal } from './CharDiscoveryModal';
 
 const RenderText = ({ content, className, fallback = null }: { content: string | any[] | undefined, className?: string, fallback?: React.ReactNode }) => {
     if (!content) return fallback ? <div className={className}>{fallback}</div> : null;
@@ -81,6 +82,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
     const [currentCharIndex, setCurrentCharIndex] = useState(0);
     const [currentGlisseIndex, setCurrentGlisseIndex] = useState(0);
     const [currentWellbeingIndex, setCurrentWellbeingIndex] = useState(0);
+    const [isCharModalOpen, setIsCharModalOpen] = useState(false);
 
     // Auto-advance slideshow
     useEffect(() => {
@@ -658,9 +660,12 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                 <Link href={homePageData?.focusChar?.ctaButton?.link || "/activites"} className="inline-flex items-center justify-center px-10 py-4 bg-orange-500 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-orange-600 transition-all shadow-lg group/btn shadow-orange-500/20">
                                     {homePageData?.focusChar?.ctaButton?.text || "Réserver une séance"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
                                 </Link>
-                                <Link href={homePageData?.focusChar?.infoButton?.link || "/activites"} className="inline-flex items-center justify-center px-10 py-4 bg-white/5 border border-white/10 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                                <button 
+                                    onClick={() => setIsCharModalOpen(true)}
+                                    className="inline-flex items-center justify-center px-10 py-4 bg-white/5 border border-white/10 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all backdrop-blur-sm"
+                                >
                                     {homePageData?.focusChar?.infoButton?.text || "En savoir plus"}
-                                </Link>
+                                </button>
                             </div>
                         </div>
 
@@ -1234,6 +1239,8 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                 title={homeGallery?.title || "Galerie Photos"}
             />
 
+            {/* MODALS */}
+            <CharDiscoveryModal isOpen={isCharModalOpen} onClose={() => setIsCharModalOpen(false)} />
         </div>
     );
 }

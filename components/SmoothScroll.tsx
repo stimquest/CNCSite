@@ -75,16 +75,34 @@ export const SmoothScroll = ({ children }: SmoothScrollProps) => {
         };
     }, []);
 
-    // Handle route changes: Reset scroll to top
+    const wasPopState = useRef(false);
+
+    // Track back/forward navigation globally
     useEffect(() => {
-        if (lenisRef.current) {
-            setTimeout(() => {
-                lenisRef.current?.scrollTo(0, { immediate: true });
+        const handlePopState = () => {
+            wasPopState.current = true;
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    // Handle route changes: Reset scroll to top ONLY on new navigations (not back/forward)
+    useEffect(() => {
+        // We use a small timeout to let Next.js complete the layout change
+        const timeout = setTimeout(() => {
+            if (!wasPopState.current) {
+                if (lenisRef.current) {
+                    lenisRef.current.scrollTo(0, { immediate: true });
+                }
                 window.scrollTo(0, 0);
-            }, 50);
-        } else {
-            window.scrollTo(0, 0);
-        }
+            }
+            // Ensure ScrollTrigger is refreshed for the new page layout
+            ScrollTrigger.refresh();
+            // Reset for the next navigation
+            wasPopState.current = false;
+        }, 100);
+
+        return () => clearTimeout(timeout);
     }, [pathname]);
 
     return (
