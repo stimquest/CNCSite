@@ -2,10 +2,10 @@
 
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLenis } from './SmoothScroll';
 import { 
     X, 
     Wind, 
-    ArrowRight, 
     Wifi, 
     Navigation, 
     Timer, 
@@ -20,23 +20,51 @@ interface CharDiscoveryModalProps {
 
 export const CharDiscoveryModal: React.FC<CharDiscoveryModalProps> = ({ isOpen, onClose }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
+    const { stop, start } = useLenis();
 
     // Focus & Scroll Lock Management
     useEffect(() => {
         if (isOpen) {
             const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+            const previousBodyOverflow = document.body.style.overflow;
+            const previousBodyPaddingRight = document.body.style.paddingRight;
+            const previousHtmlOverflow = document.documentElement.style.overflow;
+            const previousHtmlOverscroll = document.documentElement.style.overscrollBehavior;
+
             document.body.style.overflow = 'hidden';
             document.body.style.paddingRight = `${scrollBarWidth}px`;
+            document.documentElement.style.overflow = 'hidden';
+            document.documentElement.style.overscrollBehavior = 'none';
+            stop();
             
             const timer = setTimeout(() => {
-                scrollRef.current?.focus();
+                scrollRef.current?.focus({ preventScroll: true });
+                scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' });
             }, 50);
-            return () => clearTimeout(timer);
-        } else {
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
+
+            return () => {
+                clearTimeout(timer);
+                document.body.style.overflow = previousBodyOverflow;
+                document.body.style.paddingRight = previousBodyPaddingRight;
+                document.documentElement.style.overflow = previousHtmlOverflow;
+                document.documentElement.style.overscrollBehavior = previousHtmlOverscroll;
+                start();
+            };
         }
-    }, [isOpen]);
+
+        start();
+    }, [isOpen, start, stop]);
+
+    const handleModalWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+        const container = scrollRef.current;
+
+        if (!container || container.scrollHeight <= container.clientHeight) {
+            return;
+        }
+
+        container.scrollTop += event.deltaY;
+        event.preventDefault();
+    };
 
     return (
         <AnimatePresence>
@@ -56,7 +84,11 @@ export const CharDiscoveryModal: React.FC<CharDiscoveryModalProps> = ({ isOpen, 
                         initial={{ opacity: 0, scale: 0.98, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.98, y: 10 }}
-                        className="relative w-full max-w-5xl h-full max-h-[85vh] bg-white rounded-[32px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col md:flex-row pointer-events-auto border border-white/10"
+                        onWheelCapture={handleModalWheel}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Découverte du char à voile"
+                        className="relative w-full max-w-5xl h-full max-h-[85vh] bg-white rounded-[32px] md:rounded-4xl shadow-2xl overflow-hidden flex flex-col md:flex-row pointer-events-auto border border-white/10 overscroll-contain"
                     >
                         {/* Close Button UI */}
                         <button 
@@ -67,7 +99,7 @@ export const CharDiscoveryModal: React.FC<CharDiscoveryModalProps> = ({ isOpen, 
                         </button>
 
                         {/* Left Column: Brand/Visual */}
-                        <div className="w-full md:w-[40%] h-[25%] md:h-auto relative shrink-0">
+                        <div className="w-full md:w-[34%] lg:w-[32%] h-50 sm:h-60 md:h-auto relative shrink-0">
                             <img 
                                 src="/images/imgBank/Char003.jpg" 
                                 alt="Char à Voile" 
@@ -91,9 +123,9 @@ export const CharDiscoveryModal: React.FC<CharDiscoveryModalProps> = ({ isOpen, 
                             <div 
                                 ref={scrollRef}
                                 tabIndex={0}
-                                className="flex-1 overflow-y-auto px-6 py-10 md:p-12 lg:p-14 custom-scrollbar scroll-smooth focus:outline-none"
+                                className="flex-1 overflow-y-auto overscroll-contain px-6 py-8 md:px-10 md:py-12 lg:px-12 lg:py-14 custom-scrollbar scroll-smooth focus:outline-none"
                             >
-                                <div className="max-w-xl mx-auto space-y-12">
+                                <div className="max-w-2xl mx-auto space-y-10 md:space-y-12">
                                     <header>
                                         <div className="flex items-center gap-3 mb-6">
                                             <div className="h-px w-8 bg-orange-500" />
@@ -128,7 +160,7 @@ export const CharDiscoveryModal: React.FC<CharDiscoveryModalProps> = ({ isOpen, 
                                             </p>
                                         </div>
 
-                                        <div className="bg-orange-50 p-8 rounded-[24px] border border-orange-100 shadow-sm">
+                                        <div className="bg-orange-50 p-8 rounded-3xl border border-orange-100 shadow-sm">
                                             <h4 className="text-orange-600 font-black uppercase tracking-widest text-[10px] mb-3 flex items-center gap-3">
                                                 <Zap size={14} fill="currentColor" />
                                                 Sensations Garanties
@@ -180,16 +212,6 @@ export const CharDiscoveryModal: React.FC<CharDiscoveryModalProps> = ({ isOpen, 
                                         </div>
                                     </section>
                                 </div>
-                            </div>
-
-                            {/* Sticky Bottom Action Bar */}
-                            <div className="bg-white border-t border-slate-200 p-8 flex items-center justify-center md:justify-end shrink-0 relative z-20">
-                                <button 
-                                    onClick={onClose}
-                                    className="w-full md:w-auto inline-flex items-center justify-center px-10 py-5 bg-abysse text-white rounded-[20px] font-black uppercase tracking-[0.2em] text-[10px] hover:bg-orange-600 transition-all shadow-xl active:scale-95 group"
-                                >
-                                    C'est clair, je me lance ! <ArrowRight size={18} className="ml-4 group-hover:translate-x-2 transition-transform duration-300" />
-                                </button>
                             </div>
                         </div>
                     </motion.div>

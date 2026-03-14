@@ -148,6 +148,17 @@ export const queries = {
         }
     }
   }`,
+  infosPage: `*[_type == "infosPage"][0] {
+    heroTitle, heroSubtitle, address, phone, email,
+    "documents": documents[]{ title, description, category, "url": file.asset->url },
+    "pricing": pricing {
+      eyebrow, title, "pdfUrl": pricingFile.asset->url,
+      "stages": stages { label, note, rows[] { activity, ages, price1, price2 } },
+      "courses": courses { label, rows[] { activity, duration, details, price } },
+      "locations": locations { label, rows[] { support, type, duration, price } },
+      footerNote
+    }
+  }`,
   leSpotPage: `*[_type == "leSpotPage"][0] {
     hero { title, subtitle, description, "heroImage": heroImage.asset->url }
   }`,
