@@ -308,15 +308,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
 
             {/* BENTO ACCUEIL — Unifié façon "Centre de Contrôle" (Air & Glass) */}
             <section id="dashboard" className="max-w-[1600px] mx-auto px-6 pt-10 pb-4 relative z-10">
-                {/* Textures d'arrière-plan pour révéler l'effet "Glassmorphism" */}
-                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden rounded-[3rem]">
-                    <div className="absolute top-10 left-10 w-96 h-96 bg-turquoise/20 rounded-full blur-[100px]" />
-                    <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-abysse/10 rounded-full blur-[120px]" />
-                </div>
-                
-                <div className="bg-white/40 backdrop-blur-3xl relative overflow-hidden rounded-[2rem] shadow-[0_8px_32px_rgba(0,43,73,0.05)] border border-white/60">
-                    {/* Reflet subtil en haut pour l'effet de verre */}
-                    <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white to-transparent opacity-60 pointer-events-none" />
+                <div className="bg-white relative overflow-hidden rounded-[2rem] shadow-[0_8px_32px_rgba(0,43,73,0.05)] border border-abysse/10">
                     
                     <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch relative z-10">
 
@@ -389,7 +381,8 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                     const getActCfg = (s: string, category: 'encadree' | 'autonome_voile' | 'marche') => {
                                         let label = '';
                                         if (s === 'INACTIVE') {
-                                            return { dot: 'bg-abysse/10 border border-abysse/20', label: 'Hors Période', color: 'text-abysse/40' };
+                                            const inactiveLabel = category === 'marche' ? 'Pas de séance' : 'Hors Période';
+                                            return { dot: 'bg-abysse/10 border border-abysse/20', label: inactiveLabel, color: 'text-abysse/40' };
                                         }
                                         if (s === 'OPEN' || s === 'IDEAL' || s === 'FAVORABLE') {
                                             if (category === 'autonome_voile') label = 'Favorables';
@@ -446,6 +439,11 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                             MàJ: {new Date(lastPublishedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     </div>
+                                    <FreshnessIndicator
+                                        lastPublishedAt={lastPublishedAt}
+                                        lastConfirmedAt={lastConfirmedAt}
+                                        showBanner
+                                    />
                                 </div>
                             )}
                         </div>

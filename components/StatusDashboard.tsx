@@ -55,6 +55,7 @@ const getLabel = (cat: string, normalizedStatus: string) => {
         return 'Déconseillée';
     }
     if (cat === 'marche') {
+        if (normalizedStatus === 'INACTIVE') return 'Pas de séance';
         if (normalizedStatus === 'OPEN') return 'Confirmée';
         if (normalizedStatus === 'RESTRICTED') return 'Parcours adapté';
         return 'Reportée';

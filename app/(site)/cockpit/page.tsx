@@ -23,6 +23,7 @@ const STATUS_GRIDS = {
         { id: 'OPEN', label: 'Confirmée', short: 'OK', activeBg: 'bg-emerald-500 text-white border-emerald-400' },
         { id: 'RESTRICTED', label: 'Parcours adapté', short: '~', activeBg: 'bg-amber-400 text-slate-900 border-amber-300' },
         { id: 'CLOSED', label: 'Reportée', short: '✕', activeBg: 'bg-rose-500 text-white border-rose-400' },
+        { id: 'INACTIVE', label: 'Pas de séance', short: '—', activeBg: 'bg-slate-400 text-white border-slate-300' },
     ],
     generic: [
         { id: 'OPEN', label: 'Ouverte', short: 'OK', activeBg: 'bg-emerald-500 text-white border-emerald-400' },
