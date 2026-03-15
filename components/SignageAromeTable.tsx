@@ -11,6 +11,17 @@ interface ExpertData {
 
 const COLS = 16; // 8h × 2 points/h (toutes les 30 min)
 
+interface DataPoint {
+  label: string;
+  isHour: boolean;
+  wind: number;
+  gust: number | null;
+  dir: number | null;
+  waveH: number | null;
+  waveP: number | null;
+  temp: number | null;
+}
+
 const getWindColor = (knots: number): { bg: string; text: string } => {
   if (knots <= 5)  return { bg: '#2130ff', text: '#ffffff' };
   if (knots <= 9)  return { bg: '#0099ff', text: '#ffffff' };
@@ -73,7 +84,7 @@ export const SignageAromeTable: React.FC = () => {
       waveP: wIdx !== -1 ? wav.wave_period?.[wIdx] : null,
       temp: w15.temperature_2m?.[idx] != null ? Math.round(w15.temperature_2m[idx]) : null,
     };
-  }).filter(Boolean) as NonNullable<ReturnType<typeof Array.from<any>>>[];
+  }).filter((p): p is DataPoint => p !== null);
 
   // Styles partagés
   const cellBase = "flex items-center justify-center font-black text-lg border-r border-white/8";
