@@ -46,6 +46,11 @@ export interface WeatherData {
   windBearing?: number;
   trend?: 'rising' | 'falling' | 'stable';
   weatherCode?: number;
+  waveHeight?: number;
+  waveDirection?: string;
+  wavePeriod?: number;
+  sunrise?: string;
+  sunset?: string;
 }
 
 export interface ActivityPrice {

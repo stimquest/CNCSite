@@ -16,43 +16,43 @@ export const GamesSlideshow: React.FC = () => {
 
     const IntroSlide = () => (
         <div className="max-w-[1360px] w-full mx-auto bg-white rounded-[3rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] overflow-hidden">
-            <div className="grid lg:grid-cols-2 gap-12 p-8 lg:p-14 items-center">
+            <div className="grid lg:grid-cols-2 gap-8 p-6 lg:p-10 items-center">
                 {/* Left Content */}
                 <div className="text-left">
-                    <div className="inline-flex items-center gap-2 bg-turquoise/10 text-turquoise px-4 py-2 rounded-full mb-6">
-                        <Compass size={16} />
+                    <div className="inline-flex items-center gap-2 bg-turquoise/10 text-turquoise px-3 py-1.5 rounded-full mb-4">
+                        <Compass size={14} />
                         <span className="text-xs font-black uppercase tracking-widest">Apprentissage Interactif</span>
                     </div>
 
-                    <h3 className="text-4xl md:text-5xl font-black text-abysse mb-6 leading-tight">
+                    <h3 className="text-2xl md:text-3xl font-black text-abysse mb-4 leading-tight">
                         Testez vos connaissances<br />
                         <span className="text-turquoise">nautiques</span>
                     </h3>
 
-                    <p className="text-slate-500 text-lg mb-10 leading-relaxed max-w-lg">
+                    <p className="text-slate-500 text-sm mb-6 leading-relaxed max-w-lg">
                         Avant de prendre la barre, entraînez-vous ! Deux mini-jeux pour maîtriser les fondamentaux de la voile et les règles de priorité en mer.
                     </p>
 
                     <button
                         onClick={() => setActiveIndex(1)}
-                        className="inline-flex items-center gap-2 bg-turquoise hover:bg-abysse text-white px-8 py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-turquoise/30"
+                        className="inline-flex items-center gap-2 bg-turquoise hover:bg-abysse text-white px-6 py-3 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-turquoise/30"
                     >
-                        Commencer l'aventure <ChevronRight size={18} />
+                        Commencer l'aventure <ChevronRight size={16} />
                     </button>
 
                     {/* Mini Games List */}
-                    <div className="mt-12 space-y-4">
-                        <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-turquoise/30 transition-colors">
-                            <span className="text-2xl">🌊</span>
+                    <div className="mt-6 space-y-3">
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100 hover:border-turquoise/30 transition-colors">
+                            <span className="text-xl">🌊</span>
                             <div>
-                                <div className="font-bold text-abysse">Simulateur de Voile</div>
+                                <div className="font-bold text-abysse text-sm">Simulateur de Voile</div>
                                 <div className="text-xs text-slate-400">Maîtrise les allures et le vent</div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-turquoise/30 transition-colors">
-                            <span className="text-2xl">⚓</span>
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100 hover:border-turquoise/30 transition-colors">
+                            <span className="text-xl">⚓</span>
                             <div>
-                                <div className="font-bold text-abysse">Priorités en Mer</div>
+                                <div className="font-bold text-abysse text-sm">Priorités en Mer</div>
                                 <div className="text-xs text-slate-400">Quiz complet sur les règles RIPAM</div>
                             </div>
                         </div>
@@ -60,7 +60,7 @@ export const GamesSlideshow: React.FC = () => {
                 </div>
 
                 {/* Right Image */}
-                <div className="relative h-[340px] lg:h-[510px] rounded-4xl overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-700">
+                <div className="relative h-[260px] lg:h-[380px] rounded-4xl overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-700">
                     <img
                         src="/images/Games/illu_mini_Game2.jpeg"
                         alt="Illustration Mini Jeux"

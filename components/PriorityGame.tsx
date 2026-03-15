@@ -305,7 +305,7 @@ export const PriorityGame: React.FC = () => {
         <div className="relative max-w-[1360px] w-full mx-auto bg-white rounded-[3rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col lg:flex-row border border-slate-100">
 
             {/* Ocean Area */}
-            <div ref={oceanRef} className="relative w-full lg:w-[55%] min-h-[340px] lg:min-h-[425px] bg-slate-900 overflow-hidden">
+            <div ref={oceanRef} className="relative w-full lg:w-[55%] min-h-[280px] lg:min-h-[360px] bg-slate-900 overflow-hidden">
                 {/* Grid overlay */}
                 <div className="absolute inset-0 opacity-20" style={{
                     backgroundImage: 'radial-gradient(rgba(255,255,255,.15) 1.5px, transparent 1.5px)',
@@ -369,9 +369,9 @@ export const PriorityGame: React.FC = () => {
             </div>
 
             {/* Right Panel */}
-            <div className="w-full lg:w-[45%] p-8 lg:p-10 flex flex-col">
+            <div className="w-full lg:w-[45%] p-6 lg:p-8 flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-2">
                     <div>
                         <span className="text-[10px] font-black tracking-[0.2em] text-blue-500 uppercase">RIPAM / COLREG</span>
                         <p className="text-slate-600 font-bold text-sm mt-1">{cur?.rule || 'Chargement...'}</p>
@@ -383,7 +383,7 @@ export const PriorityGame: React.FC = () => {
                 </div>
 
                 {/* Progress bar */}
-                <div className="h-2 bg-slate-100 rounded-full mb-6 overflow-hidden">
+                <div className="h-1.5 bg-slate-100 rounded-full mb-4 overflow-hidden">
                     <div
                         className="h-full bg-linear-to-r from-blue-500 to-violet-500 rounded-full transition-all duration-500"
                         style={{ width: `${(idx / TOTAL) * 100}%` }}
@@ -391,37 +391,37 @@ export const PriorityGame: React.FC = () => {
                 </div>
 
                 {/* Question */}
-                <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-4 tracking-tight">Suis-je prioritaire ?</h1>
-                <p className="text-slate-500 text-lg mb-8">
+                <h1 className="text-2xl lg:text-3xl font-black text-slate-900 mb-2 tracking-tight">Suis-je prioritaire ?</h1>
+                <p className="text-slate-500 text-sm mb-4">
                     Analysez les <b className="text-slate-700">amures</b>, la <b className="text-slate-700">position relative</b> et les <b className="text-slate-700">voiles</b> par rapport au vent.
                 </p>
 
                 {/* Buttons */}
-                <div className="space-y-3 mb-8">
+                <div className="space-y-2 mb-4">
                     <button
                         onClick={() => handleAnswer(true)}
                         disabled={locked}
-                        className={`w-full py-5 rounded-2xl font-black text-lg text-white transition-all ${locked ? 'opacity-40 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 shadow-[0_6px_0_#047857] active:translate-y-1 active:shadow-none'}`}
+                        className={`w-full py-3.5 rounded-xl font-black text-base text-white transition-all ${locked ? 'opacity-40 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_0_#047857] active:translate-y-1 active:shadow-none'}`}
                     >
                         ✓  OUI, JE SUIS PRIORITAIRE
                     </button>
                     <button
                         onClick={() => handleAnswer(false)}
                         disabled={locked}
-                        className={`w-full py-5 rounded-2xl font-black text-lg text-white transition-all ${locked ? 'opacity-40 cursor-not-allowed' : 'bg-rose-600 hover:bg-rose-500 shadow-[0_6px_0_#be123c] active:translate-y-1 active:shadow-none'}`}
+                        className={`w-full py-3.5 rounded-xl font-black text-base text-white transition-all ${locked ? 'opacity-40 cursor-not-allowed' : 'bg-rose-600 hover:bg-rose-500 shadow-[0_4px_0_#be123c] active:translate-y-1 active:shadow-none'}`}
                     >
                         ✕  NON, JE M'ÉCARTE
                     </button>
                 </div>
 
                 {/* Coach */}
-                <div className="relative mt-auto bg-slate-50 p-6 pl-16 rounded-[2rem] border border-slate-100 shadow-inner">
-                    <div className="absolute -top-6 -left-4 w-24 h-24 rounded-2xl bg-blue-600 shrink-0 overflow-hidden shadow-xl border-4 border-white transform -rotate-6 z-10">
-                        <Image src="/images/Games/rayan.png" alt="Coach" width={96} height={96} className="w-full h-full object-cover" quality={100} />
+                <div className="relative mt-auto bg-slate-50 p-4 pl-12 rounded-2xl border border-slate-100 shadow-inner">
+                    <div className="absolute -top-4 -left-3 w-16 h-16 rounded-xl bg-blue-600 shrink-0 overflow-hidden shadow-xl border-4 border-white transform -rotate-6 z-10">
+                        <Image src="/images/Games/rayan.png" alt="Coach" width={64} height={64} className="w-full h-full object-cover" quality={100} />
                     </div>
-                    <div className="ml-12">
-                        <p className="text-xs text-blue-600 uppercase font-black tracking-widest mb-1">Coach nautique :</p>
-                        <p className="text-slate-800 font-bold text-base leading-tight italic">&quot;{cur?.coach || 'Prêt à naviguer ?'}&quot;</p>
+                    <div className="ml-8">
+                        <p className="text-xs text-blue-600 uppercase font-black tracking-widest mb-0.5">Coach nautique :</p>
+                        <p className="text-slate-800 font-bold text-sm leading-tight italic">&quot;{cur?.coach || 'Prêt à naviguer ?'}&quot;</p>
                     </div>
                 </div>
             </div>

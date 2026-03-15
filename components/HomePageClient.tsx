@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useLiveStatus } from '../contexts/LiveStatusContext';
 
-import { Compass, Wind, Leaf, Zap, Users, ArrowRight, LifeBuoy, GraduationCap, Briefcase, Medal, Siren, CheckCircle2, Wifi, ShoppingBag, Image, Radio, Bird, Waves, Youtube, Play, Navigation } from 'lucide-react';
+import { Compass, Wind, Leaf, Zap, Users, ArrowRight, LifeBuoy, GraduationCap, Briefcase, Medal, Siren, CheckCircle2, Wifi, ShoppingBag, Image, Radio, Bird, Waves, Youtube, Play, Navigation, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PhotoWallGallery } from '../components/PhotoWallGallery';
 import { GamesSlideshow } from '../components/GamesSlideshow';
 import PillarStory from '../components/PillarStory';
@@ -66,6 +66,97 @@ const PARTNERS = [
     { name: 'Tourisme & Handicap', logo: '/images/partenaires/tourismeHandicap.jpg', link: 'https://www.tourisme-handicaps.org/' },
 ];
 
+const HeroCarouselItem = ({ image, isActive, photoYPos }: { image: string, isActive: boolean, photoYPos: any }) => (
+    <AnimatePresence mode="popLayout">
+        {isActive && (
+            <motion.div
+                className="absolute inset-0 w-full h-full"
+                initial={{ opacity: 0, scale: 1.06 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{
+                    opacity: { duration: 2.5, ease: "easeInOut" },
+                    scale: { duration: 15, ease: "easeOut" }
+                }}
+                style={{
+                    backgroundImage: `url('${image}')`,
+                    backgroundSize: 'cover',
+                    backgroundPositionX: 'center',
+                    backgroundPositionY: photoYPos,
+                }}
+            />
+        )}
+    </AnimatePresence>
+);
+
+const HeroLogo = ({ homePageData }: { homePageData: any }) => {
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+        const { clientX, clientY, currentTarget } = e;
+        const { width, height, left, top } = currentTarget.getBoundingClientRect();
+        const x = ((clientX - left) / width - 0.5) * 2;
+        const y = ((clientY - top) / height - 0.5) * 2;
+        setMousePos({ x, y });
+    };
+
+    return (
+        <div 
+            className="absolute inset-x-0 top-0 h-screen z-20 flex flex-col items-center justify-center -translate-y-12"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setMousePos({ x: 0, y: 0 })}
+            style={{ perspective: '1500px' }}
+        >
+            {/* Tilted Logo */}
+            <motion.div
+                className="relative w-[85vw] h-[40vh] md:w-[60vw] md:h-[50vh] flex items-center justify-center"
+                animate={{
+                    rotateX: mousePos.y * -15,
+                    rotateY: mousePos.x * 15,
+                }}
+                transition={{ type: 'spring', stiffness: 150, damping: 20 }}
+                style={{ transformStyle: 'preserve-3d' }}
+            >
+                <div
+                    className="hero-logo-glass-layer logo-drop-shadow"
+                    style={{
+                        maskImage: "url('/images/LogoCNC2S.png')",
+                        WebkitMaskImage: "url('/images/LogoCNC2S.png')"
+                    }}
+                />
+                <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    animate={{
+                        background: `radial-gradient(circle at ${50 + mousePos.x * 50}% ${50 + mousePos.y * 50}%, rgba(255,255,255,0.4) 0%, transparent 60%)`,
+                    }}
+                    style={{
+                        mixBlendMode: 'overlay',
+                        maskImage: "url('/images/LogoCNC2S.png')",
+                        WebkitMaskImage: "url('/images/LogoCNC2S.png')",
+                        maskSize: 'contain',
+                        maskPosition: 'center',
+                        maskRepeat: 'no-repeat',
+                    }}
+                />
+            </motion.div>
+
+            {/* Static Text - Now properly positioned under the logo */}
+            <div className="flex flex-col items-center mt-12 hero-subtitle pointer-events-none text-center">
+                <RenderText 
+                    content={homePageData?.hero?.title}
+                    className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm"
+                    fallback="Club Nautique de Coutainville"
+                />
+                <RenderText 
+                    content={homePageData?.hero?.subtitle}
+                    className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm mt-2 opacity-80"
+                    fallback="Sauvetage et Secourisme"
+                />
+            </div>
+        </div>
+    );
+};
+
 export default function HomePageClient({ homePageData, dicoWords, homeGallery, infoMessages, upcomingEvents = [] }: any) {
     const {
         weather, statusMessage, 
@@ -77,19 +168,66 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
         stagesInitiationStatus, stagesInitiationMessage,
         stagesPerfStatus, stagesPerfMessage
     } = useLiveStatus();
+
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
     const [currentCharIndex, setCurrentCharIndex] = useState(0);
     const [currentGlisseIndex, setCurrentGlisseIndex] = useState(0);
     const [currentWellbeingIndex, setCurrentWellbeingIndex] = useState(0);
     const [isCharModalOpen, setIsCharModalOpen] = useState(false);
+    const [currentFocusIndex, setCurrentFocusIndex] = useState(0);
+    const [focusX, setFocusX] = useState(0);
+    const focusWheelLockRef = useRef(false);
+    const focusSectionRef = useRef<HTMLDivElement>(null);
+    const focusSnapLockRef = useRef(false);
 
-    // Auto-advance slideshow
+    const touchStartRef = useRef(0);
+    const handleTouchStart = (e: React.TouchEvent) => {
+        touchStartRef.current = e.touches[0].clientX;
+    };
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        const touchEnd = e.changedTouches[0].clientX;
+        const diff = touchStartRef.current - touchEnd;
+        if (Math.abs(diff) > 40) { // Seuil de 40px pour déclencher le slide
+            if (diff > 0) navigateFocus(Math.min(2, currentFocusIndex + 1));
+            else navigateFocus(Math.max(0, currentFocusIndex - 1));
+        }
+    };
+
+    const FOCUS_CARD_VW = 0.65;
+    const FOCUS_CARD_GAP = 24;
+
+    const navigateFocus = (index: number) => {
+        setCurrentFocusIndex(index);
+        const vwRatio = window.innerWidth < 1024 ? 0.85 : 0.65;
+        const cardWidth = window.innerWidth * vwRatio + FOCUS_CARD_GAP;
+        setFocusX(-index * cardWidth);
+    };
+
+    const handleFocusWheel = (e: React.WheelEvent) => {
+        if (Math.abs(e.deltaX) < Math.abs(e.deltaY) * 0.5) return;
+        if (focusWheelLockRef.current) return;
+        focusWheelLockRef.current = true;
+        setTimeout(() => { focusWheelLockRef.current = false; }, 700);
+        if (e.deltaX > 20) navigateFocus(Math.min(2, currentFocusIndex + 1));
+        else if (e.deltaX < -20) navigateFocus(Math.max(0, currentFocusIndex - 1));
+    };
+
     useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentHeroIndex((prev) => (prev + 1) % HERO_IMAGES.length);
-        }, 6000); // 6 seconds per slide
-        return () => clearInterval(timer);
+        const section = focusSectionRef.current;
+        if (!section) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && entry.intersectionRatio > 0.25 && !focusSnapLockRef.current) {
+                    focusSnapLockRef.current = true;
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setTimeout(() => { focusSnapLockRef.current = false; }, 1200);
+                }
+            },
+            { threshold: 0.25 }
+        );
+        observer.observe(section);
+        return () => observer.disconnect();
     }, []);
 
     const CHAR_IMAGES = homePageData?.focusChar?.images?.length ? homePageData.focusChar.images : [
@@ -99,33 +237,30 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
     ];
 
     const GLISSE_IMAGES = homePageData?.focusGlisse?.images?.length ? homePageData.focusGlisse.images : [
-        'https://images.unsplash.com/photo-1598514983053-ec5507ad2ea4?q=80&w=2000', // Wingfolk
-        'https://images.unsplash.com/photo-1506477331477-33d5d8b3dc85?q=80&w=2000', // Kitesurf
-        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?q=80&w=2000', // Windsurf
+        'https://images.unsplash.com/photo-1598514983053-ec5507ad2ea4?q=80&w=2000', 
+        'https://images.unsplash.com/photo-1506477331477-33d5d8b3dc85?q=80&w=2000', 
+        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?q=80&w=2000', 
     ];
 
     const WELLBEING_IMAGES = homePageData?.focusBienEtre?.images?.length ? homePageData.focusBienEtre.images : [
-        'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=2000', // Marche Aquatique
+        'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=2000', 
         '/images/imgBank/paddleKayak.jpg',
         '/images/imgBank/paddleGeant.jpg',
     ];
 
     useEffect(() => {
-        const charTimer = setInterval(() => {
-            setCurrentCharIndex((prev) => (prev + 1) % CHAR_IMAGES.length);
-        }, 5000);
-        const glisseTimer = setInterval(() => {
-            setCurrentGlisseIndex((prev) => (prev + 1) % GLISSE_IMAGES.length);
-        }, 5500);
-        const wellbeingTimer = setInterval(() => {
-            setCurrentWellbeingIndex((prev) => (prev + 1) % WELLBEING_IMAGES.length);
-        }, 6000);
+        const heroTimer = setInterval(() => setCurrentHeroIndex(p => (p + 1) % HERO_IMAGES.length), 6000);
+        const charTimer = setInterval(() => setCurrentCharIndex(p => (p + 1) % CHAR_IMAGES.length), 5000);
+        const glisseTimer = setInterval(() => setCurrentGlisseIndex(p => (p + 1) % GLISSE_IMAGES.length), 5500);
+        const wellbeingTimer = setInterval(() => setCurrentWellbeingIndex(p => (p + 1) % WELLBEING_IMAGES.length), 6000);
+
         return () => {
+            clearInterval(heroTimer);
             clearInterval(charTimer);
             clearInterval(glisseTimer);
             clearInterval(wellbeingTimer);
         };
-    }, []);
+    }, [CHAR_IMAGES.length, GLISSE_IMAGES.length, WELLBEING_IMAGES.length]);
 
     // Scroll Parallax for Waves & Photos
     const { scrollY } = useScroll();
@@ -153,31 +288,31 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
     };
 
     useEffect(() => {
-        // GSAP Hero Animations
-        gsap.to('.hero-title', {
-            opacity: 1,
-            y: 0,
-            duration: 1.5,
-            delay: 0.2,
-            ease: 'power4.out'
+        const ctx = gsap.context(() => {
+            gsap.to('.hero-title', {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                delay: 0.2,
+                ease: 'power4.out'
+            });
+
+            gsap.to('.hero-subtitle', {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                delay: 0.8,
+            });
+
+            gsap.to('.hero-btn', {
+                opacity: 1,
+                scale: 1,
+                duration: 1,
+                delay: 1,
+            });
         });
 
-        gsap.to('.hero-subtitle', {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            delay: 0.8,
-        });
-
-        gsap.to('.hero-btn', {
-            opacity: 1,
-            scale: 1,
-            duration: 1,
-            delay: 1,
-        });
-
-        // Sections appear with generic reveal if needed, but campus-card logic is removed 
-        // as it was part of an older design.
+        return () => ctx.revert();
     }, []);
 
     const galleryImages = useMemo(() => {
@@ -193,34 +328,20 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
             <section
                 id="hero"
                 className="relative h-screen w-full flex items-center justify-center overflow-hidden"
-                style={{ perspective: '1500px' }}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={() => setMousePos({ x: 0, y: 0 })}
             >
                 {/* Background: Video or Slideshow */}
                 <div className="absolute inset-0 w-full h-full overflow-hidden bg-abysse">
                     {homePageData?.hero?.videoUrl ? (
                         <YouTubeBackground videoUrl={homePageData.hero.videoUrl} />
                     ) : (
-                        <AnimatePresence mode="popLayout">
-                            <motion.div
-                                key={HERO_IMAGES[currentHeroIndex]}
-                                className="absolute inset-0 w-full h-full"
-                                initial={{ opacity: 0, scale: 1.06 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{
-                                    opacity: { duration: 2.5, ease: "easeInOut" },
-                                    scale: { duration: 15, ease: "easeOut" }
-                                }}
-                                style={{
-                                    backgroundImage: `url('${HERO_IMAGES[currentHeroIndex]}')`,
-                                    backgroundSize: 'cover',
-                                    backgroundPositionX: 'center',
-                                    backgroundPositionY: photoYPos,
-                                }}
+                        HERO_IMAGES.map((img, idx) => (
+                            <HeroCarouselItem 
+                                key={img} 
+                                image={img} 
+                                isActive={idx === currentHeroIndex} 
+                                photoYPos={photoYPos} 
                             />
-                        </AnimatePresence>
+                        ))
                     )}
                 </div>
 
@@ -229,8 +350,6 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
 
                 {/* SEPARATOR : REFINED WAVE (Plus de galbe, sans bouffer le bouton) */}
                 <div className="absolute inset-x-0 bottom-0 pointer-events-none z-10 leading-0 overflow-hidden">
-
-                    {/* Layer 1: Background Wave (Visibilité équilibrée gauche/droite) */}
                     <motion.div
                         className="absolute bottom-0 left-0 w-[200%] h-[150px] md:h-[220px] opacity-40 z-0"
                         style={{ x: waveX1 }}
@@ -240,7 +359,6 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                         </svg>
                     </motion.div>
 
-                    {/* Layer 2: Foreground Wave (Plus de courbe mais contenue) */}
                     <motion.div
                         className="relative w-full h-[140px] md:h-[200px]"
                         style={{ y: waveY2 }}
@@ -251,59 +369,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                     </motion.div>
                 </div>
 
-                {/* Conteneur du Logo avec Tilt 3D */}
-                <div className="relative z-20 w-full flex flex-col items-center justify-center -translate-y-12">
-                    <motion.div
-                        className="relative w-[85vw] h-[40vh] md:w-[60vw] md:h-[50vh] flex items-center justify-center"
-                        animate={{
-                            rotateX: mousePos.y * -15,
-                            rotateY: mousePos.x * 15,
-                        }}
-                        transition={{ type: 'spring', stiffness: 150, damping: 20 }}
-                        style={{
-                            transformStyle: 'preserve-3d',
-                        }}
-                    >
-                        {/* 1. EFFET GLASS : Couche de flou masquée par le logo */}
-                        <div
-                            className="hero-logo-glass-layer logo-drop-shadow"
-                            style={{
-                                maskImage: "url('/images/LogoCNC2S.png')",
-                                WebkitMaskImage: "url('/images/LogoCNC2S.png')"
-                            }}
-                        />
-
-                        {/* 2. REFLET : Effet lumineux dynamique qui suit la souris */}
-                        <motion.div
-                            className="absolute inset-0 pointer-events-none"
-                            animate={{
-                                background: `radial-gradient(circle at ${50 + mousePos.x * 50}% ${50 + mousePos.y * 50}%, rgba(255,255,255,0.4) 0%, transparent 60%)`,
-                            }}
-                            style={{
-                                mixBlendMode: 'overlay',
-                                maskImage: "url('/images/LogoCNC2S.png')",
-                                WebkitMaskImage: "url('/images/LogoCNC2S.png')",
-                                maskSize: 'contain',
-                                maskPosition: 'center',
-                                maskRepeat: 'no-repeat',
-                            }}
-                        />
-                    </motion.div>
-
-                    {/* Texte du Hero */}
-                    <div className="flex flex-col items-center mt-12 hero-subtitle pointer-events-auto opacity-100 text-center">
-                        <RenderText 
-                            content={homePageData?.hero?.title}
-                            className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm"
-                            fallback="Club Nautique de Coutainville"
-                        />
-                        <RenderText 
-                            content={homePageData?.hero?.subtitle}
-                            className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm mt-2 opacity-80"
-                            fallback="Sauvetage et Secourisme"
-                        />
-                    </div>
-                </div>
+                <HeroLogo homePageData={homePageData} />
             </section>
 
             {/* BENTO ACCUEIL — Unifié façon "Centre de Contrôle" (Air & Glass) */}
@@ -514,8 +580,9 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                         <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Expérience CNC</span>
                     </div>
-                    <h2 className="text-3xl md:text-4xl text-abysse">
-                        {homePageData?.spirit?.title || "L'Esprit du Club"} <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise"></span>
+                    <h2 className="text-3xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
+                        {homePageData?.spirit?.titlePart1 || "L'Esprit"} <br className="md:hidden" />
+                        <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">{homePageData?.spirit?.titlePart2 || "du Club."}</span>
                     </h2>
                 </div>
 
@@ -624,246 +691,212 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                     })}
 
                 </div>
-            </section >
+            </section>
 
-            {/* GROUPE FOCUS : Vitesse / Sensations / Équilibre */}
-            <div id="focus">
-                {/* SECTION : FOCUS ACTIVITÉ (Le Char à Voile) */}
-                <section id="vitesse" className="py-12 max-w-[1600px] mx-auto px-6 relative z-10" >
-                    <div className="group relative overflow-hidden rounded-[3rem] bg-abysse shadow-2xl flex flex-col lg:flex-row min-h-[550px]">
-                        {/* Contenu Texte */}
-                        <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-orange-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
-                                    <Zap size={24} fill="currentColor" />
-                                </div>
-                                <div>
-                                    <span className="text-orange-500 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusChar?.tagline || "Activité Phare"}</span>
-                                    <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusChar?.subTagline || "Sensation & Vitesse"}</span>
-                                </div>
-                            </div>
-
-                            <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
-                                {homePageData?.focusChar?.title || "Le Char"} <br />
-                                <span className="text-transparent bg-clip-text bg-linear-to-r from-orange-400 via-orange-500 to-red-600">{homePageData?.focusChar?.highlightSuffix || "à Voile."}</span>
-                            </h2>
-
-                            <RenderText 
-                                content={homePageData?.focusChar?.description}
-                                className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-orange-500/30 pl-8 italic"
-                                fallback="Glissez sur le sable à quelques centimètres du sol. Une expérience unique, propulsée par la seule force du vent sur l'immense plage de Coutainville."
-                            />
-
-                            <div className="flex flex-wrap gap-4 mt-auto">
-                                <Link href={homePageData?.focusChar?.ctaButton?.link || "/activites"} className="inline-flex items-center justify-center px-10 py-4 bg-orange-500 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-orange-600 transition-all shadow-lg group/btn shadow-orange-500/20">
-                                    {homePageData?.focusChar?.ctaButton?.text || "Réserver une séance"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
-                                </Link>
-                                <button 
-                                    onClick={() => setIsCharModalOpen(true)}
-                                    className="inline-flex items-center justify-center px-10 py-4 bg-white/5 border border-white/10 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all backdrop-blur-sm"
-                                >
-                                    {homePageData?.focusChar?.infoButton?.text || "En savoir plus"}
-                                </button>
-                            </div>
+            {/* GROUPE FOCUS : Carrousel style Apple */}
+            <div id="focus" ref={focusSectionRef} className="bg-sky-50 py-12">
+                <section className="relative z-10">
+                    {/* Header */}
+                    <div className="max-w-[1600px] mx-auto px-6 mb-8">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="size-2 rounded-full bg-orange-500 animate-pulse"></div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500">Activités phares</span>
                         </div>
+                        <h2 className="text-3xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
+                            Vibrez au rythme <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">des Marées.</span>
+                        </h2>
+                    </div>
 
-                        {/* Visuel Impactant - Slideshow */}
-                        <div className="flex-1 relative overflow-hidden min-h-[400px] lg:min-h-auto">
-                            <div className="absolute inset-0 z-0">
-                                <AnimatePresence mode="popLayout">
-                                    <motion.img
-                                        key={CHAR_IMAGES[currentCharIndex]}
-                                        src={CHAR_IMAGES[currentCharIndex]}
-                                        initial={{ opacity: 0, scale: 1 }}
-                                        animate={{ opacity: 1, scale: 1.08 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6, ease: "linear" } }}
-                                        className="absolute inset-0 w-full h-full object-cover"
-                                        alt="Pratique du char à voile"
+                    {/* Carousel — overflow-hidden full-width, flex aligné sur max-w-[1600px] mx-auto px-6 */}
+                    <div className="overflow-hidden" onWheel={handleFocusWheel}>
+                        <div className="max-w-[1600px] mx-auto pl-6">
+                        <motion.div
+                            id="focus-slider"
+                            className="flex gap-6 will-change-transform"
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={handleTouchEnd}
+                            style={{
+                                transform: `translateX(${focusX}px)`,
+                                transition: 'transform 0.65s cubic-bezier(0.32, 0.72, 0, 1)',
+                            }}
+                        >
+                            {/* Carte 1 — Char à Voile */}
+                            <div
+                                id="vitesse"
+                                className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-[500px] lg:min-h-[550px]"
+                                style={{ opacity: currentFocusIndex === 0 ? 1 : 0.5, transform: currentFocusIndex === 0 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
+                            >
+                                <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-orange-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                            <Zap size={24} fill="currentColor" />
+                                        </div>
+                                        <div>
+                                            <span className="text-orange-500 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusChar?.tagline || "Activité Phare"}</span>
+                                            <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusChar?.subTagline || "Sensation & Vitesse"}</span>
+                                        </div>
+                                    </div>
+                                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
+                                        {homePageData?.focusChar?.title || "Le Char"} <br />
+                                        <span className="text-transparent bg-clip-text bg-linear-to-r from-orange-400 via-orange-500 to-red-600">{homePageData?.focusChar?.highlightSuffix || "à Voile."}</span>
+                                    </h2>
+                                    <RenderText
+                                        content={homePageData?.focusChar?.description}
+                                        className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-orange-500/30 pl-8 italic"
+                                        fallback="Glissez sur le sable à quelques centimètres du sol. Une expérience unique, propulsée par la seule force du vent sur l'immense plage de Coutainville."
                                     />
-                                </AnimatePresence>
+                                    <div className="flex flex-col sm:flex-row gap-4 mt-auto">
+                                        <Link href={homePageData?.focusChar?.ctaButton?.link || "/activites"} className="inline-flex items-center justify-center px-8 py-5 bg-orange-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-orange-600 transition-all shadow-lg group/btn shadow-orange-500/20">
+                                            {homePageData?.focusChar?.ctaButton?.text || "Réserver une séance"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
+                                        </Link>
+                                        <button onClick={() => setIsCharModalOpen(true)} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                                            {homePageData?.focusChar?.infoButton?.text || "En savoir plus"}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
+                                    <div className="absolute inset-0 z-0">
+                                        <AnimatePresence mode="popLayout">
+                                            <motion.img key={CHAR_IMAGES[currentCharIndex]} src={CHAR_IMAGES[currentCharIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Char à voile" />
+                                        </AnimatePresence>
+                                    </div>
+                                    <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
+                                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
+                                    <div className="absolute bottom-6 right-8 flex gap-2 z-20">
+                                        {CHAR_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentCharIndex ? 'w-8 bg-orange-500' : 'w-2 bg-white/30'}`} />))}
+                                    </div>
+                                    <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                                        <span className="text-orange-500 font-black text-3xl block leading-none mb-1">{homePageData?.focusChar?.badgeValue || "60+"}</span>
+                                        <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusChar?.badgeLabel || "Km/h de sensations pures"}</span>
+                                    </div>
+                                </div>
                             </div>
 
-                            {/* Sharp Vertical Accent */}
-                            <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
-
-                            {/* Mobile Gradient Overlay */}
-                            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
-
-                            {/* Indicateurs Slideshow */}
-                            <div className="absolute bottom-6 right-8 flex gap-2 z-20">
-                                {CHAR_IMAGES.map((_: any, idx: number) => (
-                                    <div
-                                        key={idx}
-                                        className={`h-1 rounded-full transition-all duration-500 ${idx === currentCharIndex ? 'w-8 bg-orange-500' : 'w-2 bg-white/30'}`}
+                            {/* Carte 2 — Glisse Extrême */}
+                            <div
+                                id="adrenaline"
+                                className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row-reverse min-h-[500px] lg:min-h-[550px]"
+                                style={{ opacity: currentFocusIndex === 1 ? 1 : 0.5, transform: currentFocusIndex === 1 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
+                            >
+                                <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-blue-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                            <Wind size={24} fill="currentColor" className="text-blue-500" />
+                                        </div>
+                                        <div>
+                                            <span className="text-blue-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusGlisse?.tagline || "Sensations Fortes"}</span>
+                                            <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusGlisse?.subTagline || "Wing, Kite & Funboard"}</span>
+                                        </div>
+                                    </div>
+                                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
+                                        {homePageData?.focusGlisse?.title || "Glisse"} <br />
+                                        <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 via-indigo-500 to-purple-600">{homePageData?.focusGlisse?.highlightSuffix || "Extrême."}</span>
+                                    </h2>
+                                    <RenderText
+                                        content={homePageData?.focusGlisse?.description}
+                                        className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-blue-500/30 pl-8 italic"
+                                        fallback="Dominez les éléments. Wingfoil, Kitesurf ou Windsurf : repoussez vos limites avec les moniteurs du club sur l'un des meilleurs spots de Normandie."
                                     />
-                                ))}
+                                    <div className="flex flex-col sm:flex-row gap-4 mt-auto">
+                                        <Link href={homePageData?.focusGlisse?.ctaButton?.link || "/activites?cat=Sensations"} className="inline-flex items-center justify-center px-8 py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-blue-500 transition-all shadow-lg group/btn shadow-blue-500/20">
+                                            {homePageData?.focusGlisse?.ctaButton?.text || "Découvrir la glisse"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
+                                        </Link>
+                                        <Link href={homePageData?.focusGlisse?.infoButton?.link || "/le-spot"} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                                            {homePageData?.focusGlisse?.infoButton?.text || "Le Spot"}
+                                        </Link>
+                                    </div>
+                                </div>
+                                <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
+                                    <div className="absolute inset-0 z-0">
+                                        <AnimatePresence mode="popLayout">
+                                            <motion.img key={GLISSE_IMAGES[currentGlisseIndex]} src={GLISSE_IMAGES[currentGlisseIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6.5, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Glisse extrême" />
+                                        </AnimatePresence>
+                                    </div>
+                                    <div className="absolute inset-y-0 right-0 w-px bg-white/10 hidden lg:block z-20"></div>
+                                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
+                                    <div className="absolute bottom-6 left-8 flex gap-2 z-20">
+                                        {GLISSE_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentGlisseIndex ? 'w-8 bg-blue-500' : 'w-2 bg-white/30'}`} />))}
+                                    </div>
+                                    <div className="absolute top-8 left-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                                        <span className="text-blue-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusGlisse?.badgeValue || "Pure"}</span>
+                                        <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusGlisse?.badgeLabel || "Énergie & Adrénaline"}</span>
+                                    </div>
+                                </div>
                             </div>
 
-                            {/* Badge de vitesse stylisé */}
-                            <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
-                                <span className="text-orange-500 font-black text-3xl block leading-none mb-1">{homePageData?.focusChar?.badgeValue || "60+"}</span>
-                                <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusChar?.badgeLabel || "Km/h de sensations pures"}</span>
+                            {/* Carte 3 — Bien-être & Slow Tourisme */}
+                            <div
+                                id="bien-etre"
+                                className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-[500px] lg:min-h-[550px]"
+                                style={{ opacity: currentFocusIndex === 2 ? 1 : 0.5, transform: currentFocusIndex === 2 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
+                            >
+                                <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-emerald-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                            <Waves size={24} className="text-emerald-500" />
+                                        </div>
+                                        <div>
+                                            <span className="text-emerald-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusBienEtre?.tagline || "Slow Tourisme"}</span>
+                                            <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusBienEtre?.subTagline || "Marche Aquatique, Kayak & Paddle"}</span>
+                                        </div>
+                                    </div>
+                                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
+                                        {homePageData?.focusBienEtre?.title || "Bien-être"} <br />
+                                        <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 via-teal-500 to-cyan-600">{homePageData?.focusBienEtre?.highlightSuffix || "& Slow Tourisme."}</span>
+                                    </h2>
+                                    <RenderText
+                                        content={homePageData?.focusBienEtre?.description}
+                                        className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-emerald-500/30 pl-8 italic"
+                                        fallback="Prenez le temps de vivre. Entre marche aquatique revitalisante et balades en kayak ou paddle, découvrez la côte normande au rythme des marées."
+                                    />
+                                    <div className="flex flex-col sm:flex-row gap-4 mt-auto">
+                                        <Link href={homePageData?.focusBienEtre?.ctaButton?.link || "/activites?cat=Bien-être"} className="inline-flex items-center justify-center px-8 py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-emerald-500 transition-all shadow-lg group/btn shadow-emerald-500/20">
+                                            {homePageData?.focusBienEtre?.ctaButton?.text || "S'évader en mer"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
+                                        </Link>
+                                        <Link href={homePageData?.focusBienEtre?.infoButton?.link || "/activites"} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                                            {homePageData?.focusBienEtre?.infoButton?.text || "Voir les tarifs"}
+                                        </Link>
+                                    </div>
+                                </div>
+                                <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
+                                    <div className="absolute inset-0 z-0">
+                                        <AnimatePresence mode="popLayout">
+                                            <motion.img key={WELLBEING_IMAGES[currentWellbeingIndex]} src={WELLBEING_IMAGES[currentWellbeingIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 7, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Bien-être slow tourisme" />
+                                        </AnimatePresence>
+                                    </div>
+                                    <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
+                                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
+                                    <div className="absolute bottom-6 right-8 flex gap-2 z-20">
+                                        {WELLBEING_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentWellbeingIndex ? 'w-8 bg-emerald-500' : 'w-2 bg-white/30'}`} />))}
+                                    </div>
+                                    <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                                        <span className="text-emerald-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusBienEtre?.badgeValue || "100%"}</span>
+                                        <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusBienEtre?.badgeLabel || "Oxygène & Sérénité Locale"}</span>
+                                    </div>
+                                </div>
                             </div>
+                        </motion.div>
                         </div>
                     </div>
-                </section >
 
-                {/* SECTION : FOCUS ACTIVITÉ (La Glisse Extrême) */}
-                <section id="adrenaline" className="py-12 max-w-[1600px] mx-auto px-6 relative z-10" >
-                    <div className="group relative overflow-hidden rounded-[3rem] bg-abysse shadow-2xl flex flex-col lg:flex-row-reverse min-h-[550px]">
-                        {/* Contenu Texte */}
-                        <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-blue-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
-                                    <Wind size={24} fill="currentColor" className="text-blue-500" />
-                                </div>
-                                <div>
-                                    <span className="text-blue-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusGlisse?.tagline || "Sensations Fortes"}</span>
-                                    <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusGlisse?.subTagline || "Wing, Kite & Funboard"}</span>
-                                </div>
-                            </div>
-
-                            <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
-                                {homePageData?.focusGlisse?.title || "Glisse"} <br />
-                                <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 via-indigo-500 to-purple-600">{homePageData?.focusGlisse?.highlightSuffix || "Extrême."}</span>
-                            </h2>
-
-                            <RenderText 
-                                content={homePageData?.focusGlisse?.description}
-                                className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-blue-500/30 pl-8 italic"
-                                fallback="Dominez les éléments. Wingfoil, Kitesurf ou Windsurf : repoussez vos limites avec les moniteurs du club sur l'un des meilleurs spots de Normandie."
-                            />
-
-                            <div className="flex flex-wrap gap-4 mt-auto">
-                                <Link href={homePageData?.focusGlisse?.ctaButton?.link || "/activites?cat=Sensations"} className="inline-flex items-center justify-center px-10 py-4 bg-blue-600 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-blue-500 transition-all shadow-lg group/btn shadow-blue-500/20">
-                                    {homePageData?.focusGlisse?.ctaButton?.text || "Découvrir la glisse"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
-                                </Link>
-                                <Link href={homePageData?.focusGlisse?.infoButton?.link || "/le-spot"} className="inline-flex items-center justify-center px-10 py-4 bg-white/5 border border-white/10 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
-                                    {homePageData?.focusGlisse?.infoButton?.text || "Le Spot"}
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* Visuel Impactant - Slideshow */}
-                        <div className="flex-1 relative overflow-hidden min-h-[400px] lg:min-h-auto">
-                            <div className="absolute inset-0 z-0">
-                                <AnimatePresence mode="popLayout">
-                                    <motion.img
-                                        key={GLISSE_IMAGES[currentGlisseIndex]}
-                                        src={GLISSE_IMAGES[currentGlisseIndex]}
-                                        initial={{ opacity: 0, scale: 1 }}
-                                        animate={{ opacity: 1, scale: 1.08 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6.5, ease: "linear" } }}
-                                        className="absolute inset-0 w-full h-full object-cover"
-                                        alt="Sports de glisse extrême"
-                                    />
-                                </AnimatePresence>
-                            </div>
-
-                            {/* Sharp Vertical Accent */}
-                            <div className="absolute inset-y-0 right-0 w-px bg-white/10 hidden lg:block z-20"></div>
-
-                            {/* Mobile Gradient Overlay */}
-                            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
-
-                            {/* Indicateurs Slideshow */}
-                            <div className="absolute bottom-6 left-8 flex gap-2 z-20">
-                                {GLISSE_IMAGES.map((_: any, idx: number) => (
-                                    <div
-                                        key={idx}
-                                        className={`h-1 rounded-full transition-all duration-500 ${idx === currentGlisseIndex ? 'w-8 bg-blue-500' : 'w-2 bg-white/30'}`}
-                                    />
-                                ))}
-                            </div>
-
-                            {/* Badge technique stylisé */}
-                            <div className="absolute top-8 left-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
-                                <span className="text-blue-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusGlisse?.badgeValue || "Pure"}</span>
-                                <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusGlisse?.badgeLabel || "Énergie & Adrénaline"}</span>
-                            </div>
-                        </div>
+                    {/* Flèches — bottom right, style Apple */}
+                    <div className="max-w-[1600px] mx-auto px-6 mt-5 flex justify-end gap-3">
+                        <button
+                            onClick={() => navigateFocus(Math.max(0, currentFocusIndex - 1))}
+                            disabled={currentFocusIndex === 0}
+                            className="size-11 rounded-full bg-abysse/10 border border-abysse/20 hover:bg-abysse/20 flex items-center justify-center text-abysse disabled:opacity-30 transition-all"
+                        >
+                            <ChevronLeft size={18} />
+                        </button>
+                        <button
+                            onClick={() => navigateFocus(Math.min(2, currentFocusIndex + 1))}
+                            disabled={currentFocusIndex === 2}
+                            className="size-11 rounded-full bg-abysse/10 border border-abysse/20 hover:bg-abysse/20 flex items-center justify-center text-abysse disabled:opacity-30 transition-all"
+                        >
+                            <ChevronRight size={18} />
+                        </button>
                     </div>
-                </section >
-
-                {/* SECTION : FOCUS ACTIVITÉ (Bien-être & Slow Tourisme) */}
-                <section id="bien-etre" className="py-12 max-w-[1600px] mx-auto px-6 relative z-10" >
-                    <div className="group relative overflow-hidden rounded-[3rem] bg-abysse shadow-2xl flex flex-col lg:flex-row min-h-[550px]">
-                        {/* Contenu Texte */}
-                        <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-emerald-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
-                                    <Waves size={24} className="text-emerald-500" />
-                                </div>
-                                <div>
-                                    <span className="text-emerald-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusBienEtre?.tagline || "Slow Tourisme"}</span>
-                                    <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusBienEtre?.subTagline || "Marche Aquatique, Kayak & Paddle"}</span>
-                                </div>
-                            </div>
-
-                            <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
-                                {homePageData?.focusBienEtre?.title || "Bien-être"} <br />
-                                <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 via-teal-500 to-cyan-600">{homePageData?.focusBienEtre?.highlightSuffix || "& Slow Tourisme."}</span>
-                            </h2>
-
-                            <RenderText 
-                                content={homePageData?.focusBienEtre?.description}
-                                className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-emerald-500/30 pl-8 italic"
-                                fallback="Prenez le temps de vivre. Entre marche aquatique revitalisante et balades contemplatives en kayak ou paddle, découvrez la côte normande sous un autre angle, au rythme des marées."
-                            />
-
-                            <div className="flex flex-wrap gap-4 mt-auto">
-                                <Link href={homePageData?.focusBienEtre?.ctaButton?.link || "/activites?cat=Bien-être"} className="inline-flex items-center justify-center px-10 py-4 bg-emerald-600 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-emerald-500 transition-all shadow-lg group/btn shadow-emerald-500/20">
-                                    {homePageData?.focusBienEtre?.ctaButton?.text || "S'évader en mer"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
-                                </Link>
-                                <Link href={homePageData?.focusBienEtre?.infoButton?.link || "/activites"} className="inline-flex items-center justify-center px-10 py-4 bg-white/5 border border-white/10 text-white rounded-full font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
-                                    {homePageData?.focusBienEtre?.infoButton?.text || "Voir les tarifs"}
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* Visuel Impactant - Slideshow */}
-                        <div className="flex-1 relative overflow-hidden min-h-[400px] lg:min-h-auto">
-                            <div className="absolute inset-0 z-0">
-                                <AnimatePresence mode="popLayout">
-                                    <motion.img
-                                        key={WELLBEING_IMAGES[currentWellbeingIndex]}
-                                        src={WELLBEING_IMAGES[currentWellbeingIndex]}
-                                        initial={{ opacity: 0, scale: 1 }}
-                                        animate={{ opacity: 1, scale: 1.08 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 7, ease: "linear" } }}
-                                        className="absolute inset-0 w-full h-full object-cover"
-                                        alt="Bien-être et slow tourisme au CNC"
-                                    />
-                                </AnimatePresence>
-                            </div>
-
-                            {/* Sharp Vertical Accent */}
-                            <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
-
-                            {/* Mobile Gradient Overlay */}
-                            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
-
-                            {/* Indicateurs Slideshow */}
-                            <div className="absolute bottom-6 right-8 flex gap-2 z-20">
-                                {WELLBEING_IMAGES.map((_: any, idx: number) => (
-                                    <div
-                                        key={idx}
-                                        className={`h-1 rounded-full transition-all duration-500 ${idx === currentWellbeingIndex ? 'w-8 bg-emerald-500' : 'w-2 bg-white/30'}`}
-                                    />
-                                ))}
-                            </div>
-
-                            {/* Badge oxygène stylisé */}
-                            <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
-                                <span className="text-emerald-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusBienEtre?.badgeValue || "100%"}</span>
-                                <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusBienEtre?.badgeLabel || "Oxygène & Sérénité Locale"}</span>
-                            </div>
-                        </div>
-                    </div>
-                </section >
+                </section>
             </div>
 
             {/* --- SECTION : AGENDA / ÉVÉNEMENTS --- */}
@@ -882,7 +915,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                 <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
                                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-turquoise">Le Calendrier</span>
                             </div>
-                            <h2 className="text-4xl md:text-6xl font-black text-abysse uppercase tracking-tighter italic leading-[0.9] mb-8">
+                            <h2 className="text-3xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none mb-6">
                                 Prochains <br />
                                 <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">Événements.</span>
                             </h2>
@@ -971,14 +1004,14 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
             </section>
 
             {/* --- PILLAR STORY --- */}
-            < PillarStory campusData={homePageData?.campus} />
+            <PillarStory campusData={homePageData?.campus} />
 
             {/* --- SECTION : MINI-JEU PÉDAGOGIQUE (desktop only) --- */}
-            < section id="pedagogie" className="hidden md:block py-24 bg-abysse relative z-10" >
+            <section id="pedagogie" className="hidden md:block py-24 bg-abysse relative z-10">
                 <div className="max-w-[1600px] mx-auto px-6">
                     <GamesSlideshow />
                 </div>
-            </section >
+            </section>
 
             {/* --- SECTION : LE DICO DES PARENTS --- */}
             <section id="dico-parents" className="py-24 bg-slate-50 relative z-10">
@@ -998,7 +1031,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                         <div className="size-2 rounded-full bg-yellow-400"></div>
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Style & Souvenirs</span>
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic leading-none">
+                    <h2 className="text-3xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
                         {homePageData?.immersion?.titlePart1 || homePageData?.immersion?.titlePart2 ? (
                             <>{homePageData.immersion.titlePart1} <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-yellow-500">{homePageData.immersion.titlePart2}</span></>
                         ) : (
@@ -1190,15 +1223,15 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
             </section>
 
             {/* --- SECTION : PARTENAIRES --- */}
-            <section id="reseau" className="py-24 bg-slate-50 border-t border-slate-100" >
+            <section id="reseau" className="py-24 bg-slate-50 border-t border-slate-100">
                 <div className="max-w-[1600px] mx-auto px-6">
                     <div className="mb-16 text-center">
                         <div className="flex items-center justify-center gap-3 mb-3">
                             <div className="size-1.5 rounded-full bg-slate-300"></div>
                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Réseau & Soutiens</span>
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic">
-                            Nos <span className="text-turquoise">Partenaires</span>
+                        <h2 className="text-3xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
+                            Nos <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">Partenaires.</span>
                         </h2>
                     </div>
 
@@ -1230,7 +1263,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
 
 
             {/* --- PHOTO WALL GALLERY --- */}
-            < PhotoWallGallery
+            <PhotoWallGallery
                 isOpen={isGalleryOpen}
                 onClose={() => setIsGalleryOpen(false)}
                 images={galleryImages}

@@ -98,6 +98,7 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       .catch(e => console.warn('Direct status fetch failed:', e));
 
     const weatherPromise = fetchRealtimeWeather()
+      .catch(() => null)
       .then(async (data) => {
         if (!data) return;
         
@@ -135,6 +136,7 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     const expertWeatherPromise = fetch('/api/weather-expert')
       .then(r => r.json())
+      .catch(() => null)
       .then(expertData => {
         if (!expertData || expertData.error) return;
         const now = new Date();
@@ -178,7 +180,7 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         }
       });
 
-    await Promise.all([directPromise, weatherPromise, expertWeatherPromise]);
+    await Promise.all([directPromise, weatherPromise, expertWeatherPromise]).catch(() => {});
     setIsLoading(false);
   }, []);
 

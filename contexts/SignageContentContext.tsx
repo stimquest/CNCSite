@@ -118,6 +118,11 @@ export const SignageContentProvider: React.FC<{ children: React.ReactNode }> = (
               else if (futureWind < currentWind - 2) trend = 'falling';
             }
 
+            // Wave data (hourly)
+            const waveHeight = expertData.waves?.hourly?.wave_height?.[hourIdx];
+            const waveDirDeg = expertData.waves?.hourly?.wave_direction?.[hourIdx];
+            const wavePeriod = expertData.waves?.hourly?.wave_period?.[hourIdx];
+
             setWeather(prev => ({
               ...prev,
               temp: airTemp ? Math.round(airTemp) : prev.temp,
@@ -129,6 +134,15 @@ export const SignageContentProvider: React.FC<{ children: React.ReactNode }> = (
               windBearing: currentDirDeg,
               trend,
               weatherCode: expertData.weather?.daily?.weather_code?.[0],
+              waveHeight: waveHeight != null ? Math.round(waveHeight * 10) / 10 : prev.waveHeight,
+              waveDirection: waveDirDeg != null ? getDir(waveDirDeg) : prev.waveDirection,
+              wavePeriod: wavePeriod != null ? Math.round(wavePeriod) : prev.wavePeriod,
+              sunrise: expertData.weather?.daily?.sunrise?.[0]
+                ? new Date(expertData.weather.daily.sunrise[0]).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+                : prev.sunrise,
+              sunset: expertData.weather?.daily?.sunset?.[0]
+                ? new Date(expertData.weather.daily.sunset[0]).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+                : prev.sunset,
             }));
           })
           .catch(e => console.error('Signage expert weather fetch failed', e)),

@@ -100,6 +100,9 @@ export const queries = {
     "souvenirs": souvenirs { title, highlightText, description, "items": items[] { "image": image.asset->url, title, date, decade } },
     cta
   }`,
+  homeAgenda: `*[_type == "clubPage"][0].agenda.events[] { 
+    title, startDate, badge, time, description, "image": image.asset->url 
+  }`,
   homePage: `*[_type == "homePage"][0] {
     "hero": { "title": heroTitle, "subtitle": heroSubtitle, "images": heroImages[].asset->url, "videoUrl": heroVideoUrl, "spotImage": spotImage.asset->url },
     "spirit": { "title": spiritTitle, "message": spiritMessage, "description": spiritDescription, "cards": spiritCards[] { tag, title, description, "image": image.asset->url, link, buttonText, iconName, colorTheme } },

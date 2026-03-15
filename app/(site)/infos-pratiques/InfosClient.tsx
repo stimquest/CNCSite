@@ -243,7 +243,7 @@ const PricingWidget: React.FC<{ data?: InfosData['pricing'] }> = ({ data }) => {
     ];
 
     return (
-        <section id="pricing" className="border-t border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(252,249,244,0.86))] py-[4.5rem]">
+        <section id="pricing" className="border-t border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(252,249,244,0.86))] py-18">
             <div className="max-w-[1400px] mx-auto px-6 w-full">
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                     <div className="max-w-xl">

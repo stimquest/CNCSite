@@ -454,7 +454,7 @@ export const SailingSimulator: React.FC = () => {
         <div className="max-w-[1360px] w-full mx-auto bg-white rounded-[3rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col lg:flex-row border border-slate-100">
 
             {/* LEFT: Compass Area */}
-            <div className="p-8 bg-slate-50 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-slate-200 min-h-[425px] relative">
+            <div className="p-5 bg-slate-50 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-slate-200 min-h-[360px] relative">
 
                 {/* Progress Dots */}
                 <div className={`absolute top-8 flex gap-3 transition-opacity duration-500 ${progressDotsOpacity}`}>
@@ -474,7 +474,7 @@ export const SailingSimulator: React.FC = () => {
                 </div>
 
                 {/* Mode Switch */}
-                <div className="mb-14 flex bg-slate-200 p-1 rounded-2xl z-20 relative">
+                <div className="mb-6 flex bg-slate-200 p-1 rounded-2xl z-20 relative">
                     <button
                         onClick={() => setMode('discovery')}
                         className={`px-6 py-2 rounded-xl font-bold text-sm transition-all duration-300 ${currentMode === 'discovery'
@@ -573,10 +573,10 @@ export const SailingSimulator: React.FC = () => {
             </div>
 
             {/* RIGHT: Info Panel */}
-            <div className="p-8 lg:p-10 flex-1 flex flex-col justify-between bg-white relative">
+            <div className="p-6 lg:p-8 flex-1 flex flex-col justify-between bg-white relative">
                 <div>
                     {/* Status Row */}
-                    <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center justify-between mb-4">
                         <span className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-[0.2em] transition-colors ${amureTagClass}`}>
                             {amureTagText}
                         </span>
@@ -591,38 +591,37 @@ export const SailingSimulator: React.FC = () => {
                     )}
 
                     {/* Allure Name */}
-                    <h1 className="text-6xl font-black text-slate-900 mb-6 tracking-tighter leading-[0.9]">
+                    <h1 className="text-3xl font-black text-slate-900 mb-3 tracking-tighter leading-[0.9]">
                         {allureName}
                     </h1>
 
                     {/* Description */}
-                    <div className="space-y-8">
-                        <p className="text-slate-500 leading-snug text-2xl font-medium tracking-tight">
+                    <div className="space-y-4">
+                        <p className="text-slate-500 leading-snug text-base font-medium tracking-tight">
                             {allureDesc}
                         </p>
                     </div>
                 </div>
 
                 {/* Bottom Section */}
-                <div className="mt-12 space-y-4">
+                <div className="mt-6 space-y-3">
                     {/* Coach Card */}
-                    <div className={`relative flex items-center gap-6 ${adviceCardBg} p-6 pl-16 rounded-[2rem] border border-slate-100 shadow-inner transition-all duration-300 ${isShaking ? 'animate-shake' : ''}`}>
-                        <div className="absolute -top-6 -left-4 w-24 h-24 rounded-2xl bg-blue-600 shrink-0 overflow-hidden shadow-xl border-4 border-white transform -rotate-6 z-10">
-                            <Image src="/images/Games/rayan.png" alt="Coach" width={96} height={96} className="w-full h-full object-cover" quality={100} />
+                    <div className={`relative flex items-center gap-4 ${adviceCardBg} p-4 pl-12 rounded-2xl border border-slate-100 shadow-inner transition-all duration-300 ${isShaking ? 'animate-shake' : ''}`}>
+                        <div className="absolute -top-4 -left-3 w-16 h-16 rounded-xl bg-blue-600 shrink-0 overflow-hidden shadow-xl border-4 border-white transform -rotate-6 z-10">
+                            <Image src="/images/Games/rayan.png" alt="Coach" width={64} height={64} className="w-full h-full object-cover" quality={100} />
                         </div>
-                        <div className="flex-1 ml-12">
-                            <div className="h-4 w-px bg-white/20 mx-2"></div>
-                            <p className="text-xs text-blue-600 uppercase font-black tracking-widest mb-1">Coach nautique :</p>
-                            <p className="text-slate-800 font-bold text-lg leading-tight italic transition-all duration-300">&quot;{coachAdvice}&quot;</p>
+                        <div className="flex-1 ml-8">
+                            <p className="text-xs text-blue-600 uppercase font-black tracking-widest mb-0.5">Coach nautique :</p>
+                            <p className="text-slate-800 font-bold text-sm leading-tight italic transition-all duration-300">&quot;{coachAdvice}&quot;</p>
                         </div>
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex gap-4">
+                    <div className="flex gap-3">
                         {showVerifyBtn && (
                             <button
                                 onClick={verifyChoice}
-                                className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-black transition-all active:scale-95 shadow-xl"
+                                className="flex-1 bg-slate-900 text-white py-3 rounded-xl font-black text-sm hover:bg-black transition-all active:scale-95 shadow-xl"
                             >
                                 VÉRIFIER LA POSITION
                             </button>
@@ -630,7 +629,7 @@ export const SailingSimulator: React.FC = () => {
                         {showNextBtn && (
                             <button
                                 onClick={handleNextClick}
-                                className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all shadow-xl"
+                                className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-black text-sm hover:bg-blue-700 transition-all shadow-xl"
                             >
                                 {nextBtnText}
                             </button>

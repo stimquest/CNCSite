@@ -132,7 +132,7 @@ const PillarStory = ({ campusData }: PillarStoryProps) => {
                         <div className="size-2 rounded-full bg-turquoise"></div>
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{campusData?.tagline || "Campus Nautique"}</span>
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic leading-none">
+                    <h2 className="text-3xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
                         {campusData?.titlePart1 || "Plus qu'un Club,"} <br className="md:hidden" />
                         <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">{campusData?.titlePart2 || "une Institution."}</span>
                     </h2>
