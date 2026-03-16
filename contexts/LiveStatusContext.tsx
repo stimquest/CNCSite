@@ -39,34 +39,34 @@ interface LiveStatusState {
 
 const LiveStatusContext = createContext<LiveStatusState | undefined>(undefined);
 
-export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const LiveStatusProvider: React.FC<{ children: React.ReactNode; initialData?: any }> = ({ children, initialData }) => {
   const [weather, setWeather] = useState<WeatherData>(MOCK_WEATHER);
   const [tides, setTides] = useState<TideData[]>([]);
-  const [spotStatus, setSpotStatus] = useState<SpotStatus>(CURRENT_STATUS);
-  const [statusMessage, setStatusMessage] = useState<string>(STATUS_MESSAGE);
+  const [spotStatus, setSpotStatus] = useState<SpotStatus>(initialData?.spotStatus || CURRENT_STATUS);
+  const [statusMessage, setStatusMessage] = useState<string>(initialData?.statusMessage || STATUS_MESSAGE);
 
-  const [charStatus, setCharStatus] = useState<SpotStatus>(SpotStatus.OPEN);
-  const [charMessage, setCharMessage] = useState('');
-  const [charTags, setCharTags] = useState<string[]>([]);
-  const [marcheStatus, setMarcheStatus] = useState<SpotStatus>(SpotStatus.OPEN);
-  const [marcheMessage, setMarcheMessage] = useState('');
-  const [marcheTags, setMarcheTags] = useState<string[]>([]);
-  const [nautiqueStatus, setNautiqueStatus] = useState<SpotStatus>(SpotStatus.OPEN);
-  const [nautiqueMessage, setNautiqueMessage] = useState('');
-  const [nautiqueTags, setNautiqueTags] = useState<string[]>([]);
+  const [charStatus, setCharStatus] = useState<SpotStatus>(initialData?.charStatus || SpotStatus.OPEN);
+  const [charMessage, setCharMessage] = useState(initialData?.charMessage || '');
+  const [charTags, setCharTags] = useState<string[]>(initialData?.charTags || []);
+  const [marcheStatus, setMarcheStatus] = useState<SpotStatus>(initialData?.marcheStatus || SpotStatus.OPEN);
+  const [marcheMessage, setMarcheMessage] = useState(initialData?.marcheMessage || '');
+  const [marcheTags, setMarcheTags] = useState<string[]>(initialData?.marcheTags || []);
+  const [nautiqueStatus, setNautiqueStatus] = useState<SpotStatus>(initialData?.nautiqueStatus || SpotStatus.OPEN);
+  const [nautiqueMessage, setNautiqueMessage] = useState(initialData?.nautiqueMessage || '');
+  const [nautiqueTags, setNautiqueTags] = useState<string[]>(initialData?.nautiqueTags || []);
 
-  const [stagesMiniMoussesStatus, setStagesMiniMoussesStatus] = useState<SpotStatus>(SpotStatus.OPEN);
-  const [stagesMiniMoussesMessage, setStagesMiniMoussesMessage] = useState('');
-  const [stagesMoussaillonsStatus, setStagesMoussaillonsStatus] = useState<SpotStatus>(SpotStatus.OPEN);
-  const [stagesMoussaillonsMessage, setStagesMoussaillonsMessage] = useState('');
-  const [stagesInitiationStatus, setStagesInitiationStatus] = useState<SpotStatus>(SpotStatus.OPEN);
-  const [stagesInitiationMessage, setStagesInitiationMessage] = useState('');
-  const [stagesPerfStatus, setStagesPerfStatus] = useState<SpotStatus>(SpotStatus.OPEN);
-  const [stagesPerfMessage, setStagesPerfMessage] = useState('');
-  
-  const [lastPublishedAt, setLastPublishedAt] = useState<string | null>(null);
-  const [lastConfirmedAt, setLastConfirmedAt] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [stagesMiniMoussesStatus, setStagesMiniMoussesStatus] = useState<SpotStatus>(initialData?.stagesMiniMoussesStatus || SpotStatus.OPEN);
+  const [stagesMiniMoussesMessage, setStagesMiniMoussesMessage] = useState(initialData?.stagesMiniMoussesMessage || '');
+  const [stagesMoussaillonsStatus, setStagesMoussaillonsStatus] = useState<SpotStatus>(initialData?.stagesMoussaillonsStatus || SpotStatus.OPEN);
+  const [stagesMoussaillonsMessage, setStagesMoussaillonsMessage] = useState(initialData?.stagesMoussaillonsMessage || '');
+  const [stagesInitiationStatus, setStagesInitiationStatus] = useState<SpotStatus>(initialData?.stagesInitiationStatus || SpotStatus.OPEN);
+  const [stagesInitiationMessage, setStagesInitiationMessage] = useState(initialData?.stagesInitiationMessage || '');
+  const [stagesPerfStatus, setStagesPerfStatus] = useState<SpotStatus>(initialData?.stagesPerfStatus || SpotStatus.OPEN);
+  const [stagesPerfMessage, setStagesPerfMessage] = useState(initialData?.stagesPerfMessage || '');
+
+  const [lastPublishedAt, setLastPublishedAt] = useState<string | null>(initialData?.lastPublishedAt || null);
+  const [lastConfirmedAt, setLastConfirmedAt] = useState<string | null>(initialData?.lastConfirmedAt || null);
+  const [isLoading, setIsLoading] = useState<boolean>(!initialData);
 
   const refreshData = useCallback(async () => {
     setIsLoading(true);

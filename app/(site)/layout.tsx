@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Outfit, Syncopate, Shrikhand } from 'next/font/google';
 import '../globals.css';
 
+import { client } from '@/lib/sanity';
 import { LiveStatusProvider } from '@/contexts/LiveStatusContext';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -81,11 +82,29 @@ const jsonLd = {
   ],
 };
 
-export default function SiteLayout({
+export const revalidate = 0;
+
+export default async function SiteLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const spotSettings = await client.fetch(
+    `*[_type == "spotSettings" && _id == "singleton-spot-settings"][0] {
+      spotStatus, statusMessage,
+      charStatus, charMessage, charTags,
+      marcheStatus, marcheMessage, marcheTags,
+      nautiqueStatus, nautiqueMessage, nautiqueTags,
+      stagesMiniMoussesStatus, stagesMiniMoussesMessage,
+      stagesMoussaillonsStatus, stagesMoussaillonsMessage,
+      stagesInitiationStatus, stagesInitiationMessage,
+      stagesPerfStatus, stagesPerfMessage,
+      lastPublishedAt, lastConfirmedAt
+    }`,
+    {},
+    { useCdn: false, cache: 'no-store' as RequestCache }
+  ).catch(() => null);
+
   return (
     <>
       <script
@@ -93,7 +112,7 @@ export default function SiteLayout({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className={`${outfit.variable} ${syncopate.variable} ${shrikhand.variable} font-sans text-abysse antialiased selection:bg-turquoise selection:text-white`}>
-          <LiveStatusProvider>
+          <LiveStatusProvider initialData={spotSettings}>
             <SmoothScroll>
               <div className="min-h-screen flex flex-col">
                 <Header />
