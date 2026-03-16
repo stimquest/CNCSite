@@ -34,8 +34,11 @@ export async function GET() {
         return NextResponse.json(data, {
             headers: {
                 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+                'Vercel-CDN-Cache-Control': 'no-store',
+                'CDN-Cache-Control': 'no-store',
+                'Surrogate-Control': 'no-store',
                 'Expires': '0',
-                'Surrogate-Control': 'no-store'
+                'Pragma': 'no-cache'
             }
         });
     } catch (error: any) {

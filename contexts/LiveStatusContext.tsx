@@ -71,7 +71,7 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const refreshData = useCallback(async () => {
     setIsLoading(true);
 
-    const directPromise = fetch('/api/cockpit/direct', { cache: 'no-store' })
+    const directPromise = fetch(`/api/cockpit/direct?t=${Date.now()}`, { cache: 'no-store' })
       .then(async res => {
         if (!res.ok) return null;
         const contentType = res.headers.get('content-type');
@@ -98,6 +98,15 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           if (data.stagesPerfMessage !== undefined) setStagesPerfMessage(data.stagesPerfMessage);
           if (data.lastPublishedAt) setLastPublishedAt(data.lastPublishedAt);
           if (data.lastConfirmedAt) setLastConfirmedAt(data.lastConfirmedAt);
+          
+          // Sync all details
+          if (data.charMessage !== undefined) setCharMessage(data.charMessage);
+          if (data.marcheMessage !== undefined) setMarcheMessage(data.marcheMessage);
+          if (data.nautiqueMessage !== undefined) setNautiqueMessage(data.nautiqueMessage);
+          if (data.stagesMiniMoussesMessage !== undefined) setStagesMiniMoussesMessage(data.stagesMiniMoussesMessage);
+          if (data.stagesMoussaillonsMessage !== undefined) setStagesMoussaillonsMessage(data.stagesMoussaillonsMessage);
+          if (data.stagesInitiationMessage !== undefined) setStagesInitiationMessage(data.stagesInitiationMessage);
+          if (data.stagesPerfMessage !== undefined) setStagesPerfMessage(data.stagesPerfMessage);
         }
       })
       .catch(() => {
@@ -110,7 +119,7 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (!data) return;
         
         try {
-          const tideRes = await fetch('/api/tides');
+          const tideRes = await fetch(`/api/tides?t=${Date.now()}`);
           if (!tideRes.ok) return;
           const contentType = tideRes.headers.get('content-type');
           if (!contentType || !contentType.includes('application/json')) return;
@@ -143,7 +152,7 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         }
       });
 
-    const expertWeatherPromise = fetch('/api/weather-expert')
+    const expertWeatherPromise = fetch(`/api/weather-expert?t=${Date.now()}`)
       .then(async r => {
         if (!r.ok) return null;
         const ct = r.headers.get('content-type');
@@ -206,7 +215,7 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (interval) clearInterval(interval);
       interval = setInterval(() => {
         if (document.visibilityState === 'visible') {
-          fetch('/api/cockpit/direct', { cache: 'no-store' })
+          fetch(`/api/cockpit/direct?t=${Date.now()}`, { cache: 'no-store' })
             .then(async res => {
               if (!res.ok) return null;
               const ct = res.headers.get('content-type');
@@ -226,6 +235,15 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 if (data.stagesPerfStatus) setStagesPerfStatus(data.stagesPerfStatus);
                 if (data.lastPublishedAt) setLastPublishedAt(data.lastPublishedAt);
                 if (data.lastConfirmedAt) setLastConfirmedAt(data.lastConfirmedAt);
+                
+                // CRITIQUE : Sync Messages in polling
+                if (data.charMessage !== undefined) setCharMessage(data.charMessage);
+                if (data.marcheMessage !== undefined) setMarcheMessage(data.marcheMessage);
+                if (data.nautiqueMessage !== undefined) setNautiqueMessage(data.nautiqueMessage);
+                if (data.stagesMiniMoussesMessage !== undefined) setStagesMiniMoussesMessage(data.stagesMiniMoussesMessage);
+                if (data.stagesMoussaillonsMessage !== undefined) setStagesMoussaillonsMessage(data.stagesMoussaillonsMessage);
+                if (data.stagesInitiationMessage !== undefined) setStagesInitiationMessage(data.stagesInitiationMessage);
+                if (data.stagesPerfMessage !== undefined) setStagesPerfMessage(data.stagesPerfMessage);
               }
             }).catch(() => {});
         }
