@@ -61,20 +61,20 @@ export async function POST(req: Request) {
         const targetId = settings?._id || SINGLETON_ID;
 
         if (type === 'PATCH') {
-            await serverClient.patch(targetId).set({
-                ...patch,
-                lastPublishedAt: new Date().toISOString()
-            }).commit();
+            await serverClient.transaction()
+                .createIfNotExists({ _id: targetId, _type: 'spotSettings' })
+                .patch(targetId, p => p.set({ ...patch, lastPublishedAt: new Date().toISOString() }))
+                .commit();
             revalidatePath('/');
             revalidatePath('/fil-info');
             return NextResponse.json({ success: true });
         }
 
         if (type === 'CONFIRM') {
-            // Chef de base confirms all is OK without changing any status
-            await serverClient.patch(targetId).set({
-                lastConfirmedAt: new Date().toISOString()
-            }).commit();
+            await serverClient.transaction()
+                .createIfNotExists({ _id: targetId, _type: 'spotSettings' })
+                .patch(targetId, p => p.set({ lastConfirmedAt: new Date().toISOString() }))
+                .commit();
             revalidatePath('/');
             revalidatePath('/fil-info');
             return NextResponse.json({ success: true });
