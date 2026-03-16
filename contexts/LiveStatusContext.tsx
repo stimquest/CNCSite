@@ -109,8 +109,8 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           if (data.stagesPerfMessage !== undefined) setStagesPerfMessage(data.stagesPerfMessage);
         }
       })
-      .catch(() => {
-        // Silencieusement ignoré pour éviter de polluer la console avec des erreurs de dev ou de proxy
+      .catch((err) => {
+        console.error('[LiveStatus] Erreur fetch cockpit/direct:', err);
       });
 
     const weatherPromise = fetchRealtimeWeather()

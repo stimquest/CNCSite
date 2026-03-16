@@ -12,7 +12,7 @@ const SINGLETON_ID = 'singleton-spot-settings';
 export async function GET() {
     try {
         const data = await client.fetch(
-            `*[_type == "spotSettings" && !(_id in path('drafts.**'))][0] {
+            `*[_type == "spotSettings" && !(_id in path('drafts.**'))] | order(_updatedAt desc)[0] {
                 spotStatus, statusMessage,
                 charStatus, charMessage, charTags,
                 marcheStatus, marcheMessage, marcheTags,
@@ -24,9 +24,9 @@ export async function GET() {
                 lastPublishedAt, lastConfirmedAt, planningsLastUpdatedAt
             }`,
             {},
-            { 
+            {
                 useCdn: false,
-                next: { revalidate: 0 }
+                cache: 'no-store' as RequestCache,
             }
         );
         if (!data) return NextResponse.json({ error: 'Data not found' }, { status: 404 });
@@ -54,9 +54,9 @@ export async function POST(req: Request) {
 
         // On récupère d'abord l'ID réel du document pour être sûr de patcher le bon
         const settings = await client.fetch(
-            `*[_type == "spotSettings" && !(_id in path('drafts.**'))][0] { _id }`, 
-            {}, 
-            { useCdn: false, next: { revalidate: 0 } }
+            `*[_type == "spotSettings" && !(_id in path('drafts.**'))] | order(_updatedAt desc)[0] { _id }`,
+            {},
+            { useCdn: false, cache: 'no-store' as RequestCache }
         );
         const targetId = settings?._id || SINGLETON_ID;
 
