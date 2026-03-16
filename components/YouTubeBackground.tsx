@@ -83,8 +83,8 @@ export const YouTubeBackground: React.FC<YouTubeBackgroundProps> = ({ videoUrl }
             {iframeLoaded && (
                 <iframe
                     src={embedUrl}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] md:w-[180%] md:h-[180%]"
-                    style={{ border: 0, opacity: 1 }}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550%] h-[120%] md:w-[130%] md:h-[130%] min-h-full min-w-full scale-110"
+                    style={{ border: 0, opacity: 1, pointerEvents: 'none' }}
                     allow="autoplay; encrypted-media"
                     allowFullScreen={false}
                     tabIndex={-1}

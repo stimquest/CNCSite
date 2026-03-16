@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, ReactNode, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import Lenis from "@studio-freight/lenis";
+import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 

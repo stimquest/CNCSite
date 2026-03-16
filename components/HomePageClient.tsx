@@ -102,14 +102,14 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
 
     return (
         <div 
-            className="absolute inset-x-0 top-0 h-screen z-20 flex flex-col items-center justify-center -translate-y-12"
+            className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6"
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setMousePos({ x: 0, y: 0 })}
             style={{ perspective: '1500px' }}
         >
             {/* Tilted Logo */}
             <motion.div
-                className="relative w-[85vw] h-[40vh] md:w-[60vw] md:h-[50vh] flex items-center justify-center"
+                className="relative w-[85vw] h-[35vh] md:w-[60vw] md:h-[50vh] flex items-center justify-center"
                 animate={{
                     rotateX: mousePos.y * -15,
                     rotateY: mousePos.x * 15,
@@ -133,15 +133,16 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
                         mixBlendMode: 'overlay',
                         maskImage: "url('/images/LogoCNC2S.png')",
                         WebkitMaskImage: "url('/images/LogoCNC2S.png')",
-                        maskSize: 'contain',
                         maskPosition: 'center',
                         maskRepeat: 'no-repeat',
+                        maskSize: 'contain',
+                        WebkitMaskSize: 'contain'
                     }}
                 />
             </motion.div>
 
             {/* Static Text - Now properly positioned under the logo */}
-            <div className="flex flex-col items-center mt-12 hero-subtitle pointer-events-none text-center">
+            <div className="flex flex-col items-center mt-8 md:mt-12 hero-subtitle pointer-events-none text-center">
                 <RenderText 
                     content={homePageData?.hero?.title}
                     className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm"
@@ -327,7 +328,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
             {/* HERO SECTION - LOGO GLASS EFFECT */}
             <section
                 id="hero"
-                className="relative h-screen w-full flex items-center justify-center overflow-hidden"
+                className="relative h-[100svh] w-full flex items-center justify-center overflow-hidden"
             >
                 {/* Background: Video or Slideshow */}
                 <div className="absolute inset-0 w-full h-full overflow-hidden bg-abysse">
