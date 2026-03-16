@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
 import { client } from '@/lib/sanity';
@@ -21,6 +22,9 @@ export async function POST(req: Request) {
 
         if (type === 'PATCH') {
             await serverClient.patch(_id).set(patch).commit();
+            revalidatePath('/');
+            revalidatePath('/fil-info');
+            revalidatePath('/cockpit');
             return NextResponse.json({ success: true });
         }
 
@@ -29,6 +33,8 @@ export async function POST(req: Request) {
                 _type: 'infoMessage',
                 ...patch
             });
+            revalidatePath('/');
+            revalidatePath('/fil-info');
             return NextResponse.json({ success: true, id: result._id });
         }
 
@@ -45,7 +51,9 @@ export async function POST(req: Request) {
             if (touchTimestamp) {
                 await touchPlanningsTimestamp(serverClient);
             }
-
+            revalidatePath('/');
+            revalidatePath('/plannings');
+            revalidatePath('/activites');
             return NextResponse.json({ success: true, id: result._id });
         }
 
@@ -65,7 +73,9 @@ export async function POST(req: Request) {
             if (touchTimestamp) {
                 await touchPlanningsTimestamp(serverClient);
             }
-
+            revalidatePath('/');
+            revalidatePath('/plannings');
+            revalidatePath('/activites');
             return NextResponse.json({ success: true });
         }
 

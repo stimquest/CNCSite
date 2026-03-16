@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 
-// Document types that should trigger a /llms.txt refresh
-const LLM_REVALIDATE_TYPES = new Set([
+// Document types that should trigger a revalidation of the homepage/site
+const SITE_REVALIDATE_TYPES = new Set([
     'weeklyPlanning',
     'planningCharAVoile',
     'planningMarche',
     'activity',
     'spotSettings',
+    'homePage',
+    'news',
+    'clubPage',
+    'infoMessage',
+    'signageSlide',
 ]);
 
 export async function POST(req: Request) {
@@ -33,10 +38,19 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { _id, _type } = body;
 
-        // 2. Revalidation /llms.txt si le document est lié aux plannings ou activités
-        if (_type && LLM_REVALIDATE_TYPES.has(_type)) {
+        // 2. Revalidation
+        if (_type && SITE_REVALIDATE_TYPES.has(_type)) {
+            revalidatePath('/');
             revalidatePath('/llms.txt');
-            console.log(`[Webhook] Revalidated /llms.txt for _type="${_type}" (_id=${_id})`);
+            revalidatePath('/fil-info');
+            revalidatePath('/cockpit');
+            
+            // Revalidate some specific paths
+            if (_type === 'activity') revalidatePath('/activites');
+            if (_type === 'weeklyPlanning') revalidatePath('/plannings');
+            if (_type === 'signageSlide') revalidatePath('/digital-signage');
+            
+            console.log(`[Webhook] Revalidated site for _type="${_type}" (_id=${_id})`);
         }
 
         return NextResponse.json({ message: 'Webhook processed', _type, _id });
