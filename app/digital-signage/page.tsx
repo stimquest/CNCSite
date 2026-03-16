@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSignageContent } from '@/contexts/SignageContentContext';
 import { SignageAromeTable } from '@/components/SignageAromeTable';
+import { SignageLogo3D } from '@/components/SignageLogo3D';
+import { SignageAgendaSlide } from '@/components/SignageAgendaSlide';
 import {
   Wind, Anchor, X, QrCode, Waves, Thermometer, MapPin, Info,
   TrendingUp, TrendingDown, Minus, ArrowUp, ArrowDown, Sunrise, Sunset
@@ -183,6 +185,53 @@ const SignageSidebar: React.FC = () => {
   );
 };
 
+// ── Weather Slide ─────────────────────────────────────────────────────────────
+const WeatherSlide: React.FC = () => {
+  // Prochains événements = slides PROMO actives
+  return (
+    <div className="h-full flex flex-col animate-in fade-in duration-700 overflow-hidden">
+
+      {/* ── Logo 3D ── */}
+      <div className="shrink-0 mx-6 mt-4 mb-0 relative" style={{ height: '45%' }}>
+        {/* Glow ambiant derrière le canvas */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at center, rgba(0,169,206,0.18) 0%, transparent 70%)' }} />
+        <SignageLogo3D />     
+      </div>
+
+      {/* ── Titre + table AROME ── */}
+      <div className="flex flex-col flex-1 min-h-0 px-6 pt-3 pb-2">
+
+        {/* Header météo */}
+        <div className="flex items-end gap-3 mb-2 shrink-0">
+          <div>
+            <h2 className="text-2xl font-black uppercase italic text-white tracking-tighter leading-none">
+              Météo <span className="text-turquoise">Prochaines heures</span>
+            </h2>
+            <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.22em] mt-0.5">
+              AROME HD 1.3km · Agon-Coutainville · Manche Ouest
+            </p>
+          </div>
+          <div className="ml-auto flex items-center gap-2 px-2.5 py-1 rounded-lg shrink-0"
+            style={{ background: 'rgba(0,169,206,0.12)', border: '1px solid rgba(0,169,206,0.3)' }}>
+            <div className="size-1.5 bg-turquoise rounded-full animate-ping" />
+            <span className="text-[10px] font-black text-turquoise uppercase tracking-widest">Live</span>
+          </div>
+        </div>
+
+        {/* Table AROME */}
+        <div className="flex-1 min-h-0">
+          <SignageAromeTable />
+        </div>
+      </div>
+
+      {/* Marge basse */}
+      <div className="shrink-0 pb-4" />
+
+    </div>
+  );
+};
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 export const DigitalSignagePage: React.FC = () => {
   const { signageSlides } = useSignageContent();
@@ -191,17 +240,21 @@ export const DigitalSignagePage: React.FC = () => {
 
   const SEQUENCE = useMemo((): SequenceItem[] => {
     const weatherSlide: SequenceItem = { type: 'WEATHER', duration: 20000 };
-    if (signageSlides.length === 0) return [weatherSlide];
-    // Interleave: MÉTÉO → slide A → MÉTÉO → slide B → …
+    const agendaSlide: SequenceItem = { type: 'AGENDA', duration: 25000 };
+    if (signageSlides.length === 0) return [weatherSlide, agendaSlide];
+    // Interleave: MÉTÉO → slide A → AGENDA → slide B → …
     const result: SequenceItem[] = [];
-    signageSlides.forEach(slide => {
+    signageSlides.forEach((slide, i) => {
       result.push(weatherSlide);
       result.push({
         type: slide.type.toUpperCase(),
         duration: Math.max(slide.duration || 15000, 5000),
         data: slide,
       });
+      // Insérer l'agenda toutes les 2 slides Sanity
+      if ((i + 1) % 2 === 0) result.push(agendaSlide);
     });
+    if (!result.find(s => s.type === 'AGENDA')) result.push(agendaSlide);
     return result;
   }, [signageSlides]);
 
@@ -260,28 +313,10 @@ export const DigitalSignagePage: React.FC = () => {
       <div className="col-span-10 h-full overflow-hidden relative">
 
         {/* MÉTÉO AROME HD */}
-        {currentSlide.type === 'WEATHER' && (
-          <div className="h-full flex flex-col p-6 gap-4 animate-in fade-in duration-700">
-            <div className="flex items-center gap-3">
-              <div>
-                <h2 className="text-3xl font-black uppercase italic text-white tracking-tighter leading-none">
-                  Météo <span className="text-turquoise">Prochaines heures</span>
-                </h2>
-                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] mt-0.5">
-                  AROME HD 1.3km · Agon-Coutainville · Manche Ouest
-                </p>
-              </div>
-              <div className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-xl"
-                style={{ background: 'rgba(0,169,206,0.1)', border: '1px solid rgba(0,169,206,0.25)' }}>
-                <div className="size-2 bg-turquoise rounded-full animate-ping" />
-                <span className="text-xs font-black text-turquoise uppercase tracking-widest">Live</span>
-              </div>
-            </div>
-            <div className="flex-1 min-h-0">
-              <SignageAromeTable />
-            </div>
-          </div>
-        )}
+        {currentSlide.type === 'WEATHER' && <WeatherSlide />}
+
+        {/* PLANNING SEMAINE */}
+        {currentSlide.type === 'AGENDA' && <SignageAgendaSlide />}
 
         {/* PROMO */}
         {currentSlide.type === 'PROMO' && currentSlide.data?.promoContent && (

@@ -153,6 +153,24 @@ html {
   animation: scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
+@keyframes logo-float {
+  0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 24px rgba(0,169,206,0.5)); }
+  50% { transform: translateY(-8px) scale(1.02); filter: drop-shadow(0 0 40px rgba(0,169,206,0.9)); }
+}
+
+@keyframes logo-glow-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.15); }
+}
+
+.signage-logo-float {
+  animation: logo-float 4s ease-in-out infinite;
+}
+
+.signage-logo-glow {
+  animation: logo-glow-pulse 4s ease-in-out infinite;
+}
+
 .material-symbols-outlined {
   font-variation-settings:
     "FILL" 1,
