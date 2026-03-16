@@ -72,7 +72,12 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setIsLoading(true);
 
     const directPromise = fetch('/api/cockpit/direct', { cache: 'no-store' })
-      .then(res => res.json())
+      .then(async res => {
+        if (!res.ok) return null;
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) return null;
+        return res.json();
+      })
       .then(data => {
         if (data && !data.error) {
           if (data.spotStatus) setSpotStatus(data.spotStatus);
@@ -95,7 +100,9 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           if (data.lastConfirmedAt) setLastConfirmedAt(data.lastConfirmedAt);
         }
       })
-      .catch(e => console.warn('Direct status fetch failed:', e));
+      .catch(() => {
+        // Silencieusement ignoré pour éviter de polluer la console avec des erreurs de dev ou de proxy
+      });
 
     const weatherPromise = fetchRealtimeWeather()
       .catch(() => null)
@@ -104,6 +111,9 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         
         try {
           const tideRes = await fetch('/api/tides');
+          if (!tideRes.ok) return;
+          const contentType = tideRes.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) return;
           const tideData = await tideRes.json();
           let tideInfo = {};
 
@@ -129,13 +139,17 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           }
           setWeather(prev => ({ ...prev, ...data, ...tideInfo }));
         } catch (e) {
-          console.error("Error fetching tides", e);
-          setWeather(prev => ({ ...prev, ...data }));
+          // Normal si pas de crédits worldtides, on ne log pas d'erreur critique
         }
       });
 
     const expertWeatherPromise = fetch('/api/weather-expert')
-      .then(r => r.json())
+      .then(async r => {
+        if (!r.ok) return null;
+        const ct = r.headers.get('content-type');
+        if (!ct || !ct.includes('application/json')) return null;
+        return r.json();
+      })
       .catch(() => null)
       .then(expertData => {
         if (!expertData || expertData.error) return;
@@ -193,7 +207,12 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       interval = setInterval(() => {
         if (document.visibilityState === 'visible') {
           fetch('/api/cockpit/direct', { cache: 'no-store' })
-            .then(res => res.json())
+            .then(async res => {
+              if (!res.ok) return null;
+              const ct = res.headers.get('content-type');
+              if (!ct || !ct.includes('application/json')) return null;
+              return res.json();
+            })
             .then(data => {
               if (data && !data.error) {
                 if (data.spotStatus) setSpotStatus(data.spotStatus);

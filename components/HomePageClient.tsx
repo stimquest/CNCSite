@@ -101,7 +101,7 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
     };
 
     return (
-        <div 
+        <div
             className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6"
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setMousePos({ x: 0, y: 0 })}
@@ -143,12 +143,12 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
 
             {/* Static Text - Now properly positioned under the logo */}
             <div className="flex flex-col items-center mt-8 md:mt-12 hero-subtitle pointer-events-none text-center">
-                <RenderText 
+                <RenderText
                     content={homePageData?.hero?.title}
                     className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm"
                     fallback="Club Nautique de Coutainville"
                 />
-                <RenderText 
+                <RenderText
                     content={homePageData?.hero?.subtitle}
                     className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm mt-2 opacity-80"
                     fallback="Sauvetage et Secourisme"
@@ -160,7 +160,7 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
 
 export default function HomePageClient({ homePageData, dicoWords, homeGallery, infoMessages, upcomingEvents = [] }: any) {
     const {
-        weather, statusMessage, 
+        weather, statusMessage,
         spotStatus, lastPublishedAt, lastConfirmedAt,
         charStatus, charMessage, nautiqueStatus, nautiqueMessage,
         marcheStatus, marcheMessage,
@@ -238,13 +238,13 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
     ];
 
     const GLISSE_IMAGES = homePageData?.focusGlisse?.images?.length ? homePageData.focusGlisse.images : [
-        'https://images.unsplash.com/photo-1598514983053-ec5507ad2ea4?q=80&w=2000', 
-        'https://images.unsplash.com/photo-1506477331477-33d5d8b3dc85?q=80&w=2000', 
-        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?q=80&w=2000', 
+        'https://images.unsplash.com/photo-1598514983053-ec5507ad2ea4?q=80&w=2000',
+        'https://images.unsplash.com/photo-1506477331477-33d5d8b3dc85?q=80&w=2000',
+        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?q=80&w=2000',
     ];
 
     const WELLBEING_IMAGES = homePageData?.focusBienEtre?.images?.length ? homePageData.focusBienEtre.images : [
-        'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=2000', 
+        'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=2000',
         '/images/imgBank/paddleKayak.jpg',
         '/images/imgBank/paddleGeant.jpg',
     ];
@@ -328,7 +328,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
             {/* HERO SECTION - LOGO GLASS EFFECT */}
             <section
                 id="hero"
-                className="relative h-[100svh] w-full flex items-center justify-center overflow-hidden"
+                className="relative h-svh w-full flex items-center justify-center overflow-hidden"
             >
                 {/* Background: Video or Slideshow */}
                 <div className="absolute inset-0 w-full h-full overflow-hidden bg-abysse">
@@ -336,11 +336,11 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                         <YouTubeBackground videoUrl={homePageData.hero.videoUrl} />
                     ) : (
                         HERO_IMAGES.map((img, idx) => (
-                            <HeroCarouselItem 
-                                key={img} 
-                                image={img} 
-                                isActive={idx === currentHeroIndex} 
-                                photoYPos={photoYPos} 
+                            <HeroCarouselItem
+                                key={img}
+                                image={img}
+                                isActive={idx === currentHeroIndex}
+                                photoYPos={photoYPos}
                             />
                         ))
                     )}
@@ -376,7 +376,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
             {/* BENTO ACCUEIL — Unifié façon "Centre de Contrôle" (Air & Glass) */}
             <section id="dashboard" className="max-w-[1600px] mx-auto px-6 pt-10 pb-4 relative z-10">
                 <div className="bg-white relative overflow-hidden rounded-[2rem] shadow-[0_8px_32px_rgba(0,43,73,0.05)] border border-abysse/10">
-                    
+
                     <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch relative z-10">
 
                         {/* COL 1-4 : Le Spot / Météo (Image brute avec lettrage très contrasté) */}
@@ -387,7 +387,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                             <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent" />
                             {/* Léger assombrissement en haut pour le titre Le Spot */}
                             <div className="absolute inset-x-0 top-0 h-32 bg-linear-to-b from-black/60 to-transparent opacity-50" />
-                            
+
                             <div className="relative z-10 flex flex-col h-full justify-between">
                                 {/* Header */}
                                 <div className="flex justify-between items-start">
@@ -499,8 +499,8 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                 <div className="mt-4 pt-4 border-t border-abysse/10">
                                     <div className="flex items-center gap-2">
                                         <span className="relative flex size-2">
-                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-turquoise opacity-75"></span>
-                                          <span className="relative inline-flex rounded-full size-2 bg-turquoise"></span>
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-turquoise opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full size-2 bg-turquoise"></span>
                                         </span>
                                         <span className="text-[9px] text-abysse/40 font-bold tracking-widest uppercase">
                                             MàJ: {new Date(lastPublishedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
@@ -524,7 +524,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                 </div>
                                 <Link href="/fil-info" className="text-[9px] font-black text-abysse uppercase tracking-widest hover:text-turquoise transition-colors">Tous les logs →</Link>
                             </div>
-                            
+
                             <div className="flex-1 flex flex-col justify-start">
                                 {infoMessages && infoMessages.length > 0 ? (
                                     <div className="flex flex-col">
@@ -542,7 +542,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                                 <Link href="/fil-info" key={msg._id} className="block group border-b border-abysse/10 last:border-0 relative">
                                                     {/* Hover highlight indicator */}
                                                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-0 bg-turquoise group-hover:h-full transition-all duration-300" />
-                                                    
+
                                                     <div className="py-3.5 pl-3 transition-colors group-hover:bg-white/30 rounded-r-lg">
                                                         <div className="flex items-center justify-between mb-1.5">
                                                             <span className={`text-[9px] font-black uppercase tracking-widest ${colorClass}`}>
@@ -591,12 +591,12 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
 
                     {/* 0. Le Message - Hidden on Mobile */}
                     <div className="absolute top-8 left-8 z-30 pointer-events-none md:max-w-xl hidden md:block">
-                        <RenderText 
+                        <RenderText
                             content={homePageData?.spirit?.message}
                             className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter leading-[0.9] drop-shadow-lg whitespace-pre-line"
                             fallback="Ressentez\nla force\ndu vent."
                         />
-                        <RenderText 
+                        <RenderText
                             content={homePageData?.spirit?.description}
                             className="text-slate-300 font-medium mt-4 text-sm md:text-base hidden md:block"
                             fallback="Entre dunes et grand large, choisissez votre façon de vivre la mer."
@@ -674,7 +674,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                     {/* Contenu extensible : Révélé au survol (desktop) OU au focus (mobile) */}
                                     <div className="grid grid-rows-[0fr] group-hover/panel:grid-rows-[1fr] group-focus-within/panel:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
                                         <div className="overflow-hidden">
-                                            <RenderText 
+                                            <RenderText
                                                 content={card.description}
                                                 className={`text-slate-200 text-xs md:text-sm mb-4 leading-relaxed font-medium mt-2`}
                                             />
@@ -711,172 +711,172 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                     {/* Carousel — overflow-hidden full-width, flex aligné sur max-w-[1600px] mx-auto px-6 */}
                     <div className="overflow-hidden" onWheel={handleFocusWheel}>
                         <div className="max-w-[1600px] mx-auto pl-6">
-                        <motion.div
-                            id="focus-slider"
-                            className="flex gap-6 will-change-transform"
-                            onTouchStart={handleTouchStart}
-                            onTouchEnd={handleTouchEnd}
-                            style={{
-                                transform: `translateX(${focusX}px)`,
-                                transition: 'transform 0.65s cubic-bezier(0.32, 0.72, 0, 1)',
-                            }}
-                        >
-                            {/* Carte 1 — Char à Voile */}
-                            <div
-                                id="vitesse"
-                                className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-[500px] lg:min-h-[550px]"
-                                style={{ opacity: currentFocusIndex === 0 ? 1 : 0.5, transform: currentFocusIndex === 0 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
+                            <motion.div
+                                id="focus-slider"
+                                className="flex gap-6 will-change-transform"
+                                onTouchStart={handleTouchStart}
+                                onTouchEnd={handleTouchEnd}
+                                style={{
+                                    transform: `translateX(${focusX}px)`,
+                                    transition: 'transform 0.65s cubic-bezier(0.32, 0.72, 0, 1)',
+                                }}
                             >
-                                <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-orange-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
-                                            <Zap size={24} fill="currentColor" />
+                                {/* Carte 1 — Char à Voile */}
+                                <div
+                                    id="vitesse"
+                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-[500px] lg:min-h-[550px]"
+                                    style={{ opacity: currentFocusIndex === 0 ? 1 : 0.5, transform: currentFocusIndex === 0 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
+                                >
+                                    <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-orange-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                                <Zap size={24} fill="currentColor" />
+                                            </div>
+                                            <div>
+                                                <span className="text-orange-500 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusChar?.tagline || "Activité Phare"}</span>
+                                                <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusChar?.subTagline || "Sensation & Vitesse"}</span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <span className="text-orange-500 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusChar?.tagline || "Activité Phare"}</span>
-                                            <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusChar?.subTagline || "Sensation & Vitesse"}</span>
+                                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
+                                            {homePageData?.focusChar?.title || "Le Char"} <br />
+                                            <span className="text-transparent bg-clip-text bg-linear-to-r from-orange-400 via-orange-500 to-red-600">{homePageData?.focusChar?.highlightSuffix || "à Voile."}</span>
+                                        </h2>
+                                        <RenderText
+                                            content={homePageData?.focusChar?.description}
+                                            className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-orange-500/30 pl-8 italic"
+                                            fallback="Glissez sur le sable à quelques centimètres du sol. Une expérience unique, propulsée par la seule force du vent sur l'immense plage de Coutainville."
+                                        />
+                                        <div className="flex flex-col sm:flex-row gap-4 mt-auto">
+                                            <Link href={homePageData?.focusChar?.ctaButton?.link || "/activites"} className="inline-flex items-center justify-center px-8 py-5 bg-orange-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-orange-600 transition-all shadow-lg group/btn shadow-orange-500/20">
+                                                {homePageData?.focusChar?.ctaButton?.text || "Réserver une séance"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
+                                            </Link>
+                                            <button onClick={() => setIsCharModalOpen(true)} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                                                {homePageData?.focusChar?.infoButton?.text || "En savoir plus"}
+                                            </button>
                                         </div>
                                     </div>
-                                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
-                                        {homePageData?.focusChar?.title || "Le Char"} <br />
-                                        <span className="text-transparent bg-clip-text bg-linear-to-r from-orange-400 via-orange-500 to-red-600">{homePageData?.focusChar?.highlightSuffix || "à Voile."}</span>
-                                    </h2>
-                                    <RenderText
-                                        content={homePageData?.focusChar?.description}
-                                        className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-orange-500/30 pl-8 italic"
-                                        fallback="Glissez sur le sable à quelques centimètres du sol. Une expérience unique, propulsée par la seule force du vent sur l'immense plage de Coutainville."
-                                    />
-                                    <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-                                        <Link href={homePageData?.focusChar?.ctaButton?.link || "/activites"} className="inline-flex items-center justify-center px-8 py-5 bg-orange-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-orange-600 transition-all shadow-lg group/btn shadow-orange-500/20">
-                                            {homePageData?.focusChar?.ctaButton?.text || "Réserver une séance"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
-                                        </Link>
-                                        <button onClick={() => setIsCharModalOpen(true)} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
-                                            {homePageData?.focusChar?.infoButton?.text || "En savoir plus"}
-                                        </button>
+                                    <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
+                                        <div className="absolute inset-0 z-0">
+                                            <AnimatePresence mode="popLayout">
+                                                <motion.img key={CHAR_IMAGES[currentCharIndex]} src={CHAR_IMAGES[currentCharIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Char à voile" />
+                                            </AnimatePresence>
+                                        </div>
+                                        <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
+                                        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
+                                        <div className="absolute bottom-6 right-8 flex gap-2 z-20">
+                                            {CHAR_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentCharIndex ? 'w-8 bg-orange-500' : 'w-2 bg-white/30'}`} />))}
+                                        </div>
+                                        <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                                            <span className="text-orange-500 font-black text-3xl block leading-none mb-1">{homePageData?.focusChar?.badgeValue || "60+"}</span>
+                                            <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusChar?.badgeLabel || "Km/h de sensations pures"}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
-                                    <div className="absolute inset-0 z-0">
-                                        <AnimatePresence mode="popLayout">
-                                            <motion.img key={CHAR_IMAGES[currentCharIndex]} src={CHAR_IMAGES[currentCharIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Char à voile" />
-                                        </AnimatePresence>
-                                    </div>
-                                    <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
-                                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
-                                    <div className="absolute bottom-6 right-8 flex gap-2 z-20">
-                                        {CHAR_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentCharIndex ? 'w-8 bg-orange-500' : 'w-2 bg-white/30'}`} />))}
-                                    </div>
-                                    <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
-                                        <span className="text-orange-500 font-black text-3xl block leading-none mb-1">{homePageData?.focusChar?.badgeValue || "60+"}</span>
-                                        <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusChar?.badgeLabel || "Km/h de sensations pures"}</span>
-                                    </div>
-                                </div>
-                            </div>
 
-                            {/* Carte 2 — Glisse Extrême */}
-                            <div
-                                id="adrenaline"
-                                className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row-reverse min-h-[500px] lg:min-h-[550px]"
-                                style={{ opacity: currentFocusIndex === 1 ? 1 : 0.5, transform: currentFocusIndex === 1 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
-                            >
-                                <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-blue-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
-                                            <Wind size={24} fill="currentColor" className="text-blue-500" />
+                                {/* Carte 2 — Glisse Extrême */}
+                                <div
+                                    id="adrenaline"
+                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row-reverse min-h-[500px] lg:min-h-[550px]"
+                                    style={{ opacity: currentFocusIndex === 1 ? 1 : 0.5, transform: currentFocusIndex === 1 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
+                                >
+                                    <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-blue-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                                <Wind size={24} fill="currentColor" className="text-blue-500" />
+                                            </div>
+                                            <div>
+                                                <span className="text-blue-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusGlisse?.tagline || "Sensations Fortes"}</span>
+                                                <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusGlisse?.subTagline || "Wing, Kite & Funboard"}</span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <span className="text-blue-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusGlisse?.tagline || "Sensations Fortes"}</span>
-                                            <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusGlisse?.subTagline || "Wing, Kite & Funboard"}</span>
+                                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
+                                            {homePageData?.focusGlisse?.title || "Glisse"} <br />
+                                            <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 via-indigo-500 to-purple-600">{homePageData?.focusGlisse?.highlightSuffix || "Extrême."}</span>
+                                        </h2>
+                                        <RenderText
+                                            content={homePageData?.focusGlisse?.description}
+                                            className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-blue-500/30 pl-8 italic"
+                                            fallback="Dominez les éléments. Wingfoil, Kitesurf ou Windsurf : repoussez vos limites avec les moniteurs du club sur l'un des meilleurs spots de Normandie."
+                                        />
+                                        <div className="flex flex-col sm:flex-row gap-4 mt-auto">
+                                            <Link href={homePageData?.focusGlisse?.ctaButton?.link || "/activites?cat=Sensations"} className="inline-flex items-center justify-center px-8 py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-blue-500 transition-all shadow-lg group/btn shadow-blue-500/20">
+                                                {homePageData?.focusGlisse?.ctaButton?.text || "Découvrir la glisse"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
+                                            </Link>
+                                            <Link href={homePageData?.focusGlisse?.infoButton?.link || "/le-spot"} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                                                {homePageData?.focusGlisse?.infoButton?.text || "Le Spot"}
+                                            </Link>
                                         </div>
                                     </div>
-                                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
-                                        {homePageData?.focusGlisse?.title || "Glisse"} <br />
-                                        <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 via-indigo-500 to-purple-600">{homePageData?.focusGlisse?.highlightSuffix || "Extrême."}</span>
-                                    </h2>
-                                    <RenderText
-                                        content={homePageData?.focusGlisse?.description}
-                                        className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-blue-500/30 pl-8 italic"
-                                        fallback="Dominez les éléments. Wingfoil, Kitesurf ou Windsurf : repoussez vos limites avec les moniteurs du club sur l'un des meilleurs spots de Normandie."
-                                    />
-                                    <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-                                        <Link href={homePageData?.focusGlisse?.ctaButton?.link || "/activites?cat=Sensations"} className="inline-flex items-center justify-center px-8 py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-blue-500 transition-all shadow-lg group/btn shadow-blue-500/20">
-                                            {homePageData?.focusGlisse?.ctaButton?.text || "Découvrir la glisse"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
-                                        </Link>
-                                        <Link href={homePageData?.focusGlisse?.infoButton?.link || "/le-spot"} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
-                                            {homePageData?.focusGlisse?.infoButton?.text || "Le Spot"}
-                                        </Link>
+                                    <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
+                                        <div className="absolute inset-0 z-0">
+                                            <AnimatePresence mode="popLayout">
+                                                <motion.img key={GLISSE_IMAGES[currentGlisseIndex]} src={GLISSE_IMAGES[currentGlisseIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6.5, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Glisse extrême" />
+                                            </AnimatePresence>
+                                        </div>
+                                        <div className="absolute inset-y-0 right-0 w-px bg-white/10 hidden lg:block z-20"></div>
+                                        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
+                                        <div className="absolute bottom-6 left-8 flex gap-2 z-20">
+                                            {GLISSE_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentGlisseIndex ? 'w-8 bg-blue-500' : 'w-2 bg-white/30'}`} />))}
+                                        </div>
+                                        <div className="absolute top-8 left-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                                            <span className="text-blue-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusGlisse?.badgeValue || "Pure"}</span>
+                                            <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusGlisse?.badgeLabel || "Énergie & Adrénaline"}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
-                                    <div className="absolute inset-0 z-0">
-                                        <AnimatePresence mode="popLayout">
-                                            <motion.img key={GLISSE_IMAGES[currentGlisseIndex]} src={GLISSE_IMAGES[currentGlisseIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6.5, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Glisse extrême" />
-                                        </AnimatePresence>
-                                    </div>
-                                    <div className="absolute inset-y-0 right-0 w-px bg-white/10 hidden lg:block z-20"></div>
-                                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
-                                    <div className="absolute bottom-6 left-8 flex gap-2 z-20">
-                                        {GLISSE_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentGlisseIndex ? 'w-8 bg-blue-500' : 'w-2 bg-white/30'}`} />))}
-                                    </div>
-                                    <div className="absolute top-8 left-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
-                                        <span className="text-blue-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusGlisse?.badgeValue || "Pure"}</span>
-                                        <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusGlisse?.badgeLabel || "Énergie & Adrénaline"}</span>
-                                    </div>
-                                </div>
-                            </div>
 
-                            {/* Carte 3 — Bien-être & Slow Tourisme */}
-                            <div
-                                id="bien-etre"
-                                className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-[500px] lg:min-h-[550px]"
-                                style={{ opacity: currentFocusIndex === 2 ? 1 : 0.5, transform: currentFocusIndex === 2 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
-                            >
-                                <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-emerald-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
-                                            <Waves size={24} className="text-emerald-500" />
+                                {/* Carte 3 — Bien-être & Slow Tourisme */}
+                                <div
+                                    id="bien-etre"
+                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-[500px] lg:min-h-[550px]"
+                                    style={{ opacity: currentFocusIndex === 2 ? 1 : 0.5, transform: currentFocusIndex === 2 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
+                                >
+                                    <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-emerald-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                                <Waves size={24} className="text-emerald-500" />
+                                            </div>
+                                            <div>
+                                                <span className="text-emerald-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusBienEtre?.tagline || "Slow Tourisme"}</span>
+                                                <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusBienEtre?.subTagline || "Marche Aquatique, Kayak & Paddle"}</span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <span className="text-emerald-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusBienEtre?.tagline || "Slow Tourisme"}</span>
-                                            <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusBienEtre?.subTagline || "Marche Aquatique, Kayak & Paddle"}</span>
+                                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
+                                            {homePageData?.focusBienEtre?.title || "Bien-être"} <br />
+                                            <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 via-teal-500 to-cyan-600">{homePageData?.focusBienEtre?.highlightSuffix || "& Slow Tourisme."}</span>
+                                        </h2>
+                                        <RenderText
+                                            content={homePageData?.focusBienEtre?.description}
+                                            className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-emerald-500/30 pl-8 italic"
+                                            fallback="Prenez le temps de vivre. Entre marche aquatique revitalisante et balades en kayak ou paddle, découvrez la côte normande au rythme des marées."
+                                        />
+                                        <div className="flex flex-col sm:flex-row gap-4 mt-auto">
+                                            <Link href={homePageData?.focusBienEtre?.ctaButton?.link || "/activites?cat=Bien-être"} className="inline-flex items-center justify-center px-8 py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-emerald-500 transition-all shadow-lg group/btn shadow-emerald-500/20">
+                                                {homePageData?.focusBienEtre?.ctaButton?.text || "S'évader en mer"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
+                                            </Link>
+                                            <Link href={homePageData?.focusBienEtre?.infoButton?.link || "/activites"} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                                                {homePageData?.focusBienEtre?.infoButton?.text || "Voir les tarifs"}
+                                            </Link>
                                         </div>
                                     </div>
-                                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
-                                        {homePageData?.focusBienEtre?.title || "Bien-être"} <br />
-                                        <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 via-teal-500 to-cyan-600">{homePageData?.focusBienEtre?.highlightSuffix || "& Slow Tourisme."}</span>
-                                    </h2>
-                                    <RenderText
-                                        content={homePageData?.focusBienEtre?.description}
-                                        className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-emerald-500/30 pl-8 italic"
-                                        fallback="Prenez le temps de vivre. Entre marche aquatique revitalisante et balades en kayak ou paddle, découvrez la côte normande au rythme des marées."
-                                    />
-                                    <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-                                        <Link href={homePageData?.focusBienEtre?.ctaButton?.link || "/activites?cat=Bien-être"} className="inline-flex items-center justify-center px-8 py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-emerald-500 transition-all shadow-lg group/btn shadow-emerald-500/20">
-                                            {homePageData?.focusBienEtre?.ctaButton?.text || "S'évader en mer"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
-                                        </Link>
-                                        <Link href={homePageData?.focusBienEtre?.infoButton?.link || "/activites"} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
-                                            {homePageData?.focusBienEtre?.infoButton?.text || "Voir les tarifs"}
-                                        </Link>
+                                    <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
+                                        <div className="absolute inset-0 z-0">
+                                            <AnimatePresence mode="popLayout">
+                                                <motion.img key={WELLBEING_IMAGES[currentWellbeingIndex]} src={WELLBEING_IMAGES[currentWellbeingIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 7, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Bien-être slow tourisme" />
+                                            </AnimatePresence>
+                                        </div>
+                                        <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
+                                        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
+                                        <div className="absolute bottom-6 right-8 flex gap-2 z-20">
+                                            {WELLBEING_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentWellbeingIndex ? 'w-8 bg-emerald-500' : 'w-2 bg-white/30'}`} />))}
+                                        </div>
+                                        <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                                            <span className="text-emerald-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusBienEtre?.badgeValue || "100%"}</span>
+                                            <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusBienEtre?.badgeLabel || "Oxygène & Sérénité Locale"}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
-                                    <div className="absolute inset-0 z-0">
-                                        <AnimatePresence mode="popLayout">
-                                            <motion.img key={WELLBEING_IMAGES[currentWellbeingIndex]} src={WELLBEING_IMAGES[currentWellbeingIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 7, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Bien-être slow tourisme" />
-                                        </AnimatePresence>
-                                    </div>
-                                    <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
-                                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
-                                    <div className="absolute bottom-6 right-8 flex gap-2 z-20">
-                                        {WELLBEING_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentWellbeingIndex ? 'w-8 bg-emerald-500' : 'w-2 bg-white/30'}`} />))}
-                                    </div>
-                                    <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
-                                        <span className="text-emerald-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusBienEtre?.badgeValue || "100%"}</span>
-                                        <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusBienEtre?.badgeLabel || "Oxygène & Sérénité Locale"}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
+                            </motion.div>
                         </div>
                     </div>
 
@@ -923,8 +923,8 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                             <p className="text-slate-500 font-medium leading-relaxed mb-10 max-w-sm">
                                 Restez au courant des régates, soirées et moments forts de la vie du club.
                             </p>
-                            <Link 
-                                href="/club#life" 
+                            <Link
+                                href="/club#life"
                                 className="group/btn relative inline-flex items-center gap-4 bg-abysse text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest overflow-hidden transition-all shadow-xl hover:shadow-turquoise/20"
                             >
                                 <span className="relative z-10">Voir tout l'agenda</span>
@@ -933,62 +933,62 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                             </Link>
                         </div>
 
-                            {/* Events list */}
-                            <div className="lg:w-2/3 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {upcomingEvents.slice(0, 3).map((event: any, idx: number) => {
-                                    const eventDate = new Date(event.startDate);
-                                    return (
-                                        <div 
-                                            key={idx}
-                                            className="group/card relative bg-white/60 backdrop-blur-xl border border-white/80 p-6 rounded-4xl shadow-[0_15px_40px_rgba(0,43,73,0.08)] transition-all duration-500 hover:shadow-2xl hover:bg-white hover:-translate-y-1"
-                                        >
-                                            <div className="flex justify-between items-start mb-6">
-                                                {/* Date Float Badge */}
-                                                <div className="bg-abysse px-4 py-2.5 rounded-2xl shadow-lg text-center min-w-[65px] group-hover/card:bg-turquoise transition-colors duration-500">
-                                                    <span className="block text-[10px] font-black text-turquoise uppercase tracking-widest leading-none mb-1 group-hover/card:text-abysse">
-                                                        {eventDate.toLocaleDateString('fr-FR', { month: 'short' })}
-                                                    </span>
-                                                    <span className="block text-2xl font-black text-white leading-none italic group-hover/card:text-abysse">
-                                                        {eventDate.getDate()}
-                                                    </span>
-                                                </div>
-
-                                                {/* Image Badge / Thumbnail */}
-                                                <div className="size-16 rounded-2xl overflow-hidden border-2 border-white shadow-md rotate-3 group-hover/card:rotate-0 transition-all duration-500">
-                                                    <img 
-                                                        src={event.image || "/images/imgBank/CataPharePointeAgon.jpg"} 
-                                                        className="w-full h-full object-cover" 
-                                                        alt={event.title} 
-                                                    />
-                                                </div>
+                        {/* Events list */}
+                        <div className="lg:w-2/3 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {upcomingEvents.slice(0, 3).map((event: any, idx: number) => {
+                                const eventDate = new Date(event.startDate);
+                                return (
+                                    <div
+                                        key={idx}
+                                        className="group/card relative bg-white/60 backdrop-blur-xl border border-white/80 p-6 rounded-4xl shadow-[0_15px_40px_rgba(0,43,73,0.08)] transition-all duration-500 hover:shadow-2xl hover:bg-white hover:-translate-y-1"
+                                    >
+                                        <div className="flex justify-between items-start mb-6">
+                                            {/* Date Float Badge */}
+                                            <div className="bg-abysse px-4 py-2.5 rounded-2xl shadow-lg text-center min-w-[65px] group-hover/card:bg-turquoise transition-colors duration-500">
+                                                <span className="block text-[10px] font-black text-turquoise uppercase tracking-widest leading-none mb-1 group-hover/card:text-abysse">
+                                                    {eventDate.toLocaleDateString('fr-FR', { month: 'short' })}
+                                                </span>
+                                                <span className="block text-2xl font-black text-white leading-none italic group-hover/card:text-abysse">
+                                                    {eventDate.getDate()}
+                                                </span>
                                             </div>
 
-                                            <div className="mb-4">
-                                                {event.badge && (
-                                                    <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-turquoise/10 text-turquoise rounded-full mb-2 inline-block">
-                                                        {event.badge}
-                                                    </span>
-                                                )}
-                                                <h4 className="text-xl font-black text-abysse mb-1 leading-tight group-hover/card:text-turquoise transition-colors">
-                                                    {event.title}
-                                                </h4>
-                                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                                                    <Wind size={12} className="text-turquoise" />
-                                                    {event.time || 'Toute la journée'}
-                                                </p>
+                                            {/* Image Badge / Thumbnail */}
+                                            <div className="size-16 rounded-2xl overflow-hidden border-2 border-white shadow-md rotate-3 group-hover/card:rotate-0 transition-all duration-500">
+                                                <img
+                                                    src={event.image || "/images/imgBank/CataPharePointeAgon.jpg"}
+                                                    className="w-full h-full object-cover"
+                                                    alt={event.title}
+                                                />
                                             </div>
-
-                                            <RenderText 
-                                                content={event.description} 
-                                                className="text-sm text-slate-500 font-medium line-clamp-3 leading-relaxed mb-4" 
-                                            />
-                                            
-                                            {/* Accent line */}
-                                            <div className="h-1 w-8 bg-turquoise/20 rounded-full group-hover/card:w-full group-hover/card:bg-turquoise transition-all duration-500" />
                                         </div>
-                                    );
-                                })}
-                            
+
+                                        <div className="mb-4">
+                                            {event.badge && (
+                                                <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-turquoise/10 text-turquoise rounded-full mb-2 inline-block">
+                                                    {event.badge}
+                                                </span>
+                                            )}
+                                            <h4 className="text-xl font-black text-abysse mb-1 leading-tight group-hover/card:text-turquoise transition-colors">
+                                                {event.title}
+                                            </h4>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                                                <Wind size={12} className="text-turquoise" />
+                                                {event.time || 'Toute la journée'}
+                                            </p>
+                                        </div>
+
+                                        <RenderText
+                                            content={event.description}
+                                            className="text-sm text-slate-500 font-medium line-clamp-3 leading-relaxed mb-4"
+                                        />
+
+                                        {/* Accent line */}
+                                        <div className="h-1 w-8 bg-turquoise/20 rounded-full group-hover/card:w-full group-hover/card:bg-turquoise transition-all duration-500" />
+                                    </div>
+                                );
+                            })}
+
                             {upcomingEvents.length === 0 && (
                                 <div className="col-span-full py-20 text-center bg-white/40 backdrop-blur-md rounded-[3rem] border border-dashed border-abysse/10">
                                     <div className="size-16 bg-abysse/5 rounded-full flex items-center justify-center mx-auto mb-6 text-abysse/20">
@@ -1073,9 +1073,9 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                             const CardContainer = isPlayCard ? 'div' : Link;
 
                             return (
-                                <CardContainer 
-                                    key={idx} 
-                                    href={isPlayCard ? undefined : (card.link || "#")} 
+                                <CardContainer
+                                    key={idx}
+                                    href={isPlayCard ? undefined : (card.link || "#")}
                                     className="group relative h-[380px] rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl"
                                 >
                                     <img src={card.image || "/images/imgBank/CataPharePointeAgon.jpg"} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" alt={card.titlePart1} />

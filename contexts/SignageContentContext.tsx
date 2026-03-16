@@ -51,7 +51,12 @@ export const SignageContentProvider: React.FC<{ children: React.ReactNode }> = (
           .catch(() => { }),
 
         fetch('/api/tides')
-          .then(res => res.json())
+          .then(async res => {
+            if (!res.ok) return null;
+            const ct = res.headers.get('content-type');
+            if (!ct || !ct.includes('application/json')) return null;
+            return res.json();
+          })
           .then((tideData) => {
             if (!tideData || tideData.error) return;
 
@@ -85,10 +90,15 @@ export const SignageContentProvider: React.FC<{ children: React.ReactNode }> = (
 
             setWeather(prev => ({ ...prev, ...tideInfo }));
           })
-          .catch(e => console.error('Signage tides fetch failed', e)),
+          .catch(() => { /* Erreur silencieuse pour les marées */ }),
 
         fetch('/api/weather-expert')
-          .then(res => res.json())
+          .then(async res => {
+            if (!res.ok) return null;
+            const ct = res.headers.get('content-type');
+            if (!ct || !ct.includes('application/json')) return null;
+            return res.json();
+          })
           .then((expertData) => {
             if (!expertData || expertData.error) return;
 
@@ -145,7 +155,7 @@ export const SignageContentProvider: React.FC<{ children: React.ReactNode }> = (
                 : prev.sunset,
             }));
           })
-          .catch(e => console.error('Signage expert weather fetch failed', e)),
+          .catch(() => { /* Erreur silencieuse pour la météo experte */ }),
 
         (async () => {
           try {

@@ -78,7 +78,7 @@ export const PageHero: React.FC<PageHeroProps> = ({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-6xl md:text-8xl lg:text-9xl text-white leading-[0.8] mb-12"
+                        className="text-5xl md:text-8xl lg:text-9xl text-white leading-[0.8] mb-12"
                     >
                         {title} <br />
                         <span className="text-transparent bg-clip-text bg-linear-to-r from-turquoise to-white">
@@ -92,7 +92,7 @@ export const PageHero: React.FC<PageHeroProps> = ({
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.3 }}
-                            className="text-white text-base md:text-lg font-medium italic max-w-2xl mb-8 whitespace-pre-line bg-white/5 backdrop-blur-sm border border-white/10 px-8 py-4 rounded-2xl"
+                            className="text-white text-sm md:text-lg font-medium italic max-w-2xl mb-8 whitespace-pre-line bg-white/5 backdrop-blur-sm border border-white/10 px-6 py-3 md:px-8 md:py-4 rounded-2xl"
                         >
                             {typeof description === 'string' ? (
                                 description

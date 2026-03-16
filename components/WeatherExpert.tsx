@@ -120,7 +120,7 @@ export const WeatherExpert: React.FC = () => {
             {/* Header / Meta */}
             <div className="flex items-center justify-between gap-4 px-4 flex-wrap">
                 <div>
-                    <h2 className="text-4xl font-black tracking-tighter italic uppercase text-turquoise leading-none">Coutainville Expert</h2>
+                    <h2 className="text-2xl md:text-4xl font-black tracking-tighter italic uppercase text-turquoise leading-none">Coutainville Expert</h2>
                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mt-2">Détail Haute Définition (1.3km) & Marine</p>
                 </div>
 
@@ -195,20 +195,21 @@ export const WeatherExpert: React.FC = () => {
                     const CELL = 'flex-1 flex items-center justify-center border-r border-white/5 text-sm font-black';
 
                     return (
-                        <div className="bg-abysse rounded-4xl border border-white/10 shadow-2xl overflow-hidden">
-
-                            {/* Header légende (pas paddinné comme avant) */}
-                            <div className="flex items-center gap-8 px-8 pt-8 pb-2">
-                                <span className="text-xs font-black uppercase tracking-widest text-slate-400">Vent &amp; Rafales (nds)</span>
-                                <span className="flex items-center gap-2 text-[10px] font-black text-turquoise"><span className="size-2.5 rounded-sm bg-turquoise inline-block" /> Vent</span>
-                                <span className="flex items-center gap-2 text-[10px] font-black text-orange-400"><span className="size-2.5 rounded-sm bg-orange-400 inline-block" /> Rafales</span>
+                        <div className="bg-abysse rounded-4xl border border-white/10 overflow-hidden">
+                            {/* Header légende */}
+                            <div className="flex items-center gap-4 md:gap-8 px-6 md:px-8 pt-8 pb-4 flex-wrap">
+                                <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 shrink-0">Vent &amp; Rafales (nds)</span>
+                                <div className="flex gap-4">
+                                    <span className="flex items-center gap-2 text-[10px] font-black text-turquoise"><span className="size-2.5 rounded-sm bg-turquoise inline-block" /> Vent</span>
+                                    <span className="flex items-center gap-2 text-[10px] font-black text-orange-400"><span className="size-2.5 rounded-sm bg-orange-400 inline-block" /> Rafales</span>
+                                </div>
                             </div>
 
                             {/* LAYOUT PRINCIPAL: sticky labels | scrollable chart+données */}
-                            <div className="flex">
+                            <div className="flex overflow-x-auto no-scrollbar scroll-smooth">
 
                                 {/* COLONNE LABELS — sticky à gauche */}
-                                <div className={`sticky left-0 z-30 ${LABEL_BG} border-r border-white/10 shrink-0 w-36`}>
+                                <div className={`sticky left-0 z-30 ${LABEL_BG} border-r border-white/10 shrink-0 w-22 md:w-28 shadow-xl rounded-bl-4xl`}>
                                     {/* Zone correspondant à la hauteur du chart (CHART_H + padding top 8px) */}
                                     <div style={{ height: CHART_H + 8 }} />
                                     {/* Lignes de labels */}
@@ -221,14 +222,14 @@ export const WeatherExpert: React.FC = () => {
                                         { label: 'Période (s)', color: 'text-slate-400' },
                                         { label: 'Temp Air', color: 'text-amber-300' },
                                     ].map(({ label, color }, i) => (
-                                        <div key={i} style={{ height: ROW_H }} className={`flex items-center px-4 border-t border-white/10 text-xs font-black whitespace-nowrap ${color}`}>
+                                        <div key={i} style={{ height: ROW_H }} className={`flex items-center px-2 md:px-4 border-t border-white/10 text-[10px] md:text-xs font-black whitespace-nowrap ${color}`}>
                                             {label}
                                         </div>
                                     ))}
                                 </div>
 
                                 {/* ZONE PLEIN ÉCRAN: chart + lignes de données */}
-                                <div className="flex-1 min-w-0">
+                                <div className="flex-1 min-w-[700px] md:min-w-[900px]">
                                     <div>
 
                                         {/* CHART — 100% de la zone, s'aligne avec les colonnes flex */}
@@ -349,17 +350,17 @@ export const WeatherExpert: React.FC = () => {
                     <Calendar size={18} className="text-turquoise" />
                     <h3 className="text-xs font-black uppercase tracking-widest text-abysse">Prévisions 3 Jours (Horaires)</h3>
                 </div>
-                <div className="bg-abysse/80 backdrop-blur-xl rounded-4xl overflow-hidden border border-white/10 shadow-2xl">
+                <div className="bg-abysse/80 backdrop-blur-xl rounded-4xl overflow-hidden border border-white/10">
                     <div className="overflow-x-auto no-scrollbar scroll-smooth">
                         <table className="w-full border-separate border-spacing-0 table-fixed">
                             <thead>
                                 <tr className="bg-white/5">
-                                    <th className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-32 px-4 py-4 text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-left border-r border-white/10 shadow-xl">3 Jours</th>
+                                    <th className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-4 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-left border-r border-white/10 shadow-xl">3 Jours</th>
                                     {indicesHor.map(idx => {
                                         const d = new Date(wHor.time[idx]);
                                         const isNewDay = d.getHours() === 0;
                                         return (
-                                            <th key={idx} className={`w-16 min-w-[64px] text-center py-4 border-r border-white/5 ${isNewDay ? 'border-l-4 border-turquoise shadow-[4px_0_0_-2px_rgba(0,229,204,0.3)]' : ''}`}>
+                                            <th key={idx} className={`w-20 md:w-16 min-w-[80px] md:min-w-[64px] text-center py-4 border-r border-white/5 ${isNewDay ? 'border-l-4 border-turquoise shadow-[4px_0_0_-2px_rgba(0,229,204,0.3)]' : ''}`}>
                                                 <div className="flex flex-col gap-1">
                                                     {isNewDay || idx === startIdxHor ? (
                                                         <span className="text-[10px] font-black text-turquoise">{d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })}</span>
@@ -373,7 +374,7 @@ export const WeatherExpert: React.FC = () => {
                             </thead>
                             <tbody className="text-sm font-black tracking-tight uppercase">
                                 <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 px-4 py-3 text-slate-400 border-r border-white/10">Vent (kts)</td>
+                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-slate-400 border-r border-white/10">Vent (kts)</td>
                                     {indicesHor.map(idx => {
                                         const speed = Math.round(wHor.wind_speed_10m[idx]);
                                         const colors = getWindColor(speed);
@@ -389,7 +390,7 @@ export const WeatherExpert: React.FC = () => {
                                 </tr>
                                 {/* Rafales */}
                                 <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 px-4 py-3 text-orange-400/80 border-r border-white/10">Rafales</td>
+                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-orange-400/80 border-r border-white/10">Rafales</td>
                                     {indicesHor.map(idx => {
                                         const gust = Math.round(wHor.wind_gusts_10m[idx]);
                                         const colors = getWindColor(gust);
@@ -405,7 +406,7 @@ export const WeatherExpert: React.FC = () => {
                                 </tr>
                                 {/* Direction */}
                                 <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 px-4 py-4 text-slate-400 border-r border-white/10">Direction</td>
+                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-4 text-[10px] md:text-xs text-slate-400 border-r border-white/10">Direction</td>
                                     {indicesHor.map(idx => (
                                         <td key={idx} className="text-center py-4 border-r border-white/5 bg-white/2">
                                             {wHor.wind_direction_10m?.[idx] != null ? (
@@ -418,7 +419,7 @@ export const WeatherExpert: React.FC = () => {
                                 </tr>
                                 {/* Vagues */}
                                 <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 px-4 py-3 text-cyan-400 border-r border-white/10">Vagues (m)</td>
+                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-cyan-400 border-r border-white/10">Vagues (m)</td>
                                     {indicesHor.map(idx => {
                                         const timeStr = wHor.time[idx];
                                         const wIdx = wav.time.indexOf(timeStr);
@@ -432,7 +433,7 @@ export const WeatherExpert: React.FC = () => {
                                 </tr>
                                 {/* Dir Vagues */}
                                 <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 px-4 py-4 text-cyan-700 border-r border-white/10">Dir. Vagues</td>
+                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-4 text-[10px] md:text-xs text-cyan-700 border-r border-white/10">Dir. Vagues</td>
                                     {indicesHor.map(idx => {
                                         const timeStr = wHor.time[idx];
                                         const wIdx = wav.time.indexOf(timeStr);
@@ -451,7 +452,7 @@ export const WeatherExpert: React.FC = () => {
                                 {/* Période — affichée seulement si des données existent */}
                                 {indicesHor.some(idx => { const wIdx = wav.time.indexOf(wHor.time[idx]); return wIdx !== -1 && wav.wave_period[wIdx] != null; }) && (
                                     <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                        <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 px-4 py-3 text-slate-400 border-r border-white/10">Période (s)</td>
+                                        <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-slate-400 border-r border-white/10">Période (s)</td>
                                         {indicesHor.map(idx => {
                                             const timeStr = wHor.time[idx];
                                             const wIdx = wav.time.indexOf(timeStr);
@@ -466,7 +467,7 @@ export const WeatherExpert: React.FC = () => {
                                 )}
                                 {/* Pluie */}
                                 <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 px-4 py-3 text-blue-400 border-r border-white/10">Pluie (%)</td>
+                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-blue-400 border-r border-white/10">Pluie (%)</td>
                                     {indicesHor.map(idx => {
                                         const prob = wHor.precipitation_probability?.[idx];
                                         const hasRain = prob != null && prob > 20;
@@ -480,7 +481,7 @@ export const WeatherExpert: React.FC = () => {
                                 </tr>
                                 {/* Air */}
                                 <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 px-4 py-3 text-slate-500 border-r border-white/10">Air (°C)</td>
+                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-slate-500 border-r border-white/10">Air (°C)</td>
                                     {indicesHor.map(idx => {
                                         const temp = wHor.temperature_2m?.[idx];
                                         return (
@@ -492,7 +493,7 @@ export const WeatherExpert: React.FC = () => {
                                 </tr>
                                 {/* Mer */}
                                 <tr className="hover:bg-white/5 transition-colors">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 px-4 py-3 text-emerald-400 border-r border-white/10">Mer (°C)</td>
+                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-emerald-400 border-r border-white/10">Mer (°C)</td>
                                     {indicesHor.map(idx => {
                                         const timeStr = wHor.time[idx];
                                         const cIdx = cHor.time.indexOf(timeStr);

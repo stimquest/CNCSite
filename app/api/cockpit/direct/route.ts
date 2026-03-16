@@ -24,10 +24,20 @@ export async function GET() {
                 lastPublishedAt, lastConfirmedAt, planningsLastUpdatedAt
             }`,
             {},
-            { useCdn: false }
+            { 
+                useCdn: false,
+                next: { revalidate: 0 }
+            }
         );
         if (!data) return NextResponse.json({ error: 'Data not found' }, { status: 404 });
-        return NextResponse.json(data);
+        
+        return NextResponse.json(data, {
+            headers: {
+                'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+                'Expires': '0',
+                'Surrogate-Control': 'no-store'
+            }
+        });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
@@ -40,7 +50,11 @@ export async function POST(req: Request) {
         const { type, patch } = body;
 
         // On récupère d'abord l'ID réel du document pour être sûr de patcher le bon
-        const settings = await client.fetch(`*[_type == "spotSettings" && !(_id in path('drafts.**'))][0] { _id }`, {}, { useCdn: false });
+        const settings = await client.fetch(
+            `*[_type == "spotSettings" && !(_id in path('drafts.**'))][0] { _id }`, 
+            {}, 
+            { useCdn: false, next: { revalidate: 0 } }
+        );
         const targetId = settings?._id || SINGLETON_ID;
 
         if (type === 'PATCH') {
