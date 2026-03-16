@@ -39,8 +39,12 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { type, patch } = body;
 
+        // On récupère d'abord l'ID réel du document pour être sûr de patcher le bon
+        const settings = await client.fetch(`*[_type == "spotSettings" && !(_id in path('drafts.**'))][0] { _id }`, {}, { useCdn: false });
+        const targetId = settings?._id || SINGLETON_ID;
+
         if (type === 'PATCH') {
-            await serverClient.patch(SINGLETON_ID).set({
+            await serverClient.patch(targetId).set({
                 ...patch,
                 lastPublishedAt: new Date().toISOString()
             }).commit();
@@ -51,7 +55,7 @@ export async function POST(req: Request) {
 
         if (type === 'CONFIRM') {
             // Chef de base confirms all is OK without changing any status
-            await serverClient.patch(SINGLETON_ID).set({
+            await serverClient.patch(targetId).set({
                 lastConfirmedAt: new Date().toISOString()
             }).commit();
             revalidatePath('/');

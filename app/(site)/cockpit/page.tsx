@@ -74,12 +74,13 @@ function CockpitContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'PATCH', patch: enrichedPatch })
             });
-            if (!res.ok) throw new Error('Erreur serveur');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Erreur serveur');
             await content.refreshData();
             setToast(label || '✓ Enregistré');
             setTimeout(() => setToast(null), 2000);
-        } catch {
-            alert("⚠️ Erreur lors de l'enregistrement.");
+        } catch (err: any) {
+            alert(`⚠️ Erreur: ${err.message || "lors de l'enregistrement."}`);
         } finally {
             setIsSaving(null);
         }
