@@ -34,8 +34,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
 const HERO_IMAGES = [
-    '/images/Hero/Ryan.jpg',
-    '/images/Hero/SunriseCata.png',
+    '/images/Hero/Ryan.webp',
+    '/images/Hero/SunriseCata.webp',
     '/images/Hero/upscaled_char3.JPEG'
 ];
 
@@ -290,35 +290,21 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.to('.hero-title', {
-                opacity: 1,
-                y: 0,
-                duration: 1.5,
-                delay: 0.2,
-                ease: 'power4.out'
-            });
-
             gsap.to('.hero-subtitle', {
                 opacity: 1,
                 y: 0,
                 duration: 1,
                 delay: 0.8,
             });
-
-            gsap.to('.hero-btn', {
-                opacity: 1,
-                scale: 1,
-                duration: 1,
-                delay: 1,
-            });
         });
 
         return () => ctx.revert();
     }, []);
 
-    const galleryImages = useMemo(() => {
-        if (!homeGallery?.images?.length) return [];
-        return [...homeGallery.images].sort(() => Math.random() - 0.5);
+    const [galleryImages, setGalleryImages] = useState<any[]>([]);
+    useEffect(() => {
+        if (!homeGallery?.images?.length) return;
+        setGalleryImages([...homeGallery.images].sort(() => Math.random() - 0.5));
     }, [homeGallery]);
 
     return (
