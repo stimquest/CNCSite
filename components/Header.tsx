@@ -49,20 +49,24 @@ export const Header: React.FC<HeaderProps> = () => {
     {
       items: [
         { label: 'Le Spot', href: '/le-spot' },
-        { label: 'Environnement', href: '/nature' },
+        { label: 'L\'Environnement', href: '/nature' },
       ]
     },
     {
       items: [
-        { label: 'Activités', href: '/activites' },
+        { label: 'Les Activités', href: '/activites' },
         { label: 'L\'École', href: '/ecole-voile' },
-        { label: 'Groupes', href: '/groupes-entreprises' },
+        { label: 'Les Groupes', href: '/groupes-entreprises' },
       ]
     },
     {
       items: [
         { label: 'Le Club', href: '/club' },
-        { label: 'Infos', href: '/infos-pratiques' },
+      ]
+    },
+    {
+      items: [
+        { label: 'Infos & Contact', href: '/infos-pratiques' },
       ]
     },
   ];
@@ -134,7 +138,7 @@ export const Header: React.FC<HeaderProps> = () => {
             {NAV_GROUPS.map((group, gIdx) => (
               <div key={gIdx} className="flex items-center">
                 {gIdx > 0 && (
-                  <span className="text-turquoise/40 text-lg font-black mx-2 select-none">~</span>
+                  <span className="text-abysse text-lg mx-2 select-none">•</span>
                 )}
                 <div className="flex items-center gap-5">
                   {group.items.map((item) => (
