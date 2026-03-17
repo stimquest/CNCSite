@@ -3,7 +3,8 @@ import { client, queries } from '@/lib/sanity';
 import InfosClient from './InfosClient';
 
 export const metadata = {
-    title: 'Informations Pratiques - CNC Coutainville',
+    title: 'Infos & Contact - CNC Coutainville',
+    description: 'Tarifs, documents utiles, horaires et contact du Club Nautique de Coutainville. Toutes les informations pratiques pour rejoindre le CNC.',
 };
 
 export const revalidate = 60;

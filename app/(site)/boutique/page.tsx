@@ -9,6 +9,7 @@ import { client, queries } from '@/lib/sanity';
 
 export const metadata = {
     title: 'Boutique & Occaz - CNC Coutainville',
+    description: "Boutique officielle du CNC Coutainville : textile, accessoires nautiques et petites annonces de matériel d'occasion entre membres.",
 };
 
 // Helper: extract plain text from Portable Text blocks or return string as-is
@@ -43,7 +44,7 @@ export default async function BoutiquePage() {
                 <div className="absolute -top-24 -right-24 size-96 bg-yellow-400/10 rounded-full blur-[120px]"></div>
                 <div className="absolute -bottom-24 -left-24 size-96 bg-turquoise/10 rounded-full blur-[120px]"></div>
 
-                <div className="max-w-[1400px] mx-auto text-center relative z-10">
+                <div className="max-w-350 mx-auto text-center relative z-10">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[9px] font-black uppercase tracking-widest text-yellow-400 mb-8">
                         <ShoppingBag size={14} />
                         <span>Showcase & Merchandising</span>
@@ -59,7 +60,7 @@ export default async function BoutiquePage() {
 
             {/* 2. VITRINE MERCHANDISING */}
             <section className="py-24 px-6 relative">
-                <div className="max-w-[1400px] mx-auto">
+                <div className="max-w-350 mx-auto">
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
                         <div>
                             <span className="text-turquoise font-black uppercase tracking-[0.3em] text-[10px] mb-4 block">Collection Officielle</span>
@@ -128,7 +129,7 @@ export default async function BoutiquePage() {
                 {/* Decorative background circle */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-turquoise/5 rounded-full translate-x-1/2 -translate-y-1/2"></div>
 
-                <div className="max-w-[1400px] mx-auto relative z-10">
+                <div className="max-w-350 mx-auto relative z-10">
                     <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-8">
                         <div className="text-center md:text-left">
                             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-turquoise/10 text-turquoise rounded-lg font-black text-[9px] uppercase tracking-widest mb-4">

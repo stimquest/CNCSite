@@ -21,7 +21,8 @@ import {
     ChevronUp,
     Play,
     Bell,
-    Printer
+    Printer,
+    Zap
 } from 'lucide-react';
 import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, ActivityType, CharWeek, CharDay, CharSession } from '@/types';
 import Link from 'next/link';

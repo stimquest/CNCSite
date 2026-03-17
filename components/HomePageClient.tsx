@@ -338,7 +338,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                 {/* SEPARATOR : REFINED WAVE (Plus de galbe, sans bouffer le bouton) */}
                 <div className="absolute inset-x-0 bottom-0 pointer-events-none z-10 leading-0 overflow-hidden">
                     <motion.div
-                        className="absolute bottom-0 left-0 w-[200%] h-[150px] md:h-[220px] opacity-40 z-0"
+                        className="absolute bottom-0 left-0 w-[200%] h-37.5 md:h-55 opacity-40 z-0"
                         style={{ x: waveX1 }}
                     >
                         <svg className="w-full h-full fill-white/40" viewBox="0 0 2880 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
@@ -347,7 +347,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                     </motion.div>
 
                     <motion.div
-                        className="relative w-full h-[140px] md:h-[200px]"
+                        className="relative w-full h-35 md:h-50"
                         style={{ y: waveY2 }}
                     >
                         <svg className="w-full h-full fill-slate-50" viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
@@ -360,13 +360,13 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
             </section>
 
             {/* BENTO ACCUEIL — Unifié façon "Centre de Contrôle" (Air & Glass) */}
-            <section id="dashboard" className="max-w-[1600px] mx-auto px-6 pt-10 pb-4 relative z-10">
+            <section id="dashboard" className="max-w-400 mx-auto px-6 pt-10 pb-4 relative z-10">
                 <div className="bg-white relative overflow-hidden rounded-[2rem] shadow-[0_8px_32px_rgba(0,43,73,0.05)] border border-abysse/10">
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch relative z-10">
 
                         {/* COL 1-4 : Le Spot / Météo (Image brute avec lettrage très contrasté) */}
-                        <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-abysse/10 p-6 lg:p-8 flex flex-col justify-between group h-full min-h-[220px] relative overflow-hidden bg-black">
+                        <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-abysse/10 p-6 lg:p-8 flex flex-col justify-between group h-full min-h-55 relative overflow-hidden bg-black">
                             {/* Image brute sans le filtre bleu abysse envahissant */}
                             <img src={homePageData?.hero?.spotImage || "https://images.unsplash.com/photo-1544198365-f5d60b6d8190?q=80&w=800"} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1500" alt="Le Spot" />
                             {/* Dégradé noir neutre uniquement en bas pour garantir la lisibilité des données du vent */}
@@ -549,7 +549,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                         })}
                                     </div>
                                 ) : (
-                                    <div className="flex-1 rounded-xl border border-dashed border-abysse/20 text-center flex items-center justify-center min-h-[150px]">
+                                    <div className="flex-1 rounded-xl border border-dashed border-abysse/20 text-center flex items-center justify-center min-h-37.5">
                                         <p className="text-[10px] text-abysse/30 font-black italic uppercase tracking-widest">Aucune info récente</p>
                                     </div>
                                 )}
@@ -561,7 +561,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
             </section>
 
             {/* SECTION : L'ESPRIT DU CLUB */}
-            <section id="esprit-club" className="py-24 max-w-[1600px] mx-auto px-6 relative z-10">
+            <section id="esprit-club" className="py-24 max-w-400 mx-auto px-6 relative z-10">
                 <div className="mb-12 px-2">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
@@ -573,7 +573,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                     </h2>
                 </div>
 
-                <div className="relative rounded-[3rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-[700px] md:h-[600px] group/container">
+                <div className="relative rounded-[3rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-175 md:h-150 group/container">
 
                     {/* 0. Le Message - Hidden on Mobile */}
                     <div className="absolute top-8 left-8 z-30 pointer-events-none md:max-w-xl hidden md:block">
@@ -684,7 +684,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
             <div id="focus" ref={focusSectionRef} className="bg-sky-50 py-12">
                 <section className="relative z-10">
                     {/* Header */}
-                    <div className="max-w-[1600px] mx-auto px-6 mb-8">
+                    <div className="max-w-400 mx-auto px-6 mb-8">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="size-2 rounded-full bg-orange-500 animate-pulse"></div>
                             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500">Activités phares</span>
@@ -694,9 +694,9 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                         </h2>
                     </div>
 
-                    {/* Carousel — overflow-hidden full-width, flex aligné sur max-w-[1600px] mx-auto px-6 */}
+                    {/* Carousel — overflow-hidden full-width, flex aligné sur max-w-400 mx-auto px-6 */}
                     <div className="overflow-hidden" onWheel={handleFocusWheel}>
-                        <div className="max-w-[1600px] mx-auto pl-6">
+                        <div className="max-w-400 mx-auto pl-6">
                             <motion.div
                                 id="focus-slider"
                                 className="flex gap-6 will-change-transform"
@@ -710,7 +710,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                 {/* Carte 1 — Char à Voile */}
                                 <div
                                     id="vitesse"
-                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-[500px] lg:min-h-[550px]"
+                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-125 lg:min-h-137.5"
                                     style={{ opacity: currentFocusIndex === 0 ? 1 : 0.5, transform: currentFocusIndex === 0 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
                                 >
                                     <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
@@ -741,7 +741,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
+                                    <div className="flex-none h-70 md:h-87.5 lg:h-auto lg:flex-1 relative overflow-hidden">
                                         <div className="absolute inset-0 z-0">
                                             <AnimatePresence mode="popLayout">
                                                 <motion.img key={CHAR_IMAGES[currentCharIndex]} src={CHAR_IMAGES[currentCharIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Char à voile" />
@@ -752,7 +752,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                         <div className="absolute bottom-6 right-8 flex gap-2 z-20">
                                             {CHAR_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentCharIndex ? 'w-8 bg-orange-500' : 'w-2 bg-white/30'}`} />))}
                                         </div>
-                                        <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                                        <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-45">
                                             <span className="text-orange-500 font-black text-3xl block leading-none mb-1">{homePageData?.focusChar?.badgeValue || "60+"}</span>
                                             <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusChar?.badgeLabel || "Km/h de sensations pures"}</span>
                                         </div>
@@ -762,7 +762,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                 {/* Carte 2 — Glisse Extrême */}
                                 <div
                                     id="adrenaline"
-                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row-reverse min-h-[500px] lg:min-h-[550px]"
+                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row-reverse min-h-125 lg:min-h-137.5"
                                     style={{ opacity: currentFocusIndex === 1 ? 1 : 0.5, transform: currentFocusIndex === 1 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
                                 >
                                     <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
@@ -793,7 +793,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                             </Link>
                                         </div>
                                     </div>
-                                    <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
+                                    <div className="flex-none h-70 md:h-87.5 lg:h-auto lg:flex-1 relative overflow-hidden">
                                         <div className="absolute inset-0 z-0">
                                             <AnimatePresence mode="popLayout">
                                                 <motion.img key={GLISSE_IMAGES[currentGlisseIndex]} src={GLISSE_IMAGES[currentGlisseIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6.5, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Glisse extrême" />
@@ -804,7 +804,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                         <div className="absolute bottom-6 left-8 flex gap-2 z-20">
                                             {GLISSE_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentGlisseIndex ? 'w-8 bg-blue-500' : 'w-2 bg-white/30'}`} />))}
                                         </div>
-                                        <div className="absolute top-8 left-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                                        <div className="absolute top-8 left-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-45">
                                             <span className="text-blue-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusGlisse?.badgeValue || "Pure"}</span>
                                             <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusGlisse?.badgeLabel || "Énergie & Adrénaline"}</span>
                                         </div>
@@ -814,7 +814,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                 {/* Carte 3 — Bien-être & Slow Tourisme */}
                                 <div
                                     id="bien-etre"
-                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-[500px] lg:min-h-[550px]"
+                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-125 lg:min-h-137.5"
                                     style={{ opacity: currentFocusIndex === 2 ? 1 : 0.5, transform: currentFocusIndex === 2 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
                                 >
                                     <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
@@ -845,7 +845,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                             </Link>
                                         </div>
                                     </div>
-                                    <div className="flex-none h-[280px] md:h-[350px] lg:h-auto lg:flex-1 relative overflow-hidden">
+                                    <div className="flex-none h-70 md:h-87.5 lg:h-auto lg:flex-1 relative overflow-hidden">
                                         <div className="absolute inset-0 z-0">
                                             <AnimatePresence mode="popLayout">
                                                 <motion.img key={WELLBEING_IMAGES[currentWellbeingIndex]} src={WELLBEING_IMAGES[currentWellbeingIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 7, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Bien-être slow tourisme" />
@@ -856,7 +856,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                         <div className="absolute bottom-6 right-8 flex gap-2 z-20">
                                             {WELLBEING_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentWellbeingIndex ? 'w-8 bg-emerald-500' : 'w-2 bg-white/30'}`} />))}
                                         </div>
-                                        <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-[180px]">
+                                        <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-45">
                                             <span className="text-emerald-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusBienEtre?.badgeValue || "100%"}</span>
                                             <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusBienEtre?.badgeLabel || "Oxygène & Sérénité Locale"}</span>
                                         </div>
@@ -867,7 +867,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                     </div>
 
                     {/* Flèches — bottom right, style Apple */}
-                    <div className="max-w-[1600px] mx-auto px-6 mt-5 flex justify-end gap-3">
+                    <div className="max-w-400 mx-auto px-6 mt-5 flex justify-end gap-3">
                         <button
                             onClick={() => navigateFocus(Math.max(0, currentFocusIndex - 1))}
                             disabled={currentFocusIndex === 0}
@@ -890,11 +890,11 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
             <section id="agenda" className="py-24 relative z-10 overflow-hidden">
                 {/* Background Decoration */}
                 <div className="absolute inset-0 z-0 pointer-events-none">
-                    <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-turquoise/10 rounded-full blur-[120px] translate-x-1/2" />
-                    <div className="absolute bottom-1/4 -left-20 w-[400px] h-[400px] bg-abysse/5 rounded-full blur-[100px]" />
+                    <div className="absolute top-1/4 right-0 w-150 h-150 bg-turquoise/10 rounded-full blur-[120px] translate-x-1/2" />
+                    <div className="absolute bottom-1/4 -left-20 w-100 h-100 bg-abysse/5 rounded-full blur-[100px]" />
                 </div>
 
-                <div className="max-w-[1600px] mx-auto px-6 relative z-10">
+                <div className="max-w-400 mx-auto px-6 relative z-10">
                     <div className="flex flex-col lg:flex-row gap-16 items-start">
                         {/* Title part */}
                         <div className="lg:w-1/3 pt-8">
@@ -930,7 +930,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                     >
                                         <div className="flex justify-between items-start mb-6">
                                             {/* Date Float Badge */}
-                                            <div className="bg-abysse px-4 py-2.5 rounded-2xl shadow-lg text-center min-w-[65px] group-hover/card:bg-turquoise transition-colors duration-500">
+                                            <div className="bg-abysse px-4 py-2.5 rounded-2xl shadow-lg text-center min-w-16.25 group-hover/card:bg-turquoise transition-colors duration-500">
                                                 <span className="block text-[10px] font-black text-turquoise uppercase tracking-widest leading-none mb-1 group-hover/card:text-abysse">
                                                     {eventDate.toLocaleDateString('fr-FR', { month: 'short' })}
                                                 </span>
@@ -1004,14 +1004,14 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
 
             {/* --- SECTION : MINI-JEU PÉDAGOGIQUE (desktop only) --- */}
             <section id="pedagogie" className="hidden md:block py-24 bg-abysse relative z-10">
-                <div className="max-w-[1600px] mx-auto px-6">
+                <div className="max-w-400 mx-auto px-6">
                     <GamesSlideshow />
                 </div>
             </section>
 
             {/* --- SECTION : LE DICO DES PARENTS --- */}
             <section id="dico-parents" className="py-24 bg-slate-50 relative z-10">
-                <div className="max-w-[1600px] mx-auto px-6">
+                <div className="max-w-400 mx-auto px-6">
                     {dicoWords && dicoWords.length > 0 ? (
                         <DicoParents dicoWords={dicoWords} />
                     ) : (
@@ -1021,7 +1021,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
             </section>
 
             {/* --- NOUVEAU : LE CLUB EN IMMERSION (Shop & Galerie) --- */}
-            <section className="py-24 max-w-[1600px] mx-auto px-6 relative z-10" id="immersion">
+            <section className="py-24 max-w-400 mx-auto px-6 relative z-10" id="immersion">
                 <div className="mb-12 px-2">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="size-2 rounded-full bg-yellow-400"></div>
@@ -1071,7 +1071,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                 <CardContainer
                                     key={idx}
                                     href={isPlayCard ? undefined : (card.link || "#")}
-                                    className="group relative h-[380px] rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl"
+                                    className="group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl"
                                 >
                                     <img src={card.image || "/images/imgBank/CataPharePointeAgon.jpg"} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" alt={card.titlePart1} />
                                     <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
@@ -1118,7 +1118,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                     ) : (
                         <>
                             {/* TUILE : LA VIGIE (NEWS/LIVE) */}
-                            <Link href="/fil-info" className="group relative h-[380px] rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
+                            <Link href="/fil-info" className="group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
                                 <img src="/images/imgBank/CataPharePointeAgon.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" alt="La Vigie Direct" />
                                 <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
 
@@ -1139,7 +1139,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                             </Link>
 
                             {/* TUILE : BOUTIQUE (CNC SHOP) */}
-                            <Link href="/boutique" className="group relative h-[380px] rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
+                            <Link href="/boutique" className="group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
                                 <img src="/images/imgBank/naviguer.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" alt="Boutique CNC" />
                                 <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
 
@@ -1160,7 +1160,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                             </Link>
 
                             {/* TUILE : GALERIE MÉDIAS */}
-                            <div className="group relative h-[380px] rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl cursor-pointer">
+                            <div className="group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl cursor-pointer">
                                 <img src="/images/imgBank/Navigation.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="Galerie Médias" />
                                 <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
 
@@ -1194,7 +1194,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                             </div>
 
                             {/* TUILE : SÉMINAIRES & ÉVÉNEMENTS */}
-                            <Link href="/groupes-entreprises" className="group relative h-[380px] rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
+                            <Link href="/groupes-entreprises" className="group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
                                 <img src="/images/imgBank/Secourisme.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="Séminaires entreprises" />
                                 <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
 
@@ -1220,7 +1220,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
 
             {/* --- SECTION : PARTENAIRES --- */}
             <section id="reseau" className="py-24 bg-slate-50 border-t border-slate-100">
-                <div className="max-w-[1600px] mx-auto px-6">
+                <div className="max-w-400 mx-auto px-6">
                     <div className="mb-16 text-center">
                         <div className="flex items-center justify-center gap-3 mb-3">
                             <div className="size-1.5 rounded-full bg-slate-300"></div>

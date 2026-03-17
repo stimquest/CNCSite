@@ -4,6 +4,7 @@ import EcoleVoileClient from './EcoleVoileClient';
 
 export const metadata = {
     title: 'École de Voile - CNC Coutainville',
+    description: 'École de voile labellisée FFVoile à Agon-Coutainville. Stages Mini-Mousses, Moussaillons, Initiation et Perfectionnement pour enfants et adultes sur la Manche.',
 };
 
 export const revalidate = 60;

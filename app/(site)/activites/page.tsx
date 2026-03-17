@@ -4,6 +4,7 @@ import ActivitiesClient from './ActivitiesClient';
 
 export const metadata = {
     title: 'Activités & Stages - CNC Coutainville',
+    description: 'Voile, char à voile, wingfoil, kitesurf, kayak et marche aquatique à Agon-Coutainville. Stages enfants et adultes, location et pratique libre sur la côte normande.',
 };
 
 export const revalidate = 60;

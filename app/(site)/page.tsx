@@ -1,8 +1,20 @@
 import { client, queries } from '../../lib/sanity';
 import HomePageClient from '../../components/HomePageClient';
 
-// Add revalidate inside the server component to enable ISR optionally
-export const revalidate = 60; // revalidate every 60 seconds
+export const metadata = {
+    title: 'CNC Coutainville — Club Nautique & École de Voile',
+    description: 'Club Nautique de Coutainville depuis 1978 : stages voile, char à voile, wingfoil, kitesurf et marche aquatique sur la côte normande. École labellisée FFVoile.',
+    openGraph: {
+        title: 'CNC Coutainville — Club Nautique & École de Voile',
+        description: 'Club Nautique de Coutainville depuis 1978 : stages voile, char à voile, wingfoil, kitesurf et marche aquatique sur la côte normande.',
+        url: 'https://cnccoutainville.fr',
+        siteName: 'CNC Coutainville',
+        locale: 'fr_FR',
+        type: 'website',
+    },
+};
+
+export const revalidate = 60;
 
 export default async function Page() {
     // SSR Fetching
