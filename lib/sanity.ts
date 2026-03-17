@@ -96,12 +96,24 @@ export const queries = {
     "team": team { tag, title, "boardMembers": boardMembers[] { name, role, image }, caMembers, "proTeam": proTeam[] { name, role, image } },
     "site": site { title, description, facilities, imageCaption, imageSublabel, "image": image.asset->url },
     "fleet": fleet { title, "items": items[] { name, subtitle, description, crew, stats, "gallery": gallery[].asset->url } },
-    "agenda": agenda { title, highlightText, description, volunteering, events[] { title, startDate, badge, time, description, "image": image.asset->url } },
+    "agenda": agenda { title, highlightText, description, volunteering, "events": *[(_type == "agendaEvent") || (_type == "article" && defined(agendaDate))] | order(coalesce(startDate, agendaDate) asc) { _id, _type, "title": title, "startDate": coalesce(startDate, agendaDate), "badge": coalesce(badge, agendaBadge), "time": coalesce(time, agendaTime), "description": coalesce(description, excerpt), "image": coalesce(image.asset->url, coverImage.asset->url), "articleSlug": select(_type == "article" => slug.current, _type == "agendaEvent" => articleRef->slug.current) } },
     "souvenirs": souvenirs { title, highlightText, description, "items": items[] { "image": image.asset->url, title, date, decade } },
     cta
   }`,
-  homeAgenda: `*[_type == "clubPage"][0].agenda.events[] { 
-    title, startDate, badge, time, description, "image": image.asset->url 
+  homeAgenda: `*[(_type == "agendaEvent") || (_type == "article" && defined(agendaDate))] | order(coalesce(startDate, agendaDate) asc) {
+    _id, _type, "title": title, "startDate": coalesce(startDate, agendaDate), "badge": coalesce(badge, agendaBadge), "time": coalesce(time, agendaTime), "description": coalesce(description, excerpt), "image": coalesce(image.asset->url, coverImage.asset->url), "articleSlug": select(_type == "article" => slug.current, _type == "agendaEvent" => articleRef->slug.current)
+  }`,
+  articles: `*[_type == "article"] | order(publishedAt desc) {
+    _id, title, "slug": slug.current, category, publishedAt, excerpt,
+    "coverImage": coverImage.asset->url
+  }`,
+  articleBySlug: `*[_type == "article" && slug.current == $slug][0] {
+    _id, title, "slug": slug.current, category, publishedAt, excerpt,
+    "coverImage": coverImage.asset->url,
+    body[] {
+      ...,
+      _type == "image" => { ..., "url": asset->url }
+    }
   }`,
   homePage: `*[_type == "homePage"][0] {
     "hero": { "title": heroTitle, "subtitle": heroSubtitle, "images": heroImages[].asset->url, "videoUrl": heroVideoUrl, "spotImage": spotImage.asset->url },

@@ -62,6 +62,7 @@ export const Header: React.FC<HeaderProps> = () => {
     {
       items: [
         { label: 'Le Club', href: '/club' },
+        { label: 'Le Blog', href: '/blog' },
       ]
     },
     {

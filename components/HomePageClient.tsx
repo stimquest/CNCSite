@@ -971,6 +971,15 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
 
                                         {/* Accent line */}
                                         <div className="h-1 w-8 bg-turquoise/20 rounded-full group-hover/card:w-full group-hover/card:bg-turquoise transition-all duration-500" />
+
+                                        {event.articleSlug && (
+                                            <Link
+                                                href={`/blog/${event.articleSlug}`}
+                                                className="inline-flex items-center gap-1 mt-4 text-[10px] font-black uppercase tracking-widest text-turquoise hover:gap-2 transition-all"
+                                            >
+                                                Lire l&apos;article <ArrowRight size={10} />
+                                            </Link>
+                                        )}
                                     </div>
                                 );
                             })}

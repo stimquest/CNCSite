@@ -623,6 +623,14 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
                                                                                 <RenderText content={item.description} />
                                                                             </div>
                                                                         )}
+                                                                        {item.articleSlug && (
+                                                                            <Link
+                                                                                href={`/blog/${item.articleSlug}`}
+                                                                                className="inline-flex items-center gap-1 mt-3 text-[10px] font-black uppercase tracking-widest text-turquoise hover:gap-2 transition-all"
+                                                                            >
+                                                                                Lire l&apos;article <ArrowRight size={10} />
+                                                                            </Link>
+                                                                        )}
                                                                     </div>
                                                                     {item.image && (
                                                                         <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-100">

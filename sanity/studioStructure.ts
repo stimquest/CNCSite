@@ -44,13 +44,12 @@ export const structure: StructureResolver = (S) =>
             S.listItem()
                 .title('Club à l\'année')
                 .id('yearlyClubGroup')
-                .icon(() => '⛵')
                 .child(
                     S.list()
                         .title('Gestion Club à l\'année')
                         .items([
                             S.listItem()
-                                .title('⚙️ Configuration Page')
+                                .title('Configuration Page')
                                 .id('activitiesPage')
                                 .child(
                                     S.document()
@@ -60,11 +59,11 @@ export const structure: StructureResolver = (S) =>
                                 ),
                             S.divider(),
                             S.listItem()
-                                .title('🏗️ Les Pôles')
+                                .title('Les Pôles')
                                 .schemaType('clubPole')
                                 .child(S.documentTypeList('clubPole').title('Liste des Pôles')),
                             S.listItem()
-                                .title('🎯 Les Activités')
+                                .title('Les Activités')
                                 .schemaType('clubActivity')
                                 .child(S.documentTypeList('clubActivity').title('Liste des Activités')),
                         ])
@@ -109,34 +108,30 @@ export const structure: StructureResolver = (S) =>
 
             S.divider(),
 
-            // --- NOUVEAU GROUPE : INVENTAIRES & RÉFÉRENTIELS ---
             S.listItem()
-                .title('🗂️ Bases de Données')
-                .icon(() => '🗄️')
+                .title('Bases de Données')
                 .child(
                     S.list()
                         .title('Inventaires & Référentiels')
                         .items([
-                            S.documentTypeListItem('bookingTemplate').title('📝 Modèles de Réservation'),
-                            S.documentTypeListItem('natureEntity').title('🌿 Inventaire Nature'),
-                            S.documentTypeListItem('dicoWord').title('📖 Dico des Parents'),
+                            S.documentTypeListItem('bookingTemplate').title('Modèles de Réservation'),
+                            S.documentTypeListItem('natureEntity').title('Inventaire Nature'),
+                            S.documentTypeListItem('dicoWord').title('Dico des Parents'),
                             S.divider(),
-                            S.documentTypeListItem('fleetItem').title('⛵ La Flotte (Inventaire)'),
-                            S.documentTypeListItem('merchItem').title('👕 Boutique & Merch'),
-                            S.documentTypeListItem('occazItem').title('💰 Petites Annonces Occaz'),
+                            S.documentTypeListItem('fleetItem').title('La Flotte'),
+                            S.documentTypeListItem('merchItem').title('Boutique & Merch'),
+                            S.documentTypeListItem('occazItem').title('Petites Annonces Occaz'),
                         ])
                 ),
 
-            // --- NOUVEAU GROUPE : CONFIGURATION & MESSAGES ---
             S.listItem()
-                .title('⚙️ CONFIG & ALERTES')
-                .icon(() => '🛠️')
+                .title('Config & Alertes')
                 .child(
                     S.list()
                         .title('Configuration & Messages')
                         .items([
                             S.listItem()
-                                .title('🚩 Statut du Spot (Cockpit)')
+                                .title('Statut du Spot (Cockpit)')
                                 .id('spotSettings')
                                 .child(
                                     S.document()
@@ -144,31 +139,45 @@ export const structure: StructureResolver = (S) =>
                                         .documentId('spotSettings')
                                         .title('Statut du Spot')
                                 ),
-                            S.documentTypeListItem('infoMessage').title('📢 Messages Info / Alertes'),
-                            S.documentTypeListItem('vibeMessage').title('✨ Messages d\'Ambiance'),
-                            S.documentTypeListItem('signageSlide').title('📺 Écrans (Affichage Public)'),
+                            S.documentTypeListItem('infoMessage').title('Messages Info / Alertes'),
+                            S.documentTypeListItem('vibeMessage').title('Messages d\'Ambiance'),
+                            S.documentTypeListItem('signageSlide').title('Écrans (Affichage Public)'),
                         ])
                 ),
 
-            // --- NOUVEAU GROUPE : PROGRAMMATION & PLANNING ---
             S.listItem()
-                .title('📅 PROGRAMMATION & PLANNING')
-                .icon(() => '📅')
+                .title('Programmation & Planning')
                 .child(
                     S.list()
                         .title('Gestion des Plannings')
                         .items([
-                            S.documentTypeListItem('weeklyPlanning').title('📅 Planning de la Semaine'),
+                            S.documentTypeListItem('weeklyPlanning').title('Planning de la Semaine'),
                             S.divider(),
-                            S.documentTypeListItem('planningCharAVoile').title('💨 Planning Char à Voile'),
-                            S.documentTypeListItem('planningMarche').title('🚶 Planning Marche Aquatique'),
+                            S.documentTypeListItem('planningCharAVoile').title('Planning Char à Voile'),
+                            S.documentTypeListItem('planningMarche').title('Planning Marche Aquatique'),
                         ])
+                ),
+
+            S.listItem()
+                .title('Agenda')
+                .child(
+                    S.documentTypeList('agendaEvent')
+                        .title('Agenda')
+                        .defaultOrdering([{ field: 'startDate', direction: 'asc' }])
+                ),
+
+            S.listItem()
+                .title('Blog & Articles')
+                .child(
+                    S.documentTypeList('article')
+                        .title('Blog & Articles')
+                        .defaultOrdering([{ field: 'publishedAt', direction: 'desc' }])
                 ),
 
             S.divider(),
 
             // Regular document types
             ...S.documentTypeListItems().filter(
-                (listItem) => !['naturePage', 'clubPage', 'groupsPage', 'activitiesPage', 'leSpotPage', 'homeGallery', 'spotSettings', 'homePage', 'infosPage', 'schoolPage', 'bookingTemplate', 'natureEntity', 'dicoWord', 'fleetItem', 'merchItem', 'occazItem', 'infoMessage', 'vibeMessage', 'signageSlide', 'clubPole', 'clubActivity', 'weeklyPlanning', 'planningCharAVoile', 'planningMarche'].includes(listItem.getId() || '')
+                (listItem) => !['naturePage', 'clubPage', 'groupsPage', 'activitiesPage', 'leSpotPage', 'homeGallery', 'spotSettings', 'homePage', 'infosPage', 'schoolPage', 'bookingTemplate', 'natureEntity', 'dicoWord', 'fleetItem', 'merchItem', 'occazItem', 'infoMessage', 'vibeMessage', 'signageSlide', 'clubPole', 'clubActivity', 'weeklyPlanning', 'planningCharAVoile', 'planningMarche', 'article', 'agendaEvent'].includes(listItem.getId() || '')
             ),
         ]);

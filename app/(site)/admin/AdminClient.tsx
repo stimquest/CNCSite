@@ -11,7 +11,6 @@ import {
     Wind,
     Sun,
     Ship,
-    Zap,
     Clock,
     RefreshCw,
     Shield,
@@ -24,7 +23,7 @@ import {
     Bell,
     Printer
 } from 'lucide-react';
-import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, ActivityType, CharWeek, CharDay, CharSession, AutoConditionsConfig, ActivityThresholds, ActivityMessages } from '@/types';
+import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, ActivityType, CharWeek, CharDay, CharSession } from '@/types';
 import Link from 'next/link';
 
 // --- CONSTANTS ---
@@ -78,14 +77,8 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
         router.refresh();
     };
 
-    const [activeTab, setActiveTab] = useState<'STAGES' | 'CHAR' | 'MARCHE' | 'CONDITIONS' | 'VIGIE'>('STAGES');
+    const [activeTab, setActiveTab] = useState<'STAGES' | 'CHAR' | 'MARCHE' | 'VIGIE'>('STAGES');
     const [isSaving, setIsSaving] = useState(false);
-
-    // --- AUTO CONDITIONS STATE ---
-    const [autoConfig, setAutoConfig] = useState<AutoConditionsConfig | null>(null);
-    const [isChecking, setIsChecking] = useState(false);
-    const [checkResult, setCheckResult] = useState<any>(null);
-    const [conditionsSaved, setConditionsSaved] = useState(false);
 
     // --- VIGIE STATE ---
     const [vigieMsg, setVigieMsg] = useState({
@@ -104,89 +97,6 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
     const [selectedCharPeriod, setSelectedCharPeriod] = useState<PlanningCharAVoile | null>(null);
     const [selectedMarchePeriod, setSelectedMarchePeriod] = useState<PlanningMarche | null>(null);
     const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
-
-
-    // --- AUTO CONDITIONS: FETCH CONFIG ---
-    const fetchAutoConfig = useCallback(async () => {
-        try {
-            const res = await fetch('/api/cockpit/auto-check');
-            const data = await res.json();
-            if (data && !data.error) setAutoConfig(data);
-        } catch (e) { console.error('Failed to fetch auto-config', e); }
-    }, []);
-
-    useEffect(() => {
-        fetchAutoConfig();
-    }, [fetchAutoConfig]);
-
-    // --- AUTO CONDITIONS: SAVE CONFIG ---
-    const saveAutoConfig = async () => {
-        if (!autoConfig) return;
-        setIsSaving(true);
-        try {
-            await fetch('/api/cockpit/auto-check', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(autoConfig)
-            });
-            setConditionsSaved(true);
-            setTimeout(() => setConditionsSaved(false), 2000);
-        } catch (e) { console.error(e); alert('Erreur sauvegarde config'); }
-        finally { setIsSaving(false); }
-    };
-
-    // --- AUTO CONDITIONS: FORCE CHECK ---
-    const forceAutoCheck = async () => {
-        setIsChecking(true);
-        setCheckResult(null);
-        try {
-            const res = await fetch('/api/cockpit/auto-check', { method: 'POST' });
-            const data = await res.json();
-            setCheckResult(data);
-            await fetchAutoConfig();
-        } catch (e) { console.error(e); setCheckResult({ error: 'Erreur réseau' }); }
-        finally { setIsChecking(false); }
-    };
-
-    // --- AUTO CONDITIONS: HELPERS ---
-    const updateThreshold = (actKey: 'char' | 'nautique' | 'marche', criteria: keyof ActivityThresholds, field: string, value: number) => {
-        if (!autoConfig) return;
-        const updated = { ...autoConfig };
-        const activity = updated.activities[actKey];
-        if (!activity.thresholds[criteria]) activity.thresholds[criteria] = {};
-        (activity.thresholds[criteria] as any)[field] = value;
-        setAutoConfig(updated);
-    };
-
-    const updateMessage = (actKey: 'char' | 'nautique' | 'marche', msgKey: keyof ActivityMessages, value: string) => {
-        if (!autoConfig) return;
-        const updated = { ...autoConfig };
-        updated.activities[actKey].messages[msgKey] = value;
-        setAutoConfig(updated);
-    };
-
-    // Helper to render weather value
-    const formatWeatherValue = (val: number | undefined, unit: string) => val !== undefined ? `${Math.round(val)} ${unit}` : '-';
-
-    // --- RENDER HELPERS ---
-    const renderThresholdInput = (actKey: 'char' | 'nautique' | 'marche', criteria: keyof ActivityThresholds, field: string, label: string, unit: string) => {
-        const val = (autoConfig?.activities[actKey].thresholds[criteria] as any)?.[field];
-        return (
-            <div className="flex flex-col gap-1">
-                <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">{label}</label>
-                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
-                    <input
-                        type="number"
-                        value={val || ''}
-                        onChange={(e) => updateThreshold(actKey, criteria, field, parseFloat(e.target.value))}
-                        className="w-full bg-transparent text-xs font-black text-abysse outline-none"
-                        placeholder="-"
-                    />
-                    <span className="text-[9px] font-bold text-slate-400">{unit}</span>
-                </div>
-            </div>
-        );
-    };
 
 
     // --- HANDLERS: STAGES ---
@@ -553,8 +463,7 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
                                 <button onClick={() => setActiveTab('STAGES')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'STAGES' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Stages</button>
                                 <button onClick={() => setActiveTab('CHAR')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'CHAR' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Char à Voile</button>
                                 <button onClick={() => setActiveTab('MARCHE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'MARCHE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Marche</button>
-                                <button onClick={() => setActiveTab('CONDITIONS')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'CONDITIONS' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Zap size={12} /> Conditions Auto</button>
-                                <button onClick={() => setActiveTab('VIGIE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'VIGIE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Bell size={12} /> Vigie Direct</button>
+<button onClick={() => setActiveTab('VIGIE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'VIGIE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Bell size={12} /> Vigie Direct</button>
                                 <Link href="/cockpit" target="_blank" className="ml-2 px-4 py-2 rounded-lg bg-turquoise/10 text-turquoise hover:bg-turquoise/20 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
                                     🚀 Cockpit
                                 </Link>
@@ -1036,313 +945,6 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
                             </div>
                         </div>
                     )}
-
-                    {/* TAB: CONDITIONS AUTO */}
-                    {activeTab === 'CONDITIONS' && autoConfig && (
-                        <div className="space-y-6 max-w-300">
-
-                            {/* HEADER PANEL */}
-                            <div className="bg-white p-6 md:p-8 rounded-4xl shadow-sm border border-slate-200">
-                                <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-                                    <div className="space-y-1">
-                                        <h3 className="text-2xl font-black uppercase italic text-abysse tracking-tighter flex items-center gap-3">
-                                            <Zap size={24} className="text-turquoise" /> Pilotage Automatique
-                                        </h3>
-                                        <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
-                                            Évaluation météo multi-critères (Vent, Houle, Orages...)
-                                        </p>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        {conditionsSaved && <span className="text-[10px] font-black text-emerald-500 uppercase animate-pulse">✓ Sauvegardé</span>}
-                                        <button onClick={saveAutoConfig} disabled={isSaving} className="px-6 py-3 bg-abysse text-white rounded-xl font-black uppercase text-xs tracking-widest hover:bg-turquoise transition-all shadow-md flex items-center gap-2">
-                                            <Save size={16} /> Enregistrer
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* GLOBAL CONTROLS */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-100">
-                                    {/* Enable/Disable */}
-                                    <div className="flex items-center gap-4 bg-slate-50 px-5 py-4 rounded-2xl border border-slate-100">
-                                        <div className={`p-2.5 rounded-xl ${autoConfig.enabled ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-200 text-slate-400'} transition-colors`}>
-                                            <Zap size={18} />
-                                        </div>
-                                        <div className="flex-1">
-                                            <span className="block text-[10px] font-black uppercase text-slate-400 tracking-wider">Système Auto</span>
-                                            <span className={`text-sm font-black uppercase ${autoConfig.enabled ? 'text-emerald-600' : 'text-slate-400'}`}>
-                                                {autoConfig.enabled ? 'Activé' : 'Désactivé'}
-                                            </span>
-                                        </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" checked={autoConfig.enabled} onChange={(e) => setAutoConfig({ ...autoConfig, enabled: e.target.checked })} className="sr-only peer" />
-                                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                                        </label>
-                                    </div>
-
-                                    {/* Check Hour */}
-                                    <div className="flex items-center gap-4 bg-slate-50 px-5 py-4 rounded-2xl border border-slate-100">
-                                        <div className="p-2.5 rounded-xl bg-blue-50 text-blue-500">
-                                            <Clock size={18} />
-                                        </div>
-                                        <div className="flex-1">
-                                            <span className="block text-[10px] font-black uppercase text-slate-400 tracking-wider">Heure du check</span>
-                                            <select
-                                                value={autoConfig.checkHour}
-                                                onChange={(e) => setAutoConfig({ ...autoConfig, checkHour: parseInt(e.target.value) })}
-                                                className="mt-1 bg-transparent font-black text-abysse text-sm outline-none cursor-pointer"
-                                            >
-                                                {Array.from({ length: 24 }, (_, i) => (
-                                                    <option key={i} value={i}>{i < 10 ? `0${i}` : i}h00</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    {/* Manual Override */}
-                                    <div className="flex items-center gap-4 bg-slate-50 px-5 py-4 rounded-2xl border border-slate-100">
-                                        <div className={`p-2.5 rounded-xl ${autoConfig.manualOverride ? 'bg-amber-50 text-amber-500' : 'bg-slate-200 text-slate-400'} transition-colors`}>
-                                            <Shield size={18} />
-                                        </div>
-                                        <div className="flex-1">
-                                            <span className="block text-[10px] font-black uppercase text-slate-400 tracking-wider">Reprise Manuelle</span>
-                                            <span className={`text-sm font-black uppercase ${autoConfig.manualOverride ? 'text-amber-600' : 'text-slate-400'}`}>
-                                                {autoConfig.manualOverride ? 'Chef de base' : 'Automatique'}
-                                            </span>
-                                        </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" checked={autoConfig.manualOverride} onChange={(e) => setAutoConfig({ ...autoConfig, manualOverride: e.target.checked })} className="sr-only peer" />
-                                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* FORCE CHECK + STATUS */}
-                            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200">
-                                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                                    <div>
-                                        <h4 className="text-sm font-black uppercase text-abysse tracking-wider flex items-center gap-2">
-                                            <RefreshCw size={16} className="text-turquoise" /> Dernier Check
-                                        </h4>
-                                        {autoConfig.lastCheck ? (
-                                            <p className="text-[11px] text-slate-400 font-bold mt-1">
-                                                {new Date(autoConfig.lastCheck).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' })}
-                                            </p>
-                                        ) : (
-                                            <p className="text-[11px] text-slate-400 italic mt-1">Aucun check effectué</p>
-                                        )}
-                                    </div>
-                                    <button
-                                        onClick={forceAutoCheck}
-                                        disabled={isChecking}
-                                        className="px-6 py-3 bg-turquoise text-white rounded-xl font-black uppercase text-xs tracking-widest hover:bg-abysse transition-all shadow-md flex items-center gap-2 disabled:opacity-50"
-                                    >
-                                        {isChecking ? <RefreshCw size={16} className="animate-spin" /> : <Play size={16} />}
-                                        {isChecking ? 'Analyse en cours...' : 'Forcer le check maintenant'}
-                                    </button>
-                                </div>
-
-                                {/* Check Result Display */}
-                                {(checkResult || autoConfig.lastCheckResult) && (
-                                    <div className="mt-6 space-y-4">
-                                        {(checkResult?.weather || autoConfig.lastCheckResult?.weather) && (
-                                            <div className="flex flex-wrap gap-2 justify-center bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                                {[
-                                                    { label: 'Vent (8h-18h)', val: formatWeatherValue((checkResult?.weather || autoConfig.lastCheckResult?.weather).wind, 'nds') },
-                                                    { label: 'Rafales', val: formatWeatherValue((checkResult?.weather || autoConfig.lastCheckResult?.weather).gusts, 'nds') },
-                                                    { label: 'Houle', val: formatWeatherValue((checkResult?.weather || autoConfig.lastCheckResult?.weather).waveHeight, 'm') },
-                                                    { label: 'Période', val: formatWeatherValue((checkResult?.weather || autoConfig.lastCheckResult?.weather).wavePeriod, 's') },
-                                                    { label: 'Orage (CAPE)', val: formatWeatherValue((checkResult?.weather || autoConfig.lastCheckResult?.weather).cape, '') },
-                                                    { label: 'Visibilité', val: formatWeatherValue((checkResult?.weather || autoConfig.lastCheckResult?.weather).visibility, 'm') },
-                                                    { label: 'Eau', val: formatWeatherValue((checkResult?.weather || autoConfig.lastCheckResult?.weather).waterTemp, '°C') },
-                                                ].map((m, i) => (
-                                                    <div key={i} className="px-3 py-1.5 bg-white rounded-lg border border-slate-200 text-center">
-                                                        <span className="block text-[9px] font-black uppercase text-slate-400">{m.label}</span>
-                                                        <span className="block text-xs font-black text-abysse">{m.val}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* ACTIVITY CONFIG CARDS - SIMPLIFIED UI */}
-                            <div className="space-y-4">
-                                {([
-                                    { key: 'char' as const, label: 'Char à Voile', icon: Wind, color: 'orange' },
-                                    { key: 'nautique' as const, label: 'Sports Nautiques', icon: Anchor, color: 'blue' },
-                                    { key: 'marche' as const, label: 'Marche Aquatique', icon: Waves, color: 'turquoise' }
-                                ]).map(({ key, label, icon: Icon, color }) => {
-                                    const activity = autoConfig.activities[key];
-                                    // Determine current computed status from check result
-                                    const currentStatus = checkResult?.results?.[key]?.status || autoConfig.lastCheckResult?.[key]?.status || 'UNKNOWN';
-
-                                    return (
-                                        <div key={key} className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${expandedActivity === key ? 'border-turquoise shadow-md ring-1 ring-turquoise/20' : 'border-slate-200 hover:border-turquoise/50'}`}>
-
-                                            {/* HEADER - SUMMARY */}
-                                            <div
-                                                className="p-5 flex items-center justify-between cursor-pointer"
-                                                onClick={() => setExpandedActivity(expandedActivity === key ? null : key)}
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`p-3 rounded-xl bg-${color}-50 text-${color}-500`}>
-                                                        <Icon size={24} />
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="text-lg font-black uppercase italic text-abysse tracking-tighter">{label}</h4>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            {checkResult?.results?.[key] || autoConfig.lastCheckResult?.[key] ? (
-                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${currentStatus === 'OPEN' ? 'bg-emerald-100 text-emerald-600' :
-                                                                    currentStatus === 'RESTRICTED' ? 'bg-orange-100 text-orange-600' :
-                                                                        checkResult?.results?.[key]?.status === 'CLOSED' ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-500'
-                                                                    }`}>
-                                                                    {currentStatus === 'OPEN' ? 'OUVERT' : currentStatus === 'RESTRICTED' ? 'RESTREINT' : 'FERMÉ'}
-                                                                </span>
-                                                            ) : <span className="text-[10px] text-slate-400">Aucune donnée</span>}
-
-                                                            {/* Show simplified cause if restricted/closed */}
-                                                            {((checkResult?.results?.[key]?.causes?.length || 0) > 0 || (autoConfig.lastCheckResult?.[key]?.causes?.length || 0) > 0) && (
-                                                                <span className="text-[10px] font-bold text-slate-400">
-                                                                    via {(checkResult?.results?.[key]?.causes || autoConfig.lastCheckResult?.[key]?.causes || []).join(', ')}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-4">
-                                                    <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-lg border border-slate-100" onClick={e => e.stopPropagation()}>
-                                                        <span className={`text-[10px] font-black uppercase ${activity.enabled ? 'text-emerald-500' : 'text-slate-400'}`}>
-                                                            {activity.enabled ? 'Actif' : 'Inactif'}
-                                                        </span>
-                                                        <div className="relative inline-flex items-center cursor-pointer">
-                                                            <input type="checkbox" checked={activity.enabled} onChange={(e) => {
-                                                                const updated = { ...autoConfig };
-                                                                updated.activities[key] = { ...activity, enabled: e.target.checked };
-                                                                setAutoConfig(updated);
-                                                            }} className="sr-only peer" />
-                                                            <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                                                        </div>
-                                                    </div>
-                                                    <button className="p-2 text-slate-400 hover:text-turquoise transition-colors">
-                                                        {expandedActivity === key ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            {/* EXPANDED CONTENT - EDIT MODE */}
-                                            {expandedActivity === key && (
-                                                <div className="p-6 md:p-8 border-t border-slate-100 bg-slate-50/50">
-                                                    {/* INSTRUCTION */}
-                                                    <div className="mb-6 p-4 bg-blue-50 text-blue-700 text-xs rounded-lg border border-blue-100">
-                                                        💡 Configurez ici les seuils qui déclenchent automatiquement les statuts <strong>RESTREINT</strong> ou <strong>FERMÉ</strong>.
-                                                    </div>
-
-                                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                                        {/* 1. SEUILS METEO */}
-                                                        <div className="space-y-6">
-                                                            <h5 className="text-xs font-black uppercase text-slate-400 border-b border-slate-200 pb-2 mb-4">Critères d'évaluation</h5>
-
-                                                            {/* WIND */}
-                                                            {activity.thresholds.wind && (
-                                                                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                                                                    <div className="flex items-center gap-2 border-b border-slate-50 pb-2">
-                                                                        <Wind size={16} className="text-slate-400" />
-                                                                        <span className="text-xs font-black uppercase text-abysse">Vent Moyen</span>
-                                                                    </div>
-                                                                    <div className="space-y-3">
-                                                                        {renderThresholdInput(key, 'wind', 'closedBelow', 'Fermer si <', 'nds')}
-                                                                        {renderThresholdInput(key, 'wind', 'restrictedBelow', 'Restreindre si <', 'nds')}
-                                                                        {renderThresholdInput(key, 'wind', 'restrictedAbove', 'Restreindre si >', 'nds')}
-                                                                        {renderThresholdInput(key, 'wind', 'closedAbove', 'Fermer si >', 'nds')}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
-                                                            {/* GUSTS */}
-                                                            {activity.thresholds.gusts && (
-                                                                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                                                                    <div className="flex items-center gap-2 border-b border-slate-50 pb-2">
-                                                                        <Wind size={16} className="text-slate-400" />
-                                                                        <span className="text-xs font-black uppercase text-abysse">Rafales</span>
-                                                                    </div>
-                                                                    <div className="space-y-3">
-                                                                        {renderThresholdInput(key, 'gusts', 'restrictedAbove', 'Restreindre si >', 'nds')}
-                                                                        {renderThresholdInput(key, 'gusts', 'closedAbove', 'Fermer si >', 'nds')}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
-                                                            {/* WAVES */}
-                                                            {(activity.thresholds.waveHeight || activity.thresholds.wavePeriod) && (
-                                                                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                                                                    <div className="flex items-center gap-2 border-b border-slate-50 pb-2">
-                                                                        <Waves size={16} className="text-slate-400" />
-                                                                        <span className="text-xs font-black uppercase text-abysse">État de la mer</span>
-                                                                    </div>
-                                                                    <div className="space-y-3">
-                                                                        {activity.thresholds.waveHeight && renderThresholdInput(key, 'waveHeight', 'restrictedAbove', 'Restreindre (Houle) >', 'm')}
-                                                                        {activity.thresholds.waveHeight && renderThresholdInput(key, 'waveHeight', 'closedAbove', 'Fermer (Houle) >', 'm')}
-                                                                        {activity.thresholds.wavePeriod && renderThresholdInput(key, 'wavePeriod', 'restrictedAbove', 'Restreindre (Période) >', 's')}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
-                                                            {/* SECURITY (CAPE, VISIBILITY, TEMP) */}
-                                                            {(activity.thresholds.cape || activity.thresholds.visibility || activity.thresholds.waterTemp) && (
-                                                                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                                                                    <div className="flex items-center gap-2 border-b border-slate-50 pb-2">
-                                                                        <AlertTriangle size={16} className="text-slate-400" />
-                                                                        <span className="text-xs font-black uppercase text-abysse">Sécurité & Confirmés</span>
-                                                                    </div>
-                                                                    <div className="space-y-3">
-                                                                        {activity.thresholds.cape && renderThresholdInput(key, 'cape', 'closedAbove', 'Fermer si Orage (CAPE) >', '')}
-                                                                        {activity.thresholds.visibility && renderThresholdInput(key, 'visibility', 'closedBelow', 'Fermer si Visibilité <', 'm')}
-                                                                        {activity.thresholds.waterTemp && renderThresholdInput(key, 'waterTemp', 'closedBelow', 'Fermer si Eau <', '°C')}
-                                                                        {activity.thresholds.waterTemp && renderThresholdInput(key, 'waterTemp', 'restrictedBelow', 'Restreindre si Eau <', '°C')}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-
-                                                        {/* 2. MESSAGES AUTOMATIQUES */}
-                                                        <div className="space-y-6">
-                                                            <h5 className="text-xs font-black uppercase text-slate-400 border-b border-slate-200 pb-2 mb-4">Messages Automatiques</h5>
-                                                            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-5">
-                                                                {Object.entries(activity.messages).map(([msgKey, msgVal]) => (
-                                                                    <div key={msgKey} className="space-y-1">
-                                                                        <div className="flex justify-between items-center">
-                                                                            <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                                                                                {msgKey === 'ok' ? '✅ Conditions Idéales (OPEN)' :
-                                                                                    msgKey === 'storm' ? '⚡ Alerte Orage (CLOSED)' :
-                                                                                        msgKey === 'wind_high' ? '💨 Vent Fort (CLOSED)' :
-                                                                                            msgKey === 'wind_low' ? '🍃 Vent Faible' :
-                                                                                                msgKey === 'waves' ? '🌊 Houle / Vagues' :
-                                                                                                    msgKey.replace('_', ' ')}
-                                                                            </label>
-                                                                        </div>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={msgVal as string}
-                                                                            onChange={(e) => updateMessage(key, msgKey as any, e.target.value)}
-                                                                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-abysse focus:border-turquoise focus:ring-1 focus:ring-turquoise/20 outline-none transition-all"
-                                                                        />
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
                     {/* TAB: VIGIE DIRECT */}
                     {activeTab === 'VIGIE' && (
                         <div className="max-w-2xl mx-auto no-print">

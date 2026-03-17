@@ -304,6 +304,7 @@ export interface AgendaEvent {
   description?: string | any[];
   image?: string;
   isVolunteerCard?: boolean;
+  articleSlug?: string;
 }
 
 export interface AgendaSection {
@@ -423,70 +424,6 @@ export interface NaturePageData {
       buttonText: string;
       buttonLink: string;
     }[];
-  };
-}
-
-// --- AUTO CONDITIONS ---
-export interface ActivityThresholds {
-  wind?: { closedBelow?: number; restrictedBelow?: number; restrictedAbove?: number; closedAbove?: number };
-  gusts?: { restrictedAbove?: number; closedAbove?: number };
-  waveHeight?: { restrictedAbove?: number; closedAbove?: number };
-  wavePeriod?: { restrictedAbove?: number; closedAbove?: number };
-  cape?: { closedAbove?: number };
-  visibility?: { closedBelow?: number; restrictedBelow?: number };
-  waterTemp?: { restrictedBelow?: number; closedBelow?: number };
-}
-
-export interface ActivityMessages {
-  wind_low?: string; wind_high?: string;
-  wind_restricted_low?: string; wind_restricted_high?: string;
-  waves?: string; storm?: string; visibility?: string;
-  waterTemp?: string; ok: string;
-}
-
-export interface AutoConditionActivity {
-  enabled: boolean;
-  thresholds: ActivityThresholds;
-  messages: ActivityMessages;
-}
-
-export interface AutoConditionResult {
-  status: string;
-  message: string;
-  tags?: string[];
-  causes?: string[];
-  details?: any;
-}
-
-export interface AutoConditionsPendingResult {
-  checkedAt: string;
-  weather: {
-    windSpeed?: number;
-    gusts?: number;
-    waveHeight?: number;
-    wavePeriod?: number;
-    cape?: number;
-    visibility?: number;
-    waterTemp?: number;
-  };
-  results: {
-    char?: AutoConditionResult;
-    nautique?: AutoConditionResult;
-    marche?: AutoConditionResult;
-  };
-}
-
-export interface AutoConditionsConfig {
-  enabled: boolean;
-  checkHour: number;
-  lastCheck: string | null;
-  lastCheckResult: Record<string, AutoConditionResult> | null;
-  pendingResult: AutoConditionsPendingResult | null;
-  manualOverride: boolean;
-  activities: {
-    char: AutoConditionActivity;
-    nautique: AutoConditionActivity;
-    marche: AutoConditionActivity;
   };
 }
 

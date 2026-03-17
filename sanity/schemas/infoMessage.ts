@@ -28,7 +28,6 @@ export const infoMessage = defineType({
                     { title: '🚨 Alerte / Urgent', value: 'alert' },
                     { title: '🌦️ Météo / Conditions', value: 'weather' },
                     { title: 'ℹ️ Information', value: 'info' },
-                    { title: '🎉 Événement', value: 'event' },
                     { title: '🤙 Ambiance / Vie du Club', value: 'vibe' },
                 ],
             },

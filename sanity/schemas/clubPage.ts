@@ -318,28 +318,7 @@ export const clubPage = defineType({
                         { name: 'buttonLink', type: 'string', title: 'Lien bouton' },
                     ]
                 },
-                {
-                    name: 'events',
-                    type: 'array',
-                    title: 'Événements',
-                    of: [
-                        {
-                            type: 'object',
-                            title: 'Événement',
-                            fields: [
-                                { name: 'image', type: 'image', title: 'Photo (optionnelle)', options: { hotspot: true } },
-                                { name: 'title', type: 'string', title: 'Titre' },
-                                { name: 'startDate', type: 'date', title: 'Date de l\'événement', options: { dateFormat: 'YYYY-MM-DD' } },
-                                { name: 'badge', type: 'string', title: 'Badge / Catégorie', description: 'Ex: "Regate", "Evenement"' },
-                                { name: 'time', type: 'string', title: 'Heure / Durée', description: 'Ex: "14h - 17h"' },
-                                { name: 'description', ...basicRichText, title: 'Description détaillée' },
-                            ],
-                            preview: {
-                                select: { title: 'title', subtitle: 'startDate', media: 'image' }
-                            }
-                        }
-                    ]
-                }
+                // Les événements sont désormais gérés comme documents "agendaEvent" indépendants
             ]
         }),
 

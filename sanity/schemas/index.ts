@@ -26,7 +26,8 @@ import { signageSlide } from './signageSlide';
 import { basicRichText } from './basicRichText';
 import { dicoWord } from './dicoWord';
 import { bookingTemplate } from './bookingTemplate';
-
+import { article } from './article';
+import { agendaEvent } from './agendaEvent';
 
 // Page Builder Sections
 import { heroSection } from './sections/heroSection';
@@ -62,6 +63,8 @@ export const schemaTypes = [
   signageSlide,
   dicoWord,
   bookingTemplate,
+  article,
+  agendaEvent,
   
   // Page Builder Sections
   heroSection,
