@@ -364,14 +364,17 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
   const [isWeekSelectorOpen, setIsWeekSelectorOpen] = useState(false);
 
-  // Tri chronologique par startDate (sécurité côté client)
+  // Tri chronologique par startDate + filtre semaines passées
   const plannings = React.useMemo(() => {
     if (!planningsData?.length) return [];
-    return [...planningsData].sort((a, b) => {
-      const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
-      const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
-      return dateA - dateB;
-    });
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    return [...planningsData]
+      .filter(w => !w.endDate || new Date(w.endDate) >= today)
+      .sort((a, b) => {
+        const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+        const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+        return dateA - dateB;
+      });
   }, [planningsData]);
 
   const currentWeek = plannings?.[currentWeekIndex];

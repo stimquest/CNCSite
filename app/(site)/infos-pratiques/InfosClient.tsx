@@ -3,12 +3,11 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Clock, MapPin, Phone, Mail, Download, 
+    Clock, MapPin, Phone, Mail, Download,
     FileText, CheckCircle2, GraduationCap,
-    Search, Send, ExternalLink, ShieldCheck, Trophy, Compass
+    Search, Send, ExternalLink, Compass
 } from 'lucide-react';
 
-import { PlanningWidget } from '@/components/PlanningWidget';
 import { SecondaryNav } from '@/components/SecondaryNav';
 import { sendContactEmail } from '@/app/actions/contact';
 import { PortableText } from '@portabletext/react';
@@ -38,11 +37,11 @@ interface InfosData {
 }
 
 const CATEGORIES = [
-    { id: 'all', label: 'Tous les docs', icon: <FileText size={14} /> },
-    { id: 'stages', label: 'Stages & Mineurs', icon: <GraduationCap size={14} /> },
-    { id: 'club', label: 'Vie du Club', icon: <ShieldCheck size={14} /> },
-    { id: 'competition', label: 'Compétition', icon: <Trophy size={14} /> },
-    { id: 'tarifs', label: 'Tarifs', icon: <Clock size={14} /> },
+    { id: 'all', label: 'Tous les docs' },
+    { id: 'stages', label: 'Stages & Mineurs' },
+    { id: 'club', label: 'Vie du Club' },
+    { id: 'competition', label: 'Compétition' },
+    { id: 'tarifs', label: 'Tarifs' },
 ];
 
 const SECTIONS = [
@@ -50,7 +49,6 @@ const SECTIONS = [
     { id: 'documents', label: 'Documents' },
     { id: 'map', label: 'Accès' },
     { id: 'pricing', label: 'Tarifs' },
-    { id: 'planning', label: 'Plannings' },
 ];
 
 const formatPrice = (price: string) => {
@@ -366,7 +364,6 @@ const DocumentManager: React.FC<{ documents?: InfosData['documents'] }> = ({ doc
                                     : "text-slate-400 hover:text-abysse hover:bg-white/50"
                             }`}
                         >
-                            {cat.icon}
                             {cat.label}
                         </button>
                     ))}
@@ -624,17 +621,6 @@ export default function InfosClient({ initialData }: { initialData?: InfosData }
             </section>
 
             <PricingWidget data={initialData?.pricing} />
-
-            <section id="planning" className="py-24 px-6 bg-slate-50">
-                <div className="max-w-[1400px] mx-auto">
-                    <div className="mb-12">
-                        <span className="text-turquoise font-black uppercase tracking-widest text-[10px] mb-4 block">Organisation</span>
-                        <h2 className="text-4xl md:text-5xl text-abysse mb-4">Plannings</h2>
-                        <p className="text-slate-600 font-medium text-base">Consultez le planning des stages et activités.</p>
-                    </div>
-                    <PlanningWidget />
-                </div>
-            </section>
 
             <div className="h-32 bg-white"></div>
         </div>

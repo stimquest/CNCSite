@@ -61,11 +61,25 @@ const getActivityIcon = (type: ActivityType) => {
 
 import { client, queries } from '@/lib/sanity';
 
+function findCurrentWeekIdx(list: any[]): number {
+    const now = new Date();
+    return list.findIndex(w => {
+        if (!w.startDate || !w.endDate) return false;
+        const end = new Date(w.endDate);
+        end.setHours(23, 59, 59);
+        return now >= new Date(w.startDate) && now <= end;
+    });
+}
+
 export const PlanningWidget: React.FC = () => {
     const [plannings, setPlannings] = useState<any[]>([]);
     const [charPlannings, setCharPlannings] = useState<any[]>([]);
     const [marchePlannings, setMarchePlannings] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<'voile' | 'char' | 'marche'>('voile');
+    const [currentIdx, setCurrentIdx] = useState(0);
+    const [isWeekSelectorOpen, setIsWeekSelectorOpen] = useState(false);
+    const [selectedDayIdx, setSelectedDayIdx] = useState(0);
 
     React.useEffect(() => {
         setIsLoading(true);
@@ -83,36 +97,51 @@ export const PlanningWidget: React.FC = () => {
             setIsLoading(false);
         });
     }, []);
-    const [activeTab, setActiveTab] = useState<'voile' | 'char' | 'marche'>('voile');
-    const [currentIdx, setCurrentIdx] = useState(0);
-    const [isWeekSelectorOpen, setIsWeekSelectorOpen] = useState(false);
-    const [selectedDayIdx, setSelectedDayIdx] = useState(0);
 
     // --- DATA PREPARATION ---
-    const dataVoile = plannings || [];
+    const today = React.useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
+
+    const dataVoile = React.useMemo(() => {
+        return (plannings || []).filter(w => !w.endDate || new Date(w.endDate) >= today);
+    }, [plannings, today]);
 
     // Pour le char, la structure est un peu différente (PlanningCharAVoile contient des weeks[])
     // On va aplatir tout ça pour avoir une liste linéaire de semaines comme pour la voile
     const dataChar = React.useMemo(() => {
         if (!charPlannings) return [];
-        return charPlannings.flatMap(p => p.weeks || []).sort((a, b) => {
-            const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
-            const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
-            return dateA - dateB;
-        });
-    }, [charPlannings]);
+        return charPlannings.flatMap(p => p.weeks || [])
+            .filter(w => !w.endDate || new Date(w.endDate) >= today)
+            .sort((a, b) => {
+                const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+                const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+                return dateA - dateB;
+            });
+    }, [charPlannings, today]);
 
     const dataMarche = React.useMemo(() => {
         if (!marchePlannings) return [];
-        return marchePlannings.flatMap(p => p.weeks || []).sort((a, b) => {
-            const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
-            const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
-            return dateA - dateB;
-        });
-    }, [marchePlannings]);
+        return marchePlannings.flatMap(p => p.weeks || [])
+            .filter(w => !w.endDate || new Date(w.endDate) >= today)
+            .sort((a, b) => {
+                const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+                const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+                return dateA - dateB;
+            });
+    }, [marchePlannings, today]);
 
     const currentList = activeTab === 'voile' ? dataVoile : (activeTab === 'char' ? dataChar : dataMarche);
+
+    // Positionner sur la semaine en cours quand les données arrivent
+    React.useEffect(() => {
+        if (isLoading) return;
+        const idx = findCurrentWeekIdx(dataVoile);
+        setCurrentIdx(idx >= 0 ? idx : 0);
+        setSelectedDayIdx(0);
+    }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const currentWeek: any = currentList[currentIdx];
+    // true si l'activité a bien une semaine qui correspond à aujourd'hui
+    const hasCurrentWeek = findCurrentWeekIdx(currentList) >= 0;
 
     // --- HANDLERS ---
     const nextWeek = () => {
@@ -125,8 +154,11 @@ export const PlanningWidget: React.FC = () => {
 
     const handleTabChange = (tab: 'voile' | 'char' | 'marche') => {
         setActiveTab(tab);
-        setCurrentIdx(0); // Reset to first week on tab switch
-        setSelectedDayIdx(0); // Reset to first day
+        // Aller sur la semaine en cours pour l'onglet sélectionné
+        const list = tab === 'voile' ? dataVoile : (tab === 'char' ? dataChar : dataMarche);
+        const idx = findCurrentWeekIdx(list);
+        setCurrentIdx(idx >= 0 ? idx : 0);
+        setSelectedDayIdx(0);
         setIsWeekSelectorOpen(false);
     };
 
@@ -468,14 +500,37 @@ export const PlanningWidget: React.FC = () => {
             {/* BODY CONTENT */}
             <div className="flex-1 overflow-auto bg-slate-50 p-4 md:p-6">
                 {!currentWeek ? (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-300 opacity-50">
-                        <Calendar size={48} className="mb-4" />
-                        <span className="text-sm font-black uppercase tracking-widest">Aucun planning disponible</span>
+                    <div className="h-full flex flex-col items-center justify-center gap-4 py-16">
+                        <div className="size-16 rounded-2xl bg-slate-100 flex items-center justify-center">
+                            <Calendar size={28} className="text-slate-300" />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-sm font-black uppercase tracking-widest text-slate-400">Aucun planning disponible</p>
+                            <p className="text-xs text-slate-300 mt-1">Revenez prochainement</p>
+                        </div>
                     </div>
                 ) : (
-                    activeTab === 'voile' ? renderVoileTable(currentWeek) :
-                        activeTab === 'char' ? renderCharTable(currentWeek) :
-                            renderMarcheTable(currentWeek)
+                    <div className="flex flex-col gap-4">
+                        {/* Bandeau "pas d'activité cette semaine" si aucune semaine ne correspond à aujourd'hui */}
+                        {!hasCurrentWeek && (
+                            <div className="flex items-start gap-4 bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                                <div className="size-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                                    <Info size={18} className="text-amber-500" />
+                                </div>
+                                <div>
+                                    <p className="font-black uppercase text-sm text-amber-700 tracking-wide">
+                                        Pas d'activité{activeTab === 'voile' ? ' de stage voile' : activeTab === 'char' ? ' de char à voile' : ' de marche aquatique'} cette semaine
+                                    </p>
+                                    <p className="text-xs text-amber-600/70 mt-0.5">
+                                        Prochain planning disponible ci-dessous — utilisez les flèches pour naviguer.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                        {activeTab === 'voile' ? renderVoileTable(currentWeek) :
+                            activeTab === 'char' ? renderCharTable(currentWeek) :
+                                renderMarcheTable(currentWeek)}
+                    </div>
                 )}
             </div>
 
