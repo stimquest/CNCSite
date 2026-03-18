@@ -1,11 +1,13 @@
 {
-    "name": "CNC Coutainville",
-    "short_name": "CNC",
-    "description": "Club Nautique de Coutainville - Fil d'Info Direct",
-    "start_url": "/",
+    "name": "La Vigie — CNC Coutainville",
+    "short_name": "La Vigie",
+    "description": "Alertes météo, état des activités et actus du Club Nautique de Coutainville en direct.",
+    "start_url": "/fil-info/",
+    "scope": "/fil-info/",
     "display": "standalone",
-    "background_color": "#0F172A",
-    "theme_color": "#2DD4BF",
+    "orientation": "portrait",
+    "background_color": "#001828",
+    "theme_color": "#001828",
     "icons": [
         {
             "src": "/images/LogoCNC_Color.svg",

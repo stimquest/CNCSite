@@ -6,6 +6,7 @@ import { Share2, ExternalLink, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StatusDashboard } from '@/components/StatusDashboard';
 import { FreshnessIndicator } from '@/components/FreshnessIndicator';
+import { VigieInstallButton } from '@/components/VigieInstallButton';
 
 const GROUPS = [
     { id: 'all', label: 'Tout' },
@@ -52,9 +53,12 @@ export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages 
             <header className="bg-abysse pt-32 pb-14 px-6 relative overflow-hidden">
                 <div className="absolute inset-0 bg-linear-to-b from-turquoise/10 to-transparent pointer-events-none" />
                 <div className="max-w-6xl mx-auto relative z-10">
-                    <div className="flex items-center gap-2.5 mb-5">
-                        <span className="size-2 bg-turquoise rounded-full animate-pulse shadow-[0_0_12px_rgba(45,212,191,0.5)]" />
-                        <span className="text-turquoise text-[10px] font-black uppercase tracking-[0.35em]">La Vigie Direct</span>
+                    <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-2.5">
+                            <span className="size-2 bg-turquoise rounded-full animate-pulse shadow-[0_0_12px_rgba(45,212,191,0.5)]" />
+                            <span className="text-turquoise text-[10px] font-black uppercase tracking-[0.35em]">La Vigie Direct</span>
+                        </div>
+                        <VigieInstallButton />
                     </div>
                     <h1 className="text-5xl md:text-7xl text-white leading-none mb-3">
                         La <span className="text-turquoise">Vigie.</span>
