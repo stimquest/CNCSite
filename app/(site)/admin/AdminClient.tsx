@@ -78,7 +78,7 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
         router.refresh();
     };
 
-    const [activeTab, setActiveTab] = useState<'STAGES' | 'CHAR' | 'MARCHE' | 'VIGIE'>('STAGES');
+    const [activeTab, setActiveTab] = useState<'STAGES' | 'CHAR' | 'MARCHE' | 'VIGIE'>('VIGIE');
     const [isSaving, setIsSaving] = useState(false);
 
     // --- VIGIE STATE ---
@@ -86,7 +86,7 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
         title: '',
         content: '',
         category: 'info',
-        targetGroups: ['all'],
+        targetGroups: [] as string[],
         isPinned: false,
         externalLink: '',
         expiresAt: '',
@@ -411,6 +411,7 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
     const handleSendVigie = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!vigieMsg.title || !vigieMsg.content) return alert("Titre et contenu obligatoires");
+        if (vigieMsg.targetGroups.length === 0) return alert("Sélectionnez au moins un groupe cible.");
         setIsSaving(true);
         try {
             const res = await fetch('/api/cockpit/update', {
@@ -432,7 +433,7 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
                     title: '',
                     content: '',
                     category: 'info',
-                    targetGroups: ['all'],
+                    targetGroups: [] as string[],
                     isPinned: false,
                     externalLink: '',
                     expiresAt: '',
@@ -461,10 +462,10 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
                         <div className="flex items-center gap-6">
                             <h2 className="text-2xl font-black uppercase tracking-tighter text-abysse">CNC <span className="text-turquoise">CONTROL</span></h2>
                             <nav className="flex gap-1 bg-slate-100 p-1 rounded-xl">
+                                <button onClick={() => setActiveTab('VIGIE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'VIGIE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Bell size={12} /> Vigie Direct</button>
                                 <button onClick={() => setActiveTab('STAGES')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'STAGES' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Stages</button>
                                 <button onClick={() => setActiveTab('CHAR')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'CHAR' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Char à Voile</button>
                                 <button onClick={() => setActiveTab('MARCHE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'MARCHE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Marche</button>
-<button onClick={() => setActiveTab('VIGIE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'VIGIE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Bell size={12} /> Vigie Direct</button>
                                 <Link href="/cockpit" target="_blank" className="ml-2 px-4 py-2 rounded-lg bg-turquoise/10 text-turquoise hover:bg-turquoise/20 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
                                     🚀 Cockpit
                                 </Link>
@@ -1021,14 +1022,15 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
                                             <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider px-1">Groupes Ciblés</label>
                                             <div className="grid grid-cols-2 gap-2">
                                                 {[
-                                                    { id: 'all', label: 'Tout le club' },
+                                                    { id: 'all', label: 'Général / Tous' },
+                                                    { id: 'club-hebdo', label: 'Club Hebdo' },
+                                                    { id: 'char-voile', label: 'Char à Voile' },
                                                     { id: 'stage-minimousses', label: 'Mini-Mousses' },
                                                     { id: 'stage-moussaillons', label: 'Moussaillons' },
                                                     { id: 'stage-initiation', label: 'Initiation' },
-                                                    { id: 'stage-perfectionnement', label: 'Perf' },
-                                                    { id: 'club-sportif', label: 'Club Sportif' },
-                                                    { id: 'char-voile', label: 'Char à Voile' },
-                                                    { id: 'glisses', label: 'Glisses' },
+                                                    { id: 'stage-perfectionnement', label: 'Perf.' },
+                                                    { id: 'marche-aquatique', label: 'Marche Aquatique' },
+                                                    { id: 'pratique-libre', label: 'Pratique Libre' },
                                                 ].map(group => (
                                                     <label key={group.id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${vigieMsg.targetGroups.includes(group.id) ? 'bg-turquoise/5 border-turquoise/30 text-abysse' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}>
                                                         <input

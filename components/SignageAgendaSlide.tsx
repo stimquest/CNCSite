@@ -109,7 +109,7 @@ const SessionGrid: React.FC<{
   if (!week) return (
     <div className="flex-1 flex flex-col items-center justify-center gap-2 rounded-xl" style={{ border: `1px solid ${color}25` }}>
       <Calendar size={24} style={{ color: `${color}40` }} />
-      <span className="text-xs font-black uppercase tracking-widest" style={{ color: `${color}40` }}>Pas de planning</span>
+      <span className="text-xs font-black uppercase tracking-widest" style={{ color: `${color}40` }}>Pas de planning {label}</span>
     </div>
   );
 
@@ -167,11 +167,11 @@ export const SignageAgendaSlide: React.FC = () => {
 
   const { stageWeek, charWeek, marcheWeek } = useMemo(() => {
     if (!data) return { stageWeek: undefined, charWeek: undefined, marcheWeek: undefined };
-    const stageWeek = data.plannings.find(p => isCurrentWeek(p.startDate, p.endDate)) ?? data.plannings[0];
-    const charPeriod = data.charPlannings.find(p => isCurrentWeek(p.startDate, p.endDate)) ?? data.charPlannings[0];
-    const charWeek = charPeriod?.weeks?.find(w => isCurrentWeek(w.startDate, w.endDate)) ?? charPeriod?.weeks?.[0];
-    const marchePeriod = data.marchePlannings.find(p => isCurrentWeek(p.startDate, p.endDate)) ?? data.marchePlannings[0];
-    const marcheWeek = marchePeriod?.weeks?.find(w => isCurrentWeek(w.startDate, w.endDate)) ?? marchePeriod?.weeks?.[0];
+    const stageWeek = data.plannings.find(p => isCurrentWeek(p.startDate, p.endDate));
+    const charPeriod = data.charPlannings.find(p => isCurrentWeek(p.startDate, p.endDate));
+    const charWeek = charPeriod?.weeks?.find(w => isCurrentWeek(w.startDate, w.endDate));
+    const marchePeriod = data.marchePlannings.find(p => isCurrentWeek(p.startDate, p.endDate));
+    const marcheWeek = marchePeriod?.weeks?.find(w => isCurrentWeek(w.startDate, w.endDate));
     return { stageWeek, charWeek, marcheWeek };
   }, [data]);
 
@@ -208,7 +208,7 @@ export const SignageAgendaSlide: React.FC = () => {
         {stageWeek
           ? <StagesGrid week={stageWeek} />
           : <div className="h-full flex items-center justify-center rounded-xl" style={{ border: '1px solid rgba(0,169,206,0.15)' }}>
-              <span className="text-sm font-black text-white/20 uppercase tracking-widest">Pas de stage cette semaine</span>
+              <span className="text-sm font-black text-white/20 uppercase tracking-widest">Pas de stages voile cette semaine</span>
             </div>
         }
       </div>

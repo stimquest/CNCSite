@@ -358,8 +358,8 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
                     const isSolid = stat.style === 'solid';
                     return (
                         <div key={i} className={isSolid
-                            ? "bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-[280px]"
-                            : "bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-[280px]"
+                            ? "bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-70"
+                            : "bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-70"
                         }>
                             <div className={`size-16 rounded-2xl flex items-center justify-center shrink-0 ${isSolid ? 'bg-abysse text-white shadow-lg' : 'bg-white/10 text-white'}`}>
                                 {IconComp && <IconComp size={32} />}
@@ -381,7 +381,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
             <SecondaryNav sections={SECTIONS} />
 
             {/* 3. IDENTITÉ & VALEURS */}
-            <section id="identity" className="py-16 px-6 max-w-[1400px] mx-auto">
+            <section id="identity" className="py-16 px-6 max-w-350 mx-auto">
                 <div className="mb-12">
                     <div className="w-16 h-1 bg-turquoise rounded-full mb-6"></div>
                     <h2 className="text-3xl md:text-4xl text-abysse mb-6 leading-[0.9] whitespace-pre-line">
@@ -419,7 +419,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
                 {/* Decorative Background */}
                 <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-bl from-turquoise/5 to-transparent pointer-events-none" />
 
-                <div className="max-w-[1400px] w-full mx-auto px-6 relative z-10">
+                <div className="max-w-350 w-full mx-auto px-6 relative z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 items-start">
 
                         {/* Left Column: Intro & Volunteering CTA */}
@@ -511,7 +511,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
                         </div>
 
                         {/* Right Column: Cards + Anchor Scrollbar */}
-                        <div className="lg:col-span-2 relative h-[700px]">
+                        <div className="lg:col-span-2 relative h-175">
 
                             {/* SCROLLABLE AREA */}
                             <div id="scrollable-area" className="relative h-full">
@@ -566,7 +566,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
                                 <div
                                     id="events-scroll"
                                     ref={eventsScrollRef}
-                                    className="h-[700px] overflow-y-auto pb-10"
+                                    className="h-175 overflow-y-auto pb-10"
                                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
                                     onScroll={(e) => {
                                         const el = e.currentTarget;
@@ -669,7 +669,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
             {/* BLOCK 3: SOUVENIRS DU CLUB (MAGAZINE GRID) */}
             <section id="souvenirs" className="py-24 px-6 bg-white relative overflow-hidden">
 
-                <div className="max-w-[1400px] mx-auto">
+                <div className="max-w-350 mx-auto">
 
                     {/* Header */}
                     <div className="text-center mb-10">
@@ -759,7 +759,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
 
             {/* 4. ÉQUIPE */}
             < section id="team" className="py-24 px-6 bg-white" >
-                <div className="max-w-[1400px] mx-auto">
+                <div className="max-w-350 mx-auto">
                     <div className="mb-16">
                         <span className="text-turquoise font-black uppercase tracking-widest text-[9px] mb-3 block">{teamData.tag}</span>
                         <h2 className="text-3xl md:text-5xl text-abysse leading-none mb-6">{teamData.title}</h2>
@@ -845,7 +845,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
 
             {/* 5. LE SITE */}
             <section id="site" className="py-24 px-6 relative overflow-hidden bg-white">
-                <div className="max-w-[1400px] mx-auto relative z-10">
+                <div className="max-w-350 mx-auto relative z-10">
                     <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-center">
 
                         {/* Left Content */}
@@ -924,7 +924,7 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
             </section>
 
             {/* 6. FLOTTE */}
-            < section id="fleet" className="py-24 px-6 max-w-[1400px] mx-auto" >
+            < section id="fleet" className="py-24 px-6 max-w-350 mx-auto" >
                 <div className="text-center mb-16">
                     <span className="text-turquoise font-black uppercase tracking-[0.3em] text-[10px] py-2 px-4 border border-turquoise/30 rounded-full mb-6 inline-block">Le Matériel</span>
                     <h2 className="text-4xl md:text-6xl font-black text-abysse uppercase italic tracking-tighter mb-4">{fleetTitle}</h2>

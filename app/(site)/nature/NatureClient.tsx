@@ -262,7 +262,7 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
             {/* 2. L'ESTRAN : COMPRENDRE LES MARÉES */}
             {/* 2. L'ESTRAN : COMPRENDRE LES MARÉES */}
             <section className="py-24 bg-white educational-section" ref={estranRef}>
-                <div className="container mx-auto px-6 max-w-[1300px]">
+                <div className="container mx-auto px-6 max-w-325">
                     <div className="flex flex-col md:flex-row gap-16 items-start">
                         {/* Title Column */}
                         <div className="md:w-1/3 sticky top-32">
@@ -330,7 +330,7 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
             {/* 3. BIODIVERSITÉ (Inventaire Naturaliste - GRID, no scroll) */}
             {/* 3. BIODIVERSITÉ (Inventaire Naturaliste - HORIZONTAL MASONRY) */}
             <section className="py-24 bg-abysse text-white overflow-hidden" ref={biodivRef}>
-                <div className="container mx-auto px-6 max-w-[1700px]"> {/* Trait d'union pour largeur max */}
+                <div className="container mx-auto px-6 max-w-425"> {/* Trait d'union pour largeur max */}
                     <div className="flex items-end justify-between mb-10 border-b border-white/10 pb-6">
                         <div>
                             <span className="text-turquoise text-xs font-black uppercase tracking-widest mb-2 block">
@@ -354,7 +354,7 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
                         Height increased to ~1100px to avoid gaps/holes in layout.
                     */}
                     <div
-                        className="flex flex-col flex-wrap content-start h-[90vh] min-h-[1100px] gap-8 overflow-x-auto overflow-y-hidden pb-8 cursor-grab active:cursor-grabbing scrollbar-hide px-2"
+                        className="flex flex-col flex-wrap content-start h-[90vh] min-h-275 gap-8 overflow-x-auto overflow-y-hidden pb-8 cursor-grab active:cursor-grabbing scrollbar-hide px-2"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                         onMouseDown={(e) => {
                             const slider = e.currentTarget;
@@ -387,7 +387,7 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
                         {habitants.map((specie: any, idx: number) => (
                             <div
                                 key={idx}
-                                className="bio-card w-[320px] md:w-[420px] shrink-0 bg-white/5 border border-white/10 rounded-4xl p-5 hover:bg-white/10 transition-all duration-500 hover:border-turquoise/30 group select-none"
+                                className="bio-card w-80 md:w-105 shrink-0 bg-white/5 border border-white/10 rounded-4xl p-5 hover:bg-white/10 transition-all duration-500 hover:border-turquoise/30 group select-none"
                             >
                                 <div className={`relative rounded-[2rem] overflow-hidden mb-5 bg-white/5 ${idx % 3 === 0 ? 'h-72' : idx % 2 === 0 ? 'h-56' : 'h-64'}`}>
                                     <img
@@ -425,7 +425,7 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
             {/* 4. PÊCHE À PIED DURABLE (Table/List Layout) */}
             {/* 4. PÊCHE À PIED DURABLE (Glass Style) */}
             <section className="py-24 bg-linear-to-b from-slate-50 to-white border-y border-slate-200">
-                <div className="container mx-auto px-6 max-w-[1300px]">
+                <div className="container mx-auto px-6 max-w-325">
                     <div className="flex items-end gap-6 mb-12">
                         <div className="bg-turquoise/10 p-3 rounded-2xl text-turquoise">
                             <Ruler size={32} />
@@ -513,13 +513,13 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
 
             {/* 5. CARTE (Clean layout) */}
             <section className="py-20 bg-white" id="map">
-                <div className="container mx-auto px-6 max-w-[1200px]">
+                <div className="container mx-auto px-6 max-w-300">
                     <h2 className="text-2xl text-abysse mb-8 flex items-center gap-4">
                         <MapIcon size={24} />
                         Carte des Observations
                     </h2>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[600px]">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-150">
                         <div className="lg:col-span-8 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 relative z-0">
                             <NatureMap observations={observations} onSelectPoint={setActivePoint} activePointId={activePoint?.id} />
                         </div>

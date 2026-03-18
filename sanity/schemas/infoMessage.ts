@@ -42,7 +42,7 @@ export const infoMessage = defineType({
             options: {
                 list: [
                     { title: 'Général / Tous', value: 'all' },
-                    { title: 'Le Club (Infos générales)', value: 'club' },
+                    { title: 'Club Hebdo', value: 'club-hebdo' },
                     { title: 'Char à Voile', value: 'char-voile' },
                     { title: 'Stages - Mini-Mousses', value: 'stage-minimousses' },
                     { title: 'Stages - Moussaillons', value: 'stage-moussaillons' },

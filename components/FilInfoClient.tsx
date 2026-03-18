@@ -2,14 +2,14 @@
 
 import React, { useState, useMemo } from 'react';
 import { useLiveStatus } from '@/contexts/LiveStatusContext';
-import { Share2, ExternalLink, Facebook, Clock } from 'lucide-react';
+import { Share2, ExternalLink, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StatusDashboard } from '@/components/StatusDashboard';
 import { FreshnessIndicator } from '@/components/FreshnessIndicator';
 
 const GROUPS = [
     { id: 'all', label: 'Tout' },
-    { id: 'club', label: 'Le Club' },
+    { id: 'club-hebdo', label: 'Club Hebdo' },
     { id: 'char-voile', label: 'Char à Voile' },
     { id: 'stage-minimousses', label: 'Mini-Mousses' },
     { id: 'stage-moussaillons', label: 'Moussaillons' },
@@ -206,7 +206,7 @@ export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages 
                                                         className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold text-slate-400 hover:text-turquoise transition-colors uppercase tracking-wider"
                                                     >
                                                         {msg.externalLink.includes('facebook')
-                                                            ? <><Facebook size={11} /> Voir sur Facebook</>
+                                                            ? <><ExternalLink size={11} /> Voir sur Facebook</>
                                                             : <><ExternalLink size={11} /> En savoir plus</>
                                                         }
                                                     </a>

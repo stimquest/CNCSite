@@ -113,7 +113,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                 subtitle={heroSection.subtitle || "Collectif."}
             >
                 {heroSection.stats && (
-                    <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-[320px]">
+                    <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-80">
                         <div className="size-16 rounded-2xl bg-abysse flex items-center justify-center text-white shadow-lg shrink-0">
                             <Users size={32} />
                         </div>
@@ -129,7 +129,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                 )}
 
                 {heroSection.servicesText && (
-                    <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-[280px]">
+                    <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-70">
                         <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center text-white shrink-0">
                             <Presentation size={32} />
                         </div>
@@ -157,11 +157,11 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                 switch (block._type) {
                     case 'twoColumnsFeature':
                         return (
-                            <section key={key} className="container mx-auto px-6 max-w-[1500px] relative z-20 py-24">
+                            <section key={key} className="container mx-auto px-6 max-w-375 relative z-20 py-24">
                                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                                     <div className="lg:col-span-8 bg-white rounded-[3rem] shadow-xl border border-slate-100 overflow-hidden group">
                                         <div className="grid grid-cols-1 md:grid-cols-2 h-full">
-                                            <div className="relative overflow-hidden min-h-[300px]">
+                                            <div className="relative overflow-hidden min-h-75">
                                                 <img
                                                     src={block.mainImage || "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200"}
                                                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
@@ -246,7 +246,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                                     <Compass size={400} className="text-abysse rotate-12" />
                                 </div>
 
-                                <div className="container mx-auto px-6 max-w-[1400px] relative z-10">
+                                <div className="container mx-auto px-6 max-w-350 relative z-10">
                                     <div className="mb-16">
                                         <div className="flex items-center gap-3 mb-4">
                                             <div className={`size-2 rounded-full ${theme.bg} animate-pulse`}></div>
@@ -275,7 +275,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                                                 const iconNameToUse = card.iconName || theme.icon;
 
                                                 return (
-                                                    <div key={idx} className="bg-white p-10 rounded-4xl shadow-xl border border-slate-100 hover:translate-y-[-8px] transition-all group">
+                                                    <div key={idx} className="bg-white p-10 rounded-4xl shadow-xl border border-slate-100 hover:-translate-y-2 transition-all group">
                                                         <div className={`size-14 rounded-2xl ${theme.bg} ${theme.text} flex items-center justify-center mb-8 shadow-sm ${theme.groupHoverBg} group-hover:text-white transition-all`}>
                                                             <DynamicIcon name={iconNameToUse} size={28} />
                                                         </div>
@@ -312,7 +312,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
 
                     case 'ctaContact':
                         return (
-                            <section key={key} className="py-32 container mx-auto px-6 max-w-[1200px]">
+                            <section key={key} className="py-32 container mx-auto px-6 max-w-300">
                                 <div className="bg-abysse rounded-[3rem] p-12 md:p-20 relative overflow-hidden flex flex-col items-center text-center shadow-[0_50px_100px_-20px_rgba(0,43,73,0.4)]">
                                     <img
                                         src={block.bgImage || "https://images.unsplash.com/photo-1519741497674-6113881432c6?q=80&w=1600"}
