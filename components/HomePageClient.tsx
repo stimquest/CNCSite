@@ -17,6 +17,7 @@ import { DicoParents } from '../components/DicoParents';
 import Link from 'next/link';
 import { PortableText } from '@portabletext/react';
 import { CharDiscoveryModal } from './CharDiscoveryModal';
+import { WelcomeGuide } from './WelcomeGuide';
 
 const RenderText = ({ content, className, fallback = null }: { content: string | any[] | undefined, className?: string, fallback?: React.ReactNode }) => {
     if (!content) return fallback ? <div className={className}>{fallback}</div> : null;
@@ -1268,6 +1269,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
 
             {/* MODALS */}
             <CharDiscoveryModal isOpen={isCharModalOpen} onClose={() => setIsCharModalOpen(false)} />
+            <WelcomeGuide />
         </div>
     );
 }

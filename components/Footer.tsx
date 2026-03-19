@@ -2,23 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { Facebook } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-   const pathname = usePathname();
-
-   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, href: string) => {
-      // If we are on the page of the anchor, scroll to it. 
-      // For typical Next.js apps with hash links works if on same page.
-      // But here we are migrating hash routing -> real routing.
-      // So links like #activites are now /activites.
-      // BUT wait, footer links in App.tsx were #activites.
-      // If they link to section #activites on Home page? 
-      // No, the original App.tsx routed #activites to ActivitiesPage.
-      // So these are real pages now.
-   };
-
    return (
       <footer className="bg-abysse text-white py-20 mt-auto">
          <div className="max-w-[1600px] mx-auto px-6">
@@ -27,10 +13,10 @@ export const Footer: React.FC = () => {
                {/* Brand - 4 columns */}
                <div className="lg:col-span-4">
                   <div className="flex items-center gap-4 mb-6">
-                     <h2 className="text-4xl font-black uppercase tracking-tighter text-white">CNC2s</h2>
+                     <h2 className="text-4xl font-black uppercase tracking-tighter text-white">CNC2S</h2>
                   </div>
                   <p className="text-slate-400 max-w-sm font-medium leading-relaxed mb-6">
-                     Club Nautique de Coutainville, école de référence sur la côte Ouest du Cotentin depuis 1929. Labellisé Ecole Française de Voile.
+                     Club Nautique de Coutainville Sauvetage et Secourisme, école de référence sur la côte Ouest du Cotentin depuis 1929. Labellisé Ecole Française de Voile.
                   </p>
                   <div className="flex gap-4">
                      <a
@@ -92,6 +78,15 @@ export const Footer: React.FC = () => {
                </div>
                <div className="flex gap-8 items-center">
                   <Link href="/legal" className="hover:text-white transition-colors">Mentions Légales</Link>
+                  <button
+                     onClick={() => {
+                        localStorage.removeItem('cnc_onboarded_v1');
+                        window.dispatchEvent(new Event('cnc_reopen_guide'));
+                     }}
+                     className="hover:text-white transition-colors"
+                  >
+                     Revoir le guide
+                  </button>
                   <Link href="/digital-signage" className="text-abysse bg-white px-2 py-1 rounded hover:bg-turquoise hover:text-white transition-colors">Mode Écran</Link>
                   <Link href="/admin" className="text-slate-600 hover:text-white transition-colors">Admin</Link>
                </div>

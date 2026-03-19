@@ -7,13 +7,16 @@ export const VigieInstallButton: React.FC = () => {
     const [prompt, setPrompt] = useState<any>(null);
     const [isIOS, setIsIOS] = useState(false);
     const [showHint, setShowHint] = useState(false);
+    const [isPWA, setIsPWA] = useState(false);
 
     useEffect(() => {
-        // Enregistrer le SW
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            setIsPWA(true);
+            return;
+        }
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw-vigie.js', { scope: '/fil-info/' })
                 .catch(() => {
-                    // Si scope refusé (header manquant), enregistrer sans scope
                     navigator.serviceWorker.register('/sw-vigie.js').catch(() => {});
                 });
         }
@@ -21,7 +24,6 @@ export const VigieInstallButton: React.FC = () => {
         const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
         setIsIOS(ios);
 
-        // Capturer le prompt d'installation
         const handler = (e: Event) => {
             e.preventDefault();
             setPrompt(e);
@@ -44,6 +46,8 @@ export const VigieInstallButton: React.FC = () => {
     const hint = isIOS
         ? 'Appuyez sur Partager → "Sur l\'écran d\'accueil"'
         : 'Dans Chrome : cliquez sur l\'icône ⊕ dans la barre d\'adresse, ou le menu ⋮ → "Installer l\'application"';
+
+    if (isPWA) return null;
 
     return (
         <div className="relative">

@@ -1,13 +1,12 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 import {
-    Trees, Bird, Waves, Map as MapIcon,
-    Compass, Wind, Info, Heart,
+    Trees, Bird, Waves,
+    Compass, Info,
     ArrowRight, Anchor, Navigation,
     Binoculars, Camera, Shield, Eye,
-    Sparkles, ChevronRight, ChevronLeft, AlertCircle, Package, Trophy,
-    Ruler, Hammer, ShieldAlert
+    Sparkles, Package, Trophy,
+    Ruler, Hammer, ShieldAlert, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -26,9 +25,6 @@ const RenderText = ({ content, className, fallback = null }: { content: string |
 };
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import type { ObservationPoint } from '../../../components/NatureMap';
-
-
 // Helper to get Lucide icon from string name
 const getIconByName = (name: string, size = 24) => {
     switch (name.toLowerCase()) {
@@ -52,46 +48,13 @@ const getIconByName = (name: string, size = 24) => {
     }
 };
 
-const getObservationIcon = (type: string) => {
-    switch (type.toLowerCase()) {
-        case 'faune': return <Binoculars size={20} className="text-turquoise" />;
-        case 'patrimoine': return <Anchor size={20} className="text-abysse" />;
-        case 'flore': return <Trees size={20} className="text-green-600" />;
-        case 'oiseaux': return <Bird size={20} className="text-orange-500" />;
-        default: return <MapIcon size={20} className="text-slate-400" />;
-    }
-};
 
 // Register GSAP (Safe for client-side)
 if (typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
 }
 
-// Import dynamique de la carte pour éviter les erreurs SSR de Leaflet
-const NatureMap = dynamic(() => import('../../../components/NatureMap'), {
-    ssr: false,
-    loading: () => <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center rounded-[3.5rem]">
-        <MapIcon className="text-slate-300 animate-bounce" size={48} />
-    </div>
-});
-
 // --- FALLBACK DATA ---
-const FALLBACK_OBSERVATIONS: ObservationPoint[] = [
-    {
-        id: 'phoques',
-        title: 'Colonie de Phoques',
-        type: 'Faune',
-        icon: <Binoculars size={20} className="text-turquoise" />,
-        desc: "Une colonie de phoques veau-marin réside au cœur du havre. Ils sont particulièrement visibles à marée basse sur les bancs de sable.",
-        tip: "L'observation doit se faire à plus de 300m pour ne pas perturber leur repos. Utilisez des jumelles !",
-        position: [49.021, -1.564],
-        images: [
-            "https://images.unsplash.com/photo-1547035160-2647c093a778?q=80&w=800",
-            "https://images.unsplash.com/photo-1621508202501-9f9392211462?q=80&w=800",
-            "https://images.unsplash.com/photo-1590009628045-81498b9a9d70?q=80&w=800"
-        ]
-    }
-];
 
 const FALLBACK_HABITANTS = [
     {
@@ -110,34 +73,13 @@ interface NatureClientProps {
 
 const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
     const natureData = initialNatureData;
-    const [activePoint, setActivePoint] = useState<ObservationPoint | null>(null);
-    const [currentSlide, setCurrentSlide] = useState(0);
+    const [expandedSpecie, setExpandedSpecie] = useState<any>(null);
     const estranRef = useRef<HTMLDivElement>(null);
     const biodivRef = useRef<HTMLDivElement>(null);
     const exploreRef = useRef<HTMLElement>(null);
-    const exploreWrapperRef = useRef<HTMLDivElement>(null);
-
-    // Transform observations from Sanity to ObservationPoint
-    const observations: ObservationPoint[] = React.useMemo(() => {
-        if (!natureData?.observations) return FALLBACK_OBSERVATIONS;
-        return natureData.observations.map((obs: any) => ({
-            id: obs.id,
-            title: obs.title,
-            type: obs.type,
-            desc: obs.description,
-            tip: obs.tip,
-            position: [obs.coordinates.lat, obs.coordinates.lng],
-            images: obs.images,
-            icon: getObservationIcon(obs.type)
-        }));
-    }, [natureData?.observations]);
 
     const habitants = natureData?.habitants?.list || FALLBACK_HABITANTS;
 
-    // Reset slide when point changes
-    useEffect(() => {
-        setCurrentSlide(0);
-    }, [activePoint?.id]);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -159,7 +101,7 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
 
             // Specific Grid Animation for Biodiv
             const bioCards = gsap.utils.toArray<HTMLElement>(biodivRef.current?.querySelectorAll(".bio-card") || []);
-            bioCards.forEach((card, idx) => {
+            bioCards.forEach((card) => {
                 gsap.from(card, {
                     scrollTrigger: {
                         trigger: card,
@@ -175,7 +117,7 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
 
             // Exploration Section Parallax & Content Reveal
             const cards = gsap.utils.toArray<HTMLElement>(".exploration-card");
-            cards.forEach((card, i) => {
+            cards.forEach((card) => {
                 const img = card.querySelector("img");
                 const content = card.querySelector(".z-10");
 
@@ -212,7 +154,15 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
                 );
             });
         });
-        return () => ctx.revert();
+        // Refresh après layout stabilisé + images chargées
+        const t = setTimeout(() => ScrollTrigger.refresh(), 300);
+        const t2 = setTimeout(() => ScrollTrigger.refresh(), 1000);
+
+        return () => {
+            ctx.revert();
+            clearTimeout(t);
+            clearTimeout(t2);
+        };
     }, [natureData]);
 
     return (
@@ -387,7 +337,8 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
                         {habitants.map((specie: any, idx: number) => (
                             <div
                                 key={idx}
-                                className="bio-card w-80 md:w-105 shrink-0 bg-white/5 border border-white/10 rounded-4xl p-5 hover:bg-white/10 transition-all duration-500 hover:border-turquoise/30 group select-none"
+                                onClick={() => setExpandedSpecie(specie)}
+                                className="bio-card w-80 md:w-105 shrink-0 bg-white/5 border border-white/10 rounded-4xl p-5 hover:bg-white/10 transition-all duration-500 hover:border-turquoise/30 group select-none cursor-pointer"
                             >
                                 <div className={`relative rounded-[2rem] overflow-hidden mb-5 bg-white/5 ${idx % 3 === 0 ? 'h-72' : idx % 2 === 0 ? 'h-56' : 'h-64'}`}>
                                     <img
@@ -511,50 +462,6 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
                 </div>
             </section>
 
-            {/* 5. CARTE (Clean layout) */}
-            <section className="py-20 bg-white" id="map">
-                <div className="container mx-auto px-6 max-w-300">
-                    <h2 className="text-2xl text-abysse mb-8 flex items-center gap-4">
-                        <MapIcon size={24} />
-                        Carte des Observations
-                    </h2>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-150">
-                        <div className="lg:col-span-8 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 relative z-0">
-                            <NatureMap observations={observations} onSelectPoint={setActivePoint} activePointId={activePoint?.id} />
-                        </div>
-                        <div className="lg:col-span-4 bg-slate-50 rounded-xl border border-slate-200 p-6 flex flex-col overflow-y-auto">
-                            {activePoint ? (
-                                <div className="animate-fade-in">
-                                    <div className="text-[10px] font-bold uppercase tracking-widest text-turquoise mb-2">{activePoint.type}</div>
-                                    <h3 className="text-xl text-abysse mb-4">{activePoint.title}</h3>
-
-                                    {activePoint.images && activePoint.images.length > 0 && (
-                                        <div className="rounded-lg overflow-hidden mb-4 aspect-video">
-                                            <img src={activePoint.images[0]} className="w-full h-full object-cover" alt={activePoint.title} />
-                                        </div>
-                                    )}
-
-                                    <p className="text-sm text-slate-600 leading-relaxed mb-6">
-                                        {activePoint.desc}
-                                    </p>
-
-                                    <div className="bg-white p-4 rounded-lg border border-slate-200 text-xs text-slate-500 italic mt-auto">
-                                        <span className="font-bold not-italic text-abysse block mb-1">Le Conseil :</span>
-                                        {activePoint.tip}
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="h-full flex flex-col items-center justify-center text-slate-400 text-center">
-                                    <Binoculars size={32} className="mb-3 opacity-50" />
-                                    <p className="text-sm font-medium">Sélectionnez un point<br />sur la carte</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             {/* 6. EXPLORATION FOOTER (Minimalist) */}
             {/* 6. EXPLORATION IMMERSIVE (Vertical Stacking Cards) */}
             <section className="relative bg-abysse" ref={exploreRef}>
@@ -643,6 +550,57 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
                 })}
             </section>
 
+            {/* Specie Zoom Modal */}
+            <AnimatePresence>
+                {expandedSpecie && (
+                    <div className="fixed inset-0 z-9999 flex items-center justify-center p-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setExpandedSpecie(null)}
+                            className="absolute inset-0 bg-abysse/90 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.85 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.85 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+                            className="relative w-full max-w-lg bg-white/8 border border-white/15 rounded-4xl p-7 shadow-2xl"
+                        >
+                            <button
+                                onClick={() => setExpandedSpecie(null)}
+                                className="absolute top-4 right-4 size-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors z-10"
+                            >
+                                <X size={16} />
+                            </button>
+                            <div className="relative rounded-[2rem] overflow-hidden mb-5 h-72">
+                                <img
+                                    src={expandedSpecie.image}
+                                    className="w-full h-full object-cover"
+                                    alt={expandedSpecie.name}
+                                />
+                                <div className="absolute top-3 left-3 bg-abysse/80 backdrop-blur-md px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide text-white border border-white/20">
+                                    {expandedSpecie.scientificName}
+                                </div>
+                            </div>
+                            <h3 className="text-xl text-white font-bold mb-2 leading-tight">
+                                {expandedSpecie.name}
+                            </h3>
+                            <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wide mb-4 flex flex-wrap gap-2">
+                                {expandedSpecie.tags?.map((tag: any, tIdx: number) => (
+                                    <span key={tIdx} className={`px-1.5 py-0.5 rounded bg-white/5 ${tIdx === 0 ? expandedSpecie.tagColor : ""}`}>
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                            <p className="text-sm text-slate-200 leading-relaxed">
+                                {expandedSpecie.description}
+                            </p>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

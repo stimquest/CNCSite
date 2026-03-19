@@ -352,6 +352,11 @@ export const clubPage = defineType({
                                     title: 'Décennie (pour le filtre)',
                                     options: {
                                         list: [
+                                            { title: 'Années 1920', value: '1920s' },
+                                            { title: 'Années 1930', value: '1930s' },
+                                            { title: 'Années 1940', value: '1940s' },
+                                            { title: 'Années 1950', value: '1950s' },
+                                            { title: 'Années 1960', value: '1960s' },
                                             { title: 'Années 70', value: '70s' },
                                             { title: 'Années 80', value: '80s' },
                                             { title: 'Années 90', value: '90s' },

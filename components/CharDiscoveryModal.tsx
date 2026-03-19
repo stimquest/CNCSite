@@ -25,70 +25,38 @@ export const CharDiscoveryModal: React.FC<CharDiscoveryModalProps> = ({ isOpen, 
     // Focus & Scroll Lock Management
     useEffect(() => {
         if (isOpen) {
-            const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-            const previousBodyOverflow = document.body.style.overflow;
-            const previousBodyPaddingRight = document.body.style.paddingRight;
-            const previousHtmlOverflow = document.documentElement.style.overflow;
-            const previousHtmlOverscroll = document.documentElement.style.overscrollBehavior;
-
             document.body.style.overflow = 'hidden';
-            document.body.style.paddingRight = `${scrollBarWidth}px`;
-            document.documentElement.style.overflow = 'hidden';
-            document.documentElement.style.overscrollBehavior = 'none';
             stop();
-            
-            const timer = setTimeout(() => {
-                scrollRef.current?.focus({ preventScroll: true });
-                scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' });
-            }, 50);
-
             return () => {
-                clearTimeout(timer);
-                document.body.style.overflow = previousBodyOverflow;
-                document.body.style.paddingRight = previousBodyPaddingRight;
-                document.documentElement.style.overflow = previousHtmlOverflow;
-                document.documentElement.style.overscrollBehavior = previousHtmlOverscroll;
+                document.body.style.overflow = '';
                 start();
             };
         }
-
-        start();
-    }, [isOpen, start, stop]);
-
-    const handleModalWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-        const container = scrollRef.current;
-
-        if (!container || container.scrollHeight <= container.clientHeight) {
-            return;
-        }
-
-        container.scrollTop += event.deltaY;
-        event.preventDefault();
-    };
+    }, [isOpen, stop, start]);
 
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 md:p-8 pointer-events-none">
+                <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 md:p-8">
                     {/* Backdrop */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-abysse/95 backdrop-blur-md pointer-events-auto"
+                        className="absolute inset-0 bg-abysse/95 backdrop-blur-md"
                     />
 
                     {/* Modal Container */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, scale: 0.98, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.98, y: 10 }}
-                        onWheelCapture={handleModalWheel}
                         role="dialog"
                         aria-modal="true"
                         aria-label="Découverte du char à voile"
-                        className="relative w-full max-w-5xl h-full max-h-[85vh] bg-white rounded-[32px] md:rounded-4xl shadow-2xl overflow-hidden flex flex-col md:flex-row pointer-events-auto border border-white/10 overscroll-contain"
+                        className="relative w-full max-w-5xl h-full max-h-[85vh] bg-white rounded-[32px] md:rounded-4xl shadow-2xl overflow-hidden flex flex-col md:flex-row border border-white/10"
+                        onTouchMove={e => e.stopPropagation()}
                     >
                         {/* Close Button UI */}
                         <button 
@@ -120,10 +88,11 @@ export const CharDiscoveryModal: React.FC<CharDiscoveryModalProps> = ({ isOpen, 
                         {/* Right Column: Scrollable Content Side */}
                         <div className="flex-1 flex flex-col min-h-0 relative bg-slate-50">
                             {/* The Scrollable Zone with Focus Capture */}
-                            <div 
+                            <div
                                 ref={scrollRef}
-                                tabIndex={0}
-                                className="flex-1 overflow-y-auto overscroll-contain px-6 py-8 md:px-10 md:py-12 lg:px-12 lg:py-14 custom-scrollbar scroll-smooth focus:outline-none"
+                                className="flex-1 overflow-y-auto px-6 py-8 md:px-10 md:py-12 lg:px-12 lg:py-14"
+                                style={{ overscrollBehavior: 'contain' }}
+                                onTouchMove={e => e.stopPropagation()}
                             >
                                 <div className="max-w-2xl mx-auto space-y-10 md:space-y-12">
                                     <header>

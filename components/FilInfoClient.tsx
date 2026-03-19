@@ -171,7 +171,7 @@ export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages 
                                             `}
                                         >
                                             {/* Dot catégorie */}
-                                            <span className={`shrink-0 mt-[7px] size-2 rounded-full ${cat.dot}`} />
+                                            <span className={`shrink-0 mt-1.75 size-2 rounded-full ${cat.dot}`} />
 
                                             {/* Contenu */}
                                             <div className="flex-1 min-w-0">

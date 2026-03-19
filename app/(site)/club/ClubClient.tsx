@@ -12,8 +12,6 @@ import {
     ArrowRight,
     ChevronLeft,
     ChevronRight,
-    Pause,
-    Play,
     Camera,
     MapPin,
     UserCheck,
@@ -164,8 +162,11 @@ const FALLBACK_SOUVENIRS = [
     { id: 9, image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200', title: 'Session Matinale', date: '1988', decade: '1980' },
 ];
 
+const PRE70_VALUES = ['1920s', '1930s', '1940s', '1950s', '1960s'];
+
 const DECADES = [
     { label: 'Hasard', value: 'all' },
+    { label: 'Avant 70s', value: 'pre70s' },
     { label: '70s', value: '70s' },
     { label: '80s', value: '80s' },
     { label: '90s', value: '90s' },
@@ -196,8 +197,6 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
     const heroStats = clubData?.heroStats || FALLBACK_HERO_STATS;
     const identityTitle = clubData?.identityTitle || "Notre Projet :\nL'Horizon pour Tous";
     const values = clubData?.values || FALLBACK_VALUES;
-    const storytelling = clubData?.storytelling || FALLBACK_STORYTELLING;
-    const storytellingCta = clubData?.storytellingCta || { label: 'Nous Rejoindre', link: '/infos-pratiques' };
     const teamData = clubData?.team || FALLBACK_TEAM;
     const siteData = clubData?.site || FALLBACK_SITE;
     const fleetTitle = clubData?.fleet?.title || "L'Armada du CNC";
@@ -325,7 +324,9 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
         const sourceItems = souvenirsData.items || [];
         const filtered = activeDecade === 'all'
             ? [...sourceItems]
-            : sourceItems.filter((s: any) => s.decade === activeDecade);
+            : activeDecade === 'pre70s'
+                ? sourceItems.filter((s: any) => PRE70_VALUES.includes(s.decade))
+                : sourceItems.filter((s: any) => s.decade === activeDecade);
 
         const shuffled = [...filtered].sort(() => 0.5 - Math.random());
         setSouvenirs(shuffled.slice(0, 6));
@@ -335,7 +336,9 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
         const sourceItems = souvenirsData.items || [];
         const filtered = activeDecade === 'all'
             ? [...sourceItems]
-            : sourceItems.filter((s: any) => s.decade === activeDecade);
+            : activeDecade === 'pre70s'
+                ? sourceItems.filter((s: any) => PRE70_VALUES.includes(s.decade))
+                : sourceItems.filter((s: any) => s.decade === activeDecade);
 
         const shuffled = [...filtered].sort(() => 0.5 - Math.random());
         setSouvenirs(shuffled.slice(0, 6));
@@ -438,7 +441,6 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
                                 const now = new Date();
                                 const currentYM = now.toISOString().slice(0, 7);
                                 const idx = uniqueMonths.indexOf(selectedMonth);
-                                const effectiveIdx = idx !== -1 ? idx : Math.max(0, uniqueMonths.findIndex(m => m >= currentYM));
 
                                 const goToPrev = () => { if (idx > 0) setSelectedMonth(uniqueMonths[idx - 1]); };
                                 const goToNext = () => { if (idx < uniqueMonths.length - 1) setSelectedMonth(uniqueMonths[idx + 1]); };
