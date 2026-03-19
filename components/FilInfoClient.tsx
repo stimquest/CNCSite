@@ -58,7 +58,6 @@ export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages 
                             <span className="size-2 bg-turquoise rounded-full animate-pulse shadow-[0_0_12px_rgba(45,212,191,0.5)]" />
                             <span className="text-turquoise text-[10px] font-black uppercase tracking-[0.35em]">La Vigie Direct</span>
                         </div>
-                        <VigieInstallButton />
                     </div>
                     <h1 className="text-5xl md:text-7xl text-white leading-none mb-3">
                         La <span className="text-turquoise">Vigie.</span>
@@ -238,9 +237,12 @@ export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages 
                         </AnimatePresence>
                     </div>
 
-                    <p className="text-center text-[9px] font-black text-slate-300 uppercase tracking-[0.35em] py-6">
-                        Fin du journal de bord
-                    </p>
+                    <div className="flex flex-col items-center py-6 gap-4">
+                        <p className="text-center text-[9px] font-black text-slate-300 uppercase tracking-[0.35em]">
+                            Fin du journal de bord
+                        </p>
+                        <VigieInstallButton />
+                    </div>
                 </div>
             </div>
         </div>
