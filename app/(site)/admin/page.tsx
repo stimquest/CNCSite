@@ -10,11 +10,11 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-    // Fetch non-live CMS data on the server
-    const [plannings, charPlannings, marchePlannings] = await Promise.all([
+    const [plannings, charPlannings, marchePlannings, charSessions] = await Promise.all([
         client.fetch(queries.plannings),
         client.fetch(queries.charPlannings),
-        client.fetch(queries.marchePlannings)
+        client.fetch(queries.marchePlannings),
+        client.fetch(queries.charSessions),
     ]);
 
     return (
@@ -22,6 +22,7 @@ export default async function AdminPage() {
             plannings={plannings || []} 
             charPlannings={charPlannings || []} 
             marchePlannings={marchePlannings || []} 
+            charSessions={charSessions || []}
         />
     );
 }

@@ -27,6 +27,7 @@ import { ActivityGallery } from '../../../components/ActivityGallery';
 import { PortableText } from '@portabletext/react';
 import { PageHero } from '@/components/PageHero';
 import ClubActivitiesView from '@/components/ClubActivitiesView';
+import { ActivityFinder } from '../../../components/ActivityFinder';
 
 interface ActivitiesClientProps {
     initialActivities: Activity[];
@@ -39,6 +40,7 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
     const [activeFilter, setActiveFilter] = useState<ActivityCategory | 'TOUTES'>('TOUTES');
     const [viewMode, setViewMode] = useState<'activities' | 'club'>('activities');
     const [expandedId, setExpandedId] = useState<string | null>(null);
+    const [searchAge, setSearchAge] = useState<number | null>(null);
     const searchParams = useSearchParams();
 
     // -- DEEP LINKING SUPPORT --
@@ -72,8 +74,35 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
     }, [searchParams]);
 
     const filteredActivities = useMemo(() => {
-        return activities.filter(a => activeFilter === 'TOUTES' || a.category === activeFilter);
-    }, [activeFilter, activities]);
+        let result = activities;
+        
+        if (activeFilter !== 'TOUTES') {
+            result = result.filter(a => a.category === activeFilter);
+        }
+        
+        if (searchAge) {
+            // Filtrer les activités où l'utilisateur a l'âge minimum requis
+            result = result.filter(a => {
+                const minReq = a.minAge || 0;
+                // Exclure les activités pour petits si l'utilisateur est adulte, pour éviter le bruit
+                // Si searchAge est >= 16, on essaie de filtrer les trucs "Jeunesse" (optionnel mais UX)
+                if (searchAge >= 16 && a.category === 'Jeunesse') return false;
+                return minReq <= searchAge;
+            });
+        }
+        
+        return result;
+    }, [activeFilter, activities, searchAge]);
+
+    const handleSearch = (age: number | null, category: string | null) => {
+        setSearchAge(age);
+        if (category) {
+            setActiveFilter(category as any);
+        } else if (age !== null && activeFilter === 'TOUTES') {
+            // garder tous les filtres si juste on cherche par age
+        }
+        setViewMode('activities');
+    };
 
     const toggleExpand = (id: string) => {
         setExpandedId(expandedId === id ? null : id);
@@ -215,6 +244,11 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
                 </div>
             </section>
 
+            {/* 1.5 ACTIVITY FINDER ENGINE */}
+            <div className="relative z-30 max-w-[1400px] mx-auto px-4 md:px-6 py-8">
+                 <ActivityFinder onSearch={handleSearch} />
+            </div>
+
             {/* 3. CONTENT AREA */}
             <section className="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
                 <AnimatePresence mode="wait">
@@ -240,6 +274,7 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
                                 return (
                                     <div
                                         key={activity.id}
+                                        id={activity.id}
                                         className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-200 transition-all duration-300 hover:shadow-lg"
                                     >
                                         <div className="flex flex-col lg:flex-row">

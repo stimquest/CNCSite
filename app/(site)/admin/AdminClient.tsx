@@ -25,7 +25,9 @@ import {
     Zap
 } from 'lucide-react';
 import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, ActivityType, CharWeek, CharDay, CharSession } from '@/types';
+import { CharSessionDoc } from '@/types';
 import Link from 'next/link';
+import CharBookingAdmin from '@/components/admin/CharBookingAdmin';
 
 // --- CONSTANTS ---
 const ACTIVITY_OPTIONS: { label: string, value: ActivityType }[] = [
@@ -70,15 +72,16 @@ interface Props {
     plannings: WeeklyPlanning[];
     charPlannings: PlanningCharAVoile[];
     marchePlannings: PlanningMarche[];
+    charSessions: CharSessionDoc[];
 }
 
-export default function AdminClient({ plannings, charPlannings, marchePlannings }: Props) {
+export default function AdminClient({ plannings, charPlannings, marchePlannings, charSessions }: Props) {
     const router = useRouter();
     const refreshData = async () => {
         router.refresh();
     };
 
-    const [activeTab, setActiveTab] = useState<'STAGES' | 'CHAR' | 'MARCHE' | 'VIGIE'>('VIGIE');
+    const [activeTab, setActiveTab] = useState<'STAGES' | 'CHAR' | 'MARCHE' | 'VIGIE' | 'BOOKING'>('VIGIE');
     const [isSaving, setIsSaving] = useState(false);
 
     // --- VIGIE STATE ---
@@ -464,7 +467,8 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
                             <nav className="flex gap-1 bg-slate-100 p-1 rounded-xl">
                                 <button onClick={() => setActiveTab('VIGIE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'VIGIE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Bell size={12} /> Vigie Direct</button>
                                 <button onClick={() => setActiveTab('STAGES')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'STAGES' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Stages</button>
-                                <button onClick={() => setActiveTab('CHAR')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'CHAR' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Char à Voile</button>
+                                <button onClick={() => setActiveTab('CHAR')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'CHAR' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Char (ancien)</button>
+                                <button onClick={() => setActiveTab('BOOKING')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'BOOKING' ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-400'}`}>🏁 Booking Char</button>
                                 <button onClick={() => setActiveTab('MARCHE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'MARCHE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Marche</button>
                                 <Link href="/cockpit" target="_blank" className="ml-2 px-4 py-2 rounded-lg bg-turquoise/10 text-turquoise hover:bg-turquoise/20 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
                                     🚀 Cockpit
@@ -846,6 +850,14 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings 
                                 )}
                             </div>
                         </div>
+                    )}
+
+                    {/* TAB: BOOKING CHAR A VOILE */}
+                    {activeTab === 'BOOKING' && (
+                        <CharBookingAdmin
+                            sessions={charSessions ?? []}
+                            onRefresh={refreshData}
+                        />
                     )}
 
                     {/* TAB: MARCHE AQUATIQUE */}

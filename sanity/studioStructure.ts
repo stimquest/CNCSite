@@ -153,8 +153,31 @@ export const structure: StructureResolver = (S) =>
                         .items([
                             S.documentTypeListItem('weeklyPlanning').title('Planning de la Semaine'),
                             S.divider(),
-                            S.documentTypeListItem('planningCharAVoile').title('Planning Char à Voile'),
+                            S.documentTypeListItem('planningCharAVoile').title('Planning Char à Voile (ancien)'),
                             S.documentTypeListItem('planningMarche').title('Planning Marche Aquatique'),
+                            S.divider(),
+                            S.listItem()
+                                .title('🏁 Char à Voile — Booking')
+                                .child(
+                                    S.list()
+                                        .title('Char à Voile — Réservations')
+                                        .items([
+                                            S.documentTypeListItem('charSession')
+                                                .title('Sessions')
+                                                .child(
+                                                    S.documentTypeList('charSession')
+                                                        .title('Sessions Char à Voile')
+                                                        .defaultOrdering([{ field: 'date', direction: 'asc' }])
+                                                ),
+                                            S.documentTypeListItem('charBooking')
+                                                .title('Réservations')
+                                                .child(
+                                                    S.documentTypeList('charBooking')
+                                                        .title('Réservations Char à Voile')
+                                                        .defaultOrdering([{ field: '_createdAt', direction: 'desc' }])
+                                                ),
+                                        ])
+                                ),
                         ])
                 ),
 
@@ -178,6 +201,6 @@ export const structure: StructureResolver = (S) =>
 
             // Regular document types
             ...S.documentTypeListItems().filter(
-                (listItem) => !['naturePage', 'clubPage', 'groupsPage', 'activitiesPage', 'leSpotPage', 'homeGallery', 'spotSettings', 'homePage', 'infosPage', 'schoolPage', 'bookingTemplate', 'natureEntity', 'dicoWord', 'fleetItem', 'merchItem', 'occazItem', 'infoMessage', 'vibeMessage', 'signageSlide', 'clubPole', 'clubActivity', 'weeklyPlanning', 'planningCharAVoile', 'planningMarche', 'article', 'agendaEvent'].includes(listItem.getId() || '')
+                (listItem) => !['naturePage', 'clubPage', 'groupsPage', 'activitiesPage', 'leSpotPage', 'homeGallery', 'spotSettings', 'homePage', 'infosPage', 'schoolPage', 'bookingTemplate', 'natureEntity', 'dicoWord', 'fleetItem', 'merchItem', 'occazItem', 'infoMessage', 'vibeMessage', 'signageSlide', 'clubPole', 'clubActivity', 'weeklyPlanning', 'planningCharAVoile', 'planningMarche', 'article', 'agendaEvent', 'charSession', 'charBooking'].includes(listItem.getId() || '')
             ),
         ]);

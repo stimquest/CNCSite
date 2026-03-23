@@ -559,3 +559,35 @@ export interface DicoWord {
   quizAnswers: string[];
   correctAnswerIdx: number;
 }
+
+// --- CHAR A VOILE BOOKING ---
+
+export interface CharSessionDoc {
+  _id: string;
+  _type: 'charSession';
+  _createdAt?: string;
+  date: string;           // ISO date "2025-07-12"
+  heureDebut: string;     // "10h30"
+  heureFin: string;       // "12h30"
+  capaciteMax: number;
+  notes?: string;
+  actif?: boolean;
+  // Computed client-side from bookings
+  placesRestantes?: number;
+  bookings?: CharBookingDoc[];
+}
+
+export type CharBookingStatut = 'confirme' | 'liste_attente' | 'annule';
+
+export interface CharBookingDoc {
+  _id: string;
+  _type: 'charBooking';
+  _createdAt?: string;
+  session: { _ref: string; _type: 'reference' } | CharSessionDoc;
+  clientNom: string;
+  clientTel: string;
+  nbPlaces: number;
+  statut: CharBookingStatut;
+  notes?: string;
+  stripePaymentIntentId?: string; // Future Stripe integration
+}

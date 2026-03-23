@@ -130,63 +130,69 @@ export default defineType({
         }),
 
         defineField({
-            name: 'focusChar',
-            title: 'Section Focus : Char à Voile',
-            type: 'object',
+            name: 'focusCards',
+            title: 'Cartes Activités Phares (Carrousel Horizontal)',
+            type: 'array',
             group: 'focus',
-            fields: [
-                defineField({ name: 'title', title: 'Titre Principal', type: 'string', initialValue: 'Le Char' }),
-                defineField({ name: 'highlightSuffix', title: 'Suffixe Coloré', type: 'string', initialValue: 'à Voile.' }),
-                defineField({ name: 'tagline', title: 'Petit Titre (Tagline)', type: 'string', initialValue: 'Activité Phare' }),
-                defineField({ name: 'subTagline', title: 'Sous-Tagline', type: 'string', initialValue: 'Sensation & Vitesse' }),
-                defineField({ name: 'description', title: 'Description', type: 'text', rows: 3 }),
-                defineField({ name: 'badgeValue', title: 'Valeur Badge (ex: 60+)', type: 'string' }),
-                defineField({ name: 'badgeLabel', title: 'Label Badge', type: 'string' }),
-                defineField({ name: 'images', title: 'Galerie Images', type: 'array', of: [{ type: 'image', options: { hotspot: true } }] }),
-                defineField({ name: 'ctaButton', title: 'Bouton Action', type: 'object', fields: [{ name: 'text', type: 'string' }, { name: 'link', type: 'string' }] }),
-                defineField({ name: 'infoButton', title: 'Bouton Info', type: 'object', fields: [{ name: 'text', type: 'string' }, { name: 'link', type: 'string' }] }),
+            of: [
+                {
+                    type: 'object',
+                    fields: [
+                        defineField({
+                            name: 'cardType',
+                            title: 'Type de Carte',
+                            type: 'string',
+                            options: {
+                                list: [
+                                    { title: 'Standard (Activité)', value: 'standard' },
+                                    { title: 'Bannière / CTA Promo', value: 'cta' }
+                                ]
+                            },
+                            initialValue: 'standard',
+                        }),
+                        defineField({
+                            name: 'themeColor',
+                            title: 'Thème Couleur Principal',
+                            type: 'string',
+                            options: {
+                                list: [
+                                    { title: 'Orange (Sensation)', value: 'orange' },
+                                    { title: 'Bleu (Nautisme)', value: 'blue' },
+                                    { title: 'Turquoise / Océan', value: 'turquoise' },
+                                    { title: 'Émeraude / Nature', value: 'emerald' },
+                                    { title: 'Violet / Détente', value: 'purple' },
+                                ]
+                            },
+                            initialValue: 'orange',
+                        }),
+                        defineField({ 
+                            name: 'iconName', 
+                            title: 'Icône (Lucide)', 
+                            type: 'string', 
+                            components: { input: IconPicker },
+                            description: 'Ex: Zap (Éclair), Wind (Vent), Leaf (Feuille), Compass (Boussole)'
+                        }),
+                        defineField({ name: 'title', title: 'Titre Principal', type: 'string' }),
+                        defineField({ name: 'highlightSuffix', title: 'Suffixe Coloré', type: 'string' }),
+                        defineField({ name: 'tagline', title: 'Petit Titre (Tagline)', type: 'string' }),
+                        defineField({ name: 'subTagline', title: 'Sous-Tagline', type: 'string' }),
+                        defineField({ name: 'description', title: 'Description', type: 'text', rows: 3 }),
+                        defineField({ name: 'badgeValue', title: 'Valeur Badge (ex: 60+)', type: 'string', hidden: ({parent}) => parent?.cardType === 'cta' }),
+                        defineField({ name: 'badgeLabel', title: 'Label Badge', type: 'string', hidden: ({parent}) => parent?.cardType === 'cta' }),
+                        defineField({ name: 'images', title: 'Galerie Images (côté droit)', type: 'array', of: [{ type: 'image', options: { hotspot: true } }] }),
+                        defineField({ name: 'ctaButton', title: 'Bouton Action', type: 'object', fields: [{ name: 'text', type: 'string' }, { name: 'link', type: 'string' }] }),
+                        defineField({ name: 'infoButton', title: 'Bouton Secondaire', type: 'object', fields: [{ name: 'text', type: 'string' }, { name: 'link', type: 'string' }] }),
+                    ],
+                    preview: {
+                        select: {
+                            title: 'title',
+                            subtitle: 'tagline',
+                            media: 'images.0'
+                        }
+                    }
+                }
             ],
-            options: { collapsible: true, collapsed: true }
-        }),
-
-        defineField({
-            name: 'focusGlisse',
-            title: 'Section Focus : Glisse Extrême',
-            type: 'object',
-            group: 'focus',
-            fields: [
-                defineField({ name: 'title', title: 'Titre Principal', type: 'string', initialValue: 'Glisse' }),
-                defineField({ name: 'highlightSuffix', title: 'Suffixe Coloré', type: 'string', initialValue: 'Extrême.' }),
-                defineField({ name: 'tagline', title: 'Petit Titre (Tagline)', type: 'string', initialValue: 'Sensations Fortes' }),
-                defineField({ name: 'subTagline', title: 'Sous-Tagline', type: 'string', initialValue: 'Wing, Kite & Funboard' }),
-                defineField({ name: 'description', title: 'Description', type: 'text', rows: 3 }),
-                defineField({ name: 'badgeValue', title: 'Valeur Badge', type: 'string', initialValue: 'Pure' }),
-                defineField({ name: 'badgeLabel', title: 'Label Badge', type: 'string', initialValue: 'Énergie & Adrénaline' }),
-                defineField({ name: 'images', title: 'Galerie Images', type: 'array', of: [{ type: 'image', options: { hotspot: true } }] }),
-                defineField({ name: 'ctaButton', title: 'Bouton Action', type: 'object', fields: [{ name: 'text', type: 'string' }, { name: 'link', type: 'string' }] }),
-                defineField({ name: 'infoButton', title: 'Bouton Info', type: 'object', fields: [{ name: 'text', type: 'string' }, { name: 'link', type: 'string' }] }),
-            ],
-            options: { collapsible: true, collapsed: true }
-        }),
-
-        defineField({
-            name: 'focusBienEtre',
-            title: 'Section Focus : Bien-être',
-            type: 'object',
-            group: 'focus',
-            fields: [
-                defineField({ name: 'title', title: 'Titre Principal', type: 'string', initialValue: 'Bien-être' }),
-                defineField({ name: 'highlightSuffix', title: 'Suffixe Coloré', type: 'string', initialValue: '& Slow Tourisme.' }),
-                defineField({ name: 'tagline', title: 'Petit Titre (Tagline)', type: 'string', initialValue: 'Slow Tourisme' }),
-                defineField({ name: 'subTagline', title: 'Sous-Tagline', type: 'string', initialValue: 'Marche Aquatique, Kayak & Paddle' }),
-                defineField({ name: 'description', title: 'Description', type: 'text', rows: 3 }),
-                defineField({ name: 'badgeValue', title: 'Valeur Badge', type: 'string', initialValue: '100%' }),
-                defineField({ name: 'badgeLabel', title: 'Label Badge', type: 'string', initialValue: 'Oxygène & Sérénité Locale' }),
-                defineField({ name: 'images', title: 'Galerie Images', type: 'array', of: [{ type: 'image', options: { hotspot: true } }] }),
-                defineField({ name: 'ctaButton', title: 'Bouton Action', type: 'object', fields: [{ name: 'text', type: 'string' }, { name: 'link', type: 'string' }] }),
-                defineField({ name: 'infoButton', title: 'Bouton Info', type: 'object', fields: [{ name: 'text', type: 'string' }, { name: 'link', type: 'string' }] }),
-            ],
-            options: { collapsible: true, collapsed: true }
+            validation: Rule => Rule.max(6).warning('Attention, trop de cartes forceront l\'utilisateur à scroller beaucoup.'),
         }),
 
         // Campus Nautique (Institution)

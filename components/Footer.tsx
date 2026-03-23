@@ -7,7 +7,7 @@ import { Facebook } from 'lucide-react';
 export const Footer: React.FC = () => {
    return (
       <footer className="bg-abysse text-white py-20 mt-auto">
-         <div className="max-w-[1600px] mx-auto px-6">
+         <div className="max-w-400 mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
 
                {/* Brand - 4 columns */}

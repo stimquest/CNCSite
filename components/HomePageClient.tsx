@@ -159,6 +159,91 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
     );
 };
 
+const FocusCardItem = ({ card, idx, isActive, theme, images }: any) => {
+    const [imgIdx, setImgIdx] = useState(0);
+
+    const safeImages = images?.length ? images : ['https://images.unsplash.com/photo-1544198365-f5d60b6d8190?q=80&w=2000'];
+
+    useEffect(() => {
+        if (!safeImages || safeImages.length <= 1) return;
+        const timer = setInterval(() => setImgIdx(p => (p + 1) % safeImages.length), 5000 + (Math.random() * 1000));
+        return () => clearInterval(timer);
+    }, [safeImages.length]);
+
+    // Reverse layout for even cards to add variety
+    const isReversed = idx % 2 !== 0;
+
+    return (
+        <div
+            id={`focus-card-${idx}`}
+            className={`shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} min-h-125 lg:min-h-137.5`}
+            style={{ opacity: isActive ? 1 : 0.5, transform: isActive ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
+        >
+            <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className={`size-12 bg-white rounded-2xl flex items-center justify-center ${theme.text} shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+                        {/* Dynamic Icon */}
+                        {card.iconName === 'Leaf' ? <Leaf size={24} /> :
+                         card.iconName === 'Wind' ? <Wind size={24} /> :
+                         card.iconName === 'Compass' ? <Compass size={24} /> :
+                         card.iconName === 'Waves' ? <Waves size={24} /> :
+                         <Zap size={24} />}
+                    </div>
+                    <div>
+                        <span className={`${theme.textLight} font-black uppercase tracking-[0.2em] text-[10px] block`}>{card.tagline}</span>
+                        <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{card.subTagline}</span>
+                    </div>
+                </div>
+                <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
+                    {card.title} <br />
+                    <span className={`text-transparent bg-clip-text bg-linear-to-r ${theme.from} ${theme.via} ${theme.to}`}>{card.highlightSuffix}</span>
+                </h2>
+                <RenderText
+                    content={card.description}
+                    className={`text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-l-white/20 pl-8 italic`}
+                    fallback="Découvrez cette activité phare avec l'équipe du club nautique."
+                />
+                <div className="flex flex-col sm:flex-row gap-4 mt-auto">
+                    {card.ctaButton?.link && (
+                        <Link href={card.ctaButton.link} className={`inline-flex items-center justify-center px-8 py-5 ${theme.bg} text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:brightness-110 transition-all shadow-lg group/btn shadow-black/20`}>
+                            {card.ctaButton.text} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
+                        </Link>
+                    )}
+                    {card.infoButton?.link && (
+                        <Link href={card.infoButton.link} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                            {card.infoButton.text}
+                        </Link>
+                    )}
+                </div>
+            </div>
+            <div className="flex-none h-70 md:h-87.5 lg:h-auto lg:flex-1 relative overflow-hidden">
+                <div className="absolute inset-0 z-0">
+                    <AnimatePresence mode="popLayout">
+                        <motion.img key={safeImages[imgIdx]} src={safeImages[imgIdx]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt={card.title} />
+                    </AnimatePresence>
+                </div>
+                <div className={`absolute inset-y-0 ${isReversed ? 'right-0' : 'left-0'} w-px bg-white/10 hidden lg:block z-20`}></div>
+                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
+                
+                {/* Image pagination indicators */}
+                {safeImages.length > 1 && (
+                    <div className={`absolute bottom-6 ${isReversed ? 'left-8' : 'right-8'} flex gap-2 z-20`}>
+                        {safeImages.map((_: any, i: number) => (<div key={i} className={`h-1 rounded-full transition-all duration-500 ${i === imgIdx ? `w-8 ${theme.bg}` : 'w-2 bg-white/30'}`} />))}
+                    </div>
+                )}
+                
+                {/* Badge if exists */}
+                {card.badgeValue && (
+                    <div className={`absolute top-8 ${isReversed ? 'left-8' : 'right-8'} bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-45`}>
+                        <span className={`${theme.textLight} font-black text-3xl block leading-none mb-1`}>{card.badgeValue}</span>
+                        <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{card.badgeLabel}</span>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 export default function HomePageClient({ homePageData, dicoWords, homeGallery, infoMessages, upcomingEvents = [] }: any) {
     const {
         weather, statusMessage,
@@ -191,7 +276,8 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
         const touchEnd = e.changedTouches[0].clientX;
         const diff = touchStartRef.current - touchEnd;
         if (Math.abs(diff) > 40) { // Seuil de 40px pour déclencher le slide
-            if (diff > 0) navigateFocus(Math.min(2, currentFocusIndex + 1));
+            const maxIndex = Math.max(0, (homePageData?.focusCards?.length || 3) - 1);
+            if (diff > 0) navigateFocus(Math.min(maxIndex, currentFocusIndex + 1));
             else navigateFocus(Math.max(0, currentFocusIndex - 1));
         }
     };
@@ -211,7 +297,8 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
         if (focusWheelLockRef.current) return;
         focusWheelLockRef.current = true;
         setTimeout(() => { focusWheelLockRef.current = false; }, 700);
-        if (e.deltaX > 20) navigateFocus(Math.min(2, currentFocusIndex + 1));
+        const maxIndex = Math.max(0, (homePageData?.focusCards?.length || 3) - 1);
+        if (e.deltaX > 20) navigateFocus(Math.min(maxIndex, currentFocusIndex + 1));
         else if (e.deltaX < -20) navigateFocus(Math.max(0, currentFocusIndex - 1));
     };
 
@@ -695,7 +782,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                         </h2>
                     </div>
 
-                    {/* Carousel — overflow-hidden full-width, flex aligné sur max-w-400 mx-auto px-6 */}
+                     {/* Carousel — overflow-hidden full-width, flex aligné sur max-w-400 mx-auto px-6 */}
                     <div className="overflow-hidden" onWheel={handleFocusWheel}>
                         <div className="max-w-400 mx-auto pl-6">
                             <motion.div
@@ -708,178 +795,92 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                     transition: 'transform 0.65s cubic-bezier(0.32, 0.72, 0, 1)',
                                 }}
                             >
-                                {/* Carte 1 — Char à Voile */}
-                                <div
-                                    id="vitesse"
-                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-125 lg:min-h-137.5"
-                                    style={{ opacity: currentFocusIndex === 0 ? 1 : 0.5, transform: currentFocusIndex === 0 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
-                                >
-                                    <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
-                                        <div className="flex items-center gap-3 mb-6">
-                                            <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-orange-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
-                                                <Zap size={24} fill="currentColor" />
-                                            </div>
-                                            <div>
-                                                <span className="text-orange-500 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusChar?.tagline || "Activité Phare"}</span>
-                                                <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusChar?.subTagline || "Sensation & Vitesse"}</span>
-                                            </div>
-                                        </div>
-                                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
-                                            {homePageData?.focusChar?.title || "Le Char"} <br />
-                                            <span className="text-transparent bg-clip-text bg-linear-to-r from-orange-400 via-orange-500 to-red-600">{homePageData?.focusChar?.highlightSuffix || "à Voile."}</span>
-                                        </h2>
-                                        <RenderText
-                                            content={homePageData?.focusChar?.description}
-                                            className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-orange-500/30 pl-8 italic"
-                                            fallback="Glissez sur le sable à quelques centimètres du sol. Une expérience unique, propulsée par la seule force du vent sur l'immense plage de Coutainville."
-                                        />
-                                        <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-                                            <Link href={homePageData?.focusChar?.ctaButton?.link || "/activites"} className="inline-flex items-center justify-center px-8 py-5 bg-orange-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-orange-600 transition-all shadow-lg group/btn shadow-orange-500/20">
-                                                {homePageData?.focusChar?.ctaButton?.text || "Réserver une séance"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
-                                            </Link>
-                                            <button onClick={() => setIsCharModalOpen(true)} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
-                                                {homePageData?.focusChar?.infoButton?.text || "En savoir plus"}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="flex-none h-70 md:h-87.5 lg:h-auto lg:flex-1 relative overflow-hidden">
-                                        <div className="absolute inset-0 z-0">
-                                            <AnimatePresence mode="popLayout">
-                                                <motion.img key={CHAR_IMAGES[currentCharIndex]} src={CHAR_IMAGES[currentCharIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Char à voile" />
-                                            </AnimatePresence>
-                                        </div>
-                                        <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
-                                        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
-                                        <div className="absolute bottom-6 right-8 flex gap-2 z-20">
-                                            {CHAR_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentCharIndex ? 'w-8 bg-orange-500' : 'w-2 bg-white/30'}`} />))}
-                                        </div>
-                                        <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-45">
-                                            <span className="text-orange-500 font-black text-3xl block leading-none mb-1">{homePageData?.focusChar?.badgeValue || "60+"}</span>
-                                            <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusChar?.badgeLabel || "Km/h de sensations pures"}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                {(homePageData?.focusCards || []).map((card: any, idx: number) => {
+                                    const isActive = idx === currentFocusIndex;
+                                    const isCta = card.cardType === 'cta';
 
-                                {/* Carte 2 — Glisse Extrême */}
-                                <div
-                                    id="adrenaline"
-                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row-reverse min-h-125 lg:min-h-137.5"
-                                    style={{ opacity: currentFocusIndex === 1 ? 1 : 0.5, transform: currentFocusIndex === 1 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
-                                >
-                                    <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
-                                        <div className="flex items-center gap-3 mb-6">
-                                            <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-blue-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
-                                                <Wind size={24} fill="currentColor" className="text-blue-500" />
-                                            </div>
-                                            <div>
-                                                <span className="text-blue-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusGlisse?.tagline || "Sensations Fortes"}</span>
-                                                <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusGlisse?.subTagline || "Wing, Kite & Funboard"}</span>
-                                            </div>
-                                        </div>
-                                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
-                                            {homePageData?.focusGlisse?.title || "Glisse"} <br />
-                                            <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 via-indigo-500 to-purple-600">{homePageData?.focusGlisse?.highlightSuffix || "Extrême."}</span>
-                                        </h2>
-                                        <RenderText
-                                            content={homePageData?.focusGlisse?.description}
-                                            className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-blue-500/30 pl-8 italic"
-                                            fallback="Dominez les éléments. Wingfoil, Kitesurf ou Windsurf : repoussez vos limites avec les moniteurs du club sur l'un des meilleurs spots de Normandie."
-                                        />
-                                        <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-                                            <Link href={homePageData?.focusGlisse?.ctaButton?.link || "/activites?cat=Sensations"} className="inline-flex items-center justify-center px-8 py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-blue-500 transition-all shadow-lg group/btn shadow-blue-500/20">
-                                                {homePageData?.focusGlisse?.ctaButton?.text || "Découvrir la glisse"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
-                                            </Link>
-                                            <Link href={homePageData?.focusGlisse?.infoButton?.link || "/le-spot"} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
-                                                {homePageData?.focusGlisse?.infoButton?.text || "Le Spot"}
-                                            </Link>
-                                        </div>
-                                    </div>
-                                    <div className="flex-none h-70 md:h-87.5 lg:h-auto lg:flex-1 relative overflow-hidden">
-                                        <div className="absolute inset-0 z-0">
-                                            <AnimatePresence mode="popLayout">
-                                                <motion.img key={GLISSE_IMAGES[currentGlisseIndex]} src={GLISSE_IMAGES[currentGlisseIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6.5, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Glisse extrême" />
-                                            </AnimatePresence>
-                                        </div>
-                                        <div className="absolute inset-y-0 right-0 w-px bg-white/10 hidden lg:block z-20"></div>
-                                        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
-                                        <div className="absolute bottom-6 left-8 flex gap-2 z-20">
-                                            {GLISSE_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentGlisseIndex ? 'w-8 bg-blue-500' : 'w-2 bg-white/30'}`} />))}
-                                        </div>
-                                        <div className="absolute top-8 left-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-45">
-                                            <span className="text-blue-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusGlisse?.badgeValue || "Pure"}</span>
-                                            <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusGlisse?.badgeLabel || "Énergie & Adrénaline"}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                    // Local theme colors
+                                    const colors = {
+                                        orange: { bg: 'bg-orange-500', text: 'text-orange-500', textLight: 'text-orange-400', from: 'from-orange-400', to: 'to-red-600', via: 'via-orange-500' },
+                                        blue: { bg: 'bg-blue-600', text: 'text-blue-500', textLight: 'text-blue-400', from: 'from-blue-400', to: 'to-purple-600', via: 'via-indigo-500' },
+                                        emerald: { bg: 'bg-emerald-600', text: 'text-emerald-500', textLight: 'text-emerald-400', from: 'from-emerald-400', to: 'to-cyan-600', via: 'via-teal-500' },
+                                        turquoise: { bg: 'bg-turquoise', text: 'text-turquoise', textLight: 'text-turquoise', from: 'from-abysse', to: 'to-cyan-400', via: 'via-turquoise' },
+                                        purple: { bg: 'bg-purple-600', text: 'text-purple-500', textLight: 'text-purple-400', from: 'from-purple-400', to: 'to-pink-600', via: 'via-purple-500' },
+                                    };
+                                    
+                                    const theme = colors[card.themeColor as keyof typeof colors] || colors.orange;
 
-                                {/* Carte 3 — Bien-être & Slow Tourisme */}
-                                <div
-                                    id="bien-etre"
-                                    className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col lg:flex-row min-h-125 lg:min-h-137.5"
-                                    style={{ opacity: currentFocusIndex === 2 ? 1 : 0.5, transform: currentFocusIndex === 2 ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
-                                >
-                                    <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
-                                        <div className="flex items-center gap-3 mb-6">
-                                            <div className="size-12 bg-white rounded-2xl flex items-center justify-center text-emerald-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
-                                                <Waves size={24} className="text-emerald-500" />
+                                    if (isCta) {
+                                        return (
+                                            <div
+                                                key={`focus-${idx}`}
+                                                className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] shadow-xl ring-1 ring-white/15 flex flex-col justify-center min-h-125 lg:min-h-137.5 bg-linear-to-r"
+                                                style={{
+                                                    opacity: isActive ? 1 : 0.5,
+                                                    transform: isActive ? 'scale(1)' : 'scale(0.97)',
+                                                    transition: 'opacity 0.4s, transform 0.4s',
+                                                    backgroundImage: `linear-gradient(to right, var(--color-abysse), ${theme.bg === 'bg-turquoise' ? '#14b8a6' : theme.bg.replace('bg-', '')})` // simplification
+                                                }}
+                                            >
+                                                <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
+                                                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-[100px] rounded-full group-hover:scale-110 transition-transform duration-1000"></div>
+                            
+                                                <div className="relative z-10 p-8 md:p-16 flex flex-col lg:flex-row items-center justify-between gap-8 h-full">
+                                                    <div className="max-w-2xl text-center lg:text-left flex flex-col justify-center h-full">
+                                                        <div className="flex items-center justify-center lg:justify-start gap-3 mb-6">
+                                                            <div className="size-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
+                                                                <Users size={24} />
+                                                            </div>
+                                                            <span className="text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-xs drop-shadow-sm">{card.tagline}</span>
+                                                        </div>
+                                                        <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-white italic tracking-tighter leading-tight mb-8 drop-shadow-md">
+                                                            {card.title} <br className="hidden md:block"/> {card.highlightSuffix}
+                                                        </h2>
+                                                        <RenderText
+                                                            content={card.description}
+                                                            className="text-slate-100 border-l-4 border-white/30 pl-8 text-lg md:text-xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0 italic mb-10"
+                                                        />
+                                                        <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                                                            {card.ctaButton?.link && (
+                                                                <Link href={card.ctaButton.link} className="inline-flex items-center justify-center px-8 py-5 bg-white text-abysse rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-slate-50 hover:scale-105 transition-all shadow-xl group/btn">
+                                                                    {card.ctaButton.text}
+                                                                    <ArrowRight size={18} className="ml-3 group-hover/btn:translate-x-2 transition-transform" />
+                                                                </Link>
+                                                            )}
+                                                            {card.infoButton?.link && (
+                                                                <Link href={card.infoButton.link} className="inline-flex items-center justify-center px-8 py-5 bg-white/10 border border-white/20 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/20 transition-all backdrop-blur-sm">
+                                                                    {card.infoButton.text}
+                                                                </Link>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <span className="text-emerald-400 font-black uppercase tracking-[0.2em] text-[10px] block">{homePageData?.focusBienEtre?.tagline || "Slow Tourisme"}</span>
-                                                <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{homePageData?.focusBienEtre?.subTagline || "Marche Aquatique, Kayak & Paddle"}</span>
-                                            </div>
-                                        </div>
-                                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
-                                            {homePageData?.focusBienEtre?.title || "Bien-être"} <br />
-                                            <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 via-teal-500 to-cyan-600">{homePageData?.focusBienEtre?.highlightSuffix || "& Slow Tourisme."}</span>
-                                        </h2>
-                                        <RenderText
-                                            content={homePageData?.focusBienEtre?.description}
-                                            className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-emerald-500/30 pl-8 italic"
-                                            fallback="Prenez le temps de vivre. Entre marche aquatique revitalisante et balades en kayak ou paddle, découvrez la côte normande au rythme des marées."
-                                        />
-                                        <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-                                            <Link href={homePageData?.focusBienEtre?.ctaButton?.link || "/activites?cat=Bien-être"} className="inline-flex items-center justify-center px-8 py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-emerald-500 transition-all shadow-lg group/btn shadow-emerald-500/20">
-                                                {homePageData?.focusBienEtre?.ctaButton?.text || "S'évader en mer"} <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-2 transition-transform" />
-                                            </Link>
-                                            <Link href={homePageData?.focusBienEtre?.infoButton?.link || "/activites"} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
-                                                {homePageData?.focusBienEtre?.infoButton?.text || "Voir les tarifs"}
-                                            </Link>
-                                        </div>
-                                    </div>
-                                    <div className="flex-none h-70 md:h-87.5 lg:h-auto lg:flex-1 relative overflow-hidden">
-                                        <div className="absolute inset-0 z-0">
-                                            <AnimatePresence mode="popLayout">
-                                                <motion.img key={WELLBEING_IMAGES[currentWellbeingIndex]} src={WELLBEING_IMAGES[currentWellbeingIndex]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 7, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt="Bien-être slow tourisme" />
-                                            </AnimatePresence>
-                                        </div>
-                                        <div className="absolute inset-y-0 left-0 w-px bg-white/10 hidden lg:block z-20"></div>
-                                        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-abysse via-transparent to-transparent lg:hidden z-10"></div>
-                                        <div className="absolute bottom-6 right-8 flex gap-2 z-20">
-                                            {WELLBEING_IMAGES.map((_: any, idx: number) => (<div key={idx} className={`h-1 rounded-full transition-all duration-500 ${idx === currentWellbeingIndex ? 'w-8 bg-emerald-500' : 'w-2 bg-white/30'}`} />))}
-                                        </div>
-                                        <div className="absolute top-8 right-8 bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-45">
-                                            <span className="text-emerald-400 font-black text-3xl block leading-none mb-1">{homePageData?.focusBienEtre?.badgeValue || "100%"}</span>
-                                            <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{homePageData?.focusBienEtre?.badgeLabel || "Oxygène & Sérénité Locale"}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                        );
+                                    }
+
+                                    // Standard Card Component to handle its own image slider
+                                    return <FocusCardItem key={`focus-${idx}`} card={card} idx={idx} isActive={isActive} theme={theme} images={card.images || []} />;
+                                })}
                             </motion.div>
                         </div>
                     </div>
-
                     {/* Flèches — bottom right, style Apple */}
                     <div className="max-w-400 mx-auto px-6 mt-5 flex justify-end gap-3">
                         <button
                             onClick={() => navigateFocus(Math.max(0, currentFocusIndex - 1))}
                             disabled={currentFocusIndex === 0}
-                            className="size-11 rounded-full bg-abysse/10 border border-abysse/20 hover:bg-abysse/20 flex items-center justify-center text-abysse disabled:opacity-30 transition-all"
+                            className="size-11 rounded-full bg-abysse/10 border border-abysse/20 hover:bg-abysse/20 flex items-center justify-center text-abysse disabled:opacity-30 transition-all cursor-pointer"
                         >
                             <ChevronLeft size={18} />
                         </button>
                         <button
-                            onClick={() => navigateFocus(Math.min(2, currentFocusIndex + 1))}
-                            disabled={currentFocusIndex === 2}
-                            className="size-11 rounded-full bg-abysse/10 border border-abysse/20 hover:bg-abysse/20 flex items-center justify-center text-abysse disabled:opacity-30 transition-all"
+                            onClick={() => {
+                                const maxIndex = Math.max(0, (homePageData?.focusCards?.length || 3) - 1);
+                                navigateFocus(Math.min(maxIndex, currentFocusIndex + 1));
+                            }}
+                            disabled={currentFocusIndex === Math.max(0, (homePageData?.focusCards?.length || 3) - 1)}
+                            className="size-11 rounded-full bg-abysse/10 border border-abysse/20 hover:bg-abysse/20 flex items-center justify-center text-abysse disabled:opacity-30 transition-all cursor-pointer"
                         >
                             <ChevronRight size={18} />
                         </button>

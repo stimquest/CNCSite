@@ -125,7 +125,7 @@ const TableStages: React.FC<{ rows: InfosData['pricing']['stages']['rows']; note
                     <tbody>
                         {rows.map((row, i) => (
                             <tr key={i} className="group">
-                                <td className="rounded-l-[24px] border border-r-0 border-slate-100 bg-white px-5 py-5 align-middle shadow-[0_18px_40px_-36px_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
+                                <td className="rounded-l-3xl border border-r-0 border-slate-100 bg-white px-5 py-5 align-middle shadow-[0_18px_40px_-36px_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
                                     <div className="flex flex-col">
                                         <span className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-300">Stage</span>
                                         <span className="mt-2 text-base font-black uppercase tracking-[0.08em] text-abysse">
@@ -141,7 +141,7 @@ const TableStages: React.FC<{ rows: InfosData['pricing']['stages']['rows']; note
                                         {formatPrice(row.price1)}
                                     </span>
                                 </td>
-                                <td className="rounded-r-[24px] border border-l-0 border-slate-100 bg-white px-5 py-5 text-right align-middle shadow-[0_18px_40px_-36px_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
+                                <td className="rounded-r-3xl border border-l-0 border-slate-100 bg-white px-5 py-5 text-right align-middle shadow-[0_18px_40px_-36px_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
                                     <span className="inline-flex rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base font-black tabular-nums text-abysse shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
                                         {formatPrice(row.price2)}
                                     </span>
@@ -242,7 +242,7 @@ const PricingWidget: React.FC<{ data?: InfosData['pricing'] }> = ({ data }) => {
 
     return (
         <section id="pricing" className="border-t border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(252,249,244,0.86))] py-18">
-            <div className="max-w-[1400px] mx-auto px-6 w-full">
+            <div className="max-w-350 mx-auto px-6 w-full">
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                     <div className="max-w-xl">
                         <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.3em] text-turquoise">{data?.eyebrow || 'Informations tarifaires'}</span>
@@ -329,7 +329,7 @@ const DocumentManager: React.FC<{ documents?: InfosData['documents'] }> = ({ doc
             <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-turquoise/5 rounded-full blur-[120px] -z-10"></div>
             <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-blue-500/5 rounded-full blur-[120px] -z-10"></div>
 
-            <div className="max-w-[1400px] mx-auto px-6">
+            <div className="max-w-350 mx-auto px-6">
                 <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
                     <div className="max-w-xl">
                         <span className="text-turquoise font-black uppercase tracking-[0.3em] text-[10px] mb-4 block">Espace Ressources</span>
@@ -552,7 +552,7 @@ export default function InfosClient({ initialData }: { initialData?: InfosData }
                 <div className="absolute -top-24 -right-24 size-96 bg-turquoise/10 rounded-full blur-[120px]"></div>
                 <div className="absolute -bottom-24 -left-24 size-96 bg-blue-500/10 rounded-full blur-[120px]"></div>
 
-                <div className="max-w-[1400px] mx-auto text-center relative z-10">
+                <div className="max-w-350 mx-auto text-center relative z-10">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[9px] font-black uppercase tracking-widest text-turquoise mb-8">
                         <Compass size={14} />
                         <span>Pratique & Contact</span>
@@ -569,7 +569,7 @@ export default function InfosClient({ initialData }: { initialData?: InfosData }
             <SecondaryNav sections={SECTIONS} />
 
             <section id="contact" className="py-24 px-6 bg-white">
-                <div className="max-w-[1400px] mx-auto">
+                <div className="max-w-350 mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
                         <div className="lg:col-span-1 space-y-8 flex flex-col">
                             <div className="bg-slate-50 p-10 rounded-[3rem] border border-slate-100 shadow-sm flex-1">
@@ -603,9 +603,9 @@ export default function InfosClient({ initialData }: { initialData?: InfosData }
             <DocumentManager documents={initialData?.documents} />
 
             <section id="map" className="py-24 px-6 bg-white">
-                <div className="max-w-[1400px] mx-auto">
+                <div className="max-w-350 mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        <div className="relative z-0 isolate order-2 h-[500px] w-full overflow-hidden rounded-[4rem] border border-slate-100 shadow-2xl lg:order-1">
+                        <div className="relative z-0 isolate order-2 h-125 w-full overflow-hidden rounded-[4rem] border border-slate-100 shadow-2xl lg:order-1">
                             <div className="absolute left-10 top-10 z-10 rounded-2xl border border-slate-200 bg-white/90 px-6 py-4 shadow-2xl backdrop-blur-md">
                                 <span className="text-sm font-black text-abysse uppercase italic">Club Nautique Coutainville</span>
                             </div>

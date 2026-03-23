@@ -28,6 +28,8 @@ import { dicoWord } from './dicoWord';
 import { bookingTemplate } from './bookingTemplate';
 import { article } from './article';
 import { agendaEvent } from './agendaEvent';
+import { charSession } from './charSession';
+import { charBooking } from './charBooking';
 
 // Page Builder Sections
 import { heroSection } from './sections/heroSection';
@@ -65,6 +67,8 @@ export const schemaTypes = [
   bookingTemplate,
   article,
   agendaEvent,
+  charSession,
+  charBooking,
   
   // Page Builder Sections
   heroSection,

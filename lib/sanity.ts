@@ -119,12 +119,19 @@ export const queries = {
     "hero": { "title": heroTitle, "subtitle": heroSubtitle, "images": heroImages[].asset->url, "videoUrl": heroVideoUrl, "spotImage": spotImage.asset->url },
     "spirit": { "title": spiritTitle, "message": spiritMessage, "description": spiritDescription, "cards": spiritCards[] { tag, title, description, "image": image.asset->url, link, buttonText, iconName, colorTheme } },
     "partners": partners[] { name, "logo": logo.asset->url, link },
+    "focusCards": focusCards[] {
+      cardType, themeColor, iconName, title, highlightSuffix, tagline, subTagline, description,
+      badgeValue, badgeLabel,
+      "images": images[].asset->url,
+      ctaButton, infoButton
+    },
     "focusChar": focusChar { title, highlightSuffix, tagline, subTagline, description, badgeValue, badgeLabel, "images": images[].asset->url, ctaButton, infoButton },
     "focusGlisse": focusGlisse { title, highlightSuffix, tagline, subTagline, description, badgeValue, badgeLabel, "images": images[].asset->url, ctaButton, infoButton },
     "focusBienEtre": focusBienEtre { title, highlightSuffix, tagline, subTagline, description, badgeValue, badgeLabel, "images": images[].asset->url, ctaButton, infoButton },
     "campus": campus { tagline, titlePart1, titlePart2, chapters[] { label, title, titleSpan, proof, desc, "image": image.asset->url, link, linkLabel, themeColor } },
     "immersion": { "titlePart1": immersionTitlePart1, "titlePart2": immersionTitlePart2, "cards": immersionCards[] { titlePart1, titlePart2, description, "image": image.asset->url, link, buttonText, iconName, iconColor } }
   }`,
+
   groupsPage: `*[_type == "groupsPage"][0] {
     pageBuilder[]{
       _type,
@@ -191,4 +198,24 @@ export const queries = {
   dicoWords: `*[_type == "dicoWord"] | order(word asc) {
     _id, word, slug, pronunciation, childQuote, parentFear, reality, quizAnswers, correctAnswerIdx
   }`,
+  // Sessions char à voile avec comptage des réservations confirmées
+  charSessions: `*[_type == "charSession"] | order(date asc) {
+    _id, _type, date, heureDebut, heureFin, capaciteMax, notes, actif,
+    "placesReservees": count(*[_type == "charBooking" && session._ref == ^._id && statut == "confirme"]{nbPlaces}.nbPlaces)
+  }`,
+  // Sessions publiques uniquement (actif == true et date >= aujourd'hui)
+  charSessionsPublic: `*[_type == "charSession" && actif != false && date >= $today] | order(date asc) {
+    _id, date, heureDebut, heureFin, capaciteMax, actif,
+    "placesReservees": count(*[_type == "charBooking" && session._ref == ^._id && statut == "confirme"]{nbPlaces}.nbPlaces)
+  }`,
+  // Bookings d'une session
+  charBookingsBySession: `*[_type == "charBooking" && session._ref == $sessionId] | order(_createdAt asc) {
+    _id, _type, _createdAt, clientNom, clientTel, nbPlaces, statut, notes
+  }`,
+  // Tous les bookings (pour admin)
+  charBookings: `*[_type == "charBooking"] | order(_createdAt desc) {
+    _id, _type, _createdAt, clientNom, clientTel, nbPlaces, statut, notes,
+    "session": session->{ _id, date, heureDebut, heureFin }
+  }`,
 };
+

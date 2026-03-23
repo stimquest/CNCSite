@@ -14,6 +14,12 @@ const touchPlanningsTimestamp = async (serverClient: ReturnType<typeof getServer
     await serverClient.patch(SINGLETON_ID).set({ planningsLastUpdatedAt: new Date().toISOString() }).commit();
 };
 
+const revalidateCharPages = () => {
+    revalidatePath('/activites');
+    revalidatePath('/activites/char-a-voile');
+    revalidatePath('/admin');
+};
+
 export async function POST(req: Request) {
     try {
         const serverClient = getServerWriteClient();
@@ -76,6 +82,80 @@ export async function POST(req: Request) {
             revalidatePath('/');
             revalidatePath('/plannings');
             revalidatePath('/activites');
+            return NextResponse.json({ success: true });
+        }
+
+        // --- CHAR SESSION ---
+
+        if (type === 'CREATE_CHAR_SESSION') {
+            const { date, heureDebut, heureFin, capaciteMax, notes, actif } = patch ?? {};
+            if (!date || !heureDebut || !heureFin || !capaciteMax) {
+                return NextResponse.json({ error: 'Champs obligatoires manquants (date, heureDebut, heureFin, capaciteMax)' }, { status: 400 });
+            }
+            const result = await serverClient.create({
+                _type: 'charSession',
+                date, heureDebut, heureFin, capaciteMax,
+                notes: notes ?? '',
+                actif: actif ?? true,
+            });
+            revalidateCharPages();
+            return NextResponse.json({ success: true, id: result._id });
+        }
+
+        if (type === 'UPDATE_CHAR_SESSION') {
+            if (!_id || _id === SINGLETON_ID) return NextResponse.json({ error: 'ID manquant' }, { status: 400 });
+            await serverClient.patch(_id).set(patch).commit();
+            revalidateCharPages();
+            return NextResponse.json({ success: true });
+        }
+
+        if (type === 'DELETE_CHAR_SESSION') {
+            if (!_id || _id === SINGLETON_ID) return NextResponse.json({ error: 'ID manquant' }, { status: 400 });
+            // Cascade: delete associated bookings first
+            const bookings = await client.fetch<{ _id: string }[]>(
+                `*[_type == "charBooking" && session._ref == $sessionId]{ _id }`,
+                { sessionId: _id },
+                { useCdn: false }
+            );
+            for (const b of bookings) {
+                await serverClient.delete(b._id);
+            }
+            await serverClient.delete(_id);
+            revalidateCharPages();
+            return NextResponse.json({ success: true });
+        }
+
+        // --- CHAR BOOKING ---
+
+        if (type === 'CREATE_CHAR_BOOKING') {
+            const { sessionId, clientNom, clientTel, nbPlaces, statut, notes } = patch ?? {};
+            if (!sessionId || !clientNom || !clientTel || !nbPlaces) {
+                return NextResponse.json({ error: 'Champs obligatoires manquants' }, { status: 400 });
+            }
+            const result = await serverClient.create({
+                _type: 'charBooking',
+                session: { _type: 'reference', _ref: sessionId },
+                clientNom,
+                clientTel,
+                nbPlaces,
+                statut: statut ?? 'confirme',
+                notes: notes ?? '',
+            });
+            revalidateCharPages();
+            return NextResponse.json({ success: true, id: result._id });
+        }
+
+        if (type === 'UPDATE_CHAR_BOOKING') {
+            if (!_id || _id === SINGLETON_ID) return NextResponse.json({ error: 'ID manquant' }, { status: 400 });
+            await serverClient.patch(_id).set(patch).commit();
+            revalidateCharPages();
+            return NextResponse.json({ success: true });
+        }
+
+        if (type === 'DELETE_CHAR_BOOKING') {
+            if (!_id || _id === SINGLETON_ID) return NextResponse.json({ error: 'ID manquant' }, { status: 400 });
+            await serverClient.delete(_id);
+            revalidateCharPages();
             return NextResponse.json({ success: true });
         }
 
