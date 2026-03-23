@@ -60,18 +60,23 @@ const CustomSelect = ({ label, value, options, onChange, placeholder }: any) => 
 };
 
 interface ActivityFinderProps {
-    onSearch: (age: number | null, category: string | null) => void;
+    onSearch: (age: number | null, category: string | null, format: string | null) => void;
 }
 
 export const ActivityFinder: React.FC<ActivityFinderProps> = ({ onSearch }) => {
     const [selectedAge, setSelectedAge] = useState<number | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
 
     const handleSearch = () => {
-        onSearch(selectedAge, selectedCategory);
+        onSearch(selectedAge, selectedCategory, selectedFormat);
         
-        // Petit effet de scroll fluide vers les résultats (si nécessaire, gérable par le parent, mais on peut forcer un petit scroll).
-        window.scrollBy({ top: 400, behavior: 'smooth' });
+        const target = document.getElementById('activities-list');
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            window.scrollBy({ top: 400, behavior: 'smooth' });
+        }
     };
 
     return (
@@ -90,7 +95,7 @@ export const ActivityFinder: React.FC<ActivityFinderProps> = ({ onSearch }) => {
                     onChange={(val: any) => setSelectedAge(val)}
                     options={[
                         { value: null, label: 'Tous les âges' },
-                        { value: 5, label: 'Moussaillons (4-6 ans)' },
+                        { value: 5, label: 'Petits (4-6 ans)' },
                         { value: 8, label: 'Enfants (7-11 ans)' },
                         { value: 13, label: 'Ados (12-15 ans)' },
                         { value: 18, label: 'Adultes (16+ ans)' },
@@ -108,10 +113,27 @@ export const ActivityFinder: React.FC<ActivityFinderProps> = ({ onSearch }) => {
                     onChange={(val: any) => setSelectedCategory(val)}
                     options={[
                         { value: null, label: 'Toutes les envies' },
-                        { value: 'Voile', label: 'Découverte Voile' },
-                        { value: 'Sensations', label: 'Sensations Fortes' },
-                        { value: 'Bien-être', label: 'Détente & Marche' },
-                        { value: 'Jeunesse', label: 'Activités Jeunesse' },
+                        { value: 'Voile', label: 'Naviguer (Voile & Cata)' },
+                        { value: 'Sensations', label: 'Sensations (Kite, Char)' },
+                        { value: 'Bien-être', label: 'Nature (Paddle, Longe-côte)' },
+                        { value: 'Jeunesse', label: 'Clubs Enfants / Jardin' },
+                    ]}
+                />
+
+                {/* Vertical Divider */}
+                <div className="hidden md:block w-px h-12 bg-slate-200/50"></div>
+
+                {/* Format Selector */}
+                <CustomSelect 
+                    label="Quel format ?"
+                    placeholder="Tous les formats"
+                    value={selectedFormat}
+                    onChange={(val: any) => setSelectedFormat(val)}
+                    options={[
+                        { value: null, label: 'Tous les formats' },
+                        { value: 'stage', label: 'Stage (plusieurs jours)' },
+                        { value: 'reservation', label: 'Séance (à l unité)' },
+                        { value: 'rental', label: 'Location / Libre' },
                     ]}
                 />
 

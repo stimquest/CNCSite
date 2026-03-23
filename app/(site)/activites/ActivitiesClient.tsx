@@ -41,6 +41,7 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
     const [viewMode, setViewMode] = useState<'activities' | 'club'>('activities');
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [searchAge, setSearchAge] = useState<number | null>(null);
+    const [searchFormat, setSearchFormat] = useState<string | null>(null);
     const searchParams = useSearchParams();
 
     // -- DEEP LINKING SUPPORT --
@@ -81,21 +82,40 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
         }
         
         if (searchAge) {
-            // Filtrer les activités où l'utilisateur a l'âge minimum requis
             result = result.filter(a => {
                 const minReq = a.minAge || 0;
-                // Exclure les activités pour petits si l'utilisateur est adulte, pour éviter le bruit
-                // Si searchAge est >= 16, on essaie de filtrer les trucs "Jeunesse" (optionnel mais UX)
+
+                // Si l'utilisateur est trop jeune
+                if (minReq > searchAge) return false;
+
+                // Si c'est une activité explicitement orientée "très jeunes" (Jardin des mers, Mini-mousses)
+                // On évite de les montrer aux ados/adultes.
+                // Règle: Si searchAge >= minReq + 4 pour les catégories Jeunesse, on exclut.
+                if (a.category === 'Jeunesse') {
+                    if (searchAge >= minReq + 4) return false;
+                }
+                
+                // Sécurité forte pour ne rien montrer en "Jeunesse" aux vrais adultes.
                 if (searchAge >= 16 && a.category === 'Jeunesse') return false;
-                return minReq <= searchAge;
+                
+                return true;
+            });
+        }
+        
+        if (searchFormat) {
+            result = result.filter(a => {
+                const config = a.actions?.[searchFormat as 'stage' | 'reservation' | 'rental'];
+                const isActive = config ? config.isActive : true; // Par défaut True comme défini dans Sanity et le composant ActionButton.
+                return isActive !== false; // Uniquement si ce n'est pas explicitement désactivé
             });
         }
         
         return result;
-    }, [activeFilter, activities, searchAge]);
+    }, [activeFilter, activities, searchAge, searchFormat]);
 
-    const handleSearch = (age: number | null, category: string | null) => {
+    const handleSearch = (age: number | null, category: string | null, format: string | null) => {
         setSearchAge(age);
+        setSearchFormat(format);
         if (category) {
             setActiveFilter(category as any);
         } else if (age !== null && activeFilter === 'TOUTES') {
@@ -250,7 +270,7 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
             </div>
 
             {/* 3. CONTENT AREA */}
-            <section className="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
+            <section id="activities-list" className="max-w-[1400px] mx-auto px-4 md:px-6 py-12 scroll-mt-24">
                 <AnimatePresence mode="wait">
                     {viewMode === 'club' ? (
                         <motion.div
