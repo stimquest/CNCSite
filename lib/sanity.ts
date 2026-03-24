@@ -198,15 +198,19 @@ export const queries = {
   dicoWords: `*[_type == "dicoWord"] | order(word asc) {
     _id, word, slug, pronunciation, childQuote, parentFear, reality, quizAnswers, correctAnswerIdx
   }`,
+  // Page Char à voile
+  charAVoilePage: `*[_type == "charAVoilePage"][0] {
+    seo, hero, media, practicalInfos, faq, weatherNote
+  }`,
   // Sessions char à voile avec comptage des réservations confirmées
   charSessions: `*[_type == "charSession"] | order(date asc) {
     _id, _type, date, heureDebut, heureFin, capaciteMax, notes, actif,
-    "placesReservees": count(*[_type == "charBooking" && session._ref == ^._id && statut == "confirme"]{nbPlaces}.nbPlaces)
+    "placesReservees": coalesce(math::sum(*[_type == "charBooking" && session._ref == ^._id && statut == "confirme"].nbPlaces), 0)
   }`,
   // Sessions publiques uniquement (actif == true et date >= aujourd'hui)
   charSessionsPublic: `*[_type == "charSession" && actif != false && date >= $today] | order(date asc) {
     _id, date, heureDebut, heureFin, capaciteMax, actif,
-    "placesReservees": count(*[_type == "charBooking" && session._ref == ^._id && statut == "confirme"]{nbPlaces}.nbPlaces)
+    "placesReservees": coalesce(math::sum(*[_type == "charBooking" && session._ref == ^._id && statut == "confirme"].nbPlaces), 0)
   }`,
   // Bookings d'une session
   charBookingsBySession: `*[_type == "charBooking" && session._ref == $sessionId] | order(_createdAt asc) {

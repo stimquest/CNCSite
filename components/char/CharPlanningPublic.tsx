@@ -137,8 +137,8 @@ export default function CharPlanningPublic({ sessions, phoneNumber = '02 XX XX X
     const getAvailability = (session: CharSessionPublic) => {
         const remaining = session.capaciteMax - (session.placesReservees ?? 0);
         if (remaining <= 0) return { label: 'Complet', color: 'bg-red-500', textColor: 'text-red-600', badgeColor: 'bg-red-100 text-red-600 border-red-200', remaining: 0 };
-        if (remaining <= 2) return { label: `${remaining} place${remaining > 1 ? 's' : ''}`, color: 'bg-amber-400', textColor: 'text-amber-600', badgeColor: 'bg-amber-100 text-amber-700 border-amber-200', remaining };
-        return { label: `${remaining} places`, color: 'bg-emerald-500', textColor: 'text-emerald-600', badgeColor: 'bg-emerald-100 text-emerald-700 border-emerald-200', remaining };
+        if (remaining <= 2) return { label: `${remaining} place${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}`, color: 'bg-amber-400', textColor: 'text-amber-600', badgeColor: 'bg-amber-100 text-amber-700 border-amber-200', remaining };
+        return { label: `${remaining} places restantes`, color: 'bg-emerald-500', textColor: 'text-emerald-600', badgeColor: 'bg-emerald-100 text-emerald-700 border-emerald-200', remaining };
     };
 
     return (
@@ -303,7 +303,7 @@ export default function CharPlanningPublic({ sessions, phoneNumber = '02 XX XX X
                                                 {s.heureDebut} — {s.heureFin}
                                             </span>
                                             <span className="flex items-center gap-1 text-[10px] text-slate-400 mt-0.5">
-                                                <Users size={10} /> {s.capaciteMax} places
+                                                <Users size={10} /> {s.capaciteMax} places au total
                                             </span>
                                         </div>
                                         <div className="text-right">

@@ -434,8 +434,8 @@ export default function CharBookingAdmin({ sessions, onRefresh }: Props) {
                                     {sessionBookings.map(b => {
                                         const statut = STATUT_CONFIG[b.statut] ?? STATUT_CONFIG.confirme;
                                         return (
-                                            <div key={b._id} className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-slate-200 transition-all">
-                                                <div className="flex-1 min-w-0">
+                                            <div key={b._id} className="flex flex-col md:flex-row md:items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-slate-200 transition-all">
+                                                <div className="flex-1 w-full min-w-0">
                                                     <div className="flex items-center gap-2 flex-wrap">
                                                         <span className="font-black text-abysse text-sm">{b.clientNom}</span>
                                                         <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border flex items-center gap-1 ${statut.color}`}>
@@ -445,27 +445,27 @@ export default function CharBookingAdmin({ sessions, onRefresh }: Props) {
                                                             {b.nbPlaces} place{b.nbPlaces > 1 ? 's' : ''}
                                                         </span>
                                                     </div>
-                                                    <div className="flex items-center gap-3 mt-1">
-                                                        <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                                                            <Phone size={9} /> {b.clientTel}
-                                                        </span>
-                                                        {b.notes && <span className="text-[10px] text-slate-400 italic truncate">{b.notes}</span>}
+                                                    <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                                                        <a href={`tel:${b.clientTel}`} className="text-[11px] text-turquoise font-black flex items-center gap-1 hover:underline bg-turquoise/10 px-2 py-0.5 rounded-lg active:scale-95 transition-transform" title="Appeler le client">
+                                                            <Phone size={10} /> {b.clientTel}
+                                                        </a>
+                                                        {b.notes && <span className="text-[10px] text-slate-400 italic truncate max-w-full">{b.notes}</span>}
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="flex items-center gap-2 w-full md:w-auto mt-2 pt-3 border-t border-slate-100 md:border-t-0 md:mt-0 md:pt-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                                     {/* Quick statut change */}
                                                     <select
                                                         value={b.statut}
                                                         onChange={e => handleUpdateBookingStatut(b._id, e.target.value as CharBookingStatut)}
-                                                        className="text-[9px] font-black uppercase py-1.5 px-2 bg-white border border-slate-200 rounded-lg outline-none hover:border-abysse/30 cursor-pointer"
+                                                        className="flex-1 md:flex-none text-[10px] font-black uppercase py-2.5 px-3 bg-white border border-slate-200 rounded-xl outline-none hover:border-abysse/30 cursor-pointer text-abysse appearance-none"
                                                     >
                                                         <option value="confirme">✅ Confirmé</option>
                                                         <option value="liste_attente">⏳ Attente</option>
                                                         <option value="annule">❌ Annulé</option>
                                                     </select>
                                                     <button onClick={() => handleDeleteBooking(b._id)}
-                                                        className="p-1.5 rounded-lg text-red-300 hover:text-red-500 hover:bg-red-50 transition-all">
-                                                        <Trash2 size={13} />
+                                                        className="p-2.5 rounded-xl text-red-400 hover:text-white hover:bg-red-500 bg-white border border-slate-200 hover:border-red-500 transition-all shadow-sm">
+                                                        <Trash2 size={14} />
                                                     </button>
                                                 </div>
                                             </div>

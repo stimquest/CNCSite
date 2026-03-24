@@ -30,6 +30,7 @@ import { article } from './article';
 import { agendaEvent } from './agendaEvent';
 import { charSession } from './charSession';
 import { charBooking } from './charBooking';
+import { charAVoilePage } from './charAVoilePage';
 
 // Page Builder Sections
 import { heroSection } from './sections/heroSection';
@@ -69,6 +70,7 @@ export const schemaTypes = [
   agendaEvent,
   charSession,
   charBooking,
+  charAVoilePage,
   
   // Page Builder Sections
   heroSection,
