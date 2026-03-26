@@ -1,4 +1,4 @@
-import { defineType, defineField } from 'sanity';
+import { defineType, defineField, defineArrayMember } from 'sanity';
 
 export const article = defineType({
     name: 'article',
@@ -86,12 +86,17 @@ export const article = defineType({
             title: 'Contenu de l\'article',
             type: 'array',
             of: [
-                {
+                defineArrayMember({
                     type: 'block',
                     styles: [
                         { title: 'Normal', value: 'normal' },
+                        { title: 'Normal (Centré)', value: 'normal_center' },
+                        { title: 'Normal (Droite)', value: 'normal_right' },
+                        { title: 'Normal (Justifié)', value: 'normal_justify' },
                         { title: 'Titre H2', value: 'h2' },
+                        { title: 'Titre H2 (Centré)', value: 'h2_center' },
                         { title: 'Titre H3', value: 'h3' },
+                        { title: 'Titre H3 (Centré)', value: 'h3_center' },
                         { title: 'Citation', value: 'blockquote' },
                     ],
                     lists: [
@@ -120,8 +125,8 @@ export const article = defineType({
                             },
                         ],
                     },
-                },
-                {
+                }),
+                defineArrayMember({
                     type: 'image',
                     title: 'Image',
                     options: { hotspot: true },
@@ -131,8 +136,25 @@ export const article = defineType({
                             type: 'string',
                             title: 'Légende',
                         },
+                        {
+                            name: 'layout',
+                            type: 'string',
+                            title: 'Mise en page',
+                            options: {
+                                list: [
+                                    { title: 'Classique (centré)', value: 'center' },
+                                    { title: 'Pleine largeur', value: 'full' },
+                                    { title: 'Flottant à Gauche', value: 'left' },
+                                    { title: 'Flottant à Droite', value: 'right' }
+                                ],
+                                layout: 'radio'
+                            }
+                        }
                     ],
-                },
+                }),
+                defineArrayMember({
+                    type: 'ctaBlock',
+                }),
             ],
         }),
     ],

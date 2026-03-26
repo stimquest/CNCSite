@@ -10,19 +10,21 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-    const [plannings, charPlannings, marchePlannings, charSessions] = await Promise.all([
+    const [plannings, marchePlannings, charSessions, agendaEvents, articles] = await Promise.all([
         client.fetch(queries.plannings),
-        client.fetch(queries.charPlannings),
         client.fetch(queries.marchePlannings),
         client.fetch(queries.charSessions),
+        client.fetch(queries.adminAgendaEvents),
+        client.fetch(queries.articles),
     ]);
 
     return (
         <AdminClient 
             plannings={plannings || []} 
-            charPlannings={charPlannings || []} 
             marchePlannings={marchePlannings || []} 
             charSessions={charSessions || []}
+            agendaEvents={agendaEvents || []}
+            articles={articles || []}
         />
     );
 }

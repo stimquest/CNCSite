@@ -27,6 +27,7 @@ import { basicRichText } from './basicRichText';
 import { dicoWord } from './dicoWord';
 import { bookingTemplate } from './bookingTemplate';
 import { article } from './article';
+import { ctaBlock } from './ctaBlock';
 import { agendaEvent } from './agendaEvent';
 import { charSession } from './charSession';
 import { charBooking } from './charBooking';
@@ -67,6 +68,7 @@ export const schemaTypes = [
   dicoWord,
   bookingTemplate,
   article,
+  ctaBlock,
   agendaEvent,
   charSession,
   charBooking,

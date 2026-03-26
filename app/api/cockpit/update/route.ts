@@ -85,6 +85,28 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true });
         }
 
+        if (type === 'UPSERT_AGENDA') {
+            if (!document || typeof document !== 'object' || (document as { _type?: string })._type !== 'agendaEvent') {
+                return NextResponse.json({ error: 'Invalid agenda document' }, { status: 400 });
+            }
+            const result = (document as { _id?: string })._id
+                ? await serverClient.createOrReplace(document as any)
+                : await serverClient.create(document as any);
+            revalidatePath('/');
+            revalidatePath('/admin');
+            return NextResponse.json({ success: true, id: result._id });
+        }
+
+        if (type === 'DELETE_AGENDA') {
+            if (typeof _id !== 'string' || !_id.trim()) {
+                return NextResponse.json({ error: 'Invalid agenda id' }, { status: 400 });
+            }
+            await serverClient.delete(_id);
+            revalidatePath('/');
+            revalidatePath('/admin');
+            return NextResponse.json({ success: true });
+        }
+
         // --- CHAR SESSION ---
 
         if (type === 'CREATE_CHAR_SESSION') {

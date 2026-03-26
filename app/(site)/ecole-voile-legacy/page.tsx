@@ -3,8 +3,8 @@ import { client, queries } from '@/lib/sanity';
 import EcoleVoileClient from './EcoleVoileClient';
 
 export const metadata = {
-    title: 'Stages & École de Voile — CNC Coutainville',
-    description: 'Stages de voile (juillet & août) et école à l\'année (mercredis & samedis) à Agon-Coutainville. Mini-Mousses, Moussaillons, Catamaran, Planche à Voile, de 5 à 16 ans et adultes.',
+    title: 'École de Voile - CNC Coutainville',
+    description: 'École de voile labellisée FFVoile à Agon-Coutainville. Stages Mini-Mousses, Moussaillons, Initiation et Perfectionnement pour enfants et adultes sur la Manche.',
 };
 
 export const revalidate = 60;

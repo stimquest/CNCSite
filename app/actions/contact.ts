@@ -1,5 +1,9 @@
 "use server";
 
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 export async function sendContactEmail(formData: FormData) {
     const name    = formData.get('name')    as string;
     const email   = formData.get('email')   as string;
@@ -10,35 +14,28 @@ export async function sendContactEmail(formData: FormData) {
         return { error: 'Veuillez remplir tous les champs obligatoires.' };
     }
 
-    const accessKey = process.env.WEB3FORMS_ACCESS_KEY;
-    if (!accessKey) {
-        return { error: 'Configuration serveur manquante. Contactez un administrateur.' };
-    }
-
     try {
-        const payload = {
-            access_key: accessKey,
-            name,
-            email,
+        const data = await resend.emails.send({
+            from: 'CNC Coutainville <contact@cncoutainville.fr>',
+            to: ['contact@cncoutainville.fr'],
             subject: `[Site Web] ${subject} - ${name}`,
-            message,
-            from_name: 'CNC Coutainville — Contact',
-        };
-
-        const response = await fetch('https://api.web3forms.com/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-            body: JSON.stringify(payload),
+            html: `
+                <h2>Nouveau message de contact</h2>
+                <p><strong>Nom :</strong> ${name}</p>
+                <p><strong>Email :</strong> ${email}</p>
+                <p><strong>Sujet :</strong> ${subject}</p>
+                <hr />
+                <p>${message.replace(/\n/g, '<br>')}</p>
+            `,
+            replyTo: email,
         });
 
-        const data = await response.json();
-
-        if (!data.success) {
-            return { error: data.message || "Une erreur est survenue lors de l'envoi du message." };
+        if (data.error) {
+            return { error: data.error.message };
         }
 
         return { success: true };
-    } catch {
+    } catch (error) {
         return { error: "Une erreur est survenue lors de l'envoi du message." };
     }
 }

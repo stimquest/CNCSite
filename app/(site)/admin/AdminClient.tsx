@@ -29,6 +29,8 @@ import { CharSessionDoc } from '@/types';
 import Link from 'next/link';
 import CharBookingAdmin from '@/components/admin/CharBookingAdmin';
 
+import CockpitClient from '@/components/admin/CockpitClient';
+
 // --- CONSTANTS ---
 const ACTIVITY_OPTIONS: { label: string, value: ActivityType }[] = [
     { label: 'Piscine / Cerf-volant', value: 'piscine' },
@@ -70,18 +72,19 @@ import { useRouter } from 'next/navigation';
 
 interface Props {
     plannings: WeeklyPlanning[];
-    charPlannings: PlanningCharAVoile[];
     marchePlannings: PlanningMarche[];
     charSessions: CharSessionDoc[];
+    agendaEvents: any[];
+    articles: any[];
 }
 
-export default function AdminClient({ plannings, charPlannings, marchePlannings, charSessions }: Props) {
+export default function AdminClient({ plannings, marchePlannings, charSessions, agendaEvents, articles }: Props) {
     const router = useRouter();
     const refreshData = async () => {
         router.refresh();
     };
 
-    const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'STAGES' | 'CHAR' | 'MARCHE'>('DASHBOARD');
+    const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'COCKPIT' | 'STAGES' | 'MARCHE' | 'AGENDA'>('DASHBOARD');
     const [isSaving, setIsSaving] = useState(false);
 
     // --- VIGIE STATE ---
@@ -98,8 +101,9 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings,
     // SELECTORS
     const [selectedDate, setSelectedDate] = useState<string>(formatDate(new Date())); // Selected Monday
     const [selectedStage, setSelectedStage] = useState<WeeklyPlanning | null>(null);
-    const [selectedCharPeriod, setSelectedCharPeriod] = useState<PlanningCharAVoile | null>(null);
+
     const [selectedMarchePeriod, setSelectedMarchePeriod] = useState<PlanningMarche | null>(null);
+    const [selectedAgendaEvent, setSelectedAgendaEvent] = useState<any | null>(null);
     const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
 
 
@@ -249,70 +253,6 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings,
     };
 
 
-    // --- HANDLERS: CHAR A VOILE ---
-    const createNewCharPeriod = () => {
-        const today = formatDate(new Date());
-        const newPeriod: PlanningCharAVoile = {
-            _type: 'planningCharAVoile',
-            title: "Nouvelle Période",
-            startDate: today,
-            endDate: addDays(today, 14),
-            weeks: []
-        };
-        setSelectedCharPeriod(newPeriod);
-    };
-
-    const addCharWeek = () => {
-        if (!selectedCharPeriod) return;
-
-        // Auto-determine start date based on last week or period start
-        let start = selectedCharPeriod.startDate;
-        if (selectedCharPeriod.weeks.length > 0) {
-            const lastWeek = selectedCharPeriod.weeks[selectedCharPeriod.weeks.length - 1];
-            start = addDays(lastWeek.startDate, 7);
-        }
-
-        const newWeek: CharWeek = {
-            _key: `week-${Date.now()}`,
-            title: "Nouvelle Semaine",
-            startDate: start,
-            endDate: addDays(start, 6),
-            days: DAYS_CHAR.map((name, i) => ({
-                _key: `cday-${i}-${Date.now()}`,
-                name,
-                date: addDays(start, i),
-                sessions: []
-            }))
-        };
-        setSelectedCharPeriod({
-            ...selectedCharPeriod,
-            weeks: [...selectedCharPeriod.weeks, newWeek]
-        });
-    };
-
-    const saveCharPeriod = async () => {
-        if (!selectedCharPeriod) return;
-        setIsSaving(true);
-        try {
-            const doc = { ...selectedCharPeriod, _type: 'planningCharAVoile' as const };
-            await upsertPlanning(doc);
-            await refreshData();
-            alert("Planning Char enregistré !");
-        } catch (err) { console.error(err); alert("Erreur sauvegarde"); }
-        finally { setIsSaving(false); }
-    };
-
-    const deleteCharPeriod = async () => {
-        if (!selectedCharPeriod?._id) return;
-        if (!confirm("Supprimer cette période ?")) return;
-        setIsSaving(true);
-        try {
-            await deletePlanning(selectedCharPeriod._id);
-            setSelectedCharPeriod(null);
-            await refreshData();
-        } catch (err) { console.error(err); } finally { setIsSaving(false); }
-    }
-
     // --- HANDLERS: MARCHE AQUATIQUE ---
     const createNewMarchePeriod = () => {
         const today = formatDate(new Date());
@@ -376,6 +316,79 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings,
         } catch (err) { console.error(err); } finally { setIsSaving(false); }
     }
 
+
+    // --- HANDLERS: AGENDA ---
+    const createNewAgendaEvent = () => {
+        setSelectedAgendaEvent({
+            _type: 'agendaEvent',
+            title: "Nouvel Événement",
+            startDate: formatDate(new Date()),
+            time: "",
+            badge: "",
+            description: [],
+            _tempDesc: ""
+        });
+    };
+
+    const saveAgendaEvent = async () => {
+        if (!selectedAgendaEvent) return;
+        setIsSaving(true);
+        try {
+            const finalEvent = { ...selectedAgendaEvent };
+            if (finalEvent._tempDesc !== undefined) {
+                if (finalEvent._tempDesc.trim() !== "") {
+                    finalEvent.description = [{
+                        _type: 'block',
+                        _key: Date.now().toString(),
+                        style: 'normal',
+                        markDefs: [],
+                        children: [{
+                            _type: 'span',
+                            _key: Date.now().toString(),
+                            marks: [],
+                            text: finalEvent._tempDesc
+                        }]
+                    }];
+                } else {
+                    finalEvent.description = null;
+                }
+                delete finalEvent._tempDesc;
+            }
+
+            const res = await fetch('/api/cockpit/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'UPSERT_AGENDA',
+                    document: finalEvent,
+                })
+            });
+            if (!res.ok) throw new Error("Erreur");
+            await refreshData();
+            alert("Événement enregistré !");
+        } catch (err) { console.error(err); alert("Erreur sauvegarde Agenda"); }
+        finally { setIsSaving(false); }
+    };
+
+    const deleteAgendaEvent = async () => {
+        if (!selectedAgendaEvent?._id) return;
+        if (!confirm("Supprimer cet événement ?")) return;
+        setIsSaving(true);
+        try {
+            const res = await fetch('/api/cockpit/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'DELETE_AGENDA',
+                    _id: selectedAgendaEvent._id,
+                })
+            });
+            if (!res.ok) throw new Error();
+            setSelectedAgendaEvent(null);
+            await refreshData();
+        } catch (err) { console.error(err); alert("Erreur suppression"); }
+        finally { setIsSaving(false); }
+    };
 
     // --- VIGIE HANDLERS ---
     const [testPushId, setTestPushId] = useState('');
@@ -470,19 +483,25 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings,
                             <nav className="flex gap-1 bg-slate-100 p-1 rounded-xl w-full overflow-x-auto hide-scrollbar">
                                 <button onClick={() => setActiveTab('DASHBOARD')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'DASHBOARD' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Bell size={12} /> Dashboard / Vigie</button>
                                 <button onClick={() => setActiveTab('STAGES')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'STAGES' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Stages</button>
-                                <button onClick={() => setActiveTab('CHAR')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'CHAR' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Char (ancien)</button>
+
                                 <button onClick={() => setActiveTab('MARCHE')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'MARCHE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Marche</button>
-                                <Link href="/cockpit" target="_blank" className="shrink-0 ml-auto md:ml-2 px-3 md:px-4 py-2 rounded-lg bg-turquoise/10 text-turquoise hover:bg-turquoise/20 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
-                                    🚀 Cockpit
-                                </Link>
+                                <button onClick={() => setActiveTab('AGENDA')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'AGENDA' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><CalendarDays size={12}/> Blog & Agenda</button>
+                                <button onClick={() => setActiveTab('COCKPIT')} className={`shrink-0 ml-auto md:ml-2 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'COCKPIT' ? 'bg-turquoise text-white shadow-sm' : 'bg-turquoise/10 text-turquoise hover:bg-turquoise/20'}`}>🚀 Cockpit</button>
                             </nav>
                         </div>
                         {isSaving && <span className="hidden md:block text-[10px] font-black text-turquoise animate-pulse uppercase shrink-0 ml-4">Sauvegarde...</span>}
                     </div>
                 </header>
 
-                <main className="flex-1 w-full max-w-400 mx-auto p-6 md:p-10">
+                <main className="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-10">
                     {/* (Editor content will stay as is, but now it's inside a no-print parent) */}
+
+                    {/* TAB: COCKPIT */}
+                    {activeTab === 'COCKPIT' && (
+                        <div className="animate-in fade-in slide-in-from-bottom-2">
+                            <CockpitClient />
+                        </div>
+                    )}
 
 
                     {/* TAB: STAGES */}
@@ -753,107 +772,6 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings,
                         </div>
                     )}
 
-                    {/* TAB: CHAR A VOILE */}
-                    {activeTab === 'CHAR' && (
-                        <div className="flex flex-col lg:flex-row gap-10">
-                            <div className="lg:w-80 shrink-0 space-y-4 no-print">
-                                <button onClick={createNewCharPeriod} className="w-full py-4 bg-orange-500 text-white rounded-xl font-black uppercase tracking-widest hover:bg-abysse transition-all shadow-md flex items-center justify-center gap-2"><Plus size={18} /> Nouvelle Période</button>
-                                <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-                                    {(charPlannings || []).map((period) => (
-                                        <button key={period._id} onClick={() => setSelectedCharPeriod({ ...period })} className={`w-full p-5 text-left border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-all ${selectedCharPeriod?._id === period._id ? 'bg-slate-50 border-l-4 border-l-orange-500 pl-4' : ''}`}>
-                                            <span className="block font-black text-abysse uppercase tracking-tighter line-clamp-1">{period.title}</span>
-                                            <span className="block text-[10px] text-slate-400 mt-1 italic">{new Date(period.startDate).toLocaleDateString()}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="flex-1">
-                                {selectedCharPeriod && (
-                                    <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-200">
-                                        <div className="flex flex-col md:flex-row justify-between gap-8 mb-12 border-b border-slate-100 pb-10">
-                                            <div className="flex-1 space-y-4">
-                                                <input type="text" value={selectedCharPeriod.title || ''} onChange={(e) => setSelectedCharPeriod({ ...selectedCharPeriod, title: e.target.value })} className="w-full p-2 bg-transparent text-3xl font-black uppercase italic text-abysse outline-none focus:text-turquoise border-b border-transparent focus:border-slate-200" placeholder="Label Période" />
-                                                <div className="flex items-center gap-6">
-                                                    <input type="date" value={selectedCharPeriod.startDate || ''} onChange={(e) => setSelectedCharPeriod({ ...selectedCharPeriod, startDate: e.target.value })} className="font-bold text-abysse" />
-                                                    <span className="text-slate-300">-</span>
-                                                    <input type="date" value={selectedCharPeriod.endDate || ''} onChange={(e) => setSelectedCharPeriod({ ...selectedCharPeriod, endDate: e.target.value })} className="font-bold text-abysse" />
-                                                </div>
-                                            </div>
-                                            <div className="flex items-start gap-4 no-print">
-                                                {selectedCharPeriod && <button onClick={() => window.open(`/print/char/${selectedCharPeriod._id}`, '_blank')} className="px-6 py-4 bg-white border border-slate-200 text-slate-500 rounded-xl font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-md flex items-center gap-2"><Printer size={20} /> Imprimer</button>}
-                                                {selectedCharPeriod._id && <button onClick={deleteCharPeriod} className="p-4 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all"><Trash2 size={20} /></button>}
-                                                <button onClick={saveCharPeriod} disabled={isSaving} className="px-8 py-4 bg-abysse text-white rounded-xl font-black uppercase tracking-widest hover:bg-turquoise transition-all shadow-xl flex items-center gap-2"><Save size={20} /> Enregistrer</button>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-16">
-                                            {(selectedCharPeriod.weeks || []).map((week, wIdx) => (
-                                                <div key={wIdx} className="bg-slate-50 rounded-4xl p-8 border border-slate-100">
-                                                    <div className="flex flex-col md:flex-row gap-6 mb-8">
-                                                        <div className="bg-orange-500 text-white rounded-lg px-3 py-1 text-xs font-black uppercase tracking-widest w-fit">Semaine {wIdx + 1}</div>
-                                                        <input type="text" value={week.title} onChange={(e) => {
-                                                            const nw = [...selectedCharPeriod.weeks];
-                                                            nw[wIdx].title = e.target.value;
-                                                            setSelectedCharPeriod({ ...selectedCharPeriod, weeks: nw });
-                                                        }} className="flex-1 bg-transparent text-xl font-black italic text-abysse outline-none border-b border-dashed border-slate-300 focus:border-orange-500" placeholder="Label semaine" />
-
-                                                        {/* Date Control for Week */}
-                                                        <input type="date" value={week.startDate || ''} onChange={(e) => {
-                                                            const newStart = e.target.value;
-                                                            const nw = [...selectedCharPeriod.weeks];
-                                                            nw[wIdx].startDate = newStart;
-                                                            nw[wIdx].endDate = addDays(newStart, 6);
-                                                            // Correct days dates
-                                                            nw[wIdx].days = nw[wIdx].days.map((d, i) => ({ ...d, date: addDays(newStart, i) }));
-                                                            setSelectedCharPeriod({ ...selectedCharPeriod, weeks: nw });
-                                                        }} className="font-bold text-abysse bg-transparent" />
-                                                    </div>
-
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                        {week.days.map((day, dIdx) => (
-                                                            <div key={dIdx} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                                                                <div className="flex justify-between items-center mb-3">
-                                                                    <span className="font-black text-sm uppercase text-abysse">{day.name}</span>
-                                                                    <span className="text-[10px] text-slate-400">{new Date(day.date).getDate()}</span>
-                                                                </div>
-                                                                <div className="space-y-2">
-                                                                    {day.sessions.map((sess, sIdx) => (
-                                                                        <div key={sIdx} className="flex gap-2">
-                                                                            <input type="text" value={sess.time || ''} onChange={(e) => {
-                                                                                const nw = [...selectedCharPeriod.weeks];
-                                                                                nw[wIdx].days[dIdx].sessions[sIdx].time = e.target.value;
-                                                                                setSelectedCharPeriod({ ...selectedCharPeriod, weeks: nw });
-                                                                            }} className="flex-1 bg-slate-50 p-2 rounded text-xs font-bold text-center" />
-                                                                            <button onClick={() => {
-                                                                                const nw = [...selectedCharPeriod.weeks];
-                                                                                nw[wIdx].days[dIdx].sessions.splice(sIdx, 1);
-                                                                                setSelectedCharPeriod({ ...selectedCharPeriod, weeks: nw });
-                                                                            }} className="text-red-300 hover:text-red-500 px-1"><Trash2 size={12} /></button>
-                                                                        </div>
-                                                                    ))}
-                                                                    <button onClick={() => {
-                                                                        const nw = [...selectedCharPeriod.weeks];
-                                                                        nw[wIdx].days[dIdx].sessions.push({ time: "14h - 16h", _key: Date.now().toString() });
-                                                                        setSelectedCharPeriod({ ...selectedCharPeriod, weeks: nw });
-                                                                    }} className="w-full py-2 bg-orange-50 text-orange-600 rounded-lg text-[10px] font-black uppercase hover:bg-orange-100 transition-colors">+ Session</button>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            ))}
-
-                                            <button onClick={addCharWeek} className="w-full py-6 border-2 border-dashed border-slate-300 text-slate-400 rounded-[2rem] font-black uppercase tracking-widest hover:border-orange-500 hover:text-orange-500 hover:bg-orange-50 transition-all flex items-center justify-center gap-2">
-                                                <Plus size={20} /> Ajouter une semaine
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
 
                     {/* TAB: MARCHE AQUATIQUE */}
                     {activeTab === 'MARCHE' && (
@@ -1075,6 +993,99 @@ export default function AdminClient({ plannings, charPlannings, marchePlannings,
                                             Publier le message
                                         </button>
                                     </form>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* TAB: AGENDA & BLOG */}
+                    {activeTab === 'AGENDA' && (
+                        <div className="flex flex-col lg:flex-row gap-10 animate-in fade-in slide-in-from-bottom-2">
+                            {/* AGENDA SECTION */}
+                            <div className="lg:w-1/2 flex flex-col gap-4">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div>
+                                        <h3 className="text-xl font-black uppercase italic text-abysse">Agenda Simplifié</h3>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Événements rapides</p>
+                                    </div>
+                                    <button onClick={createNewAgendaEvent} className="px-4 py-2 bg-turquoise text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-abysse transition-all shadow-md flex items-center gap-2"><Plus size={14}/> Nouveau</button>
+                                </div>
+
+                                {selectedAgendaEvent ? (
+                                    <div className="bg-white p-6 rounded-3xl shadow-md border border-slate-200">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h4 className="font-black text-sm uppercase text-abysse">Édition Événement</h4>
+                                            <div className="flex gap-2">
+                                                {selectedAgendaEvent._id && <button onClick={deleteAgendaEvent} className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all"><Trash2 size={16}/></button>}
+                                                <button onClick={saveAgendaEvent} disabled={isSaving} className="px-4 py-2 bg-abysse text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-turquoise transition-all flex items-center gap-2"><Save size={14}/> Enregistrer</button>
+                                                <button onClick={() => setSelectedAgendaEvent(null)} className="p-2 text-slate-400 hover:text-abysse transition-all"><XCircle size={16}/></button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Titre</label>
+                                                <input type="text" value={selectedAgendaEvent.title || ''} onChange={(e) => setSelectedAgendaEvent({ ...selectedAgendaEvent, title: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-sm text-abysse" placeholder="Ex: Assemblée Générale" />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Date</label>
+                                                    <input type="date" value={selectedAgendaEvent.startDate || ''} onChange={(e) => setSelectedAgendaEvent({ ...selectedAgendaEvent, startDate: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-sm text-abysse" />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Heure/Durée</label>
+                                                    <input type="text" value={selectedAgendaEvent.time || ''} onChange={(e) => setSelectedAgendaEvent({ ...selectedAgendaEvent, time: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-sm text-abysse" placeholder="Ex: 14h - 17h" />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Badge / Catégorie</label>
+                                                <input type="text" value={selectedAgendaEvent.badge || ''} onChange={(e) => setSelectedAgendaEvent({ ...selectedAgendaEvent, badge: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-sm text-abysse" placeholder="Ex: Régate, Événement..." />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Description (Simple)</label>
+                                                <textarea rows={4} value={typeof selectedAgendaEvent._tempDesc === 'string' ? selectedAgendaEvent._tempDesc : (selectedAgendaEvent.description?.[0]?.children?.[0]?.text || '')} onChange={(e) => setSelectedAgendaEvent({ ...selectedAgendaEvent, _tempDesc: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise text-sm text-slate-600" placeholder="Description de l'événement..."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                                        {(agendaEvents || []).map((ev) => (
+                                            <button key={ev._id} onClick={() => {
+                                                const text = ev.description?.[0]?.children?.map((c: any) => c.text).join('') || '';
+                                                setSelectedAgendaEvent({ ...ev, _tempDesc: text });
+                                            }} className="w-full p-5 text-left border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-all flex items-center justify-between">
+                                                <div>
+                                                    <span className="block font-black text-abysse uppercase tracking-tighter line-clamp-1">{ev.title}</span>
+                                                    <span className="block text-[10px] text-slate-400 mt-1 italic">{new Date(ev.startDate).toLocaleDateString()} {ev.time && `· ${ev.time}`}</span>
+                                                </div>
+                                                {ev.badge && <span className="text-[9px] bg-slate-100 text-slate-500 px-2 py-1 rounded-md font-bold uppercase">{ev.badge}</span>}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="hidden lg:block w-px bg-slate-200"></div>
+
+                            {/* BLOG SECTION */}
+                            <div className="lg:w-1/2 flex flex-col gap-4">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div>
+                                        <h3 className="text-xl font-black uppercase italic text-abysse">Blog & Articles</h3>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Articles riches via Sanity Studio</p>
+                                    </div>
+                                    <button onClick={() => window.open('/studio/intent/create/template=article;type=article/', '_blank')} className="px-4 py-2 bg-abysse text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-turquoise transition-all shadow-md flex items-center gap-2"><Plus size={14}/> Nouvel Article</button>
+                                </div>
+                                <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                                    {(articles || []).map((art) => (
+                                        <div key={art._id} className="w-full p-5 flex items-center justify-between border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-all">
+                                            <div className="flex-1 pr-4">
+                                                <span className="block font-black text-abysse uppercase tracking-tighter line-clamp-1">{art.title}</span>
+                                                <span className="block text-[10px] text-slate-400 mt-1 italic capitalize">{art.category} · {new Date(art.publishedAt).toLocaleDateString()}</span>
+                                            </div>
+                                            <button onClick={() => window.open(`/studio/intent/edit/id=${art._id};type=article/`, '_blank')} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all shrink-0">Éditer Studio</button>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>

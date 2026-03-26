@@ -33,17 +33,33 @@ function formatDate(dateStr: string) {
 
 const portableTextComponents: PortableTextComponents = {
     block: {
-        normal: ({ children }) => <p className="mb-4 text-abysse/80 leading-relaxed">{children}</p>,
+        normal: ({ children }) => <p className="mb-4 text-abysse/80 leading-relaxed text-left">{children}</p>,
+        normal_center: ({ children }) => <p className="mb-4 text-abysse/80 leading-relaxed text-center">{children}</p>,
+        normal_right: ({ children }) => <p className="mb-4 text-abysse/80 leading-relaxed text-right">{children}</p>,
+        normal_justify: ({ children }) => <p className="mb-4 text-abysse/80 leading-relaxed text-justify">{children}</p>,
+        
         h2: ({ children }) => (
-            <h2 className="font-['Syncopate'] text-xl font-bold uppercase text-abysse mt-10 mb-4 tracking-tight">
+            <h2 className="font-['Syncopate'] text-xl font-bold uppercase text-abysse mt-10 mb-4 tracking-tight text-left">
                 {children}
             </h2>
         ),
+        h2_center: ({ children }) => (
+            <h2 className="font-['Syncopate'] text-xl font-bold uppercase text-abysse mt-10 mb-4 tracking-tight text-center">
+                {children}
+            </h2>
+        ),
+        
         h3: ({ children }) => (
-            <h3 className="font-['Syncopate'] text-base font-bold uppercase text-abysse mt-8 mb-3 tracking-tight">
+            <h3 className="font-['Syncopate'] text-base font-bold uppercase text-abysse mt-8 mb-3 tracking-tight text-left">
                 {children}
             </h3>
         ),
+        h3_center: ({ children }) => (
+            <h3 className="font-['Syncopate'] text-base font-bold uppercase text-abysse mt-8 mb-3 tracking-tight text-center">
+                {children}
+            </h3>
+        ),
+        
         blockquote: ({ children }) => (
             <blockquote className="border-l-4 border-turquoise pl-5 my-6 text-abysse/70 italic text-lg">
                 {children}
@@ -69,24 +85,61 @@ const portableTextComponents: PortableTextComponents = {
         ),
     },
     types: {
-        image: ({ value }) => (
-            <figure className="my-8">
-                <div className="relative w-full rounded-2xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
-                    <Image
-                        src={value.url}
-                        alt={value.caption ?? ''}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 760px"
-                    />
+        image: ({ value }) => {
+            const layout = value.layout || 'center';
+            let wrapperClass = "my-8 clear-both";
+            let aspectStyle = { aspectRatio: '16/9' };
+            
+            if (layout === 'full') {
+                wrapperClass = "my-12 -mx-4 md:-mx-16 lg:-mx-24 clear-both relative z-10";
+            } else if (layout === 'left') {
+                wrapperClass = "my-6 md:float-left md:w-1/2 md:mr-8 md:mb-6";
+                aspectStyle = { aspectRatio: '4/3' };
+            } else if (layout === 'right') {
+                wrapperClass = "my-6 md:float-right md:w-1/2 md:ml-8 md:mb-6";
+                aspectStyle = { aspectRatio: '4/3' };
+            }
+
+            return (
+                <figure className={wrapperClass}>
+                    <div className="relative w-full rounded-2xl overflow-hidden shadow-sm" style={aspectStyle}>
+                        <Image
+                            src={value.url}
+                            alt={value.caption ?? ''}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 1000px"
+                        />
+                    </div>
+                    {value.caption && (
+                        <figcaption className="text-center text-xs text-(--color-taupe-500,#8c7e6e) mt-3 italic">
+                            {value.caption}
+                        </figcaption>
+                    )}
+                </figure>
+            );
+        },
+        ctaBlock: ({ value }) => {
+            const alignmentClass = value.alignment === 'center' ? 'justify-center' : value.alignment === 'right' ? 'justify-end' : 'justify-start';
+            const baseBtnClass = "inline-flex items-center justify-center px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-xs transition-all shadow-sm";
+            
+            let btnClass = baseBtnClass;
+            if (value.style === 'secondary') {
+                btnClass += " bg-turquoise text-white hover:bg-abysse hover:shadow-md";
+            } else if (value.style === 'outline') {
+                btnClass += " border-2 border-abysse text-abysse hover:bg-abysse hover:text-white";
+            } else {
+                btnClass += " bg-abysse text-white hover:bg-turquoise hover:shadow-md";
+            }
+
+            return (
+                <div className={`flex w-full my-10 clear-both ${alignmentClass}`}>
+                    <Link href={value.url || '#'} className={btnClass}>
+                        {value.text}
+                    </Link>
                 </div>
-                {value.caption && (
-                    <figcaption className="text-center text-xs text-(--color-taupe-500,#8c7e6e) mt-2">
-                        {value.caption}
-                    </figcaption>
-                )}
-            </figure>
-        ),
+            );
+        }
     },
 };
 
@@ -138,11 +191,7 @@ export default function BlogArticleClient({ article }: { article: Article }) {
 
             {/* Article body */}
             <article className="max-w-3xl mx-auto px-4 py-12">
-                {article.excerpt && (
-                    <p className="text-lg text-abysse/70 font-medium mb-8 pb-8 border-b border-(--color-taupe-200,#e5e0d8) leading-relaxed">
-                        {article.excerpt}
-                    </p>
-                )}
+                <div className="h-4"></div>
 
                 {article.body && (
                     <div className="prose-custom">

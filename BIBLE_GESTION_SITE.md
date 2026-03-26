@@ -124,6 +124,3 @@ Informations réservées au webmaster et aux développeurs.
 - Les serveurs Vercel font tourner le site (Liaison API Cockpit -> Sanity -> Frontend). 
 - **INTERDIT AU PERSONNEL :** L'interface Vercel ne doit jamais être modifiée par les équipes administratives, sous peine de crash global des requêtes serveurs. Seul le développeur a autorité sur cette brique.
 
----
-
-*Mission accomplie. Ce document reflète exactement le fonctionnement hybride exclusif au C.N.C. (Admin sur-mesure métier + Cockpit d'urgence + CMS visuel).*

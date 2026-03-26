@@ -27,8 +27,8 @@ export default defineType({
             type: 'object',
             group: 'hero',
             fields: [
-                { name: 'title', type: 'string', title: 'Titre' },
-                { name: 'subtitle', type: 'string', title: 'Sous-titre' },
+                { name: 'title', type: 'text', rows: 2, title: 'Titre' },
+                { name: 'subtitle', type: 'text', rows: 2, title: 'Sous-titre' },
                 { name: 'tagText', type: 'string', title: 'Texte du Badge' },
                 { name: 'image', type: 'image', title: 'Image de fond' },
             ]
@@ -39,7 +39,7 @@ export default defineType({
             title: 'Section Présentation (Intro)',
             group: 'intro',
             fields: [
-                { name: 'title', type: 'string', title: 'Titre' },
+                { name: 'title', type: 'text', rows: 2, title: 'Titre' },
                 { name: 'content', type: 'basicRichText', title: 'Texte de présentation' },
             ]
         }),
@@ -79,12 +79,12 @@ export default defineType({
                 type: 'object',
                 fields: [
                     { name: 'id', type: 'string', title: 'ID unique (slug)' },
-                    { name: 'step', type: 'string', title: 'Numéro d\'étape (ex: 01)' },
-                    { name: 'phase', type: 'string', title: 'Phase (ex: L\'Éveil)' },
-                    { name: 'title', type: 'string', title: 'Titre narratif' },
+                    { name: 'phase', type: 'text', rows: 2, title: 'Phase (ex: L\'Éveil)' },
+                    { name: 'title', type: 'text', rows: 2, title: 'Titre narratif' },
                     { name: 'officialName', type: 'string', title: 'Nom officiel du stage' },
                     { name: 'age', type: 'string', title: 'Tranche d\'âge' },
-                    { name: 'hook', type: 'string', title: 'Accroche (Citation)' },
+                    { name: 'price', type: 'string', title: 'Prix (ex: 165€)' },
+                    { name: 'hook', type: 'text', rows: 3, title: 'Accroche (Citation)' },
                     { name: 'description', type: 'basicRichText', title: 'Description courte (Colonnes)' },
                     { name: 'longDescription', type: 'basicRichText', title: 'Description longue (Détails)' },
                     { name: 'logistique', type: 'array', title: 'Logistique & Pratique', of: [{ type: 'string' }] },
@@ -109,11 +109,30 @@ export default defineType({
                             ]
                         }]
                     }
-                ]
+                ],
+                preview: {
+                    select: {
+                        title: 'officialName',
+                        subtitle: 'title',
+                        media: 'image'
+                    }
+                }
             }]
         }),
 
-        // PRACTICAL INFO
+        defineField({
+            name: 'tarifNote',
+            title: "Note Tarifaire (sous les cartes école à l'année)",
+            type: 'object',
+            group: 'stages',
+            fields: [
+                { name: 'title', type: 'string', title: 'Titre (ex: Tarifs indicatifs)' },
+                { name: 'description', type: 'text', rows: 4, title: 'Texte explicatif' },
+                { name: 'ctaLabel', type: 'string', title: 'Texte du lien CTA' },
+                { name: 'ctaUrl', type: 'url', title: 'URL du lien CTA' },
+            ]
+        }),
+
         defineField({
             name: 'practicalInfo',
             title: 'Informations Pratiques',

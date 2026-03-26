@@ -9,5 +9,9 @@ const NextStudio = dynamic(
 );
 
 export default function StudioPage() {
-  return <NextStudio config={config} />;
+  return (
+    <div suppressHydrationWarning className="min-h-screen">
+      <NextStudio config={config} />
+    </div>
+  );
 }

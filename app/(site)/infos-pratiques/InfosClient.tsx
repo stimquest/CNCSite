@@ -112,44 +112,73 @@ const groupCourseRows = (rows: CourseRow[]) => {
 const TableStages: React.FC<{ rows: InfosData['pricing']['stages']['rows']; note?: string }> = ({ rows, note }) => (
     <TableShell icon={<GraduationCap size={22} />} eyebrow="Stages nautiques" note={note}>
         <div className="px-4 pb-4 pt-2 md:px-6 md:pb-6">
-            <div className="overflow-x-auto">
-                <table className="min-w-full border-separate [border-spacing:0_12px]">
-                    <thead>
-                    <tr>
-                            <Th className="border-0 pl-4 text-slate-300">Activité</Th>
-                            <Th className="border-0 text-slate-300">Âges</Th>
-                            <Th className="border-0 text-right text-slate-300">1ère semaine</Th>
-                            <Th className="border-0 pr-4 text-right text-slate-300">2ème semaine&nbsp;(−5%)</Th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        {rows.map((row, i) => (
-                            <tr key={i} className="group">
-                                <td className="rounded-l-3xl border border-r-0 border-slate-100 bg-white px-5 py-5 align-middle shadow-[0_18px_40px_-36px_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-300">Stage</span>
-                                        <span className="mt-2 text-base font-black uppercase tracking-[0.08em] text-abysse">
-                                            {row.activity}
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full border-separate [border-spacing:0_12px]">
+                        <thead>
+                        <tr>
+                                <Th className="border-0 pl-4 text-slate-300">Activité</Th>
+                                <Th className="border-0 text-slate-300">Âges</Th>
+                                <Th className="border-0 text-right text-slate-300">1ère semaine</Th>
+                                <Th className="border-0 pr-4 text-right text-slate-300">2ème semaine&nbsp;(−5%)</Th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {rows.map((row, i) => (
+                                <tr key={i} className="group">
+                                    <td className="rounded-l-3xl border border-r-0 border-slate-100 bg-white px-5 py-5 align-middle shadow-[0_18px_40px_-36px_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-300">Stage</span>
+                                            <span className="mt-2 text-base font-black uppercase tracking-[0.08em] text-abysse">
+                                                {row.activity}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="border border-r-0 border-l-0 border-slate-100 bg-white px-4 py-5 align-middle shadow-[0_18px_40_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
+                                        <span className="font-medium text-slate-500">{row.ages}</span>
+                                    </td>
+                                    <td className="border border-r-0 border-l-0 border-slate-100 bg-white px-4 py-5 text-right align-middle shadow-[0_18px_40_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
+                                        <span className="inline-flex rounded-2xl bg-[#f7f2ea] px-4 py-3 text-base font-black tabular-nums text-abysse">
+                                            {formatPrice(row.price1)}
                                         </span>
-                                    </div>
-                                </td>
-                                <td className="border border-r-0 border-l-0 border-slate-100 bg-white px-4 py-5 align-middle shadow-[0_18px_40px_-36px_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
-                                    <span className="font-medium text-slate-500">{row.ages}</span>
-                                </td>
-                                <td className="border border-r-0 border-l-0 border-slate-100 bg-white px-4 py-5 text-right align-middle shadow-[0_18px_40px_-36px_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
-                                    <span className="inline-flex rounded-2xl bg-[#f7f2ea] px-4 py-3 text-base font-black tabular-nums text-abysse">
-                                        {formatPrice(row.price1)}
-                                    </span>
-                                </td>
-                                <td className="rounded-r-3xl border border-l-0 border-slate-100 bg-white px-5 py-5 text-right align-middle shadow-[0_18px_40px_-36px_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
-                                    <span className="inline-flex rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base font-black tabular-nums text-abysse shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
-                                        {formatPrice(row.price2)}
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                    </td>
+                                    <td className="rounded-r-3xl border border-l-0 border-slate-100 bg-white px-5 py-5 text-right align-middle shadow-[0_18px_40_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
+                                        <span className="inline-flex rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base font-black tabular-nums text-abysse shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+                                            {formatPrice(row.price2)}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid gap-4 md:hidden py-4">
+                {rows.map((row, i) => (
+                    <div key={i} className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+                        <div className="p-5 border-b border-slate-50">
+                            <span className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-300 block mb-1">Stage</span>
+                            <h3 className="text-lg font-black uppercase tracking-tight text-abysse leading-tight">{row.activity}</h3>
+                            <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-lg text-xs font-bold text-slate-500 border border-slate-100">
+                                <span>Âges:</span>
+                                <span className="text-abysse">{row.ages}</span>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 bg-slate-50/50">
+                            <div className="p-4 border-r border-slate-100 flex flex-col items-center text-center">
+                                <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-2">1ère semaine</span>
+                                <span className="text-lg font-black text-abysse tabular-nums">{formatPrice(row.price1)}</span>
+                            </div>
+                            <div className="p-4 flex flex-col items-center text-center">
+                                <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-2">Semaine sup. (−5%)</span>
+                                <span className="text-lg font-black text-abysse tabular-nums">{formatPrice(row.price2)}</span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     </TableShell>
@@ -203,27 +232,49 @@ const TableCourses: React.FC<{ rows: InfosData['pricing']['courses']['rows'] }> 
 // ── Onglet 3 : Locations ───────────────────────────────────────────────────
 const TableLocations: React.FC<{ rows: InfosData['pricing']['locations']['rows'] }> = ({ rows }) => (
     <TableShell icon={<Clock size={22} />} eyebrow="Locations & supports">
-        <div className="overflow-x-auto">
-            <table className="min-w-full border-separate border-spacing-0">
-                <thead className="bg-white">
-                    <tr>
-                        <Th className="pl-6 md:pl-8">Support</Th>
-                        <Th>Type</Th>
-                        <Th>Durée</Th>
-                        <Th className="pr-6 text-right md:pr-8">Tarif</Th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows.map((row, i) => (
-                        <tr key={i} className="transition-colors hover:bg-slate-50/80">
-                            <Td className="pl-6 md:pl-8"><span className="font-black text-abysse">{row.support}</span></Td>
-                            <Td><span className="font-medium text-slate-500">{row.type}</span></Td>
-                            <Td><span className="font-medium text-slate-500">{row.duration}</span></Td>
-                            <Td className="pr-6 text-right font-black tabular-nums text-abysse md:pr-8">{formatPrice(row.price)}</Td>
+        <div className="px-2 pb-4 pt-2 md:px-6 md:pb-6">
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
+                <table className="min-w-full border-separate border-spacing-0">
+                    <thead className="bg-white">
+                        <tr>
+                            <Th className="pl-6 md:pl-8">Support</Th>
+                            <Th>Type</Th>
+                            <Th>Durée</Th>
+                            <Th className="pr-6 text-right md:pr-8">Tarif</Th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {rows.map((row, i) => (
+                            <tr key={i} className="transition-colors hover:bg-slate-50/80">
+                                <Td className="pl-6 md:pl-8"><span className="font-black text-abysse">{row.support}</span></Td>
+                                <Td><span className="font-medium text-slate-500">{row.type}</span></Td>
+                                <Td><span className="font-medium text-slate-500">{row.duration}</span></Td>
+                                <Td className="pr-6 text-right font-black tabular-nums text-abysse md:pr-8">{formatPrice(row.price)}</Td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Mobile View */}
+            <div className="md:hidden divide-y divide-slate-100">
+                {rows.map((row, i) => (
+                    <div key={i} className="p-5 flex flex-col gap-3">
+                        <div className="flex justify-between items-start">
+                             <div className="flex flex-col">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-turquoise">{row.type}</span>
+                                <h4 className="text-base font-black text-abysse leading-tight mt-1">{row.support}</h4>
+                             </div>
+                             <span className="text-lg font-black text-abysse tabular-nums">{formatPrice(row.price)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Clock size={12} className="text-slate-400" />
+                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-none">{row.duration}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     </TableShell>
 );
@@ -262,15 +313,15 @@ const PricingWidget: React.FC<{ data?: InfosData['pricing'] }> = ({ data }) => {
                 </div>
 
                 {/* NAVIGATION */}
-                <div className="mb-10 flex w-fit flex-wrap gap-2 rounded-[1.4rem] border border-slate-200/80 bg-white/85 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] backdrop-blur-sm">
+                <div className="mb-10 flex w-full md:w-fit flex-col md:flex-row gap-2 rounded-[1.4rem] border border-slate-200/80 bg-white/85 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] backdrop-blur-sm">
                     {tabs.map(tab => (
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${
+                            className={`px-6 py-4 md:py-3 rounded-xl font-black text-[10px] md:text-[10px] uppercase tracking-widest transition-all duration-300 border md:border-0 ${
                                 activeTab === tab.key
-                                    ? 'scale-[1.02] bg-abysse text-white shadow-[0_18px_35px_-24px_rgba(15,23,42,0.8)]'
-                                    : 'text-slate-500 hover:bg-slate-50 hover:text-abysse'
+                                    ? 'scale-[1.02] bg-abysse text-white shadow-[0_18px_35px_-24px_rgba(15,23,42,0.8)] border-abysse'
+                                    : 'text-slate-500 bg-slate-50/50 md:bg-transparent border-slate-100 hover:bg-slate-50 hover:text-abysse'
                             }`}
                         >
                             {tab.label}

@@ -108,8 +108,6 @@ export default async function SiteLayout({
 
   return (
     <>
-      {/* Preload première image hero pour éviter le LCP tardif */}
-      <link rel="preload" as="image" href="/images/Hero/Ryan.webp" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

@@ -311,7 +311,7 @@ export default function CharBookingAdmin({ sessions, onRefresh }: Props) {
                 ) : (
                     <div className="bg-white rounded-4xl border border-slate-200 shadow-sm overflow-hidden">
                         {/* Header session */}
-                        <div className="p-6 md:p-8 border-b border-slate-100 bg-gradient-to-r from-orange-50/50 to-white">
+                        <div className="p-6 md:p-8 border-b border-slate-100 bg-linear-to-r from-orange-50/50 to-white">
                             <div className="flex flex-col md:flex-row justify-between gap-4">
                                 <div>
                                     <h3 className="text-2xl font-black uppercase italic text-abysse tracking-tighter">

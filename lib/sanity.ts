@@ -100,6 +100,11 @@ export const queries = {
     "souvenirs": souvenirs { title, highlightText, description, "items": items[] { "image": image.asset->url, title, date, decade } },
     cta
   }`,
+  adminAgendaEvents: `*[_type == "agendaEvent"] | order(startDate desc) {
+    _id, title, startDate, badge, time, description,
+    "image": image.asset->url,
+    "articleSlug": articleRef->slug.current
+  }`,
   homeAgenda: `*[(_type == "agendaEvent") || (_type == "article" && defined(agendaDate))] | order(coalesce(startDate, agendaDate) asc) {
     _id, _type, "title": title, "startDate": coalesce(startDate, agendaDate), "badge": coalesce(badge, agendaBadge), "time": coalesce(time, agendaTime), "description": coalesce(description, excerpt), "image": coalesce(image.asset->url, coverImage.asset->url), "articleSlug": select(_type == "article" => slug.current, _type == "agendaEvent" => articleRef->slug.current)
   }`,

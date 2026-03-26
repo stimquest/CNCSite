@@ -3,7 +3,7 @@
 import { Resend } from 'resend';
 
 // Initialize Resend with the provided API key
-const resend = new Resend('re_Rf7hj5b5_3oDQ9eEC5NYdT3h8ErrYvQBK');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendGroupEmail(formData: FormData) {
   const name = formData.get('name') as string;
@@ -28,8 +28,8 @@ export async function sendGroupEmail(formData: FormData) {
 
   try {
     const data = await resend.emails.send({
-      from: 'Réservation CNC <onboarding@resend.dev>',
-      to: ['patrick.louvel@gmail.com'],
+      from: 'CNC Coutainville <contact@cncoutainville.fr>',
+      to: ['contact@cncoutainville.fr'],
       subject: `[Réservation / Groupe] ${activity} - ${firstName} ${name}`,
       html: `
         <h2>Nouvelle demande de réservation</h2>
