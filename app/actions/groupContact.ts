@@ -28,8 +28,8 @@ export async function sendGroupEmail(formData: FormData) {
 
   try {
     const data = await resend.emails.send({
-      from: 'CNC Coutainville <contact@cncoutainville.fr>',
-      to: ['contact@cncoutainville.fr'],
+      from: 'Réservation CNC <onboarding@resend.dev>',
+      to: ['patrick.louvel@gmail.com'],
       subject: `[Réservation / Groupe] ${activity} - ${firstName} ${name}`,
       html: `
         <h2>Nouvelle demande de réservation</h2>
@@ -57,7 +57,7 @@ export async function sendGroupEmail(formData: FormData) {
     });
 
     if (data.error) {
-      return { error: data.error.message };
+      return { error: (data.error as any).message || 'Erreur inconnue' };
     }
 
     return { success: true };
@@ -65,4 +65,3 @@ export async function sendGroupEmail(formData: FormData) {
     return { error: "Une erreur est survenue lors de l'envoi de la demande." };
   }
 }
-

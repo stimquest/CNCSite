@@ -70,7 +70,6 @@ const PLANNING_ROWS = [
 const STAGES_VACANCES = [
   {
     id: "mini-mousses",
-    phase: "L'Éveil",
     title: "Les Petits Pas",
     officialName: "Mini-Mousses",
     age: "5-7 ans",
@@ -85,11 +84,10 @@ Le programme est riche et varié : deux séances de deux heures du Lundi au Vend
     pricingTiers: [{ label: "Stage Semaine (Tout Inclus)", value: "163 €" }],
     logistique: ["Gilet de sauvetage fourni", "Combinaison adaptée fournie", "Bassin marin sécurisé", "Carnet de voile offert"],
     image: "/images/imgBank/minimousse.jpg",
-    color: "text-orange-500", bgColor: "bg-orange-500", iconName: "Sun",
+    color: "text-orange-500", bgColor: "bg-orange-500",
   },
   {
     id: "moussaillons",
-    phase: "L'Exploration",
     title: "Le Cap vers l'Horizon",
     officialName: "Moussaillons",
     age: "6-9 ans",
@@ -104,11 +102,10 @@ Le reste de la semaine, les séances de 2h permettent une progression ludique ve
     pricingTiers: [{ label: "Stage Semaine (Tout Inclus)", value: "168 €" }],
     logistique: ["Initiation sur lac incluse", "Matériel sécurisé FFV", "Passage de niveaux", "Combinaison fournie"],
     image: "/images/imgBank/moussaillon.jpg",
-    color: "text-turquoise", bgColor: "bg-turquoise", iconName: "Anchor",
+    color: "text-turquoise", bgColor: "bg-turquoise",
   },
   {
     id: "catamaran",
-    phase: "La Puissance",
     title: "Dompter le Vent",
     officialName: "Stage Catamaran",
     age: "Dès 8 ans",
@@ -116,7 +113,7 @@ Le reste de la semaine, les séances de 2h permettent une progression ludique ve
     description: `C'est le passage aux choses sérieuses. Le catamaran, c'est la vitesse pure et le partage. On ne navigue plus seul, on fait partie d'un équipage.
 
 On apprend l'équilibre dynamique, le réglage fin des voiles et la coordination parfaite. Du petit 10 pieds pour les juniors aux puissants 16 pieds pour les adultes, chaque support est une promesse de sensations. On ne subit plus le vent, on l'utilise pour voler au-dessus des vagues de la Manche.`,
-    longDescription: `Stage de référence pour ados et adultes. 5 demi-journées (lundi au vendredi) avec des séances de 3h.
+    longDescription: `Stage de référence pour ados et adultes. 5 demi-journées (lundi au vendredi) with des séances de 3h.
 Supports adaptés :
 - 10/12 pieds : Initiation jeunes
 - 14/16 pieds : Perf et adultes
@@ -129,11 +126,10 @@ Le tarif inclut systématiquement le passeport voile et l'adhésion club.`,
     ],
     logistique: ["Bateaux de sécurité dédiés", "Liaison radio permanente", "Matériel renouvelé régulièrement", "Licence FFV comprise"],
     image: "/images/imgBank/Cata001.jpg",
-    color: "text-blue-600", bgColor: "bg-blue-600", iconName: "Wind",
+    color: "text-blue-600", bgColor: "bg-blue-600",
   },
   {
     id: "planche",
-    phase: "La Maîtrise",
     title: "L'Équilibre Pur",
     officialName: "Stage Planche",
     age: "Dès 10 ans",
@@ -147,31 +143,51 @@ Après les premières chutes riches d'enseignement, vient le moment magique : la
     pricingTiers: [{ label: "Stage Semaine (Tout Inclus)", value: "183 €" }],
     logistique: ["Planches larges haute stabilité", "Gréements légers spécial jeunes", "Encadrement expert", "Combinaison renforcée"],
     image: "/images/imgBank/WindsurfandKite.jpg",
-    color: "text-purple-500", bgColor: "bg-purple-500", iconName: "Waves",
+    color: "text-purple-500", bgColor: "bg-purple-500",
+  },
+];
+
+// ─── DATA: Formations Professionnelles ───────────────────────────────────────
+
+const PRO_FORMATIONS_FALLBACK = [
+  {
+    id: "cqp-initiateur",
+    officialName: "CQP Initiateur Voile",
+    label: "Diplôme d'État",
+    target: "Passionné de voile dès 16 ans",
+    duration: "Formation longue — sur saison",
+    price: "Sur devis",
+    description: `Le CQP Initiateur Voile permet d'encadrer sous la responsabilité d'un moniteur diplômé. Formation en situation à Agon-Coutainville, Hauteville-sur-Mer et Barneville-Carteret (CPCO).`,
+    conditions: ["16 ans minimum", "Niveau 4 FFVoile", "PSC1 / Secourisme", "Permis bateau côtier", "Licence FFVoile valide"],
+    image: "/images/imgBank/Secourisme.jpg",
+    color: "text-abysse",
+    accentColor: "bg-abysse",
   },
   {
-    id: "formation",
-    phase: "La Transmission",
-    title: "Partager l'Horizon",
-    officialName: "CQP Initiateur",
-    age: "Dès 16 ans",
-    hook: "Transmettez votre passion, devenez moniteur.",
-    description: `Vous avez dompté le vent et maîtrisé la glisse. L'heure est venue de passer de l'autre côté de la barre. Le CQP Initiateur Voile est l'étape ultime de votre parcours à Coutainville : apprendre à enseigner, à sécuriser et à inspirer les futurs navigateurs.
-
-Au sein du Centre Permanent de la Côte Ouest (CPCO), cette formation vous plonge dans la réalité du métier de moniteur en partenariat avec les clubs de Hauteville et Barneville-Carteret.`,
-    longDescription: `Le CQP Initiateur Voile permet d'encadrer sous la responsabilité d'un moniteur diplômé.
-Formation en situation à Agon-Coutainville, Hauteville sur mer et Barneville-Carteret (CPCO).
-
-Conditions : 16 ans min, Niveau 4 FFVoile, PSC1, Permis Bateau Côtier.
-Pour toute question sur le PSC1 (secourisme), contactez-nous à contact@cncoutainville.fr`,
-    price: "Sur Devis",
-    pricingTiers: [
-      { label: "CQP Initiateur Voile", value: "Sur Devis" },
-      { label: "Formation PSC1 / Recyclage", value: "Nous contacter" },
-    ],
-    logistique: ["16 ans minimum", "Niveau 4 FFVoile", "PSC1 / Secourisme", "Permis bateau côtier", "Licence FFVoile valide"],
+    id: "psc1",
+    officialName: "Formation PSC1 / Recyclage",
+    label: "Secourisme",
+    target: "Moniteurs & Bénévoles",
+    duration: "1 journée",
+    price: "Nous contacter",
+    description: `Formation aux gestes de premiers secours (PSC1) et recyclage pour les moniteurs et bénévoles du club. Prérequis pour le CQP Initiateur.`,
+    conditions: ["Ouvert à tous", "Prérequis CQP Initiateur", "Recyclage recommandé tous les 2 ans"],
     image: "/images/imgBank/Secourisme.jpg",
-    color: "text-slate-900", bgColor: "bg-slate-900", iconName: "GraduationCap",
+    color: "text-rose-600",
+    accentColor: "bg-rose-600",
+  },
+  {
+    id: "wingfoil-expert",
+    officialName: "Wingfoil Expert Pro",
+    label: "Stage Immersion 3 jours",
+    target: "Titulaires BPJEPS / BE minimum",
+    duration: "3 jours intensifs",
+    price: "Sur devis",
+    description: `Le Wingfoil n'est plus une tendance, c'est un incontournable. Votre structure est-elle prête à prendre de la hauteur ? Forts de 5 ans d'expertise de terrain, nous accompagnons les moniteurs et responsables de clubs dans la maîtrise et l'enseignement de cette discipline. Notre valeur ajoutée : une analyse technique et stratégique fine, forgée par notre statut d'évaluateurs N4 et N5 FFV.`,
+    conditions: ["BPJEPS ou BE minimum", "Pratique Wingfoil confirmée", "Responsables de clubs bienvenus"],
+    image: "/images/imgBank/WindsurfandKite.jpg",
+    color: "text-turquoise",
+    accentColor: "bg-turquoise",
   },
 ];
 
@@ -246,8 +262,8 @@ const ANNEE_GROUPS = [
 // ─── Stages Vacances : grille + overlay ──────────────────────────────────────
 
 const StagesVacancesGrid = ({ items }: { items: any[] }) => {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selected = items.find(i => i.id === selectedId);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const selected = items.find(i => (i._key || i.id) === selectedKey);
   const descScrollRef = React.useRef<HTMLDivElement>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
   const [canScrollUp, setCanScrollUp] = useState(false);
@@ -267,14 +283,14 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
     el.scrollTop = 0;
     const t = setTimeout(checkScroll, 80);
     return () => clearTimeout(t);
-  }, [selectedId, checkScroll]);
+  }, [selectedKey, checkScroll]);
 
   return (
     <>
       {/* Grille 4 colonnes desktop, 2 mobile */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        {items.map((item) => (
-          <div key={item.id} onClick={() => setSelectedId(item.id)}
+        {items.map((item, index) => (
+          <div key={item._key || item.id || index} onClick={() => setSelectedKey(item._key || item.id || String(index))}
             className="relative rounded-2xl overflow-hidden aspect-square shadow-md cursor-pointer group"
           >
             <img src={item.image} alt={item.officialName}
@@ -284,12 +300,22 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
             <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent" />
 
             {/* Badge en haut : nom + âge — Micro-Split centered at top */}
-            <div className="absolute top-4 md:top-5 left-0 right-0 flex justify-center px-4 pointer-events-none">
-              <div className="inline-flex items-center bg-white rounded-full shadow-lg overflow-hidden h-7 md:h-9">
-                <div className={`${item.bgColor} text-white text-[9px] md:text-[10px] font-black px-3.5 h-full flex items-center uppercase tracking-widest`}>
+            <div className="absolute top-3 md:top-5 left-0 right-0 flex flex-col items-center gap-1 px-2 pointer-events-none">
+              {/* Mobile : empilé */}
+              <div className="md:hidden flex flex-col items-center gap-1">
+                <div className={`${item.bgColor} text-white text-[9px] font-black px-2.5 py-0.5 rounded-full shadow uppercase tracking-widest`}>
                   {item.age}
                 </div>
-                <div className={`${item.color} bg-white text-[10px] md:text-sm font-black px-4 h-full flex items-center uppercase tracking-tight`}>
+                <div className={`bg-white ${item.color} text-[9px] font-black px-2.5 py-0.5 rounded-full shadow uppercase tracking-tight text-center`}>
+                  <RenderText content={item.officialName} className="m-0! p-0!" />
+                </div>
+              </div>
+              {/* Desktop : pill horizontal */}
+              <div className="hidden md:inline-flex items-center bg-white rounded-full shadow-lg overflow-hidden h-9">
+                <div className={`${item.bgColor} text-white text-[10px] font-black px-3.5 h-full flex items-center uppercase tracking-widest`}>
+                  {item.age}
+                </div>
+                <div className={`${item.color} bg-white text-sm font-black px-4 h-full flex items-center uppercase tracking-tight`}>
                   <RenderText content={item.officialName} className="m-0! p-0!" />
                 </div>
               </div>
@@ -333,27 +359,27 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
       <AnimatePresence>
         {selected && (
           <>
-            <motion.div
-              key="backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-90 bg-black/70 backdrop-blur-sm"
-              onClick={() => setSelectedId(null)}
-            />
+              <motion.div
+                key="backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-90 bg-black/70 backdrop-blur-sm"
+                onClick={() => setSelectedKey(null)}
+              />
 
-            <motion.div
-              key="overlay"
-              initial={{ opacity: 0, scale: 0.93, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.93, y: 12 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="fixed z-100 inset-x-3 top-16 bottom-20 md:inset-x-28 md:inset-y-12 lg:inset-x-52 lg:inset-y-14 rounded-2xl overflow-hidden bg-white shadow-2xl flex flex-col md:flex-row"
-            >
-              {/* Bouton fermer */}
-                <button
-                  onClick={() => setSelectedId(null)}
+              <motion.div
+                key="overlay"
+                initial={{ opacity: 0, scale: 0.93, y: 12 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.93, y: 12 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className="fixed z-100 inset-x-3 top-16 bottom-20 md:inset-x-28 md:inset-y-12 lg:inset-x-52 lg:inset-y-14 rounded-2xl overflow-hidden bg-white shadow-2xl flex flex-col md:flex-row"
+              >
+                {/* Bouton fermer */}
+                  <button
+                    onClick={() => setSelectedKey(null)}
                   className="absolute top-4 right-10 z-10 p-2.5 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all shadow-md group"
                   aria-label="Fermer"
                 >
@@ -379,7 +405,6 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
                         <RenderText content={selected.officialName} className="m-0! p-0!" />
                       </div>
                     </div>
-                    <p className="text-slate-400 text-[8px] font-black uppercase tracking-[0.5em] mb-1">{selected.phase}</p>
                     <h2 className="text-base font-black text-abysse tracking-tighter leading-tight uppercase mb-1">
                       <RenderText content={selected.title} />
                     </h2>
@@ -443,7 +468,6 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
                       <RenderText content={selected.officialName} className="m-0! p-0!" />
                     </div>
                   </div>
-                  <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.5em] mb-1">{selected.phase}</p>
                   <h2 className="text-xl lg:text-2xl font-black text-abysse tracking-tighter leading-tight uppercase mb-1">
                     <RenderText content={selected.title} />
                   </h2>
@@ -561,6 +585,9 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
 const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageData, initialPlannings }) => {
   const schoolPageData = initialSchoolPageData;
   const stages = schoolPageData?.stages?.length ? schoolPageData.stages : STAGES_VACANCES;
+  const proFormations = schoolPageData?.proFormations?.length ? schoolPageData.proFormations : PRO_FORMATIONS_FALLBACK;
+  const anneeGroups = schoolPageData?.ecoleAnnee?.groups?.length ? schoolPageData.ecoleAnnee.groups : ANNEE_GROUPS;
+  const ecoleAnneeData = schoolPageData?.ecoleAnnee;
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
   const [isWeekSelectorOpen, setIsWeekSelectorOpen] = useState(false);
 
@@ -575,6 +602,28 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
   const currentWeek = plannings?.[currentWeekIndex];
   const nextWeek = () => setCurrentWeekIndex(prev => (prev + 1) % plannings.length);
   const prevWeek = () => setCurrentWeekIndex(prev => (prev - 1 + plannings.length) % plannings.length);
+
+  const [selectedProKey, setSelectedProKey] = useState<string | null>(null);
+  const selectedPro = proFormations.find((f: any) => (f.id || f._key || f.officialName) === selectedProKey);
+  const proScrollRef = React.useRef<HTMLDivElement>(null);
+  const [canProScrollDown, setCanProScrollDown] = useState(false);
+  const [canProScrollUp, setCanProScrollUp] = useState(false);
+
+  const checkProScroll = React.useCallback(() => {
+    const el = proScrollRef.current;
+    if (!el) return;
+    const hasOverflow = el.scrollHeight > el.clientHeight + 4;
+    setCanProScrollUp(el.scrollTop > 8);
+    setCanProScrollDown(hasOverflow && el.scrollTop + el.clientHeight < el.scrollHeight - 8);
+  }, []);
+
+  React.useEffect(() => {
+    const el = proScrollRef.current;
+    if (!el) return;
+    el.scrollTop = 0;
+    const t = setTimeout(checkProScroll, 80);
+    return () => clearTimeout(t);
+  }, [selectedProKey, checkProScroll]);
 
 
   return (
@@ -702,9 +751,11 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
               <p className="text-xs font-black text-slate-600 uppercase tracking-wide mb-1">
                 {schoolPageData?.tarifNote?.title || 'Tarifs indicatifs'}
               </p>
-              <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                {schoolPageData?.tarifNote?.description || "Les tarifs affichés sont donnés à titre indicatif (base 2022/2023). Les tarifs en cours et les modalités d'inscription sont disponibles directement à l'accueil du club ou sur Axyomes pour la licence FFVoile."}
-              </p>
+              <RenderText
+                content={schoolPageData?.tarifNote?.description}
+                className="text-xs text-slate-500 font-medium leading-relaxed"
+                fallback="Les tarifs affichés sont donnés à titre indicatif (base 2022/2023). Les tarifs en cours et les modalités d'inscription sont disponibles directement à l'accueil du club ou sur Axyomes pour la licence FFVoile."
+              />
               <a
                 href={schoolPageData?.tarifNote?.ctaUrl || 'https://coutainville.axyomes.com/'}
                 target="_blank"
@@ -717,8 +768,239 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
         </div>
       </section>
 
+      {/* ─── BLOC PRO : FORMATIONS PROFESSIONNELLES ────────────────────────── */}
+      <section id="formations-pro" className="scroll-mt-20 bg-abysse border-y border-abysse/80">
+
+        {/* Header — même structure que les deux autres sections */}
+        <div className="py-16 px-6">
+          <div className="max-w-350 mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="flex items-start gap-5">
+              <div className="size-14 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
+                <GraduationCap size={26} />
+              </div>
+              <div>
+                <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2">
+                  ● Pôle Expertise & Formation
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter leading-tight">Formations Professionnelles</h2>
+                <p className="text-white/50 font-bold text-sm mt-1">Moniteurs · Éducateurs · Responsables de structures</p>
+              </div>
+            </div>
+            <div className="text-sm text-white/60 max-w-sm leading-relaxed border-l-4 border-white/20 pl-5">
+              Des formations conçues par des professionnels du terrain. Forts de 5 ans d'expertise, nous accompagnons les moniteurs et responsables de clubs dans la maîtrise de leur discipline.
+            </div>
+          </div>
+        </div>
+
+        {/* Cards — slide mobile, grille desktop — même padding que stages vacances */}
+        <div className="px-6 md:px-32 lg:px-64 pb-20">
+          <div className="flex gap-4 overflow-x-auto pb-4 md:pb-0 md:overflow-visible md:grid md:grid-cols-3 snap-x snap-mandatory no-scrollbar">
+            {proFormations.map((f: any) => (
+              <div key={f._key || f.id || f.officialName}
+                onClick={() => setSelectedProKey(f._key || f.id || f.officialName)}
+                className="group snap-start shrink-0 w-[60vw] md:w-auto relative aspect-square rounded-2xl overflow-hidden cursor-pointer shadow-xl"
+              >
+                {/* Image plein fond */}
+                <img src={f.image} alt={f.officialName}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+
+                {/* Dégradé sombre bas (plus dense que les tuiles vacances) */}
+                <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/50 to-black/10" />
+
+                {/* Badge type — haut gauche */}
+                <div className={`absolute top-4 left-4 ${f.accentColor || 'bg-abysse'} text-white text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-widest shadow`}>
+                  {f.label}
+                </div>
+
+                {/* Durée — haut droite */}
+                <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-sm text-white text-[9px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide flex items-center gap-1">
+                  <Clock size={9} /> {f.duration}
+                </div>
+
+                {/* Contenu bas — aligné à gauche */}
+                <div className="absolute bottom-0 left-0 right-0 p-5 flex flex-col gap-2">
+                  <span className={`${f.color || 'text-turquoise'} text-[9px] font-black uppercase tracking-widest`}>
+                    {f.target}
+                  </span>
+                  <h3 className="text-xl font-black text-white uppercase italic tracking-tighter leading-tight">
+                    {f.officialName}
+                  </h3>
+                  <RenderText content={f.description} className="text-white/60 text-[11px] font-medium leading-relaxed line-clamp-2" />
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {(f.conditions || []).slice(0, 3).map((c: string, i: number) => (
+                      <span key={i} className="text-[8px] font-black text-white/50 bg-white/10 px-2 py-0.5 rounded-md uppercase tracking-wide">
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between mt-2 pt-3 border-t border-white/10">
+                    <span className={`${f.color || 'text-turquoise'} font-black text-sm`}>{f.price}</span>
+                    <a href="mailto:contact@cncoutainville.fr"
+                      className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/25 border border-white/15 text-white text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-lg transition-all">
+                      Contact <ArrowRight size={10} />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── OVERLAY FORMATIONS PRO ─────────────────────────────────────── */}
+      <AnimatePresence>
+        {selectedPro && (
+          <>
+            <motion.div
+              key="pro-backdrop"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-90 bg-black/70 backdrop-blur-sm"
+              onClick={() => setSelectedProKey(null)}
+            />
+            <motion.div
+              key="pro-overlay"
+              initial={{ opacity: 0, scale: 0.93, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.93, y: 12 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="fixed z-100 inset-x-3 top-16 bottom-20 md:inset-x-28 md:inset-y-12 lg:inset-x-52 lg:inset-y-14 rounded-2xl overflow-hidden bg-slate-900 shadow-2xl flex flex-col md:flex-row"
+            >
+              {/* Bouton fermer */}
+              <button onClick={() => setSelectedProKey(null)}
+                className="absolute top-4 right-10 z-10 p-2.5 rounded-full bg-white/10 text-slate-300 hover:bg-white/20 hover:text-white transition-all shadow-md group"
+                aria-label="Fermer">
+                <LucideIcons.X size={24} className="transition-transform group-hover:rotate-90" />
+              </button>
+
+              {/* Image */}
+              <div className="relative shrink-0 h-52 md:h-auto md:w-1/2">
+                <img src={selectedPro.image} alt={selectedPro.officialName} className="w-full h-full object-cover opacity-60" />
+                <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 via-transparent to-transparent md:bg-linear-to-r md:from-slate-900/20 md:to-transparent" />
+              </div>
+
+              {/* MOBILE : bloc unique scrollable */}
+              <div className="md:hidden flex-1 overflow-y-auto flex flex-col min-h-0">
+                <div className="p-5 flex flex-col gap-4">
+                  <div>
+                    <div className={`inline-flex items-center ${selectedPro.accentColor || 'bg-abysse'} text-white text-[9px] font-black px-4 py-1.5 rounded-full mb-4 uppercase tracking-widest`}>
+                      {selectedPro.label}
+                    </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`${selectedPro.color || 'text-turquoise'} text-[10px] font-black uppercase tracking-widest`}>{selectedPro.target}</span>
+                      <span className="text-slate-600 text-[10px]">·</span>
+                      <span className="text-slate-400 text-[10px] font-bold flex items-center gap-1"><Clock size={9} /> {selectedPro.duration}</span>
+                    </div>
+                    <h2 className="text-xl font-black text-white tracking-tighter leading-tight uppercase mb-1">{selectedPro.officialName}</h2>
+                  </div>
+                  <RenderText content={selectedPro.description} className="text-slate-300 text-[13px] font-medium leading-relaxed" />
+                  {selectedPro.conditions?.length > 0 && (
+                    <ul className="grid grid-cols-1 gap-1.5">
+                      {selectedPro.conditions.map((c: string, i: number) => (
+                        <li key={i} className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                          <CheckCircle2 size={12} className={`${selectedPro.color || 'text-turquoise'} shrink-0`} />{c}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <div className="pt-3 border-t border-slate-700">
+                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.4em] mb-1">Tarif</p>
+                    <span className={`text-2xl font-black tracking-tighter ${selectedPro.color || 'text-turquoise'}`}>{selectedPro.price}</span>
+                  </div>
+                </div>
+                <div className="px-5 pb-5 pt-2">
+                  <a href="mailto:contact@cncoutainville.fr"
+                    className={`flex items-center justify-center gap-2 w-full py-4 rounded-xl ${selectedPro.accentColor || 'bg-turquoise'} text-white font-black uppercase tracking-widest text-sm hover:brightness-110 transition-all shadow-md`}
+                    onClick={e => e.stopPropagation()}>
+                    Nous contacter <ArrowRight size={14} />
+                  </a>
+                </div>
+              </div>
+
+              {/* DESKTOP : header fixe / description scroll / footer fixe */}
+              <div className="hidden md:flex flex-col flex-1 min-h-0 overflow-hidden">
+
+                {/* Zone 1 : Header */}
+                <div className="shrink-0 px-8 pt-8 pb-3">
+                  <div className={`inline-flex items-center ${selectedPro.accentColor || 'bg-abysse'} text-white text-[10px] font-black px-5 py-1.5 rounded-full mb-5 uppercase tracking-widest`}>
+                    {selectedPro.label}
+                  </div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className={`${selectedPro.color || 'text-turquoise'} text-[10px] font-black uppercase tracking-widest`}>{selectedPro.target}</span>
+                    <span className="text-slate-600 text-[10px]">·</span>
+                    <span className="text-slate-400 text-[10px] font-bold flex items-center gap-1"><Clock size={10} /> {selectedPro.duration}</span>
+                  </div>
+                  <h2 className="text-2xl lg:text-3xl font-black text-white tracking-tighter leading-tight uppercase">{selectedPro.officialName}</h2>
+                </div>
+
+                {/* Zone 2 : Description scrollable */}
+                <div
+                  className="relative flex-1 min-h-0 border-y border-slate-700"
+                  onWheel={e => { e.stopPropagation(); proScrollRef.current?.scrollBy({ top: e.deltaY, behavior: 'auto' }); }}
+                >
+                  <div
+                    ref={proScrollRef}
+                    onScroll={checkProScroll}
+                    className="h-full overflow-y-auto px-8 py-4 flex flex-col gap-4"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
+                  >
+                    <RenderText content={selectedPro.description} className="text-slate-300 text-base font-medium leading-relaxed" />
+                    {selectedPro.conditions?.length > 0 && (
+                      <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-2">
+                        {selectedPro.conditions.map((c: string, i: number) => (
+                          <li key={i} className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                            <CheckCircle2 size={11} className={`${selectedPro.color || 'text-turquoise'} shrink-0`} />{c}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  {/* Fondu HAUT */}
+                  <AnimatePresence>
+                    {canProScrollUp && (
+                      <motion.div key="pro-fade-top" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}
+                        className="absolute top-0 left-0 right-0 h-10 pointer-events-none"
+                        style={{ background: 'linear-gradient(to bottom, rgb(15,23,42) 0%, transparent 100%)' }}
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  {/* Fondu BAS + chevron pulsé */}
+                  <AnimatePresence>
+                    {canProScrollDown && (
+                      <motion.div key="pro-fade-bottom" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}
+                        className="absolute bottom-0 left-0 right-0 h-14 pointer-events-none flex items-end justify-center pb-2"
+                        style={{ background: 'linear-gradient(to top, rgb(15,23,42) 0%, rgba(15,23,42,0.6) 60%, transparent 100%)' }}
+                      >
+                        <motion.div animate={{ y: [0, 3, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}>
+                          <ChevronDown size={16} className="text-slate-500" />
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Zone 3 : Footer fixe */}
+                <div className="shrink-0 px-8 py-5 flex items-center justify-between">
+                  <div>
+                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.4em] mb-1">Tarif</p>
+                    <span className={`text-3xl font-black tracking-tighter ${selectedPro.color || 'text-turquoise'}`}>{selectedPro.price}</span>
+                  </div>
+                  <a href="mailto:contact@cncoutainville.fr"
+                    className={`inline-flex items-center gap-2 px-8 py-4 rounded-xl ${selectedPro.accentColor || 'bg-turquoise'} text-white font-black uppercase tracking-widest text-sm hover:brightness-110 transition-all shadow-lg`}
+                    onClick={e => e.stopPropagation()}>
+                    Nous contacter <ArrowRight size={14} />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* ─── BLOC 2 : ÉCOLE À L'ANNÉE ─────────────────────────────────────── */}
-      <section id="ecole-annee" className="scroll-mt-20 bg-blue-50 border-b border-blue-100">
+      <section id="ecole-annee" className="scroll-mt-20 bg-white border-b border-slate-100">
 
         {/* Header du bloc */}
         <div className="py-12 px-6">
@@ -731,62 +1013,67 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
                 <div className="inline-flex items-center gap-2 bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2">
                   ● École à l'Année
                 </div>
-                <h2 className="text-3xl md:text-4xl font-black text-abysse tracking-tighter leading-tight">Octobre → Juin</h2>
-                <p className="text-slate-500 font-bold text-sm mt-1">Mercredis (enfants 6-11 ans) · Samedis (jeunes & adultes)</p>
+                <h2 className="text-3xl md:text-4xl font-black text-abysse tracking-tighter leading-tight">{ecoleAnneeData?.sectionTitle || 'Octobre → Juin'}</h2>
+                <p className="text-slate-500 font-bold text-sm mt-1">{ecoleAnneeData?.sectionSubtitle || 'Mercredis (enfants 6-11 ans) · Samedis (jeunes & adultes)'}</p>
               </div>
             </div>
             <div className="text-sm text-slate-600 max-w-sm leading-relaxed border-l-4 border-blue-500 pl-5">
-              Vous habitez dans le coin ou à proximité ? L'école à l'année, c'est le rythme du club : on revient chaque semaine, on progresse dans la durée, on intègre un groupe de son niveau. C'est ici que naissent les vrais navigateurs.
+              <RenderText content={ecoleAnneeData?.sectionDescription} fallback="Vous habitez dans le coin ou à proximité ? L'école à l'année, c'est le rythme du club : on revient chaque semaine, on progresse dans la durée, on intègre un groupe de son niveau. C'est ici que naissent les vrais navigateurs." />
             </div>
           </div>
         </div>
 
         {/* Cards des 4 groupes */}
-        <div className="pb-16 px-6">
-          <div className="max-w-350 mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {ANNEE_GROUPS.map((group, i) => (
-                <motion.div
-                  key={group.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className={`${group.bgColor} border-2 ${group.borderColor} rounded-4xl p-8 flex flex-col gap-6`}
-                >
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`size-12 ${group.accentColor} rounded-2xl flex items-center justify-center text-white shadow-md`}>
-                        {group.icon}
+        <div className="px-6 md:px-32 lg:px-64 pb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {anneeGroups.map((group: any, i: number) => {
+              const GroupIcon = group.iconName ? ((LucideIcons as any)[group.iconName] || LucideIcons.Anchor) : null;
+              return (
+              <motion.div
+                key={group._key || group.id || i}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 flex flex-col"
+              >
+                {/* Barre accent top */}
+                <div className={`h-1.5 ${group.accentColor}`} />
+
+                <div className="p-7 flex flex-col gap-5 flex-1">
+                  {/* Header : icône + titre + prix */}
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className={`size-12 ${group.accentColor} rounded-2xl flex items-center justify-center text-white shadow-md shrink-0`}>
+                        {GroupIcon ? <GroupIcon size={20} /> : group.icon}
                       </div>
                       <div>
-                        <h3 className={`text-xl font-black ${group.color} tracking-tight`}>{group.title}</h3>
-                        <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">{group.age}</p>
+                        <h3 className={`text-xl font-black ${group.color} tracking-tight leading-tight`}>{group.title}</h3>
+                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-0.5">{group.age}</p>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <p className={`text-2xl font-black ${group.color} tracking-tighter leading-none`}>{group.price}</p>
-                      <p className="text-[10px] text-slate-400 font-bold mt-1">{group.priceSuffix}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold mt-1 max-w-25 text-right leading-tight">{group.priceSuffix}</p>
                     </div>
                   </div>
 
                   {/* Infos */}
-                  <div className="space-y-3">
+                  <div className="space-y-2.5 pt-4 border-t border-slate-100">
                     <div className="flex items-center gap-3">
-                      <Calendar size={15} className="text-slate-400 shrink-0" />
+                      <Calendar size={13} className={`${group.color} shrink-0`} />
                       <span className="text-sm font-black text-abysse">{group.jour}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Wind size={15} className="text-slate-400 shrink-0" />
+                      <Wind size={13} className={`${group.color} shrink-0`} />
                       <span className="text-sm font-bold text-slate-700">{group.activite}</span>
                     </div>
-                    <p className="text-xs text-slate-500 leading-relaxed font-medium pl-6">{group.detail}</p>
+                    <RenderText content={group.detail} className="text-xs text-slate-500 leading-relaxed font-medium pl-5" />
                   </div>
-                </motion.div>
-              ))}
-            </div>
-
+                </div>
+              </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

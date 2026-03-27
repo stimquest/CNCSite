@@ -165,13 +165,6 @@ export default defineType({
                             },
                             initialValue: 'orange',
                         }),
-                        defineField({ 
-                            name: 'iconName', 
-                            title: 'Icône (Lucide)', 
-                            type: 'string', 
-                            components: { input: IconPicker },
-                            description: 'Ex: Zap (Éclair), Wind (Vent), Leaf (Feuille), Compass (Boussole)'
-                        }),
                         defineField({ name: 'title', title: 'Titre Principal', type: 'string' }),
                         defineField({ name: 'highlightSuffix', title: 'Suffixe Coloré', type: 'string' }),
                         defineField({ name: 'tagline', title: 'Petit Titre (Tagline)', type: 'string' }),

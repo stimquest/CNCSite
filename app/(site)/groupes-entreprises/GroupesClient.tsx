@@ -107,10 +107,10 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                 key={heroSection._key || 'hero'}
                 image={heroSection.heroImage || "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2000"}
                 imageAlt={heroSection.title || "Hero"}
-                tagIcon={<Briefcase size={14} />}
-                tagText={heroSection.tagText || "Séminaires • Teambuilding • Privé"}
-                title={heroSection.title || "Vivre le"}
-                subtitle={heroSection.subtitle || "Collectif."}
+                tagIcon={<Users size={14} />}
+                tagText={heroSection.tagText || "Scolaires • ACM • Entreprises • Privés"}
+                title={heroSection.title || "Vivre l'Expérience"}
+                subtitle={heroSection.subtitle || "De l'Équipage."}
             >
                 {heroSection.stats && (
                     <div className="bg-white rounded-[2rem] p-8 shadow-2xl flex items-center gap-8 border border-slate-100 min-w-80">
@@ -131,12 +131,12 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                 {heroSection.servicesText && (
                     <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-8 border border-white/10 flex items-center gap-8 min-w-70">
                         <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center text-white shrink-0">
-                            <Presentation size={32} />
+                            <Compass size={32} />
                         </div>
                         <div className="text-left">
-                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">{heroSection.servicesText.label || "Services"}</p>
-                            <p className="text-3xl font-black text-white uppercase italic leading-none">{heroSection.servicesText.mainText || "Full-Tech"}</p>
-                            <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">{heroSection.servicesText.subtext || "Fibre • Visio • Traiteur"}</p>
+                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">{heroSection.servicesText.label || "Infrastructures"}</p>
+                            <p className="text-3xl font-black text-white uppercase italic leading-none">{heroSection.servicesText.mainText || "Confort & Vue"}</p>
+                            <p className="text-[10px] text-white/60 font-bold mt-1 uppercase italic">{heroSection.servicesText.subtext || "Vestiaires • Douches • Réunion"}</p>
                         </div>
                     </div>
                 )}
@@ -145,7 +145,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans selection:bg-turquoise selection:text-white">
+        <div id="scolaires" className="min-h-screen bg-white font-sans selection:bg-turquoise selection:text-white scroll-mt-20">
             {renderHero()}
             
             {pageBuilder.map((block: any, index: number) => {
@@ -157,7 +157,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                 switch (block._type) {
                     case 'twoColumnsFeature':
                         return (
-                            <section key={key} className="container mx-auto px-6 max-w-375 relative z-20 py-24">
+                            <section id="entreprises" key={key} className="container mx-auto px-6 max-w-375 relative z-20 py-24 scroll-mt-20">
                                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                                     <div className="lg:col-span-8 bg-white rounded-[3rem] shadow-xl border border-slate-100 overflow-hidden group">
                                         <div className="grid grid-cols-1 md:grid-cols-2 h-full">
@@ -172,7 +172,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                                             <div className="p-10 md:p-14 flex flex-col justify-center">
                                                 <div className="flex items-center gap-3 mb-6">
                                                     <div className={`size-1.5 rounded-full ${theme.bg}`}></div>
-                                                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">{block.tag || "Business x Nautisme"}</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">{block.tag || "Cohésion & Nautisme"}</span>
                                                 </div>
                                                 <h2 className="text-4xl text-abysse leading-none mb-6">
                                                     {block.titlePart1 || "Séminaires"} <br />
@@ -241,7 +241,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
 
                     case 'gridShowcase':
                         return (
-                            <section key={key} className="py-24 bg-slate-50 overflow-hidden relative">
+                            <section id="particuliers" key={key} className="py-24 bg-slate-50 overflow-hidden relative scroll-mt-20">
                                 <div className="absolute top-0 right-0 p-32 opacity-5 pointer-events-none">
                                     <Compass size={400} className="text-abysse rotate-12" />
                                 </div>
@@ -250,7 +250,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                                     <div className="mb-16">
                                         <div className="flex items-center gap-3 mb-4">
                                             <div className={`size-2 rounded-full ${theme.bg} animate-pulse`}></div>
-                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">{block.tag || "Pour les Particuliers"}</span>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">{block.tag || "Partager des émotions"}</span>
                                         </div>
                                         <h2 className="text-5xl md:text-6xl text-abysse leading-none">
                                             {block.titlePart1 || "Événements"} <span className={theme.gradientText}>{block.titlePart2 || "Privés."}</span>

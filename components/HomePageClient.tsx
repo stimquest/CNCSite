@@ -2,8 +2,11 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useLiveStatus } from '../contexts/LiveStatusContext';
-
-import { Compass, Wind, Leaf, Zap, Users, ArrowRight, LifeBuoy, GraduationCap, Briefcase, Medal, Siren, CheckCircle2, Wifi, ShoppingBag, Image, Radio, Bird, Waves, Youtube, Play, Navigation, ChevronLeft, ChevronRight } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+import {
+  ArrowRight, ChevronLeft, ChevronRight, Zap, Menu, X,
+  Wind, Bird, Navigation, Image as ImageIcon, Youtube, Play, Radio, ShoppingBag, Briefcase
+} from 'lucide-react';
 import { PhotoWallGallery } from '../components/PhotoWallGallery';
 import { GamesSlideshow } from '../components/GamesSlideshow';
 import PillarStory from '../components/PillarStory';
@@ -18,6 +21,11 @@ import Link from 'next/link';
 import { PortableText } from '@portabletext/react';
 import { CharDiscoveryModal } from './CharDiscoveryModal';
 import { WelcomeGuide } from './WelcomeGuide';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+
+const getIcon = (name: string) => (name && (LucideIcons as any)[name]) || Zap;
 
 const RenderText = ({ content, className, fallback = null }: { content: string | any[] | undefined, className?: string, fallback?: React.ReactNode }) => {
     if (!content) return fallback ? <div className={className}>{fallback}</div> : null;
@@ -30,9 +38,6 @@ const RenderText = ({ content, className, fallback = null }: { content: string |
         </div>
     );
 };
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
 const HERO_IMAGES = [
     '/images/Hero/Ryan.webp',
@@ -176,31 +181,23 @@ const FocusCardItem = ({ card, idx, isActive, theme, images }: any) => {
     return (
         <div
             id={`focus-card-${idx}`}
-            className={`shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] bg-abysse ring-1 ring-white/15 flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} min-h-125 lg:min-h-137.5`}
-            style={{ opacity: isActive ? 1 : 0.5, transform: isActive ? 'scale(1)' : 'scale(0.97)', transition: 'opacity 0.4s, transform 0.4s' }}
+            className={`shrink-0 w-[85vw] lg:w-[58vw] group relative overflow-hidden rounded-4xl bg-abysse ring-1 ring-white/15 flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} min-h-120 lg:min-h-150`}
+            style={{ opacity: isActive ? 1 : 0.5, transform: isActive ? 'scale(1)' : 'scale(0.98)', transition: 'opacity 0.4s, transform 0.4s' }}
         >
-            <div className="flex-1 p-8 md:p-16 flex flex-col justify-center z-20 relative">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className={`size-12 bg-white rounded-2xl flex items-center justify-center ${theme.text} shadow-lg group-hover:scale-110 transition-transform duration-500`}>
-                        {/* Dynamic Icon */}
-                        {card.iconName === 'Leaf' ? <Leaf size={24} /> :
-                         card.iconName === 'Wind' ? <Wind size={24} /> :
-                         card.iconName === 'Compass' ? <Compass size={24} /> :
-                         card.iconName === 'Waves' ? <Waves size={24} /> :
-                         <Zap size={24} />}
-                    </div>
+            <div className="flex-1 p-8 md:p-12 flex flex-col justify-center z-20 relative">
+                <div className="flex items-center gap-3 mb-5">
                     <div>
                         <span className={`${theme.textLight} font-black uppercase tracking-[0.2em] text-[10px] block`}>{card.tagline}</span>
                         <span className="text-slate-400 font-medium text-[9px] uppercase tracking-widest">{card.subTagline}</span>
                     </div>
                 </div>
-                <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-8">
+                <h2 className="text-4xl md:text-4xl lg:text-5xl font-black text-white uppercase italic tracking-tighter leading-[0.95] mb-6">
                     {card.title} <br />
                     <span className={`text-transparent bg-clip-text bg-linear-to-r ${theme.from} ${theme.via} ${theme.to}`}>{card.highlightSuffix}</span>
                 </h2>
                 <RenderText
                     content={card.description}
-                    className={`text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mb-12 border-l-4 border-l-white/20 pl-8 italic`}
+                    className={`text-slate-300 text-base md:text-lg font-medium leading-relaxed max-w-xl mb-10 border-l-3 border-l-white/20 pl-6 italic`}
                     fallback="Découvrez cette activité phare avec l'équipe du club nautique."
                 />
                 <div className="flex flex-col sm:flex-row gap-4 mt-auto">
@@ -210,13 +207,13 @@ const FocusCardItem = ({ card, idx, isActive, theme, images }: any) => {
                         </Link>
                     )}
                     {card.infoButton?.link && (
-                        <Link href={card.infoButton.link} className="inline-flex items-center justify-center px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/10 transition-all backdrop-blur-sm">
+                        <Link href={card.infoButton.link} className="inline-flex items-center justify-center px-8 py-5 bg-white/10 border-2 border-white/20 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white hover:text-abysse transition-all backdrop-blur-md shadow-xl">
                             {card.infoButton.text}
                         </Link>
                     )}
                 </div>
             </div>
-            <div className="flex-none h-70 md:h-87.5 lg:h-auto lg:flex-1 relative overflow-hidden">
+            <div className="flex-none h-56 md:h-80 lg:h-auto lg:flex-1 relative overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <AnimatePresence mode="popLayout">
                         <motion.img key={safeImages[imgIdx]} src={safeImages[imgIdx]} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 1, scale: 1.08 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 1.5, ease: "easeInOut" }, scale: { duration: 6, ease: "linear" } }} className="absolute inset-0 w-full h-full object-cover" alt={card.title} />
@@ -234,7 +231,7 @@ const FocusCardItem = ({ card, idx, isActive, theme, images }: any) => {
                 
                 {/* Badge if exists */}
                 {card.badgeValue && (
-                    <div className={`absolute top-8 ${isReversed ? 'left-8' : 'right-8'} bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-45`}>
+                    <div className={`hidden lg:block absolute top-8 ${isReversed ? 'left-8' : 'right-8'} bg-black/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl z-20 max-w-45`}>
                         <span className={`${theme.textLight} font-black text-3xl block leading-none mb-1`}>{card.badgeValue}</span>
                         <span className="text-white font-bold text-[10px] uppercase tracking-widest leading-tight block">{card.badgeLabel}</span>
                     </div>
@@ -263,6 +260,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
     const [currentWellbeingIndex, setCurrentWellbeingIndex] = useState(0);
     const [isCharModalOpen, setIsCharModalOpen] = useState(false);
     const [currentFocusIndex, setCurrentFocusIndex] = useState(0);
+    const [activeSpiritIndex, setActiveSpiritIndex] = useState(0);
     const [focusX, setFocusX] = useState(0);
     const focusWheelLockRef = useRef(false);
     const focusSectionRef = useRef<HTMLDivElement>(null);
@@ -287,7 +285,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
 
     const navigateFocus = (index: number) => {
         setCurrentFocusIndex(index);
-        const vwRatio = window.innerWidth < 1024 ? 0.85 : 0.65;
+        const vwRatio = window.innerWidth < 1024 ? 0.85 : 0.58;
         const cardWidth = window.innerWidth * vwRatio + FOCUS_CARD_GAP;
         setFocusX(-index * cardWidth);
     };
@@ -648,123 +646,74 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                 </div>
             </section>
 
-            {/* SECTION : L'ESPRIT DU CLUB */}
+            {/* SECTION : L'ESPRIT DU CLUB - REPAIRED & REFINED */}
             <section id="esprit-club" className="py-24 max-w-400 mx-auto px-6 relative z-10">
                 <div className="mb-12 px-2">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Expérience CNC</span>
                     </div>
-                    <h2 className="text-3xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
-                        {homePageData?.spirit?.titlePart1 || "L'Esprit"} <br className="md:hidden" />
-                        <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">{homePageData?.spirit?.titlePart2 || "du Club."}</span>
+                    <h2 className="text-2xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
+                        {homePageData?.spirit?.titlePart1 || "L'Esprit"} <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">{homePageData?.spirit?.titlePart2 || "du Club."}</span>
                     </h2>
                 </div>
 
-                <div className="relative rounded-[3rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-175 md:h-150 group/container">
-
-                    {/* 0. Le Message - Hidden on Mobile */}
-                    <div className="absolute top-8 left-8 z-30 pointer-events-none md:max-w-xl hidden md:block">
-                        <RenderText
-                            content={homePageData?.spirit?.message}
-                            className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter leading-[0.9] drop-shadow-lg whitespace-pre-line"
-                            fallback="Ressentez\nla force\ndu vent."
-                        />
-                        <RenderText
-                            content={homePageData?.spirit?.description}
-                            className="text-slate-300 font-medium mt-4 text-sm md:text-base hidden md:block"
-                            fallback="Entre dunes et grand large, choisissez votre façon de vivre la mer."
-                        />
-                    </div>
-
+                <div className="relative rounded-[3.5rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-175 md:h-150 group/container border border-white/5">
                     {/* CARTES DYNAMIQUES */}
                     {(homePageData?.spirit?.cards || [
-                        {
-                            tag: 'Nature',
-                            title: 'Apprendre',
-                            description: "De l'éveil des sens à l'autonomie. L'école de voile pour les enfants de 5 à 12 ans.",
-                            buttonText: "Découvrir l'école",
-                            link: '/ecole-voile',
-                            iconName: 'Leaf',
-                            colorTheme: 'turquoise',
-                            image: '/images/imgBank/Cata001.jpg'
-                        },
-                        {
-                            tag: 'Sensation',
-                            title: 'Naviguer',
-                            description: "Adrénaline et vitesse. Stages catamarans, char à voile et glisse pour ados & adultes.",
-                            buttonText: "Voir les stages",
-                            link: '/activites?cat=Sensations',
-                            iconName: 'Zap',
-                            colorTheme: 'orange',
-                            image: '/images/imgBank/Navigation.jpg'
-                        },
-                        {
-                            tag: 'Exploration',
-                            title: "S'évader",
-                            description: "Louez un paddle ou un kayak, longez la côte à votre rythme. La liberté absolue.",
-                            buttonText: "Louer du matériel",
-                            link: '/activites',
-                            iconName: 'Compass',
-                            colorTheme: 'purple',
-                            image: '/images/imgBank/paddlekayak.jpg'
-                        }
+                        { tag: 'Sensation', title: 'DOMPTER', description: "Vitesse et adrénaline. Stages de catamaran, char à voile et sports de glisse pour faire le plein de sensations fortes.", buttonText: "Voir les activités sensation", link: '/activites?cat=Sensations', iconName: 'Zap', colorTheme: 'orange', image: '/images/imgBank/Navigation.jpg' },
+                        { tag: 'Exploration', title: 'DÉCOUVRIR', description: "Louez un paddle ou un kayak, longez la côte à votre rythme. La liberté absolue entre dunes et grand large.", buttonText: "Louer du matériel", link: '/activites', iconName: 'Compass', colorTheme: 'purple', image: '/images/imgBank/paddlekayak.jpg' },
+                        { tag: 'Nature', title: 'RESSENTIR', description: "De l'éveil des sens à l'autonomie. L'école de voile pour les enfants de 5 à 12 ans et la découverte de l'estran.", buttonText: "Découvrir l'école", link: '/ecole-voile', iconName: 'Leaf', colorTheme: 'turquoise', image: '/images/imgBank/Cata001.jpg' }
                     ]).map((card: any, idx: number) => {
-                        // Color Theme Helper
-                        const themeColor = card.colorTheme === 'orange' ? 'text-orange-500' : card.colorTheme === 'purple' ? 'text-purple-500' : 'text-turquoise';
-                        const hoverBg = card.colorTheme === 'orange' ? 'border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white' :
-                            card.colorTheme === 'purple' ? 'border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white' :
-                                'border-turquoise text-turquoise hover:bg-turquoise hover:text-abysse';
-                        const hoverText = card.colorTheme === 'orange' ? 'text-orange-400' : card.colorTheme === 'purple' ? 'text-purple-400' : 'text-turquoise';
+                        const themeColor = card.colorTheme === 'orange' ? 'text-orange-400' : card.colorTheme === 'purple' ? 'text-purple-400' : 'text-turquoise';
+                        const btnTheme = card.colorTheme === 'orange' ? 'border-orange-500 text-orange-400 hover:bg-orange-500' : 
+                                         card.colorTheme === 'purple' ? 'border-purple-500 text-purple-400 hover:bg-purple-500' : 
+                                         'border-turquoise text-turquoise hover:bg-turquoise';
 
                         return (
                             <div
                                 key={idx}
-                                className="group/panel relative flex-1 hover:flex-2 transition-all duration-700 ease-in-out overflow-hidden md:cursor-pointer flex flex-col focus-within:flex-3"
+                                onMouseEnter={() => setActiveSpiritIndex(idx)}
+                                onClick={() => setActiveSpiritIndex(idx)}
+                                className={`group/panel relative transition-all duration-700 ease-in-out overflow-hidden md:cursor-pointer flex flex-col ${activeSpiritIndex === idx ? 'flex-3 md:flex-2' : 'flex-1'} focus-within:flex-3`}
                                 tabIndex={0}
                             >
-                                <div className="absolute inset-0 bg-black/50 group-hover/panel:bg-black/20 group-focus-within/panel:bg-black/20 transition-colors z-10 duration-500"></div>
+                                <div className="absolute inset-0 bg-abysse/40 group-hover/panel:bg-abysse/10 transition-colors z-10 duration-500"></div>
                                 <img
                                     src={card.image}
-                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-110 group-focus-within/panel:scale-110"
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-105"
                                     alt={card.title}
                                 />
 
-                                <div className="absolute bottom-0 left-0 w-full p-6 md:p-8 z-20 bg-linear-to-t from-abysse via-abysse/60 to-transparent flex flex-col justify-end h-full md:h-auto">
-                                    <div className="flex items-center gap-3 md:gap-4 mb-2 translate-y-2 group-hover/panel:translate-y-0 group-focus-within/panel:translate-y-0 transition-transform duration-300">
-                                        <div className={`size-10 md:size-12 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 flex items-center justify-center ${themeColor} shadow-lg shrink-0`}>
-                                            {card.iconName === 'Leaf' && <Leaf size={20} />}
-                                            {card.iconName === 'Zap' && <Zap size={20} />}
-                                            {card.iconName === 'Compass' && <Compass size={20} />}
-                                            {!['Leaf', 'Zap', 'Compass'].includes(card.iconName) && <Leaf size={20} />}
+                                <div className="absolute bottom-0 left-0 w-full p-8 md:p-10 z-20 bg-linear-to-t from-abysse via-abysse/60 to-transparent flex flex-col justify-end h-full md:h-auto">
+                                    <div className="flex items-center gap-4 mb-3">
+                                        <div className={`size-12 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center ${themeColor} shadow-lg shrink-0 group-hover:scale-110 transition-transform duration-500`}>
+                                            {(() => {
+                                                const Icon = getIcon(card.iconName);
+                                                return <Icon size={24} />;
+                                            })()}
                                         </div>
-                                        <span className={`${themeColor} font-black uppercase tracking-[0.2em] text-[10px] md:text-xs`}>{card.tag}</span>
+                                        <span className={`${themeColor} font-black uppercase tracking-[0.2em] text-[10px]`}>{card.tag}</span>
                                     </div>
 
-                                    <h3 className="text-2xl md:text-3xl font-black text-white uppercase italic mb-1 md:mb-2 group-hover/panel:text-3xl group-focus-within/panel:text-3xl group-focus-within/panel:mb-3 transition-all">
+                                    <h3 className="text-3xl md:text-5xl font-black text-white uppercase italic mb-4 leading-none transition-all">
                                         {card.title}
                                     </h3>
 
-                                    {/* Contenu extensible : Révélé au survol (desktop) OU au focus (mobile) */}
-                                    <div className="grid grid-rows-[0fr] group-hover/panel:grid-rows-[1fr] group-focus-within/panel:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+                                    <div className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${activeSpiritIndex === idx ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'} md:grid-rows-[0fr] md:group-hover/panel:grid-rows-[1fr]`}>
                                         <div className="overflow-hidden">
-                                            <RenderText
-                                                content={card.description}
-                                                className={`text-slate-200 text-xs md:text-sm mb-4 leading-relaxed font-medium mt-2`}
-                                            />
-                                            <Link href={card.link || '#'} className={`w-full md:w-auto inline-flex justify-center items-center gap-2 bg-transparent border-2 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-colors mb-2 md:mb-0 ${hoverBg}`}>
-                                                {card.buttonText} <ArrowRight size={14} />
+                                            <p className="text-slate-200 text-sm mb-6 leading-relaxed font-medium">
+                                                {card.description}
+                                            </p>
+                                            <Link href={card.link || '#'} className={`inline-flex items-center gap-3 bg-transparent border-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all hover:text-white ${btnTheme}`}>
+                                                {card.buttonText} <ArrowRight size={16} />
                                             </Link>
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Overlay cliquable (mobile seulement) pour prendre le focus quand on touche n'importe où sur la carte */}
-                                <div className="absolute inset-0 z-10 md:hidden cursor-pointer"></div>
                             </div>
                         );
                     })}
-
                 </div>
             </section>
 
@@ -777,7 +726,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                             <div className="size-2 rounded-full bg-orange-500 animate-pulse"></div>
                             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500">Activités phares</span>
                         </div>
-                        <h2 className="text-3xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
+                        <h2 className="text-2xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic leading-none">
                             Vibrez au rythme <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">des Marées.</span>
                         </h2>
                     </div>
@@ -814,10 +763,10 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                         return (
                                             <div
                                                 key={`focus-${idx}`}
-                                                className="shrink-0 w-[85vw] lg:w-[65vw] group relative overflow-hidden rounded-[3rem] shadow-xl ring-1 ring-white/15 flex flex-col justify-center min-h-125 lg:min-h-137.5 bg-linear-to-r"
+                                                className="shrink-0 w-[85vw] lg:w-[58vw] group relative overflow-hidden rounded-4xl shadow-xl ring-1 ring-white/15 flex flex-col justify-center min-h-120 lg:min-h-150 bg-linear-to-r"
                                                 style={{
                                                     opacity: isActive ? 1 : 0.5,
-                                                    transform: isActive ? 'scale(1)' : 'scale(0.97)',
+                                                    transform: isActive ? 'scale(1)' : 'scale(0.98)',
                                                     transition: 'opacity 0.4s, transform 0.4s',
                                                     backgroundImage: `linear-gradient(to right, var(--color-abysse), ${theme.bg === 'bg-turquoise' ? '#14b8a6' : theme.bg.replace('bg-', '')})` // simplification
                                                 }}
@@ -825,20 +774,23 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
                                                 <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-[100px] rounded-full group-hover:scale-110 transition-transform duration-1000"></div>
                             
-                                                <div className="relative z-10 p-8 md:p-16 flex flex-col lg:flex-row items-center justify-between gap-8 h-full">
-                                                    <div className="max-w-2xl text-center lg:text-left flex flex-col justify-center h-full">
-                                                        <div className="flex items-center justify-center lg:justify-start gap-3 mb-6">
-                                                            <div className="size-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
-                                                                <Users size={24} />
+                                                <div className="relative z-10 p-8 md:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 h-full">
+                                                    <div className="max-w-xl text-center lg:text-left flex flex-col justify-center h-full">
+                                                        <div className="flex items-center justify-center lg:justify-start gap-3 mb-5">
+                                                            <div className="size-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-xl group-hover:scale-110 transition-transform duration-700">
+                                                                {(() => {
+                                                                    const Icon = getIcon(card.iconName);
+                                                                    return <Icon size={20} />;
+                                                                })()}
                                                             </div>
                                                             <span className="text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-xs drop-shadow-sm">{card.tagline}</span>
                                                         </div>
-                                                        <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-white italic tracking-tighter leading-tight mb-8 drop-shadow-md">
+                                                        <h2 className="text-2xl md:text-3xl lg:text-5xl font-black text-white italic tracking-tighter leading-tight mb-6 drop-shadow-md">
                                                             {card.title} <br className="hidden md:block"/> {card.highlightSuffix}
                                                         </h2>
                                                         <RenderText
                                                             content={card.description}
-                                                            className="text-slate-100 border-l-4 border-white/30 pl-8 text-lg md:text-xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0 italic mb-10"
+                                                            className="text-slate-100 border-l-3 border-white/30 pl-6 text-base md:text-lg font-medium leading-relaxed max-w-xl mx-auto lg:mx-0 italic mb-10"
                                                         />
                                                         <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                                                             {card.ctaButton?.link && (
@@ -848,7 +800,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                                                 </Link>
                                                             )}
                                                             {card.infoButton?.link && (
-                                                                <Link href={card.infoButton.link} className="inline-flex items-center justify-center px-8 py-5 bg-white/10 border border-white/20 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white/20 transition-all backdrop-blur-sm">
+                                                                <Link href={card.infoButton.link} className="inline-flex items-center justify-center px-8 py-5 bg-white/15 border-2 border-white/20 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white hover:text-abysse transition-all backdrop-blur-md shadow-2xl">
                                                                     {card.infoButton.text}
                                                                 </Link>
                                                             )}
@@ -904,7 +856,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                 <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
                                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-turquoise">Le Calendrier</span>
                             </div>
-                            <h2 className="text-3xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none mb-6">
+                            <h2 className="text-2xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic leading-none mb-6">
                                 Prochains <br />
                                 <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">Événements.</span>
                             </h2>
@@ -922,13 +874,14 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                         </div>
 
                         {/* Events list */}
-                        <div className="lg:w-2/3 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {upcomingEvents.slice(0, 3).map((event: any, idx: number) => {
+                        {/* Events list */}
+                        <div className="lg:w-2/3 w-full flex overflow-x-auto gap-6 snap-x snap-mandatory scroll-smooth scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden -mx-6 px-6 lg:-m-10 lg:p-10 lg:mx-0 lg:px-0 lg:overflow-x-auto pb-12 lg:pb-10">
+                            {upcomingEvents.slice(0, 8).map((event: any, idx: number) => {
                                 const eventDate = new Date(event.startDate);
                                 return (
                                     <div
                                         key={idx}
-                                        className="group/card relative bg-white/60 backdrop-blur-xl border border-white/80 p-6 rounded-4xl shadow-[0_15px_40px_rgba(0,43,73,0.08)] transition-all duration-500 hover:shadow-2xl hover:bg-white hover:-translate-y-1"
+                                        className="shrink-0 snap-center w-[85vw] md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] group/card relative bg-white border border-slate-200/50 p-6 rounded-4xl transition-all duration-500 hover:border-turquoise/30 hover:bg-slate-50 hover:-translate-y-1 shadow-xs"
                                     >
                                         <div className="flex justify-between items-start mb-6">
                                             {/* Date Float Badge */}
@@ -957,7 +910,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                                     {event.badge}
                                                 </span>
                                             )}
-                                            <h4 className="text-xl font-black text-abysse mb-1 leading-tight group-hover/card:text-turquoise transition-colors">
+                                            <h4 className="text-lg font-black text-abysse mb-1 leading-tight group-hover/card:text-turquoise transition-colors">
                                                 {event.title}
                                             </h4>
                                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
@@ -1029,7 +982,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                         <div className="size-2 rounded-full bg-yellow-400"></div>
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Style & Souvenirs</span>
                     </div>
-                    <h2 className="text-3xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
+                    <h2 className="text-2xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic leading-none">
                         {homePageData?.immersion?.titlePart1 || homePageData?.immersion?.titlePart2 ? (
                             <>{homePageData.immersion.titlePart1} <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-yellow-500">{homePageData.immersion.titlePart2}</span></>
                         ) : (
@@ -1038,11 +991,10 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                     </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="flex overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 snap-x snap-mandatory scroll-smooth scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden -mx-6 px-6 md:-m-10 md:p-10 md:mx-0 md:px-0 md:overflow-visible pb-12 md:pb-10">
                     {homePageData?.immersion?.cards && homePageData.immersion.cards.length > 0 ? (
                         homePageData.immersion.cards.map((card: any, idx: number) => {
-                            const icons: Record<string, any> = { Radio, ShoppingBag, Play, Briefcase };
-                            const IconComponent = icons[card.iconName as string] || Radio;
+                            const IconComponent = getIcon(card.iconName as string);
                             const colorClass = {
                                 blue: 'text-blue-400',
                                 yellow: 'text-yellow-400',
@@ -1073,7 +1025,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                 <CardContainer
                                     key={idx}
                                     href={isPlayCard ? undefined : (card.link || "#")}
-                                    className="group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl"
+                                    className="shrink-0 snap-center w-[85vw] md:w-auto group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/5 transition-all duration-500 hover:bg-slate-900"
                                 >
                                     <img src={card.image || "/images/imgBank/CataPharePointeAgon.jpg"} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" alt={card.titlePart1} />
                                     <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
@@ -1095,7 +1047,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                                         onClick={(e) => { e.preventDefault(); setIsGalleryOpen(true); }}
                                                         className="inline-flex items-center gap-2 bg-white text-slate-900 px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-turquoise hover:text-white transition-all shadow-lg"
                                                     >
-                                                        <Image size={12} /> Photos
+                                                        <ImageIcon size={12} /> Photos
                                                     </button>
                                                     <a
                                                         href="https://www.youtube.com/@clubnautiquedecoutainville"
@@ -1120,7 +1072,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                     ) : (
                         <>
                             {/* TUILE : LA VIGIE (NEWS/LIVE) */}
-                            <Link href="/fil-info" className="group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
+                            <Link href="/fil-info" className="shrink-0 snap-center w-[85vw] md:w-auto group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/5 transition-all duration-500 hover:bg-slate-900">
                                 <img src="/images/imgBank/CataPharePointeAgon.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" alt="La Vigie Direct" />
                                 <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
 
@@ -1141,7 +1093,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                             </Link>
 
                             {/* TUILE : BOUTIQUE (CNC SHOP) */}
-                            <Link href="/boutique" className="group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
+                            <Link href="/boutique" className="shrink-0 snap-center w-[85vw] md:w-auto group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/5 transition-all duration-500 hover:bg-slate-900">
                                 <img src="/images/imgBank/naviguer.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000" alt="Boutique CNC" />
                                 <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
 
@@ -1150,7 +1102,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                         <ShoppingBag size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">Boutique <span className="text-yellow-400">CNC</span></h3>
+                                        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">Boutique <span className="text-yellow-400">CNC</span></h3>
                                         <p className="text-slate-300 text-sm font-medium mb-4 line-clamp-2">
                                             Sweats, t-shirts et accessoires aux couleurs du club.
                                         </p>
@@ -1162,7 +1114,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                             </Link>
 
                             {/* TUILE : GALERIE MÉDIAS */}
-                            <div className="group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl cursor-pointer">
+                            <div className="shrink-0 snap-center w-[85vw] md:w-auto group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/5 transition-all duration-500 hover:bg-slate-900 cursor-pointer">
                                 <img src="/images/imgBank/Navigation.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="Galerie Médias" />
                                 <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
 
@@ -1171,7 +1123,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                         <Play size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">Galerie <span className="text-turquoise">Médias</span></h3>
+                                        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">Galerie <span className="text-turquoise">Médias</span></h3>
                                         <p className="text-slate-300 text-sm font-medium mb-4 line-clamp-2">
                                             Photos et vidéos des plus beaux moments du spot.
                                         </p>
@@ -1180,7 +1132,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                                 onClick={() => setIsGalleryOpen(true)}
                                                 className="inline-flex items-center gap-2 bg-white text-slate-900 px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-turquoise hover:text-white transition-all shadow-lg"
                                             >
-                                                <Image size={12} /> Photos
+                                                <ImageIcon size={12} /> Photos
                                             </button>
                                             <a
                                                 href="https://www.youtube.com/@clubnautiquedecoutainville"
@@ -1196,7 +1148,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                             </div>
 
                             {/* TUILE : SÉMINAIRES & ÉVÉNEMENTS */}
-                            <Link href="/groupes-entreprises" className="group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/10 shadow-xl transition-all duration-500 hover:shadow-2xl">
+                            <Link href="/groupes-entreprises" className="shrink-0 snap-center w-[85vw] md:w-auto group relative h-95 rounded-[2rem] overflow-hidden bg-abysse border border-white/5 transition-all duration-500 hover:bg-slate-900">
                                 <img src="/images/imgBank/Secourisme.jpg" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="Séminaires entreprises" />
                                 <div className="absolute inset-0 bg-linear-to-t from-abysse/90 via-abysse/40 to-transparent z-10" />
 

@@ -79,7 +79,6 @@ export default defineType({
                 type: 'object',
                 fields: [
                     { name: 'id', type: 'string', title: 'ID unique (slug)' },
-                    { name: 'phase', type: 'text', rows: 2, title: 'Phase (ex: L\'Éveil)' },
                     { name: 'title', type: 'text', rows: 2, title: 'Titre narratif' },
                     { name: 'officialName', type: 'string', title: 'Nom officiel du stage' },
                     { name: 'age', type: 'string', title: 'Tranche d\'âge' },
@@ -91,12 +90,6 @@ export default defineType({
                     { name: 'image', type: 'image', title: 'Image d\'illustration' },
                     { name: 'color', type: 'string', title: 'Couleur du texte (ex: text-orange-500)' },
                     { name: 'bgColor', type: 'string', title: 'Couleur de fond (ex: bg-orange-500)' },
-                    defineField({
-                        name: 'iconName',
-                        type: 'string',
-                        title: 'Icône (Lucide)',
-                        components: { input: IconPicker }
-                    }),
                     {
                         name: 'pricingTiers',
                         type: 'array',
@@ -118,6 +111,76 @@ export default defineType({
                     }
                 }
             }]
+        }),
+
+        defineField({
+            name: 'proFormations',
+            title: 'Formations Professionnelles',
+            type: 'array',
+            group: 'stages',
+            of: [{
+                type: 'object',
+                fields: [
+                    { name: 'officialName', type: 'string', title: 'Nom de la formation' },
+                    { name: 'label', type: 'string', title: 'Badge (ex: Stage Immersion 3 jours)' },
+                    { name: 'target', type: 'string', title: 'Public cible (ex: Titulaires BPJEPS / BE)' },
+                    { name: 'duration', type: 'string', title: 'Durée (ex: 3 jours intensifs)' },
+                    { name: 'price', type: 'string', title: 'Tarif (ex: Sur devis)' },
+                    { name: 'description', type: 'text', rows: 4, title: 'Description' },
+                    {
+                        name: 'conditions',
+                        type: 'array',
+                        title: 'Conditions / Prérequis',
+                        of: [{ type: 'string' }]
+                    },
+                    { name: 'image', type: 'image', title: 'Image' },
+                    { name: 'accentColor', type: 'string', title: 'Couleur accent (classe Tailwind bg-*)', description: 'Ex: bg-turquoise, bg-abysse, bg-rose-600' },
+                    { name: 'color', type: 'string', title: 'Couleur texte (classe Tailwind text-*)', description: 'Ex: text-turquoise, text-abysse, text-rose-600' },
+                ],
+                preview: {
+                    select: { title: 'officialName', subtitle: 'target' }
+                }
+            }]
+        }),
+
+        defineField({
+            name: 'ecoleAnnee',
+            title: "École à l'Année",
+            type: 'object',
+            group: 'stages',
+            fields: [
+                { name: 'sectionTitle', type: 'string', title: 'Titre de section (ex: Octobre → Juin)' },
+                { name: 'sectionSubtitle', type: 'string', title: 'Sous-titre (jours / tranches d\'âge)' },
+                { name: 'sectionDescription', type: 'text', rows: 3, title: 'Texte descriptif (colonne droite du header)' },
+                {
+                    name: 'groups',
+                    type: 'array',
+                    title: 'Groupes / Niveaux',
+                    of: [{
+                        type: 'object',
+                        fields: [
+                            { name: 'title', type: 'string', title: 'Nom du groupe (ex: Petits Mousses)' },
+                            { name: 'age', type: 'string', title: 'Tranche d\'âge (ex: 6 à 8 ans)' },
+                            { name: 'jour', type: 'string', title: 'Jour (ex: Chaque mercredi)' },
+                            { name: 'activite', type: 'string', title: 'Activité principale' },
+                            { name: 'detail', type: 'text', rows: 3, title: 'Détail / note complémentaire' },
+                            { name: 'price', type: 'string', title: 'Prix (ex: 115 €)' },
+                            { name: 'priceSuffix', type: 'string', title: 'Suffixe prix (ex: + licence + adhésion)' },
+                            { name: 'accentColor', type: 'string', title: 'Couleur accent (bg-*)', description: 'Ex: bg-orange-500, bg-turquoise, bg-blue-600' },
+                            { name: 'color', type: 'string', title: 'Couleur texte (text-*)', description: 'Ex: text-orange-500, text-turquoise, text-blue-600' },
+                            defineField({
+                                name: 'iconName',
+                                type: 'string',
+                                title: 'Icône (Lucide)',
+                                components: { input: IconPicker }
+                            }),
+                        ],
+                        preview: {
+                            select: { title: 'title', subtitle: 'age' }
+                        }
+                    }]
+                }
+            ]
         }),
 
         defineField({

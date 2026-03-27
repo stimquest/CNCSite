@@ -16,8 +16,8 @@ export async function sendContactEmail(formData: FormData) {
 
     try {
         const data = await resend.emails.send({
-            from: 'CNC Coutainville <contact@cncoutainville.fr>',
-            to: ['contact@cncoutainville.fr'],
+            from: 'Contact CNC <onboarding@resend.dev>',
+            to: ['patrick.louvel@gmail.com'],
             subject: `[Site Web] ${subject} - ${name}`,
             html: `
                 <h2>Nouveau message de contact</h2>
@@ -31,7 +31,7 @@ export async function sendContactEmail(formData: FormData) {
         });
 
         if (data.error) {
-            return { error: data.error.message };
+            return { error: (data.error as any).message || 'Erreur inconnue' };
         }
 
         return { success: true };

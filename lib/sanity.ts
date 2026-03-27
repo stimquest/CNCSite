@@ -198,7 +198,10 @@ export const queries = {
     exploration { tag, title, description, cards[] { title, subtitle, description, "image": cardImage.asset->url, features, buttonText, buttonLink } }
   }`,
   schoolPage: `*[_type == "schoolPage"][0]{
-    ..., intro, hero { ..., "image": image.asset->url }, heroBadges, stages[] { ..., "image": image.asset->url }
+    ..., intro, hero { ..., "image": image.asset->url }, heroBadges,
+    stages[] { ..., "image": image.asset->url },
+    proFormations[] { ..., "image": image.asset->url },
+    ecoleAnnee { sectionTitle, sectionSubtitle, sectionDescription, groups[] { title, age, jour, activite, detail, price, priceSuffix, accentColor, color, iconName } }
   }`,
   dicoWords: `*[_type == "dicoWord"] | order(word asc) {
     _id, word, slug, pronunciation, childQuote, parentFear, reality, quizAnswers, correctAnswerIdx
