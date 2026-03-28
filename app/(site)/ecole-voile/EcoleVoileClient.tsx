@@ -288,7 +288,7 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
   return (
     <>
       {/* Grille 4 colonnes desktop, 2 mobile */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
         {items.map((item, index) => (
           <div key={item._key || item.id || index} onClick={() => setSelectedKey(item._key || item.id || String(index))}
             className="relative rounded-2xl overflow-hidden aspect-square shadow-md cursor-pointer group"
@@ -721,7 +721,7 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
 
         {/* Header du bloc */}
         <div className="py-12 px-6">
-          <div className="max-w-350 mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="max-w-350 mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div className="flex items-start gap-5">
               <div className="size-14 bg-turquoise rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
                 <Sun size={26} />
@@ -730,7 +730,7 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
                 <div className="inline-flex items-center gap-2 bg-turquoise text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2">
                   ● Stages Vacances Scolaires
                 </div>
-                <h2 className="text-3xl md:text-4xl font-black text-abysse tracking-tighter leading-tight">Vacances scolaires</h2>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-abysse tracking-tighter leading-tight">Vacances scolaires</h2>
                 <p className="text-slate-500 font-bold text-sm mt-1">5 jours · Été · Pâques · Toussaint · Encadrement diplômé FFVoile</p>
               </div>
             </div>
@@ -741,7 +741,7 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
         </div>
 
         {/* Grille de cartes */}
-        <div className="px-6 md:px-32 lg:px-64 pb-10">
+        <div className="px-4 lg:px-16 xl:px-32 pb-10">
           <StagesVacancesGrid items={stages} />
 
           {/* Note tarifaire */}
@@ -773,7 +773,7 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
 
         {/* Header — même structure que les deux autres sections */}
         <div className="py-16 px-6">
-          <div className="max-w-350 mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="max-w-350 mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div className="flex items-start gap-5">
               <div className="size-14 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
                 <GraduationCap size={26} />
@@ -782,7 +782,7 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
                 <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2">
                   ● Pôle Expertise & Formation
                 </div>
-                <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter leading-tight">Formations Professionnelles</h2>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tighter leading-tight">Formations Professionnelles</h2>
                 <p className="text-white/50 font-bold text-sm mt-1">Moniteurs · Éducateurs · Responsables de structures</p>
               </div>
             </div>
@@ -793,12 +793,12 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
         </div>
 
         {/* Cards — slide mobile, grille desktop — même padding que stages vacances */}
-        <div className="px-6 md:px-32 lg:px-64 pb-20">
-          <div className="flex gap-4 overflow-x-auto pb-4 md:pb-0 md:overflow-visible md:grid md:grid-cols-3 snap-x snap-mandatory no-scrollbar">
+        <div className="px-4 lg:px-16 xl:px-32 pb-20">
+          <div className="flex gap-4 overflow-x-auto pb-4 md:pb-0 md:overflow-visible md:grid md:grid-cols-2 lg:grid-cols-3 snap-x snap-mandatory no-scrollbar">
             {proFormations.map((f: any) => (
               <div key={f._key || f.id || f.officialName}
                 onClick={() => setSelectedProKey(f._key || f.id || f.officialName)}
-                className="group snap-start shrink-0 w-[60vw] md:w-auto relative aspect-square rounded-2xl overflow-hidden cursor-pointer shadow-xl"
+                className="group snap-start shrink-0 w-[72vw] md:w-auto relative aspect-3/4 md:aspect-square rounded-2xl overflow-hidden cursor-pointer shadow-xl"
               >
                 {/* Image plein fond */}
                 <img src={f.image} alt={f.officialName}
@@ -812,21 +812,20 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
                   {f.label}
                 </div>
 
-                {/* Durée — haut droite */}
-                <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-sm text-white text-[9px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide flex items-center gap-1">
+                {/* Durée — haut droite (desktop only) */}
+                <div className="hidden md:flex absolute top-4 right-4 bg-black/40 backdrop-blur-sm text-white text-[9px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide items-center gap-1">
                   <Clock size={9} /> {f.duration}
                 </div>
 
-                {/* Contenu bas — aligné à gauche */}
+                {/* Contenu bas */}
                 <div className="absolute bottom-0 left-0 right-0 p-5 flex flex-col gap-2">
                   <span className={`${f.color || 'text-turquoise'} text-[9px] font-black uppercase tracking-widest`}>
                     {f.target}
                   </span>
-                  <h3 className="text-xl font-black text-white uppercase italic tracking-tighter leading-tight">
+                  <h3 className="text-lg md:text-xl font-black text-white uppercase italic tracking-tighter leading-tight">
                     {f.officialName}
                   </h3>
-                  <RenderText content={f.description} className="text-white/60 text-[11px] font-medium leading-relaxed line-clamp-2" />
-                  <div className="flex flex-wrap gap-1.5 mt-1">
+                  <div className="hidden md:flex flex-wrap gap-1.5 mt-1">
                     {(f.conditions || []).slice(0, 3).map((c: string, i: number) => (
                       <span key={i} className="text-[8px] font-black text-white/50 bg-white/10 px-2 py-0.5 rounded-md uppercase tracking-wide">
                         {c}
@@ -835,8 +834,9 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
                   </div>
                   <div className="flex items-center justify-between mt-2 pt-3 border-t border-white/10">
                     <span className={`${f.color || 'text-turquoise'} font-black text-sm`}>{f.price}</span>
+                    {/* Bouton contact : desktop only */}
                     <a href="mailto:contact@cncoutainville.fr"
-                      className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/25 border border-white/15 text-white text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-lg transition-all">
+                      className="hidden md:inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/25 border border-white/15 text-white text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-lg transition-all">
                       Contact <ArrowRight size={10} />
                     </a>
                   </div>
@@ -1004,7 +1004,7 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
 
         {/* Header du bloc */}
         <div className="py-12 px-6">
-          <div className="max-w-350 mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="max-w-350 mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div className="flex items-start gap-5">
               <div className="size-14 bg-blue-700 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
                 <Calendar size={26} />
@@ -1013,7 +1013,7 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
                 <div className="inline-flex items-center gap-2 bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2">
                   ● École à l'Année
                 </div>
-                <h2 className="text-3xl md:text-4xl font-black text-abysse tracking-tighter leading-tight">{ecoleAnneeData?.sectionTitle || 'Octobre → Juin'}</h2>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-abysse tracking-tighter leading-tight">{ecoleAnneeData?.sectionTitle || 'Octobre → Juin'}</h2>
                 <p className="text-slate-500 font-bold text-sm mt-1">{ecoleAnneeData?.sectionSubtitle || 'Mercredis (enfants 6-11 ans) · Samedis (jeunes & adultes)'}</p>
               </div>
             </div>
@@ -1024,7 +1024,7 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
         </div>
 
         {/* Cards des 4 groupes */}
-        <div className="px-6 md:px-32 lg:px-64 pb-20">
+        <div className="px-4 lg:px-16 xl:px-32 pb-20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {anneeGroups.map((group: any, i: number) => {
               const GroupIcon = group.iconName ? ((LucideIcons as any)[group.iconName] || LucideIcons.Anchor) : null;
