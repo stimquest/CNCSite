@@ -1,5 +1,6 @@
 import { defineType, defineField } from 'sanity';
 import { IconPicker } from '../components/IconPicker';
+import { BgColorSwatchInput, TextColorSwatchInput } from '../components/ColorSwatchInput';
 
 export default defineType({
     name: 'schoolPage',
@@ -88,8 +89,8 @@ export default defineType({
                     { name: 'longDescription', type: 'basicRichText', title: 'Description longue (Détails)' },
                     { name: 'logistique', type: 'array', title: 'Logistique & Pratique', of: [{ type: 'string' }] },
                     { name: 'image', type: 'image', title: 'Image d\'illustration' },
-                    { name: 'color', type: 'string', title: 'Couleur du texte (ex: text-orange-500)' },
-                    { name: 'bgColor', type: 'string', title: 'Couleur de fond (ex: bg-orange-500)' },
+                    defineField({ name: 'color', type: 'string', title: 'Couleur du texte', components: { input: TextColorSwatchInput } }),
+                    defineField({ name: 'bgColor', type: 'string', title: 'Couleur de fond', components: { input: BgColorSwatchInput } }),
                     {
                         name: 'pricingTiers',
                         type: 'array',
@@ -134,8 +135,8 @@ export default defineType({
                         of: [{ type: 'string' }]
                     },
                     { name: 'image', type: 'image', title: 'Image' },
-                    { name: 'accentColor', type: 'string', title: 'Couleur accent (classe Tailwind bg-*)', description: 'Ex: bg-turquoise, bg-abysse, bg-rose-600' },
-                    { name: 'color', type: 'string', title: 'Couleur texte (classe Tailwind text-*)', description: 'Ex: text-turquoise, text-abysse, text-rose-600' },
+                    defineField({ name: 'accentColor', type: 'string', title: 'Couleur accent', components: { input: BgColorSwatchInput } }),
+                    defineField({ name: 'color', type: 'string', title: 'Couleur texte', components: { input: TextColorSwatchInput } }),
                 ],
                 preview: {
                     select: { title: 'officialName', subtitle: 'target' }
@@ -166,8 +167,8 @@ export default defineType({
                             { name: 'detail', type: 'text', rows: 3, title: 'Détail / note complémentaire' },
                             { name: 'price', type: 'string', title: 'Prix (ex: 115 €)' },
                             { name: 'priceSuffix', type: 'string', title: 'Suffixe prix (ex: + licence + adhésion)' },
-                            { name: 'accentColor', type: 'string', title: 'Couleur accent (bg-*)', description: 'Ex: bg-orange-500, bg-turquoise, bg-blue-600' },
-                            { name: 'color', type: 'string', title: 'Couleur texte (text-*)', description: 'Ex: text-orange-500, text-turquoise, text-blue-600' },
+                            defineField({ name: 'accentColor', type: 'string', title: 'Couleur accent', components: { input: BgColorSwatchInput } }),
+                            defineField({ name: 'color', type: 'string', title: 'Couleur texte', components: { input: TextColorSwatchInput } }),
                             defineField({
                                 name: 'iconName',
                                 type: 'string',

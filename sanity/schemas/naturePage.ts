@@ -1,5 +1,6 @@
 import { defineType, defineField } from 'sanity';
 import { IconPicker } from '../components/IconPicker';
+import { TextColorSwatchInput } from '../components/ColorSwatchInput';
 
 export const naturePage = defineType({
     name: 'naturePage',
@@ -51,7 +52,7 @@ export const naturePage = defineType({
                                     title: 'Icône (Lucide)',
                                     components: { input: IconPicker }
                                 }),
-                                { name: 'color', type: 'string', title: 'Couleur (ex: text-abysse, text-orange-600)' },
+                                defineField({ name: 'color', type: 'string', title: 'Couleur', components: { input: TextColorSwatchInput } }),
                             ]
                         }
                     ]
