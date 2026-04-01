@@ -18,7 +18,9 @@ import {
     Sparkles,
     Users,
     X,
-    Heart
+    Heart,
+    Phone,
+    ExternalLink
 } from 'lucide-react';
 import { Activity, ActivityCategory } from '../../../types';
 
@@ -28,11 +30,58 @@ import { PortableText } from '@portabletext/react';
 import { PageHero } from '@/components/PageHero';
 import ClubActivitiesView from '@/components/ClubActivitiesView';
 import { ActivityFinder } from '../../../components/ActivityFinder';
+import Link from 'next/link';
 
 interface ActivitiesClientProps {
     initialActivities: Activity[];
     initialActivitiesData: any;
 }
+
+const modalPortableTextComponents = {
+    marks: {
+        link: ({ value, children }: any) => {
+            const href: string = value?.href || '';
+            const isTel = href.startsWith('tel:');
+            const isExternal = href.startsWith('http');
+            if (isTel) {
+                return (
+                    <a
+                        href={href}
+                        className="inline-flex items-center gap-2 font-black text-abysse hover:text-turquoise transition-colors"
+                    >
+                        <Phone size={14} className="shrink-0" />
+                        {children}
+                    </a>
+                );
+            }
+            if (isExternal) {
+                return (
+                    <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 font-bold text-turquoise underline underline-offset-2 hover:text-abysse transition-colors"
+                    >
+                        {children}
+                        <ExternalLink size={12} className="shrink-0" />
+                    </a>
+                );
+            }
+            return (
+                <Link
+                    href={href}
+                    className="inline-flex items-center gap-1.5 font-bold text-turquoise underline underline-offset-2 hover:text-abysse transition-colors"
+                >
+                    {children}
+                </Link>
+            );
+        },
+        strong: ({ children }: any) => <strong className="font-black text-abysse">{children}</strong>,
+    },
+    block: {
+        normal: ({ children }: any) => <p className="mb-2 last:mb-0">{children}</p>,
+    },
+};
 
 const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, initialActivitiesData }) => {
     const activities = initialActivities;
@@ -67,10 +116,20 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
             if (exactMatch) { setActiveFilter(exactMatch as any); return; }
             const mappedMatch = catMap[catParam.toLowerCase()];
             if (mappedMatch) { setActiveFilter(mappedMatch as any); return; }
-            const fuzzyMatch = validCats.find(c => 
+            const fuzzyMatch = validCats.find(c =>
                 c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === normalizedParam
             );
             if (fuzzyMatch) { setActiveFilter(fuzzyMatch as any); }
+        }
+
+        const openParam = searchParams.get('open');
+        if (openParam) {
+            setExpandedId(openParam);
+            // Scroll vers l'activité après le rendu
+            setTimeout(() => {
+                const el = document.getElementById(openParam);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
         }
     }, [searchParams]);
 
@@ -203,7 +262,7 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
                                 </button>
                             </div>
                             <div className="text-slate-600 font-medium leading-relaxed mb-8 prose prose-slate prose-sm text-justify">
-                                <PortableText value={modalConfig.message} />
+                                <PortableText value={modalConfig.message} components={modalPortableTextComponents} />
                             </div>
                             <button
                                 onClick={() => setModalConfig({ ...modalConfig, isOpen: false })}
