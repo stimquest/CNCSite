@@ -135,6 +135,8 @@ export default defineType({
                         of: [{ type: 'string' }]
                     },
                     { name: 'image', type: 'image', title: 'Image' },
+                    { name: 'ctaLabel', type: 'string', title: 'Bouton CTA (ex: Nous contacter, S\'inscrire...)', description: 'Défaut : Nous contacter' },
+                    { name: 'ctaUrl', type: 'string', title: 'Lien CTA (email, URL...)', description: 'Défaut : mailto:contact@cncoutainville.fr' },
                     defineField({ name: 'accentColor', type: 'string', title: 'Couleur accent', components: { input: BgColorSwatchInput } }),
                     defineField({ name: 'color', type: 'string', title: 'Couleur texte', components: { input: TextColorSwatchInput } }),
                 ],

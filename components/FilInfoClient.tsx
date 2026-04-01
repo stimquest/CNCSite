@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLiveStatus } from '@/contexts/LiveStatusContext';
 import { Share2, ExternalLink, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,7 +9,6 @@ import { FreshnessIndicator } from '@/components/FreshnessIndicator';
 import { VigieInstallButton } from '@/components/VigieInstallButton';
 
 const GROUPS = [
-    { id: 'all', label: 'Tout' },
     { id: 'club-hebdo', label: 'Club Hebdo' },
     { id: 'char-voile', label: 'Char à Voile' },
     { id: 'stage-minimousses', label: 'Mini-Mousses' },
@@ -19,6 +18,8 @@ const GROUPS = [
     { id: 'marche-aquatique', label: 'Marche Aquatique' },
     { id: 'pratique-libre', label: 'Pratique Libre' },
 ];
+
+const STORAGE_KEY = 'vigie-selected-groups';
 
 const CATEGORY_CONFIG: Record<string, { dot: string; color: string; label: string }> = {
     alert: { dot: 'bg-amber-400', color: 'text-amber-600', label: 'Alerte' },
@@ -39,13 +40,44 @@ function relDate(iso: string) {
 
 export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages }) => {
     const { lastPublishedAt, lastConfirmedAt } = useLiveStatus();
-    const [selectedGroup, setSelectedGroup] = useState('all');
+    const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
+
+    // Restore from localStorage on mount
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    setSelectedGroups(new Set(parsed));
+                }
+            }
+        } catch (_) {}
+    }, []);
+
+    const toggleGroup = (id: string) => {
+        setSelectedGroups(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...next])); } catch (_) {}
+            return next;
+        });
+    };
+
+    const clearAll = () => {
+        setSelectedGroups(new Set());
+        try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+    };
 
     const filteredMessages = useMemo(() => {
         if (!infoMessages) return [];
-        if (selectedGroup === 'all') return infoMessages;
-        return infoMessages.filter(m => m.targetGroups?.includes(selectedGroup) || m.targetGroups?.includes('all'));
-    }, [infoMessages, selectedGroup]);
+        if (selectedGroups.size === 0) return infoMessages;
+        return infoMessages.filter(m =>
+            m.targetGroups?.includes('all') ||
+            m.targetGroups?.some((g: string) => selectedGroups.has(g))
+        );
+    }, [infoMessages, selectedGroups]);
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
@@ -71,8 +103,16 @@ export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages 
             {/* FILTRES — sticky, toutes tailles */}
             <div className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-100 overflow-x-auto no-scrollbar">
                 <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-1">
+                    {/* Bouton Tout (reset) */}
+                    <button
+                        onClick={clearAll}
+                        className={`shrink-0 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${selectedGroups.size === 0 ? 'bg-abysse text-white shadow-sm' : 'text-slate-400 hover:text-slate-700 bg-transparent'}`}
+                    >
+                        Tout
+                    </button>
+
                     {GROUPS.map(g => {
-                        const isSelected = selectedGroup === g.id;
+                        const isSelected = selectedGroups.has(g.id);
                         const isStage = g.id.startsWith('stage-');
                         const isChar = g.id === 'char-voile';
 
@@ -89,7 +129,7 @@ export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages 
                         return (
                             <button
                                 key={g.id}
-                                onClick={() => setSelectedGroup(g.id)}
+                                onClick={() => toggleGroup(g.id)}
                                 className={`shrink-0 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${colorClasses}`}
                             >
                                 {g.label}
@@ -148,7 +188,7 @@ export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages 
                                         Aucun message pour ce groupe
                                     </p>
                                     <button
-                                        onClick={() => setSelectedGroup('all')}
+                                        onClick={clearAll}
                                         className="mt-3 text-[10px] font-bold text-turquoise uppercase underline tracking-widest"
                                     >
                                         Voir tout

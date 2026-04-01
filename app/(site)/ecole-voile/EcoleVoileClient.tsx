@@ -31,7 +31,13 @@ const RenderText = ({ content, className, fallback = null }: {
   }
 
   if (typeof content === 'string') {
-    return <span className={`whitespace-pre-line ${className}`}>{content}</span>;
+    const paragraphs = content.split(/\n\n+/).filter(Boolean);
+    if (paragraphs.length <= 1) return <p className={`whitespace-pre-line ${className}`}>{content}</p>;
+    return (
+      <div className={className}>
+        {paragraphs.map((p, i) => <p key={i} className="mb-2 last:mb-0 whitespace-pre-line">{p}</p>)}
+      </div>
+    );
   }
 
   // Custom components for PortableText to have full control instead of "prose" overrides
@@ -832,13 +838,8 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
                       </span>
                     ))}
                   </div>
-                  <div className="flex items-center justify-between mt-2 pt-3 border-t border-white/10">
+                  <div className="mt-2 pt-3 border-t border-white/10">
                     <span className={`${f.color || 'text-turquoise'} font-black text-sm`}>{f.price}</span>
-                    {/* Bouton contact : desktop only */}
-                    <a href="mailto:contact@cncoutainville.fr"
-                      className="hidden md:inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/25 border border-white/15 text-white text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-lg transition-all">
-                      Contact <ArrowRight size={10} />
-                    </a>
                   </div>
                 </div>
               </div>
@@ -909,10 +910,10 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
                   </div>
                 </div>
                 <div className="px-5 pb-5 pt-2">
-                  <a href="mailto:contact@cncoutainville.fr"
+                  <a href={selectedPro.ctaUrl || 'mailto:contact@cncoutainville.fr'}
                     className={`flex items-center justify-center gap-2 w-full py-4 rounded-xl ${selectedPro.accentColor || 'bg-turquoise'} text-white font-black uppercase tracking-widest text-sm hover:brightness-110 transition-all shadow-md`}
                     onClick={e => e.stopPropagation()}>
-                    Nous contacter <ArrowRight size={14} />
+                    {selectedPro.ctaLabel || 'Nous contacter'} <ArrowRight size={14} />
                   </a>
                 </div>
               </div>
@@ -1261,15 +1262,18 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
                             </div>
                           </div>
                         </td>
-                        {['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].map(day => {
-                          const status = row.accessor(currentWeek[day]);
-                          const isFull = status === 'COMPLET' || status === 'Full';
-                          const isClosed = status === 'FERMÉ' || status === 'N/A';
+                        {(currentWeek.days ?? []).slice(0, 5).map((dayData: any, i: number) => {
+                          const raw = dayData ? row.accessor(dayData) : undefined;
+                          const timeStr = raw && typeof raw === 'object' ? raw.time : (raw as string | undefined);
+                          const activity = raw && typeof raw === 'object' ? raw.activity : undefined;
+                          const isFull = timeStr === 'COMPLET' || timeStr === 'Full';
+                          const isClosed = timeStr === 'FERMÉ' || timeStr === 'N/A';
                           return (
-                            <td key={day} className="p-2">
-                              <div className={`h-14 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${isFull ? 'bg-rose-50 border-rose-100 text-rose-500' : isClosed ? 'bg-slate-50 border-slate-100 text-slate-300' : 'bg-white border-slate-100 text-emerald-500 hover:border-emerald-200'}`}>
-                                <span className="text-[10px] font-black uppercase tracking-tighter">{status || 'OUVERT'}</span>
-                                {!isFull && !isClosed && <div className="size-1.5 bg-emerald-500 rounded-full animate-pulse" />}
+                            <td key={i} className="p-2">
+                              <div className={`h-14 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-all ${isFull ? 'bg-rose-50 border-rose-100 text-rose-500' : isClosed ? 'bg-slate-50 border-slate-100 text-slate-300' : `bg-white border-slate-100 ${row.color} hover:border-slate-200`}`}>
+                                <span className="text-[10px] font-black uppercase tracking-tighter">{timeStr || 'OUVERT'}</span>
+                                {activity && !isFull && !isClosed && <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{activity}</span>}
+                                {!timeStr && !isFull && !isClosed && <div className={`size-1.5 ${row.bgColor} rounded-full animate-pulse`} />}
                               </div>
                             </td>
                           );

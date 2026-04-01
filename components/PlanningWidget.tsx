@@ -75,6 +75,7 @@ export const PlanningWidget: React.FC = () => {
     const [plannings, setPlannings] = useState<any[]>([]);
     const [charPlannings, setCharPlannings] = useState<any[]>([]);
     const [marchePlannings, setMarchePlannings] = useState<any[]>([]);
+    const [charSessions, setCharSessions] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'voile' | 'char' | 'marche'>('voile');
     const [currentIdx, setCurrentIdx] = useState(0);
@@ -86,11 +87,13 @@ export const PlanningWidget: React.FC = () => {
         Promise.all([
             client.fetch(queries.plannings),
             client.fetch(queries.charPlannings),
-            client.fetch(queries.marchePlannings)
-        ]).then(([p, c, m]) => {
+            client.fetch(queries.marchePlannings),
+            client.fetch(queries.charSessionsPublic, { today: new Date().toISOString().split('T')[0] })
+        ]).then(([p, c, m, cs]) => {
             setPlannings(p || []);
             setCharPlannings(c || []);
             setMarchePlannings(m || []);
+            setCharSessions(cs || []);
             setIsLoading(false);
         }).catch(err => {
             console.error("Error fetching plannings widget", err);
@@ -105,18 +108,33 @@ export const PlanningWidget: React.FC = () => {
         return (plannings || []).filter(w => !w.endDate || new Date(w.endDate) >= today);
     }, [plannings, today]);
 
-    // Pour le char, la structure est un peu différente (PlanningCharAVoile contient des weeks[])
-    // On va aplatir tout ça pour avoir une liste linéaire de semaines comme pour la voile
+    const DAYS_FR = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
     const dataChar = React.useMemo(() => {
-        if (!charPlannings) return [];
-        return charPlannings.flatMap(p => p.weeks || [])
-            .filter(w => !w.endDate || new Date(w.endDate) >= today)
-            .sort((a, b) => {
-                const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
-                const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
-                return dateA - dateB;
-            });
-    }, [charPlannings, today]);
+        if (!charSessions.length) return [];
+        const weekMap: Record<string, any> = {};
+        charSessions.forEach(s => {
+            const d = new Date(s.date);
+            const diff = d.getDay() === 0 ? -6 : 1 - d.getDay();
+            const ws = new Date(d); ws.setDate(d.getDate() + diff);
+            const weekKey = ws.toISOString().split('T')[0];
+            if (!weekMap[weekKey]) {
+                const we = new Date(ws); we.setDate(ws.getDate() + 6);
+                const fmt = (x: Date) => x.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                weekMap[weekKey] = {
+                    title: `${fmt(ws)} — ${fmt(we)}`,
+                    startDate: weekKey,
+                    endDate: we.toISOString().split('T')[0],
+                    days: Array.from({ length: 7 }, (_, i) => {
+                        const dd = new Date(ws); dd.setDate(ws.getDate() + i);
+                        return { name: DAYS_FR[i], date: dd.toISOString().split('T')[0], sessions: [] };
+                    })
+                };
+            }
+            const dayIdx = (new Date(s.date).getDay() + 6) % 7;
+            weekMap[weekKey].days[dayIdx].sessions.push({ time: `${s.heureDebut} — ${s.heureFin}` });
+        });
+        return Object.keys(weekMap).sort().map(k => weekMap[k]);
+    }, [charSessions]);
 
     const dataMarche = React.useMemo(() => {
         if (!marchePlannings) return [];
@@ -511,7 +529,6 @@ export const PlanningWidget: React.FC = () => {
                     </div>
                 ) : (
                     <div className="flex flex-col gap-4">
-                        {/* Bandeau "pas d'activité cette semaine" si aucune semaine ne correspond à aujourd'hui */}
                         {!hasCurrentWeek && (
                             <div className="flex items-start gap-4 bg-amber-50 border border-amber-200 rounded-2xl p-4">
                                 <div className="size-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">

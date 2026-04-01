@@ -212,12 +212,15 @@ export default function CockpitClient() {
                             </button>
                         ))}
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <button onClick={() => setGroupStatus('autonome', 'CLOSED')} className="py-3 rounded-xl border border-slate-200 bg-white shadow-sm text-xs font-black text-slate-500 uppercase tracking-wider hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all active:scale-95">
                             Autonomes → Déconseillée
                         </button>
                         <button onClick={() => setGroupStatus('encadree', 'CLOSED')} className="py-3 rounded-xl border border-slate-200 bg-white shadow-sm text-xs font-black text-slate-500 uppercase tracking-wider hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all active:scale-95">
                             Encadrées → Annulé
+                        </button>
+                        <button onClick={() => setGroupStatus('encadree', 'INACTIVE')} className="py-3 rounded-xl border border-slate-200 bg-white shadow-sm text-xs font-black text-slate-500 uppercase tracking-wider hover:bg-slate-100 hover:text-slate-700 hover:border-slate-300 transition-all active:scale-95">
+                            Encadrées → Hors Saison
                         </button>
                     </div>
                 </div>
