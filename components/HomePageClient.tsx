@@ -1344,7 +1344,7 @@ export default function HomePageClient({
             </div>
 
             {/* Overlay Navigation - Centers perfectly aligned with central card borders */}
-            <div className="absolute inset-0 pointer-events-none z-50 h-full overflow-visible">
+            <div className="hidden lg:block absolute inset-0 pointer-events-none z-50 h-full overflow-visible">
               {/* Using same responsive widths as cards for 1:1 alignment */}
               <div 
                 className="absolute inset-y-0 left-1/2 -translate-x-1/2 h-full pointer-events-none w-[85vw] lg:w-[58vw]"
