@@ -126,90 +126,55 @@ export const spotSettings = defineType({
       of: [{ type: 'string' }],
     }),
 
-    // --- STAGES ---
+    // --- STAGES (dynamique) ---
+    // Les statuts sont indexés par la clé du stage (stageDefinition.key.current)
+    // Exemple : [{ stageKey: 'mini-mousses', status: 'OPEN', message: '' }, ...]
     defineField({
-      name: 'stagesMiniMoussesStatus',
-      title: 'Statut Stages Mini-Mousses (5-7 ans)',
-      type: 'string',
-      options: {
-        list: [
-          { title: '🟢 Confirmée', value: 'OPEN' },
-          { title: '🟡 Confirmée – conditions techniques', value: 'RESTRICTED' },
-          { title: '🔴 Annulée', value: 'CLOSED' },
-          { title: '⚪ Hors Période', value: 'INACTIVE' },
-        ],
-        layout: 'radio',
-      },
-      initialValue: 'OPEN',
-    }),
-    defineField({
-      name: 'stagesMiniMoussesMessage',
-      title: 'Note Mini-Mousses',
-      type: 'string',
-      description: 'Ex: Annulé — vent trop fort',
-    }),
-
-    defineField({
-      name: 'stagesMoussaillonsStatus',
-      title: 'Statut Stages Moussaillons (8-9 ans)',
-      type: 'string',
-      options: {
-        list: [
-          { title: '🟢 Confirmée', value: 'OPEN' },
-          { title: '🟡 Confirmée – conditions techniques', value: 'RESTRICTED' },
-          { title: '🔴 Annulée', value: 'CLOSED' },
-          { title: '⚪ Hors Période', value: 'INACTIVE' },
-        ],
-        layout: 'radio',
-      },
-      initialValue: 'OPEN',
-    }),
-    defineField({
-      name: 'stagesMoussaillonsMessage',
-      title: 'Note Moussaillons',
-      type: 'string',
-    }),
-
-    defineField({
-      name: 'stagesInitiationStatus',
-      title: 'Statut Stages Initiation (10-16 ans)',
-      type: 'string',
-      options: {
-        list: [
-          { title: '🟢 Confirmée', value: 'OPEN' },
-          { title: '🟡 Confirmée – conditions techniques', value: 'RESTRICTED' },
-          { title: '🔴 Annulée', value: 'CLOSED' },
-          { title: '⚪ Hors Période', value: 'INACTIVE' },
-        ],
-        layout: 'radio',
-      },
-      initialValue: 'OPEN',
-    }),
-    defineField({
-      name: 'stagesInitiationMessage',
-      title: 'Note Initiation',
-      type: 'string',
-    }),
-
-    defineField({
-      name: 'stagesPerfStatus',
-      title: 'Statut Stages Perfectionnement (10-16 ans)',
-      type: 'string',
-      options: {
-        list: [
-          { title: '🟢 Confirmée', value: 'OPEN' },
-          { title: '🟡 Confirmée – conditions techniques', value: 'RESTRICTED' },
-          { title: '🔴 Reportée', value: 'CLOSED' },
-          { title: '⚪ Hors Période', value: 'INACTIVE' },
-        ],
-        layout: 'radio',
-      },
-      initialValue: 'OPEN',
-    }),
-    defineField({
-      name: 'stagesPerfMessage',
-      title: 'Note Perfectionnement',
-      type: 'string',
+      name: 'stageStatuses',
+      title: 'Statuts des Stages',
+      description: 'Géré automatiquement par le Cockpit. Ne pas modifier directement.',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          name: 'stageStatus',
+          fields: [
+            {
+              name: 'stageKey',
+              title: 'Clé du stage',
+              type: 'string',
+              validation: (Rule: any) => Rule.required()
+            },
+            {
+              name: 'status',
+              title: 'Statut',
+              type: 'string',
+              options: {
+                list: [
+                  { title: '🟢 Confirmée', value: 'OPEN' },
+                  { title: '🟡 Cond. techniques', value: 'RESTRICTED' },
+                  { title: '🔴 Annulée', value: 'CLOSED' },
+                  { title: '⚪ Hors Période', value: 'INACTIVE' },
+                ],
+                layout: 'radio'
+              },
+              initialValue: 'OPEN'
+            },
+            {
+              name: 'message',
+              title: 'Note',
+              type: 'string'
+            }
+          ],
+          preview: {
+            select: { stageKey: 'stageKey', status: 'status', message: 'message' },
+            prepare({ stageKey, status, message }: any) {
+              const emoji = status === 'OPEN' ? '🟢' : status === 'RESTRICTED' ? '🟡' : status === 'INACTIVE' ? '⚪' : '🔴';
+              return { title: `${emoji} ${stageKey}`, subtitle: message || '' };
+            }
+          }
+        }
+      ]
     }),
 
     defineField({

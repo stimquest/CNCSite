@@ -8,13 +8,10 @@ import { StatusDashboard } from '@/components/StatusDashboard';
 import { FreshnessIndicator } from '@/components/FreshnessIndicator';
 import { VigieInstallButton } from '@/components/VigieInstallButton';
 
-const GROUPS = [
+// Groupes fixes (non-stages)
+const FIXED_GROUPS = [
     { id: 'club-hebdo', label: 'Club Hebdo' },
     { id: 'char-voile', label: 'Char à Voile' },
-    { id: 'stage-minimousses', label: 'Mini-Mousses' },
-    { id: 'stage-moussaillons', label: 'Moussaillons' },
-    { id: 'stage-initiation', label: 'Stages Initiation' },
-    { id: 'stage-perfectionnement', label: 'Stages Perf.' },
     { id: 'marche-aquatique', label: 'Marche Aquatique' },
     { id: 'pratique-libre', label: 'Pratique Libre' },
 ];
@@ -39,7 +36,11 @@ function relDate(iso: string) {
 }
 
 export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages }) => {
-    const { lastPublishedAt, lastConfirmedAt } = useLiveStatus();
+    const { lastPublishedAt, lastConfirmedAt, stageDefinitions } = useLiveStatus();
+
+    // Groupes stages dérivés dynamiquement des stageDefinitions Sanity
+    const stageGroups = stageDefinitions.map(s => ({ id: s.vigieGroupId, label: s.shortLabel || s.label }));
+    const GROUPS = [...FIXED_GROUPS.slice(0, 2), ...stageGroups, ...FIXED_GROUPS.slice(2)];
     const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
 
     // Restore from localStorage on mount

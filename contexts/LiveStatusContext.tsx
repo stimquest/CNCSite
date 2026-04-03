@@ -2,13 +2,19 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { MOCK_WEATHER, CURRENT_STATUS, STATUS_MESSAGE } from '../constants';
-import { WeatherData, SpotStatus, TideData, VibeMessage } from '../types';
+import { WeatherData, SpotStatus, TideData, StageDefinition } from '../types';
 import { fetchRealtimeWeather } from '../lib/weather';
+
+/** Statut d'un stage individuel dans le contexte live */
+export interface LiveStageStatus {
+  status: SpotStatus;
+  message: string;
+}
 
 interface LiveStatusState {
   weather: WeatherData;
   tides: TideData[];
-  
+
   spotStatus: SpotStatus;
   statusMessage: string;
   charStatus: SpotStatus;
@@ -20,26 +26,40 @@ interface LiveStatusState {
   nautiqueStatus: SpotStatus;
   nautiqueMessage: string;
   nautiqueTags: string[];
-  
-  stagesMiniMoussesStatus: SpotStatus;
-  stagesMiniMoussesMessage: string;
-  stagesMoussaillonsStatus: SpotStatus;
-  stagesMoussaillonsMessage: string;
-  stagesInitiationStatus: SpotStatus;
-  stagesInitiationMessage: string;
-  stagesPerfStatus: SpotStatus;
-  stagesPerfMessage: string;
+
+  /** Statuts des stages indexés par stageKey. Ex: stageStatuses['mini-mousses'] */
+  stageStatuses: Record<string, LiveStageStatus>;
+
+  /** Définitions des stages actifs, chargées depuis Sanity côté serveur */
+  stageDefinitions: StageDefinition[];
 
   lastPublishedAt: string | null;
   lastConfirmedAt: string | null;
-  
+
   isLoading: boolean;
   refreshData: () => Promise<void>;
 }
 
 const LiveStatusContext = createContext<LiveStatusState | undefined>(undefined);
 
-export const LiveStatusProvider: React.FC<{ children: React.ReactNode; initialData?: any }> = ({ children, initialData }) => {
+function buildStageStatusMap(rawArray: any[]): Record<string, LiveStageStatus> {
+  if (!Array.isArray(rawArray)) return {};
+  return rawArray.reduce((acc, item) => {
+    if (item?.stageKey) {
+      acc[item.stageKey] = {
+        status: item.status || SpotStatus.OPEN,
+        message: item.message || ''
+      };
+    }
+    return acc;
+  }, {} as Record<string, LiveStageStatus>);
+}
+
+export const LiveStatusProvider: React.FC<{
+  children: React.ReactNode;
+  initialData?: any;
+  stageDefinitions?: StageDefinition[];
+}> = ({ children, initialData, stageDefinitions: initialStageDefs = [] }) => {
   const [weather, setWeather] = useState<WeatherData>(MOCK_WEATHER);
   const [tides, setTides] = useState<TideData[]>([]);
   const [spotStatus, setSpotStatus] = useState<SpotStatus>(initialData?.spotStatus || CURRENT_STATUS);
@@ -55,14 +75,10 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode; initialDa
   const [nautiqueMessage, setNautiqueMessage] = useState(initialData?.nautiqueMessage || '');
   const [nautiqueTags, setNautiqueTags] = useState<string[]>(initialData?.nautiqueTags || []);
 
-  const [stagesMiniMoussesStatus, setStagesMiniMoussesStatus] = useState<SpotStatus>(initialData?.stagesMiniMoussesStatus || SpotStatus.OPEN);
-  const [stagesMiniMoussesMessage, setStagesMiniMoussesMessage] = useState(initialData?.stagesMiniMoussesMessage || '');
-  const [stagesMoussaillonsStatus, setStagesMoussaillonsStatus] = useState<SpotStatus>(initialData?.stagesMoussaillonsStatus || SpotStatus.OPEN);
-  const [stagesMoussaillonsMessage, setStagesMoussaillonsMessage] = useState(initialData?.stagesMoussaillonsMessage || '');
-  const [stagesInitiationStatus, setStagesInitiationStatus] = useState<SpotStatus>(initialData?.stagesInitiationStatus || SpotStatus.OPEN);
-  const [stagesInitiationMessage, setStagesInitiationMessage] = useState(initialData?.stagesInitiationMessage || '');
-  const [stagesPerfStatus, setStagesPerfStatus] = useState<SpotStatus>(initialData?.stagesPerfStatus || SpotStatus.OPEN);
-  const [stagesPerfMessage, setStagesPerfMessage] = useState(initialData?.stagesPerfMessage || '');
+  const [stageStatuses, setStageStatuses] = useState<Record<string, LiveStageStatus>>(
+    buildStageStatusMap(initialData?.stageStatuses || [])
+  );
+  const [stageDefinitions] = useState<StageDefinition[]>(initialStageDefs);
 
   const [lastPublishedAt, setLastPublishedAt] = useState<string | null>(initialData?.lastPublishedAt || null);
   const [lastConfirmedAt, setLastConfirmedAt] = useState<string | null>(initialData?.lastConfirmedAt || null);
@@ -84,29 +100,18 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode; initialDa
           if (data.statusMessage !== undefined) setStatusMessage(data.statusMessage);
           if (data.charStatus) setCharStatus(data.charStatus);
           if (data.charMessage !== undefined) setCharMessage(data.charMessage);
+          if (data.charTags !== undefined) setCharTags(data.charTags || []);
           if (data.marcheStatus) setMarcheStatus(data.marcheStatus);
           if (data.marcheMessage !== undefined) setMarcheMessage(data.marcheMessage);
+          if (data.marcheTags !== undefined) setMarcheTags(data.marcheTags || []);
           if (data.nautiqueStatus) setNautiqueStatus(data.nautiqueStatus);
           if (data.nautiqueMessage !== undefined) setNautiqueMessage(data.nautiqueMessage);
-          if (data.stagesMiniMoussesStatus) setStagesMiniMoussesStatus(data.stagesMiniMoussesStatus);
-          if (data.stagesMiniMoussesMessage !== undefined) setStagesMiniMoussesMessage(data.stagesMiniMoussesMessage);
-          if (data.stagesMoussaillonsStatus) setStagesMoussaillonsStatus(data.stagesMoussaillonsStatus);
-          if (data.stagesMoussaillonsMessage !== undefined) setStagesMoussaillonsMessage(data.stagesMoussaillonsMessage);
-          if (data.stagesInitiationStatus) setStagesInitiationStatus(data.stagesInitiationStatus);
-          if (data.stagesInitiationMessage !== undefined) setStagesInitiationMessage(data.stagesInitiationMessage);
-          if (data.stagesPerfStatus) setStagesPerfStatus(data.stagesPerfStatus);
-          if (data.stagesPerfMessage !== undefined) setStagesPerfMessage(data.stagesPerfMessage);
+          if (data.nautiqueTags !== undefined) setNautiqueTags(data.nautiqueTags || []);
+          if (data.stageStatuses !== undefined) {
+            setStageStatuses(buildStageStatusMap(data.stageStatuses));
+          }
           if (data.lastPublishedAt) setLastPublishedAt(data.lastPublishedAt);
           if (data.lastConfirmedAt) setLastConfirmedAt(data.lastConfirmedAt);
-          
-          // Sync all details
-          if (data.charMessage !== undefined) setCharMessage(data.charMessage);
-          if (data.marcheMessage !== undefined) setMarcheMessage(data.marcheMessage);
-          if (data.nautiqueMessage !== undefined) setNautiqueMessage(data.nautiqueMessage);
-          if (data.stagesMiniMoussesMessage !== undefined) setStagesMiniMoussesMessage(data.stagesMiniMoussesMessage);
-          if (data.stagesMoussaillonsMessage !== undefined) setStagesMoussaillonsMessage(data.stagesMoussaillonsMessage);
-          if (data.stagesInitiationMessage !== undefined) setStagesInitiationMessage(data.stagesInitiationMessage);
-          if (data.stagesPerfMessage !== undefined) setStagesPerfMessage(data.stagesPerfMessage);
         }
       })
       .catch((err) => {
@@ -117,7 +122,6 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode; initialDa
       .catch(() => null)
       .then(async (data) => {
         if (!data) return;
-        
         try {
           const tideRes = await fetch(`/api/tides?t=${Date.now()}`);
           if (!tideRes.ok) return;
@@ -148,7 +152,7 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode; initialDa
           }
           setWeather(prev => ({ ...prev, ...data, ...tideInfo }));
         } catch (e) {
-          // Normal si pas de crédits worldtides, on ne log pas d'erreur critique
+          // Normal si pas de crédits worldtides
         }
       });
 
@@ -209,7 +213,7 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode; initialDa
 
   useEffect(() => {
     refreshData();
-    
+
     let interval: NodeJS.Timeout;
     const startPolling = () => {
       if (interval) clearInterval(interval);
@@ -227,23 +231,16 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode; initialDa
                 if (data.spotStatus) setSpotStatus(data.spotStatus);
                 if (data.statusMessage !== undefined) setStatusMessage(data.statusMessage);
                 if (data.charStatus) setCharStatus(data.charStatus);
+                if (data.charMessage !== undefined) setCharMessage(data.charMessage);
                 if (data.marcheStatus) setMarcheStatus(data.marcheStatus);
+                if (data.marcheMessage !== undefined) setMarcheMessage(data.marcheMessage);
                 if (data.nautiqueStatus) setNautiqueStatus(data.nautiqueStatus);
-                if (data.stagesMiniMoussesStatus) setStagesMiniMoussesStatus(data.stagesMiniMoussesStatus);
-                if (data.stagesMoussaillonsStatus) setStagesMoussaillonsStatus(data.stagesMoussaillonsStatus);
-                if (data.stagesInitiationStatus) setStagesInitiationStatus(data.stagesInitiationStatus);
-                if (data.stagesPerfStatus) setStagesPerfStatus(data.stagesPerfStatus);
+                if (data.nautiqueMessage !== undefined) setNautiqueMessage(data.nautiqueMessage);
+                if (data.stageStatuses !== undefined) {
+                  setStageStatuses(buildStageStatusMap(data.stageStatuses));
+                }
                 if (data.lastPublishedAt) setLastPublishedAt(data.lastPublishedAt);
                 if (data.lastConfirmedAt) setLastConfirmedAt(data.lastConfirmedAt);
-                
-                // CRITIQUE : Sync Messages in polling
-                if (data.charMessage !== undefined) setCharMessage(data.charMessage);
-                if (data.marcheMessage !== undefined) setMarcheMessage(data.marcheMessage);
-                if (data.nautiqueMessage !== undefined) setNautiqueMessage(data.nautiqueMessage);
-                if (data.stagesMiniMoussesMessage !== undefined) setStagesMiniMoussesMessage(data.stagesMiniMoussesMessage);
-                if (data.stagesMoussaillonsMessage !== undefined) setStagesMoussaillonsMessage(data.stagesMoussaillonsMessage);
-                if (data.stagesInitiationMessage !== undefined) setStagesInitiationMessage(data.stagesInitiationMessage);
-                if (data.stagesPerfMessage !== undefined) setStagesPerfMessage(data.stagesPerfMessage);
               }
             }).catch(() => {});
         }
@@ -281,23 +278,18 @@ export const LiveStatusProvider: React.FC<{ children: React.ReactNode; initialDa
     nautiqueStatus,
     nautiqueMessage,
     nautiqueTags,
-    stagesMiniMoussesStatus,
-    stagesMiniMoussesMessage,
-    stagesMoussaillonsStatus,
-    stagesMoussaillonsMessage,
-    stagesInitiationStatus,
-    stagesInitiationMessage,
-    stagesPerfStatus,
-    stagesPerfMessage,
+    stageStatuses,
+    stageDefinitions,
     lastPublishedAt,
     lastConfirmedAt,
     isLoading,
     refreshData,
   }), [
-    weather, tides, spotStatus, statusMessage, charStatus, charMessage, charTags,
-    marcheStatus, marcheMessage, marcheTags, nautiqueStatus, nautiqueMessage, nautiqueTags,
-    stagesMiniMoussesStatus, stagesMiniMoussesMessage, stagesMoussaillonsStatus, stagesMoussaillonsMessage,
-    stagesInitiationStatus, stagesInitiationMessage, stagesPerfStatus, stagesPerfMessage,
+    weather, tides, spotStatus, statusMessage,
+    charStatus, charMessage, charTags,
+    marcheStatus, marcheMessage, marcheTags,
+    nautiqueStatus, nautiqueMessage, nautiqueTags,
+    stageStatuses, stageDefinitions,
     lastPublishedAt, lastConfirmedAt, isLoading, refreshData
   ]);
 

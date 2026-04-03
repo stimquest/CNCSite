@@ -1,0 +1,203 @@
+des[
+  {
+    "_id": "Oa2lIOGPZgt0V4EIzXFfvG",
+    "_type": "weeklyPlanning",
+    "_createdAt": "2026-03-31T11:52:32Z",
+    "_updatedAt": "2026-03-31T11:52:32Z",
+    "title": "Semaine du 13 avril",
+    "startDate": "2026-04-13",
+    "endDate": "2026-04-19",
+    "isPublished": true,
+    "days": [
+      {
+        "_key": "day-0-1774957899445",
+        "name": "Lundi",
+        "date": "2026-04-13",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "13h00 - 16h00",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-1-1774957899445",
+        "name": "Mardi",
+        "date": "2026-04-14",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "14h30 - 17h30",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-2-1774957899445",
+        "name": "Mercredi",
+        "date": "2026-04-15",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "08h30 - 11h30",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-3-1774957899445",
+        "name": "Jeudi",
+        "date": "2026-04-16",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "09h00 - 12h00",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-4-1774957899445",
+        "name": "Vendredi",
+        "date": "2026-04-17",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "09h30 - 12h30",
+        "perfectionnement": "14h - 17h"
+      }
+    ]
+  },
+  {
+    "_id": "wZawyatkaw2P2smIvycH1E",
+    "_type": "weeklyPlanning",
+    "_createdAt": "2026-03-31T11:53:22Z",
+    "_updatedAt": "2026-03-31T11:53:22Z",
+    "title": "Semaine du 20 avril",
+    "startDate": "2026-04-20",
+    "endDate": "2026-04-26",
+    "isPublished": true,
+    "days": [
+      {
+        "_key": "day-0-1774957978029",
+        "name": "Lundi",
+        "date": "2026-04-20",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "11h30 - 14h30",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-1-1774957978029",
+        "name": "Mardi",
+        "date": "2026-04-21",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "12h30 - 15h30",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-2-1774957978029",
+        "name": "Mercredi",
+        "date": "2026-04-22",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "13h00 - 16h00",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-3-1774957978029",
+        "name": "Jeudi",
+        "date": "2026-04-23",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "13h30 - 16h30",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-4-1774957978029",
+        "name": "Vendredi",
+        "date": "2026-04-24",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "14h30 - 17h30",
+        "perfectionnement": "14h - 17h"
+      }
+    ]
+  },
+  {
+    "_id": "wZawyatkaw2P2smIvycfVY",
+    "_type": "weeklyPlanning",
+    "_createdAt": "2026-03-31T11:54:13Z",
+    "_updatedAt": "2026-03-31T11:54:13Z",
+    "title": "Semaine du 27 avril",
+    "startDate": "2026-04-27",
+    "endDate": "2026-05-03",
+    "isPublished": true,
+    "days": [
+      {
+        "_key": "day-0-1774958011969",
+        "name": "Lundi",
+        "date": "2026-04-27",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "13h30 - 16h30",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-1-1774958011969",
+        "name": "Mardi",
+        "date": "2026-04-28",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "14h30 - 17h30",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-2-1774958011969",
+        "name": "Mercredi",
+        "date": "2026-04-29",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "08h30 - 11h30",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-3-1774958011969",
+        "name": "Jeudi",
+        "date": "2026-04-30",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "09h00 - 12h00",
+        "perfectionnement": "14h - 17h"
+      },
+      {
+        "_key": "day-4-1774958011969",
+        "name": "Vendredi",
+        "date": "2026-05-01",
+        "isRaidDay": false,
+        "raidTarget": "none",
+        "miniMousses": { "activity": "optimist", "description": "", "time": "10h - 12h" },
+        "mousses": { "activity": "optimist", "description": "", "time": "10h - 13h" },
+        "initiation": "09h30 - 12h30",
+        "perfectionnement": "14h - 17h"
+      }
+    ]
+  }
+]

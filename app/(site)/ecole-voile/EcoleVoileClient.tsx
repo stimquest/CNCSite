@@ -11,12 +11,14 @@ import {
 } from 'lucide-react';
 import { PageHero } from '@/components/PageHero';
 import { PortableText } from '@portabletext/react';
+import { useLiveStatus } from '@/contexts/LiveStatusContext';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface EcoleVoileClientProps {
   initialSchoolPageData: any;
   initialPlannings: any[];
+  initialStageDefinitions?: any[];
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -64,12 +66,16 @@ const RenderText = ({ content, className, fallback = null }: {
 };
 
 
-const PLANNING_ROWS = [
-  { id: "miniMousses", title: "Mini-Mousses", age: "5-7 ans", color: "text-orange-500", bgColor: "bg-orange-500", icon: <Sun size={24} />, accessor: (day: any) => day.miniMousses },
-  { id: "mousses", title: "Moussaillons", age: "8-9 ans", color: "text-turquoise", bgColor: "bg-turquoise", icon: <Anchor size={24} />, accessor: (day: any) => day.mousses },
-  { id: "initiation", title: "Initiation", age: "10-16 ans", color: "text-blue-500", bgColor: "bg-blue-500", icon: <Wind size={24} />, accessor: (day: any) => day.initiation },
-  { id: "perfectionnement", title: "Perfectionnement", age: "10-16 ans", color: "text-purple-500", bgColor: "bg-purple-500", icon: <Waves size={24} />, accessor: (day: any) => day.perfectionnement },
-];
+// Mapping couleur stageDefinition.color → classes Tailwind
+const STAGE_COLOR_MAP: Record<string, { text: string; bgColor: string }> = {
+  yellow:    { text: 'text-yellow-600',  bgColor: 'bg-yellow-500'  },
+  turquoise: { text: 'text-turquoise',   bgColor: 'bg-turquoise'   },
+  blue:      { text: 'text-blue-500',    bgColor: 'bg-blue-500'    },
+  purple:    { text: 'text-purple-500',  bgColor: 'bg-purple-500'  },
+  orange:    { text: 'text-orange-500',  bgColor: 'bg-orange-500'  },
+  rose:      { text: 'text-rose-500',    bgColor: 'bg-rose-500'    },
+};
+const DEFAULT_STAGE_COLORS = { text: 'text-slate-500', bgColor: 'bg-slate-400' };
 
 // ─── DATA: Stages Vacances ────────────────────────────────────────────────────
 
@@ -588,7 +594,9 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageData, initialPlannings }) => {
+const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageData, initialPlannings, initialStageDefinitions }) => {
+  const { stageDefinitions: contextDefs } = useLiveStatus();
+  const stageDefinitions = (initialStageDefinitions?.length ? initialStageDefinitions : contextDefs);
   const schoolPageData = initialSchoolPageData;
   const stages = schoolPageData?.stages?.length ? schoolPageData.stages : STAGES_VACANCES;
   const proFormations = schoolPageData?.proFormations?.length ? schoolPageData.proFormations : PRO_FORMATIONS_FALLBACK;
@@ -1251,35 +1259,41 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
                     </tr>
                   </thead>
                   <tbody>
-                    {PLANNING_ROWS.map(row => (
-                      <tr key={row.id}>
+                    {stageDefinitions.map(stage => {
+                      const colors = STAGE_COLOR_MAP[stage.color || ''] ?? DEFAULT_STAGE_COLORS;
+                      return (
+                      <tr key={stage.key}>
                         <td className="p-4 bg-white rounded-xl border border-slate-100 transition-all hover:bg-slate-50">
                           <div className="flex items-center gap-3">
-                            <div className={`size-9 ${row.bgColor} rounded-lg flex items-center justify-center text-white shadow-sm`}>{row.icon}</div>
-                            <div>
-                              <div className={`text-xs font-black ${row.color}`}>{row.title}</div>
-                              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{row.age}</div>
-                            </div>
+                            <div className={`size-3 rounded-full ${colors.bgColor} shrink-0`} />
+                            <div className={`text-xs font-black ${colors.text}`}>{stage.label}</div>
                           </div>
                         </td>
                         {(currentWeek.days ?? []).slice(0, 5).map((dayData: any, i: number) => {
-                          const raw = dayData ? row.accessor(dayData) : undefined;
-                          const timeStr = raw && typeof raw === 'object' ? raw.time : (raw as string | undefined);
-                          const activity = raw && typeof raw === 'object' ? raw.activity : undefined;
-                          const isFull = timeStr === 'COMPLET' || timeStr === 'Full';
+                          const slot = (dayData?.stageSlots || []).find((s: any) => s.stageKey === stage.key);
+                          const timeStr = slot?.time;
+                          const activity = slot?.activity;
+                          const isFull = timeStr === 'COMPLET';
                           const isClosed = timeStr === 'FERMÉ' || timeStr === 'N/A';
+                          const hasContent = timeStr || activity;
                           return (
                             <td key={i} className="p-2">
-                              <div className={`h-14 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-all ${isFull ? 'bg-rose-50 border-rose-100 text-rose-500' : isClosed ? 'bg-slate-50 border-slate-100 text-slate-300' : `bg-white border-slate-100 ${row.color} hover:border-slate-200`}`}>
-                                <span className="text-[10px] font-black uppercase tracking-tighter">{timeStr || 'OUVERT'}</span>
-                                {activity && !isFull && !isClosed && <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{activity}</span>}
-                                {!timeStr && !isFull && !isClosed && <div className={`size-1.5 ${row.bgColor} rounded-full animate-pulse`} />}
+                              <div className={`h-14 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-all ${isFull ? 'bg-rose-50 border-rose-100 text-rose-500' : isClosed ? 'bg-slate-50 border-slate-100 text-slate-300' : `bg-white border-slate-100 ${colors.text} hover:border-slate-200`}`}>
+                                {hasContent ? (
+                                  <>
+                                    {timeStr && <span className="text-[10px] font-black uppercase tracking-tighter">{timeStr}</span>}
+                                    {activity && <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{activity}</span>}
+                                  </>
+                                ) : (
+                                  <span className="text-[10px] font-bold text-slate-300">—</span>
+                                )}
                               </div>
                             </td>
                           );
                         })}
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

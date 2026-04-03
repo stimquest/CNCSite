@@ -90,21 +90,29 @@ export default async function SiteLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const spotSettings = await client.fetch(
-    `*[_type == "spotSettings" && _id == "singleton-spot-settings"][0] {
-      spotStatus, statusMessage,
-      charStatus, charMessage, charTags,
-      marcheStatus, marcheMessage, marcheTags,
-      nautiqueStatus, nautiqueMessage, nautiqueTags,
-      stagesMiniMoussesStatus, stagesMiniMoussesMessage,
-      stagesMoussaillonsStatus, stagesMoussaillonsMessage,
-      stagesInitiationStatus, stagesInitiationMessage,
-      stagesPerfStatus, stagesPerfMessage,
-      lastPublishedAt, lastConfirmedAt
-    }`,
-    {},
-    { useCdn: false, cache: 'no-store' as RequestCache }
-  ).catch(() => null);
+  const [spotSettings, stageDefinitions] = await Promise.all([
+    client.fetch(
+      `*[_type == "spotSettings" && _id == "singleton-spot-settings"][0] {
+        spotStatus, statusMessage,
+        charStatus, charMessage, charTags,
+        marcheStatus, marcheMessage, marcheTags,
+        nautiqueStatus, nautiqueMessage, nautiqueTags,
+        stageStatuses[] { stageKey, status, message },
+        lastPublishedAt, lastConfirmedAt
+      }`,
+      {},
+      { useCdn: false, cache: 'no-store' as RequestCache }
+    ).catch(() => null),
+    client.fetch(
+      `*[_type == "stageDefinition" && isActive == true] | order(order asc) {
+        _id,
+        "key": key.current,
+        label, shortLabel, vigieGroupId, order, isActive, planningType, color
+      }`,
+      {},
+      { useCdn: false, cache: 'no-store' as RequestCache }
+    ).catch(() => []),
+  ]);
 
   return (
     <>
@@ -113,7 +121,7 @@ export default async function SiteLayout({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className={`${outfit.variable} ${syncopate.variable} ${shrikhand.variable} font-sans text-abysse antialiased selection:bg-turquoise selection:text-white`}>
-          <LiveStatusProvider initialData={spotSettings}>
+          <LiveStatusProvider initialData={spotSettings} stageDefinitions={stageDefinitions ?? []}>
             <SmoothScroll>
               <div className="min-h-screen flex flex-col">
                 <Header />

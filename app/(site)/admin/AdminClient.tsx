@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useLiveStatus } from '@/contexts/LiveStatusContext';
 import {
     Save,
     Trash2,
@@ -24,7 +25,7 @@ import {
     Printer,
     Zap
 } from 'lucide-react';
-import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, ActivityType, CharWeek, CharDay, CharSession } from '@/types';
+import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, ActivityType, CharWeek, CharDay, CharSession, StageDefinition, StageSlot } from '@/types';
 import { CharSessionDoc } from '@/types';
 import Link from 'next/link';
 import CharBookingAdmin from '@/components/admin/CharBookingAdmin';
@@ -38,6 +39,9 @@ const ACTIVITY_OPTIONS: { label: string, value: ActivityType }[] = [
     { label: 'Catamaran', value: 'catamaran' },
     { label: 'Paddle / Kayak', value: 'paddle' },
     { label: 'Char à voile', value: 'char' },
+    { label: 'Planche à voile', value: 'planche' },
+    { label: 'Kite', value: 'kite' },
+    { label: 'Multiglisse', value: 'multiglisse' },
 ];
 
 const DAYS_STAGES = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
@@ -83,6 +87,8 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
     const refreshData = async () => {
         router.refresh();
     };
+
+    const { stageDefinitions } = useLiveStatus();
 
     const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'COCKPIT' | 'STAGES' | 'MARCHE' | 'AGENDA'>('DASHBOARD');
     const [isSaving, setIsSaving] = useState(false);
@@ -131,25 +137,31 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
         }
     };
 
+    const buildDefaultSlots = (): StageSlot[] =>
+        stageDefinitions.map(s => ({
+            _key: `slot-${s.key}-${Date.now()}`,
+            stageKey: s.key,
+            time: s.planningType === 'kid' ? '10h - 12h' : '14h - 17h',
+            activity: s.planningType === 'kid' ? 'optimist' as ActivityType : undefined,
+            description: ''
+        }));
+
     const initNewStage = (startDate: string) => {
         const days = DAYS_STAGES.map((name, i) => ({
             _key: `day-${i}-${Date.now()}`,
             name,
             date: addDays(startDate, i),
             isRaidDay: false,
-            raidTarget: 'none' as const,
-            miniMousses: { time: '10h - 12h', activity: 'optimist' as ActivityType, description: '' },
-            mousses: { time: '10h - 13h', activity: 'optimist' as ActivityType, description: '' },
-            initiation: '14h - 17h',
-            perfectionnement: '14h - 17h'
+            raidStageKey: '',
+            stageSlots: buildDefaultSlots()
         }));
 
         setSelectedStage({
             _type: 'weeklyPlanning',
             title: `Semaine du ${toFRDate(startDate)}`,
             startDate: startDate,
-            endDate: addDays(startDate, 6), // Week covers 7 days technically
-            days: days, // Only 5 initially
+            endDate: addDays(startDate, 6),
+            days: days,
             isPublished: true
         });
     };
@@ -176,11 +188,8 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                 name,
                 date: targetDate,
                 isRaidDay: false,
-                raidTarget: 'none' as const,
-                miniMousses: { time: '10h - 12h', activity: 'optimist' as ActivityType, description: '' },
-                mousses: { time: '10h - 13h', activity: 'optimist' as ActivityType, description: '' },
-                initiation: '14h - 17h',
-                perfectionnement: '14h - 17h'
+                raidStageKey: '',
+                stageSlots: buildDefaultSlots()
             };
 
             currentDays.push(newDay);
@@ -617,105 +626,59 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                                             <div className="font-black text-[11px] uppercase text-abysse leading-tight">{day.name}</div>
                                                             <div className="text-[9px] font-bold text-slate-400">{new Date(day.date).getDate()} {new Date(day.date).toLocaleDateString('fr-FR', { month: 'short' })}</div>
 
-                                                            {/* RAID SELECTOR SMALL */}
-                                                            <select
-                                                                value={day.raidTarget || 'none'}
-                                                                onChange={(e) => {
-                                                                    const nd = [...selectedStage.days];
-                                                                    nd[dIdx].raidTarget = e.target.value as any;
-                                                                    nd[dIdx].isRaidDay = e.target.value !== 'none';
-                                                                    setSelectedStage({ ...selectedStage, days: nd });
-                                                                }}
-                                                                className={`mt-2 w-full bg-white px-1.5 py-1 rounded text-[9px] font-black uppercase outline-none border transition-colors ${day.raidTarget !== 'none' ? 'border-orange-300 bg-orange-50 text-orange-600' : 'border-slate-200 text-slate-400'}`}
-                                                            >
-                                                                <option value="none">Pas de Raid</option>
-                                                                <option value="miniMousses">Raid Mini</option>
-                                                                <option value="mousses">Raid Moussaillons</option>
-                                                                <option value="initiation">Raid Initation</option>
-                                                                <option value="perfectionnement">Raid Perf</option>
-                                                            </select>
+
                                                         </div>
                                                     ))}
                                                 </div>
 
-                                                {/* GROUP ROWS */}
-                                                {[
-                                                    { id: 'miniMousses', label: 'Mini-Mousses', color: 'yellow', icon: Sun },
-                                                    { id: 'mousses', label: 'Moussaillons', color: 'turquoise', icon: Ship },
-                                                    { id: 'initiation', label: 'Initiation', color: 'blue', icon: Wind },
-                                                    { id: 'perfectionnement', label: 'Perfectionnement', color: 'purple', icon: Waves }
-                                                ].map((group) => (
-                                                    <div key={group.id} className="grid grid-cols-[180px_repeat(auto-fit,minmax(120px,1fr))] border-b border-slate-50 last:border-0 group">
+                                                {/* GROUP ROWS — dynamique depuis stageDefinitions */}
+                                                {stageDefinitions.map((stage) => (
+                                                    <div key={stage.key} className="grid grid-cols-[180px_repeat(auto-fit,minmax(120px,1fr))] border-b border-slate-50 last:border-0 group">
                                                         <div className="p-3 bg-slate-50/30 flex items-center gap-2 border-r border-slate-50">
-                                                            <div className={`p-1.5 rounded-lg bg-${group.color}-50 text-${group.color}-500 shadow-sm`}>
-                                                                <group.icon size={14} />
+                                                            <div className={`p-1.5 rounded-lg bg-${stage.color || 'blue'}-50 text-${stage.color || 'blue'}-500 shadow-sm`}>
+                                                                <Ship size={14} />
                                                             </div>
-                                                            <span className="font-black text-[10px] uppercase tracking-tighter text-slate-600">{group.label}</span>
+                                                            <span className="font-black text-[10px] uppercase tracking-tighter text-slate-600">{stage.label}</span>
                                                         </div>
 
                                                         {selectedStage.days.map((day, dIdx) => {
-                                                            const isRaid = day.raidTarget === group.id;
+                                                            const isRaid = (day.raidStageKey || '').split(',').includes(stage.key);
+                                                            const slot = day.stageSlots?.find(s => s.stageKey === stage.key);
 
-                                                            if (group.id === 'miniMousses' || group.id === 'mousses') {
-                                                                const session = (day as any)[group.id];
-                                                                return (
-                                                                    <div key={dIdx} className={`p-2 border-l border-slate-50 space-y-1.5 transition-colors ${isRaid ? 'bg-orange-50/50' : 'hover:bg-slate-50/30'}`}>
-                                                                        <div className="flex gap-1">
-                                                                            <select
-                                                                                value={(session?.time || '').split(' - ')[0]}
-                                                                                onChange={(e) => {
-                                                                                    const nd = [...selectedStage.days];
-                                                                                    const defaultDur = group.id === 'miniMousses' ? 2 : 3;
-                                                                                    const newRange = calculateTimeRange(e.target.value, defaultDur);
-                                                                                    (nd[dIdx] as any)[group.id].time = newRange;
-                                                                                    setSelectedStage({ ...selectedStage, days: nd });
-                                                                                }}
-                                                                                className="w-16 p-1 bg-white border border-slate-100 rounded text-[9px] font-bold outline-none focus:border-turquoise"
-                                                                            >
-                                                                                <option value="">Début</option>
-                                                                                {START_HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                                                                            </select>
-                                                                            <select
-                                                                                value={(() => {
-                                                                                    const parts = (session?.time || '').split(' - ');
-                                                                                    if (parts.length < 2) return group.id === 'miniMousses' ? '2' : '3';
-                                                                                    return String(parseInt(parts[1].split('h')[0]) - parseInt(parts[0].split('h')[0]));
-                                                                                })()}
-                                                                                onChange={(e) => {
-                                                                                    const start = (session?.time || '').split(' - ')[0] || '14h00';
-                                                                                    const nd = [...selectedStage.days];
-                                                                                    (nd[dIdx] as any)[group.id].time = calculateTimeRange(start, parseInt(e.target.value));
-                                                                                    setSelectedStage({ ...selectedStage, days: nd });
-                                                                                }}
-                                                                                className="w-12 p-1 bg-turquoise/10 border border-turquoise/20 rounded text-[9px] font-black text-turquoise-700 outline-none focus:border-turquoise"
-                                                                            >
-                                                                                {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d}h</option>)}
-                                                                            </select>
+                                                            const updateSlot = (updates: Partial<StageSlot>) => {
+                                                                const nd = [...selectedStage.days];
+                                                                const slots = [...(nd[dIdx].stageSlots || [])];
+                                                                const idx = slots.findIndex(s => s.stageKey === stage.key);
+                                                                if (idx >= 0) {
+                                                                    slots[idx] = { ...slots[idx], ...updates };
+                                                                } else {
+                                                                    slots.push({ _key: `slot-${stage.key}-${Date.now()}`, stageKey: stage.key, time: '', ...updates });
+                                                                }
+                                                                nd[dIdx] = { ...nd[dIdx], stageSlots: slots };
+                                                                setSelectedStage({ ...selectedStage, days: nd });
+                                                            };
 
-                                                                            <select value={session?.activity || 'optimist'} onChange={(e) => {
-                                                                                const nd = [...selectedStage.days]; (nd[dIdx] as any)[group.id].activity = e.target.value; setSelectedStage({ ...selectedStage, days: nd });
-                                                                            }} className="flex-1 p-1.5 bg-white border border-slate-100 rounded text-[9px] font-bold outline-none focus:border-turquoise" title="Activité">
-                                                                                {ACTIVITY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label.split(' / ')[0]}</option>)}
-                                                                            </select>
-                                                                        </div>
-                                                                        <input type="text" value={session?.description || ''} onChange={(e) => {
-                                                                            const nd = [...selectedStage.days]; (nd[dIdx] as any)[group.id].description = e.target.value; setSelectedStage({ ...selectedStage, days: nd });
-                                                                        }} className="w-full p-1.5 bg-white border border-slate-100 rounded text-[9px] outline-none focus:border-turquoise" placeholder="Desc..." title="Description" />
-                                                                    </div>
-                                                                );
-                                                            } else {
-                                                                const value = (day as any)[group.id];
+                                                            const toggleRaid = (e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                const current = (day.raidStageKey || '').split(',').filter(Boolean);
+                                                                const next = e.target.checked ? [...current, stage.key] : current.filter(k => k !== stage.key);
+                                                                const nd = [...selectedStage.days];
+                                                                nd[dIdx].raidStageKey = next.join(',');
+                                                                nd[dIdx].isRaidDay = next.length > 0;
+                                                                setSelectedStage({ ...selectedStage, days: nd });
+                                                            };
+
+                                                            if (stage.planningType === 'kid') {
                                                                 return (
-                                                                    <div key={dIdx} className={`p-2 border-l border-slate-50 transition-colors ${isRaid ? 'bg-orange-50/50' : 'hover:bg-slate-50/30'}`}>
+                                                                    <div key={dIdx} className={`p-2 border-l border-slate-50 transition-colors relative ${isRaid ? 'bg-orange-50/50' : 'hover:bg-slate-50/30'}`}>
+                                                                        <label className="flex items-center justify-between mb-1 cursor-pointer group">
+                                                                            <span className={`text-[8px] font-black uppercase transition-colors ${isRaid ? 'text-orange-500' : 'text-slate-300 group-hover:text-slate-400'}`}>Raid</span>
+                                                                            <input type="checkbox" checked={isRaid} onChange={toggleRaid} className="size-2.5 accent-orange-500 cursor-pointer" />
+                                                                        </label>
                                                                         <div className="flex flex-col gap-1.5 mt-1">
                                                                             <div className="flex items-center gap-1">
                                                                                 <select
-                                                                                    value={(value || '').split(' - ')[0]}
-                                                                                    onChange={(e) => {
-                                                                                        const nd = [...selectedStage.days];
-                                                                                        (nd[dIdx] as any)[group.id] = calculateTimeRange(e.target.value, 3);
-                                                                                        setSelectedStage({ ...selectedStage, days: nd });
-                                                                                    }}
+                                                                                    value={(slot?.time || '').split(' - ')[0]}
+                                                                                    onChange={(e) => updateSlot({ time: calculateTimeRange(e.target.value, 2) })}
                                                                                     className="flex-1 p-1 bg-white border border-slate-100 rounded text-[10px] font-bold outline-none focus:border-turquoise"
                                                                                 >
                                                                                     <option value="">Début</option>
@@ -723,21 +686,72 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                                                                 </select>
                                                                                 <select
                                                                                     value={(() => {
-                                                                                        const parts = (value || '').split(' - ');
+                                                                                        const parts = (slot?.time || '').split(' - ');
+                                                                                        if (parts.length < 2) return '2';
+                                                                                        return String(parseInt(parts[1].split('h')[0]) - parseInt(parts[0].split('h')[0]));
+                                                                                    })()}
+                                                                                    onChange={(e) => {
+                                                                                        const start = (slot?.time || '').split(' - ')[0] || '10h00';
+                                                                                        updateSlot({ time: calculateTimeRange(start, parseInt(e.target.value)) });
+                                                                                    }}
+                                                                                    className="w-12 p-1 bg-turquoise/10 border border-turquoise/20 rounded text-[9px] font-black text-turquoise-700 outline-none focus:border-turquoise"
+                                                                                >
+                                                                                    {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d}h</option>)}
+                                                                                </select>
+                                                                            </div>
+                                                                            <select
+                                                                                value={slot?.activity || 'optimist'}
+                                                                                onChange={(e) => updateSlot({ activity: e.target.value as ActivityType })}
+                                                                                className="w-full p-1.5 bg-white border border-slate-100 rounded text-[9px] font-bold outline-none focus:border-turquoise"
+                                                                                title="Activité"
+                                                                            >
+                                                                                {ACTIVITY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label.split(' / ')[0]}</option>)}
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            } else {
+                                                                // planningType === 'simple' : heure de début + durée + activité optionnelle
+                                                                return (
+                                                                    <div key={dIdx} className={`p-2 border-l border-slate-50 transition-colors relative ${isRaid ? 'bg-orange-50/50' : 'hover:bg-slate-50/30'}`}>
+                                                                        <label className="flex items-center justify-between mb-1 cursor-pointer group">
+                                                                            <span className={`text-[8px] font-black uppercase transition-colors ${isRaid ? 'text-orange-500' : 'text-slate-300 group-hover:text-slate-400'}`}>Raid</span>
+                                                                            <input type="checkbox" checked={isRaid} onChange={toggleRaid} className="size-2.5 accent-orange-500 cursor-pointer" />
+                                                                        </label>
+                                                                        <div className="flex flex-col gap-1.5 mt-1">
+                                                                            <div className="flex items-center gap-1">
+                                                                                <select
+                                                                                    value={(slot?.time || '').split(' - ')[0]}
+                                                                                    onChange={(e) => updateSlot({ time: calculateTimeRange(e.target.value, 3) })}
+                                                                                    className="flex-1 p-1 bg-white border border-slate-100 rounded text-[10px] font-bold outline-none focus:border-turquoise"
+                                                                                >
+                                                                                    <option value="">Début</option>
+                                                                                    {START_HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                                                                                </select>
+                                                                                <select
+                                                                                    value={(() => {
+                                                                                        const parts = (slot?.time || '').split(' - ');
                                                                                         if (parts.length < 2) return '3';
                                                                                         return String(parseInt(parts[1].split('h')[0]) - parseInt(parts[0].split('h')[0]));
                                                                                     })()}
                                                                                     onChange={(e) => {
-                                                                                        const start = (value || '').split(' - ')[0] || '14h00';
-                                                                                        const nd = [...selectedStage.days];
-                                                                                        (nd[dIdx] as any)[group.id] = calculateTimeRange(start, parseInt(e.target.value));
-                                                                                        setSelectedStage({ ...selectedStage, days: nd });
+                                                                                        const start = (slot?.time || '').split(' - ')[0] || '14h00';
+                                                                                        updateSlot({ time: calculateTimeRange(start, parseInt(e.target.value)) });
                                                                                     }}
                                                                                     className="w-12 p-1 bg-abysse/10 border border-abysse/20 rounded text-[9px] font-black text-abysse outline-none focus:border-abysse"
                                                                                 >
                                                                                     {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d}h</option>)}
                                                                                 </select>
                                                                             </div>
+                                                                            <select
+                                                                                value={slot?.activity || ''}
+                                                                                onChange={(e) => updateSlot({ activity: e.target.value as ActivityType || undefined })}
+                                                                                className="w-full p-1 bg-white border border-slate-100 rounded text-[9px] font-bold outline-none focus:border-turquoise"
+                                                                                title="Activité (optionnel)"
+                                                                            >
+                                                                                <option value="">Activité…</option>
+                                                                                {ACTIVITY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                                                            </select>
                                                                         </div>
                                                                     </div>
                                                                 );
@@ -945,15 +959,12 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                             {/* Scrollable Groups for compactness */}
                                             <div className="space-y-2">
                                                 <label className="text-[9px] font-black uppercase text-slate-400 px-1">Cibles</label>
-                                                <div className="grid grid-cols-2 gap-2 max-h-[140px] overflow-y-auto custom-scrollbar pr-1">
+                                                <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto custom-scrollbar pr-1">
                                                     {[
                                                         { id: 'all', label: 'Tous' },
                                                         { id: 'club-hebdo', label: 'Club Hebdo' },
                                                         { id: 'char-voile', label: 'Char Voile' },
-                                                        { id: 'stage-minimousses', label: 'Mini-Mousses' },
-                                                        { id: 'stage-moussaillons', label: 'Moussaillons' },
-                                                        { id: 'stage-initiation', label: 'Initiation' },
-                                                        { id: 'stage-perfectionnement', label: 'Perf.' },
+                                                        ...stageDefinitions.map(s => ({ id: s.vigieGroupId, label: s.shortLabel || s.label })),
                                                         { id: 'marche-aquatique', label: 'Marche' },
                                                         { id: 'pratique-libre', label: 'Libre' }
                                                     ].map(group => (

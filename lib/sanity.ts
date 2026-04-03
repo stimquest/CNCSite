@@ -34,11 +34,13 @@ export const queries = {
     charStatus, charMessage, charTags,
     marcheStatus, marcheMessage, marcheTags,
     nautiqueStatus, nautiqueMessage, nautiqueTags,
-    stagesMiniMoussesStatus, stagesMiniMoussesMessage,
-    stagesMoussaillonsStatus, stagesMoussaillonsMessage,
-    stagesInitiationStatus, stagesInitiationMessage,
-    stagesPerfStatus, stagesPerfMessage,
+    stageStatuses[] { stageKey, status, message },
     lastPublishedAt
+  }`,
+  stageDefinitions: `*[_type == "stageDefinition" && isActive == true] | order(order asc) {
+    _id,
+    "key": key.current,
+    label, shortLabel, vigieGroupId, order, isActive, planningType, color
   }`,
   news: `*[_type == "news"] | order(publishedAt desc)[0...30] {
     _id, title, category, content, externalLink, date, publishedAt
@@ -47,12 +49,10 @@ export const queries = {
     id, name, subtitle, description, "gallery": gallery[].asset->url, stats, crew
   }`,
   plannings: `*[_type == "weeklyPlanning"] | order(startDate asc) {
-    _id, title, startDate, endDate,
+    _id, title, startDate, endDate, isPublished,
     days[] {
-      _key, name, date, isRaidDay, raidTarget,
-      miniMousses { time, activity, description },
-      mousses { time, activity, description },
-      initiation, perfectionnement
+      _key, name, date, isRaidDay, raidStageKey,
+      stageSlots[] { _key, stageKey, time, activity, description }
     }
   }`,
   charPlannings: `*[_type == "planningCharAVoile"] | order(startDate asc) {

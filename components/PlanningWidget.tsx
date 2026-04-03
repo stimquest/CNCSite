@@ -7,46 +7,18 @@ import {
     Calendar, ChevronLeft, ChevronRight, Wind, Waves, Info,
     Sun, Anchor, Sailboat, LayoutGrid, Phone, CheckCircle2, Clock
 } from 'lucide-react';
+import { useLiveStatus } from '@/contexts/LiveStatusContext';
 
-// Configuration visuelle des groupes (Voile)
-const GROUP_CONFIG = [
-    {
-        id: 'miniMousses',
-        label: 'Mini-Mousses',
-        age: '5-7 ans',
-        bg: 'bg-yellow-50',
-        text: 'text-yellow-700',
-        border: 'border-yellow-200',
-        iconColor: 'bg-yellow-500'
-    },
-    {
-        id: 'mousses',
-        label: 'Moussaillons',
-        age: '8-9 ans',
-        bg: 'bg-orange-50',
-        text: 'text-orange-700',
-        border: 'border-orange-200',
-        iconColor: 'bg-orange-500'
-    },
-    {
-        id: 'initiation',
-        label: 'Initiation',
-        age: '10-16 ans',
-        bg: 'bg-green-50',
-        text: 'text-green-700',
-        border: 'border-green-200',
-        iconColor: 'bg-green-500'
-    },
-    {
-        id: 'perfectionnement',
-        label: 'Perfectionnement',
-        age: '10-16 ans',
-        bg: 'bg-blue-50',
-        text: 'text-blue-700',
-        border: 'border-blue-200',
-        iconColor: 'bg-blue-500'
-    }
-];
+// Mapping couleur stageDefinition.color → classes Tailwind
+const STAGE_COLOR_MAP: Record<string, { bg: string; text: string; border: string; iconColor: string }> = {
+    yellow:    { bg: 'bg-yellow-50',  text: 'text-yellow-700',  border: 'border-yellow-200',    iconColor: 'bg-yellow-500'  },
+    turquoise: { bg: 'bg-cyan-50',    text: 'text-cyan-700',    border: 'border-cyan-200',      iconColor: 'bg-turquoise'   },
+    blue:      { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200',      iconColor: 'bg-blue-500'    },
+    purple:    { bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-200',    iconColor: 'bg-purple-500'  },
+    orange:    { bg: 'bg-orange-50',  text: 'text-orange-700',  border: 'border-orange-200',    iconColor: 'bg-orange-500'  },
+    rose:      { bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200',      iconColor: 'bg-rose-500'    },
+};
+const DEFAULT_COLORS = { bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-200', iconColor: 'bg-slate-400' };
 
 const getActivityIcon = (type: ActivityType) => {
     switch (type) {
@@ -56,6 +28,20 @@ const getActivityIcon = (type: ActivityType) => {
         case 'paddle': return <Waves size={14} />;
         case 'char': return <Wind size={14} />;
         default: return <Waves size={14} />;
+    }
+};
+
+const getActivityLabel = (type: string) => {
+    switch (type) {
+        case 'piscine': return 'Piscine / Volant';
+        case 'optimist': return 'Optimist';
+        case 'catamaran': return 'Catamaran';
+        case 'paddle': return 'Paddle / Kayak';
+        case 'char': return 'Char à voile';
+        case 'planche': return 'Planche à voile';
+        case 'kite': return 'Kite';
+        case 'multiglisse': return 'Multiglisse';
+        default: return type;
     }
 };
 
@@ -72,6 +58,7 @@ function findCurrentWeekIdx(list: any[]): number {
 }
 
 export const PlanningWidget: React.FC = () => {
+    const { stageDefinitions } = useLiveStatus();
     const [plannings, setPlannings] = useState<any[]>([]);
     const [charPlannings, setCharPlannings] = useState<any[]>([]);
     const [marchePlannings, setMarchePlannings] = useState<any[]>([]);
@@ -153,21 +140,29 @@ export const PlanningWidget: React.FC = () => {
     React.useEffect(() => {
         if (isLoading) return;
         const idx = findCurrentWeekIdx(dataVoile);
-        setCurrentIdx(idx >= 0 ? idx : 0);
+        setCurrentIdx(idx); // Peut être -1 si pas de stage cette semaine
         setSelectedDayIdx(0);
     }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const currentWeek: any = currentList[currentIdx];
-    // true si l'activité a bien une semaine qui correspond à aujourd'hui
-    const hasCurrentWeek = findCurrentWeekIdx(currentList) >= 0;
+    const currentWeek: any = currentIdx >= 0 ? currentList[currentIdx] : null;
 
     // --- HANDLERS ---
     const nextWeek = () => {
-        if (currentList.length > 0) setCurrentIdx(prev => (prev + 1) % currentList.length);
+        if (currentList.length > 0) {
+            setCurrentIdx(prev => {
+                if (prev === -1) return 0;
+                return (prev + 1) % currentList.length;
+            });
+        }
     };
 
     const prevWeek = () => {
-        if (currentList.length > 0) setCurrentIdx(prev => (prev - 1 + currentList.length) % currentList.length);
+        if (currentList.length > 0) {
+            setCurrentIdx(prev => {
+                if (prev === -1) return currentList.length - 1;
+                return (prev - 1 + currentList.length) % currentList.length;
+            });
+        }
     };
 
     const handleTabChange = (tab: 'voile' | 'char' | 'marche') => {
@@ -175,258 +170,269 @@ export const PlanningWidget: React.FC = () => {
         // Aller sur la semaine en cours pour l'onglet sélectionné
         const list = tab === 'voile' ? dataVoile : (tab === 'char' ? dataChar : dataMarche);
         const idx = findCurrentWeekIdx(list);
-        setCurrentIdx(idx >= 0 ? idx : 0);
+        setCurrentIdx(idx);
         setSelectedDayIdx(0);
         setIsWeekSelectorOpen(false);
     };
 
     if (isLoading) return <div className="p-20 text-center font-black uppercase text-slate-300 animate-pulse">Chargement du planning...</div>;
 
-    // --- RENDER TABLE VOILE ---
-    const renderVoileTable = (week: any) => (
-        <div className="flex flex-col gap-4">
-            {/* Day Selector Mobile */}
-            <div className="flex md:hidden bg-white p-1 rounded-2xl border border-slate-200 overflow-x-auto no-scrollbar">
-                {week.days?.map((day: any, i: number) => (
+    // --- DAY TABS (shared) ---
+    const renderDayTabs = (week: any, activeColor: string) => (
+        <div className="flex bg-white p-1 rounded-2xl border border-slate-200 overflow-x-auto no-scrollbar gap-0.5">
+            {week.days?.map((day: any, i: number) => {
+                const dateStr = day.date
+                    ? new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+                    : '';
+                const isActive = selectedDayIdx === i;
+                return (
                     <button
                         key={i}
                         onClick={() => setSelectedDayIdx(i)}
-                        className={`flex-1 min-w-[60px] py-2 rounded-xl text-[10px] font-black uppercase transition-all ${selectedDayIdx === i ? 'bg-abysse text-white shadow-md' : 'text-slate-400'}`}
+                        className={`flex-1 min-w-[52px] py-2.5 px-1 rounded-xl flex flex-col items-center gap-0.5 transition-all ${isActive ? `${activeColor} shadow-md` : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'}`}
                     >
-                        {day.name?.slice(0, 3)}
+                        <span className="text-[10px] font-black uppercase leading-none">{day.name?.slice(0, 3)}</span>
+                        <span className="text-[9px] font-bold opacity-70 leading-none">{dateStr}</span>
                     </button>
-                ))}
-            </div>
+                );
+            })}
+        </div>
+    );
 
-            <div className="overflow-x-auto pb-4 md:block">
-                <table className="w-full min-w-full md:min-w-[800px] border-separate border-spacing-1">
-                    <thead className="hidden md:table-header-group">
-                        <tr>
-                            <th className="p-2 text-left w-48 bg-slate-100 rounded-xl">
-                                <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest pl-2">Groupes</span>
-                            </th>
-                            {week.days?.map((day: any, i: number) => (
-                                <th key={i} className="p-2 text-center bg-white border border-slate-100 rounded-xl shadow-sm">
-                                    <div className="flex flex-col">
-                                        <span className="block text-abysse font-black text-sm uppercase">{(day.name || '---').slice(0, 3)}</span>
-                                        <span className="text-[9px] font-bold text-slate-400">
-                                            {new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                                        </span>
-                                    </div>
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {GROUP_CONFIG.map((group) => (
-                            <tr key={group.id} className="flex flex-col md:table-row mb-2 md:mb-0">
-                                <td className={`p-3 rounded-xl border ${group.border} ${group.bg} shadow-sm md:table-cell mb-1 md:mb-0`}>
-                                    <div className="flex items-center gap-3">
-                                        <div className={`size-8 rounded-lg ${group.iconColor} flex items-center justify-center text-white shadow-sm`}>
-                                            <LayoutGrid size={16} />
-                                        </div>
-                                        <div>
-                                            <span className={`block font-black uppercase italic text-xs ${group.text}`}>{group.label}</span>
-                                            <span className="block text-[9px] font-bold opacity-40 uppercase">{group.age}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                {week.days?.map((day: any, dayIdx: number) => {
-                                    const isVisible = dayIdx === selectedDayIdx;
-                                    const session = (day as any)[group.id];
-                                    let isRaid = false;
-                                    if (day.raidTarget && day.raidTarget !== 'none') isRaid = day.raidTarget === group.id;
-                                    else isRaid = (day as any).isRaidDay || (typeof session === 'string' && session.toLowerCase() === 'raid');
+    // --- RENDER VOILE ---
+    const renderVoileDayContent = (day: any, isDesktop: boolean) => {
+        return stageDefinitions.map((stage: any) => {
+            const colors = STAGE_COLOR_MAP[stage.color || ''] ?? DEFAULT_COLORS;
+            const slot = (day?.stageSlots || []).find((s: any) => s.stageKey === stage.key);
+            const isRaid = day?.isRaidDay && (day?.raidStageKey || '').split(',').includes(stage.key);
+            const time = slot?.time;
+            const desc = slot?.description;
 
-                                    let time = '--';
-                                    let desc = null;
+            if (isDesktop) {
+                if (!time) {
+                    // Empty row alignment spacer for desktop grid
+                    return <div key={stage.key} className="h-[72px] border border-transparent shrink-0" />;
+                }
+                return (
+                    <div key={stage.key} className={`flex flex-col items-center justify-center shrink-0 h-[72px] p-2 rounded-xl border text-center transition-all ${isRaid ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-100'}`}>
+                        {isRaid && <span className="text-[8px] font-black uppercase text-orange-500 mb-0.5">Raid</span>}
+                        <span className={`text-[10px] md:text-[11px] font-black uppercase leading-tight line-clamp-2 ${colors.text}`}>{stage.shortLabel || stage.label}</span>
+                        <span className={`text-[11px] md:text-xs font-black mt-0.5 ${time ? 'text-abysse' : 'text-slate-300'}`}>{time}</span>
+                        {slot?.activity && <span className="text-[9px] font-bold text-slate-400 mt-0.5 max-w-[70px] truncate uppercase">{getActivityLabel(slot.activity)}</span>}
+                    </div>
+                );
+            } else {
+                // Mobile list view
+                return (
+                    <div key={stage.key} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${isRaid ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-100'} ${!time ? 'opacity-50 grayscale' : ''}`}>
+                        <div className="flex items-center gap-2">
+                            <div className={`size-2.5 rounded-full ${colors.iconColor} shrink-0`} />
+                            <span className={`text-xs font-black uppercase ${colors.text}`}>{stage.shortLabel || stage.label}</span>
+                        </div>
+                        <div className="flex flex-col items-end gap-0.5">
+                            {isRaid && <span className="text-[8px] font-black uppercase text-orange-500">Raid</span>}
+                            <span className={`text-sm font-black leading-none ${time ? 'text-abysse' : 'text-slate-300'}`}>{time || '—'}</span>
+                            {slot?.activity && <span className="text-[9px] font-bold text-slate-400 mt-0.5 uppercase">{getActivityLabel(slot.activity)}</span>}
+                        </div>
+                    </div>
+                );
+            }
+        });
+    };
 
-                                    if (typeof session === 'object') {
-                                        time = session?.time || '--';
-                                        desc = session?.description;
-                                    } else {
-                                        time = session || '--';
-                                    }
-
-                                    return (
-                                        <td key={dayIdx} className={`p-1 ${isVisible ? 'block' : 'hidden'} md:table-cell`}>
-                                            <div className={`rounded-xl h-full min-h-[50px] flex flex-col items-center justify-center text-center shadow-sm transition-colors bg-white border ${isRaid ? 'border-orange-200' : 'border-slate-100 hover:border-turquoise/50'} p-2`}>
-                                                {isRaid && (
-                                                    <span className="mb-1 px-1.5 py-0.5 bg-orange-500 text-white text-[8px] font-black uppercase tracking-widest rounded-md">
-                                                        🗺️ Raid
-                                                    </span>
-                                                )}
-                                                <span className="text-[11px] font-black text-abysse leading-none">{time}</span>
-                                                {desc && <span className="text-[8px] font-bold text-slate-400 uppercase mt-1 line-clamp-1">{desc}</span>}
+    const renderVoileTable = (week: any) => {
+        const selectedDay = week.days?.[selectedDayIdx];
+        return (
+            <>
+                {/* MOBILE VIEW */}
+                <div className="md:hidden flex flex-col gap-3">
+                    {renderDayTabs(week, 'bg-abysse text-white')}
+                    <div className="flex flex-col gap-1.5 pb-2">
+                        {renderVoileDayContent(selectedDay, false)}
+                    </div>
+                </div>
+                {/* DESKTOP VIEW (TABLE) */}
+                <div className="hidden md:block overflow-x-auto pb-6 scroll-smooth -mx-2 px-2">
+                    <table className="w-full text-left border-separate border-spacing-y-2 min-w-[850px]">
+                        <thead>
+                            <tr>
+                                <th className="p-3 w-[150px]"></th>
+                                {week.days?.map((day: any, i: number) => (
+                                    <th key={i} className={`p-2 text-center border-b-2 ${day.date === new Date().toISOString().split('T')[0] ? 'border-abysse' : 'border-slate-200'}`}>
+                                        <p className="text-xs font-black uppercase text-slate-800 tracking-wider disabled-if-empty">{day.name}</p>
+                                        <p className="text-[10px] text-slate-400 font-bold mt-0.5">
+                                            {day.date ? new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''}
+                                        </p>
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {stageDefinitions.map((stage: any) => {
+                                const colors = STAGE_COLOR_MAP[stage.color || ''] ?? DEFAULT_COLORS;
+                                return (
+                                    <tr key={stage.key} className="bg-white hover:bg-slate-50 transition-colors group">
+                                        <td className="p-3 rounded-l-2xl border-y border-l border-slate-100 shadow-sm align-middle">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`size-3 rounded-full ${colors.iconColor} shrink-0`} />
+                                                <span className={`text-[10px] lg:text-[11px] font-black uppercase ${colors.text} leading-tight`}>{stage.shortLabel || stage.label}</span>
                                             </div>
                                         </td>
-                                    );
-                                })}
-                            </tr>
+                                        {week.days?.map((day: any, i: number) => {
+                                            const slot = (day?.stageSlots || []).find((s: any) => s.stageKey === stage.key);
+                                            const isRaid = day?.isRaidDay && (day?.raidStageKey || '').split(',').includes(stage.key);
+                                            const time = slot?.time;
+                                            return (
+                                                <td key={i} className={`p-2 border-y border-slate-100 text-center align-middle ${i === 6 ? 'border-r rounded-r-2xl' : ''} shadow-sm`}>
+                                                    {time ? (
+                                                        <div className={`mx-auto flex flex-col items-center justify-center p-2 rounded-xl transition-all max-w-[120px] ${isRaid ? 'bg-orange-50 border border-orange-200' : 'bg-slate-50 border border-slate-100'}`}>
+                                                            {isRaid && <span className="text-[8px] font-black uppercase text-orange-500 mb-0.5">Raid</span>}
+                                                            <span className={`text-xs font-black ${time ? 'text-abysse' : 'text-slate-300'}`}>{time}</span>
+                                                            {slot?.activity && <span className="text-[8px] font-bold text-slate-400 mt-0.5 max-w-full truncate px-1 uppercase" title={getActivityLabel(slot.activity)}>{getActivityLabel(slot.activity)}</span>}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-slate-200 font-bold opacity-0 group-hover:opacity-50 transition-opacity select-none">—</span>
+                                                    )}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </>
+        );
+    };
+
+    // --- RENDER CHAR ---
+    const renderCharDayContent = (day: any, isDesktop: boolean) => {
+        const hasSessions = day?.sessions?.length > 0;
+        if (!hasSessions) {
+            return isDesktop ? <div className="h-[72px] border border-transparent shrink-0" /> : (
+                <div className="p-4 rounded-xl border border-slate-100 bg-white text-center">
+                    <span className="text-xs font-bold text-slate-300 uppercase">Pas de séance</span>
+                </div>
+            );
+        }
+        return day.sessions.map((sess: any, idx: number) => (
+            isDesktop ? (
+                <div key={idx} className="flex flex-col items-center justify-center shrink-0 h-[72px] p-2 rounded-xl border bg-white border-purple-100 gap-1 text-center">
+                    <span className="text-[10px] md:text-[11px] font-black uppercase text-purple-700 leading-tight">Roulage</span>
+                    <span className="text-[11px] md:text-xs font-black text-abysse leading-none bg-purple-50 px-2 py-1.5 rounded-md mt-0.5">{sess.time}</span>
+                </div>
+            ) : (
+                <div key={idx} className="flex items-center justify-between p-3 rounded-xl border bg-white border-purple-100 gap-2">
+                    <div className="flex items-center gap-2">
+                        <div className="size-2.5 rounded-full bg-purple-500 shrink-0" />
+                        <span className="text-xs font-black uppercase text-purple-700">Roulage</span>
+                    </div>
+                    <span className="text-sm font-black text-abysse leading-none bg-purple-50 px-2 py-1 rounded-md">{sess.time}</span>
+                </div>
+            )
+        ));
+    };
+
+    const renderCharTable = (week: any) => {
+        const selectedDay = week.days?.[selectedDayIdx];
+        return (
+            <>
+                {/* MOBILE VIEW */}
+                <div className="md:hidden flex flex-col gap-3">
+                    {renderDayTabs(week, 'bg-purple-500 text-white')}
+                    <div className="flex flex-col gap-1.5 pb-2">
+                        {renderCharDayContent(selectedDay, false)}
+                    </div>
+                </div>
+                {/* DESKTOP VIEW */}
+                <div className="hidden md:block overflow-x-auto pb-6 -mx-2 px-2 scroll-smooth">
+                    <div className="grid grid-cols-7 gap-2 min-w-[850px] pb-2">
+                        {week.days?.map((day: any, i: number) => (
+                            <div key={i} className="flex flex-col gap-2">
+                                <div className={`text-center pb-2 border-b-2 ${day.date === new Date().toISOString().split('T')[0] ? 'border-purple-500' : 'border-slate-200'}`}>
+                                    <p className="text-xs font-black uppercase text-slate-800 tracking-wider">{day.name}</p>
+                                    <p className="text-[10px] text-slate-400 font-bold mt-0.5">
+                                        {day.date ? new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''}
+                                    </p>
+                                </div>
+                                <div className="flex flex-col gap-1.5 h-full">
+                                    {renderCharDayContent(day, true)}
+                                </div>
+                            </div>
                         ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
+                    </div>
+                </div>
+            </>
+        );
+    };
 
-    // --- RENDER TABLE CHAR (MODE HORIZONTAL) ---
-    const renderCharTable = (week: any) => (
-        <div className="flex flex-col gap-4">
-            {/* Day Selector Mobile */}
-            <div className="flex md:hidden bg-white p-1 rounded-2xl border border-slate-200 overflow-x-auto no-scrollbar">
-                {week.days?.map((day: any, i: number) => (
-                    <button
-                        key={i}
-                        onClick={() => setSelectedDayIdx(i)}
-                        className={`flex-1 min-w-[60px] py-2 rounded-xl text-[10px] font-black uppercase transition-all ${selectedDayIdx === i ? 'bg-purple-500 text-white shadow-md' : 'text-slate-400'}`}
-                    >
-                        {day.name?.slice(0, 3)}
-                    </button>
-                ))}
-            </div>
+    // --- RENDER MARCHE ---
+    const renderMarcheDayContent = (day: any, isDesktop: boolean) => {
+        const hasSessions = day?.sessions?.length > 0;
+        if (!hasSessions) {
+            return isDesktop ? <div className="h-[72px] border border-transparent shrink-0" /> : (
+                <div className="p-4 rounded-xl border border-slate-100 bg-white text-center">
+                    <span className="text-xs font-bold text-slate-300 uppercase">Pas de séance</span>
+                </div>
+            );
+        }
+        return day.sessions.map((sess: any, idx: number) => (
+            isDesktop ? (
+                <div key={idx} className="flex flex-col items-center justify-center shrink-0 h-[72px] p-2 rounded-xl border bg-white border-turquoise/30 gap-1 text-center">
+                    <span className="text-[10px] md:text-[11px] font-black uppercase text-turquoise leading-tight">Marche</span>
+                    <span className="text-[11px] md:text-xs font-black text-abysse leading-none bg-cyan-50 px-2 py-1.5 rounded-md mt-0.5">{sess.time}</span>
+                </div>
+            ) : (
+                <div key={idx} className="flex items-center justify-between p-3 rounded-xl border bg-white border-turquoise/30 gap-2">
+                    <div className="flex items-center gap-2">
+                        <div className="size-2.5 rounded-full bg-turquoise shrink-0" />
+                        <span className="text-xs font-black uppercase text-turquoise">Marche</span>
+                    </div>
+                    <span className="text-sm font-black text-abysse leading-none bg-cyan-50 px-2 py-1 rounded-md">{sess.time}</span>
+                </div>
+            )
+        ));
+    };
 
-            <div className="overflow-x-auto pb-4">
-                <table className="w-full min-w-full md:min-w-[800px] border-separate border-spacing-1">
-                    <thead className="hidden md:table-header-group">
-                        <tr>
-                            <th className="p-2 text-left w-32 bg-slate-100 rounded-xl">
-                                <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest pl-2">Activité</span>
-                            </th>
-                            {week.days?.map((day: any, i: number) => (
-                                <th key={i} className="p-2 text-center bg-white border border-slate-100 rounded-xl shadow-sm">
-                                    <div className="flex flex-col">
-                                        <span className="block text-abysse font-black text-sm uppercase">{(day.name || '---').slice(0, 3)}</span>
-                                        <span className="text-[9px] font-bold text-slate-400">
-                                            {new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                                        </span>
-                                    </div>
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="flex flex-col md:table-row">
-                            <td className="p-3 rounded-xl border border-purple-200 bg-purple-50 shadow-sm align-top md:table-cell mb-1 md:mb-0">
-                                <div className="flex items-center gap-3">
-                                    <div className="size-8 rounded-lg bg-purple-500 flex items-center justify-center text-white shadow-sm">
-                                        <Wind size={16} />
-                                    </div>
-                                    <div>
-                                        <span className="block font-black uppercase italic text-xs text-purple-700">Roulage</span>
-                                        <span className="block text-[9px] font-bold opacity-40 uppercase">Tous nvx</span>
-                                    </div>
+    const renderMarcheTable = (week: any) => {
+        const selectedDay = week.days?.[selectedDayIdx];
+        return (
+            <>
+                {/* MOBILE VIEW */}
+                <div className="md:hidden flex flex-col gap-3">
+                    {renderDayTabs(week, 'bg-turquoise text-abysse')}
+                    <div className="flex flex-col gap-1.5 pb-2">
+                        {renderMarcheDayContent(selectedDay, false)}
+                    </div>
+                </div>
+                {/* DESKTOP VIEW */}
+                <div className="hidden md:block overflow-x-auto pb-6 -mx-2 px-2 scroll-smooth">
+                    <div className="grid grid-cols-7 gap-2 min-w-[850px] pb-2">
+                        {week.days?.map((day: any, i: number) => (
+                            <div key={i} className="flex flex-col gap-2">
+                                <div className={`text-center pb-2 border-b-2 ${day.date === new Date().toISOString().split('T')[0] ? 'border-turquoise' : 'border-slate-200'}`}>
+                                    <p className="text-xs font-black uppercase text-slate-800 tracking-wider">{day.name}</p>
+                                    <p className="text-[10px] text-slate-400 font-bold mt-0.5">
+                                        {day.date ? new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''}
+                                    </p>
                                 </div>
-                            </td>
-                            {week.days?.map((day: any, i: number) => {
-                                const isVisible = i === selectedDayIdx;
-                                const hasSessions = day.sessions && day.sessions.length > 0;
-                                return (
-                                    <td key={i} className={`p-1 align-top h-full ${isVisible ? 'block' : 'hidden'} md:table-cell`}>
-                                        <div className="bg-white border border-slate-100 rounded-xl p-2 h-full min-h-[50px] flex flex-col gap-2 shadow-sm hover:border-turquoise/50 transition-colors">
-                                            {hasSessions ? (
-                                                day.sessions.map((sess: any, idx: number) => (
-                                                    <div key={idx} className="bg-purple-50 border border-purple-100 rounded-lg p-2 text-center">
-                                                        <span className="block text-xs font-black text-purple-700 leading-none">{sess.time}</span>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div className="flex-1 flex items-center justify-center opacity-30">
-                                                    <span className="text-[10px] font-black text-slate-300">-</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </td>
-                                );
-                            })}
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
-
-    // --- RENDER TABLE MARCHE (MODE HORIZONTAL) ---
-    const renderMarcheTable = (week: any) => (
-        <div className="flex flex-col gap-4">
-            {/* Day Selector Mobile */}
-            <div className="flex md:hidden bg-white p-1 rounded-2xl border border-slate-200 overflow-x-auto no-scrollbar">
-                {week.days?.map((day: any, i: number) => (
-                    <button
-                        key={i}
-                        onClick={() => setSelectedDayIdx(i)}
-                        className={`flex-1 min-w-[60px] py-2 rounded-xl text-[10px] font-black uppercase transition-all ${selectedDayIdx === i ? 'bg-turquoise text-abysse shadow-md' : 'text-slate-400'}`}
-                    >
-                        {day.name?.slice(0, 3)}
-                    </button>
-                ))}
-            </div>
-
-            <div className="overflow-x-auto pb-4">
-                <table className="w-full min-w-full md:min-w-[800px] border-separate border-spacing-1">
-                    <thead className="hidden md:table-header-group">
-                        <tr>
-                            <th className="p-2 text-left w-32 bg-slate-100 rounded-xl">
-                                <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest pl-2">Activité</span>
-                            </th>
-                            {week.days?.map((day: any, i: number) => (
-                                <th key={i} className="p-2 text-center bg-white border border-slate-100 rounded-xl shadow-sm">
-                                    <div className="flex flex-col">
-                                        <span className="block text-abysse font-black text-sm uppercase">{(day.name || '---').slice(0, 3)}</span>
-                                        <span className="text-[9px] font-bold text-slate-400">
-                                            {new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                                        </span>
-                                    </div>
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="flex flex-col md:table-row">
-                            <td className="p-3 rounded-xl border border-turquoise/20 bg-turquoise/5 shadow-sm align-top md:table-cell mb-1 md:mb-0">
-                                <div className="flex items-center gap-3">
-                                    <div className="size-8 rounded-lg bg-turquoise flex items-center justify-center text-white shadow-sm">
-                                        <Waves size={16} />
-                                    </div>
-                                    <div>
-                                        <span className="block font-black uppercase italic text-xs text-turquoise-700">Marche</span>
-                                        <span className="block text-[9px] font-bold opacity-40 uppercase">Tous nvx</span>
-                                    </div>
+                                <div className="flex flex-col gap-1.5 h-full">
+                                    {renderMarcheDayContent(day, true)}
                                 </div>
-                            </td>
-                            {week.days?.map((day: any, i: number) => {
-                                const isVisible = i === selectedDayIdx;
-                                const hasSessions = day.sessions && day.sessions.length > 0;
-                                return (
-                                    <td key={i} className={`p-1 align-top h-full ${isVisible ? 'block' : 'hidden'} md:table-cell`}>
-                                        <div className="bg-white border border-slate-100 rounded-xl p-2 h-full min-h-[50px] flex flex-col gap-2 shadow-sm hover:border-turquoise/50 transition-colors">
-                                            {hasSessions ? (
-                                                day.sessions.map((sess: any, idx: number) => (
-                                                    <div key={idx} className="bg-turquoise/5 border border-turquoise/10 rounded-lg p-2 text-center">
-                                                        <span className="block text-xs font-black text-turquoise-700 leading-none">{sess.time}</span>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div className="flex-1 flex items-center justify-center opacity-30">
-                                                    <span className="text-[10px] font-black text-slate-300">-</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </td>
-                                );
-                            })}
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </>
+        );
+    };
 
     return (
-        <div className="bg-white rounded-4xl border border-slate-200 shadow-xl overflow-hidden font-sans flex flex-col h-full">
+        <div className="w-full font-sans flex flex-col shrink-0">
 
             {/* HEADER : TABS & NAV */}
-            <div className="bg-abysse p-6 pb-0 flex flex-col gap-6 shrink-0">
+            <div className="bg-abysse p-4 md:p-6 pb-0 flex flex-col gap-4 md:gap-6 shrink-0">
 
                 {/* TABS SWITCHER */}
                 <div className="flex p-1 bg-slate-800/50 rounded-2xl border border-white/5 self-stretch md:self-start overflow-x-auto no-scrollbar">
@@ -451,9 +457,9 @@ export const PlanningWidget: React.FC = () => {
                 </div>
 
                 {/* NAVIGATION BAR */}
-                <div className="flex items-center justify-between pb-6 border-b border-white/10">
+                <div className="flex items-center justify-between pb-4 md:pb-6 border-b border-white/10">
                     <div className="hidden md:block">
-                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter loading-none">
+                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-none">
                             {activeTab === 'voile' ? 'Planning Hebdo' : activeTab === 'char' ? 'Sessions Roulage' : 'Marche Aquatique'}
                         </h2>
                         <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">
@@ -471,8 +477,12 @@ export const PlanningWidget: React.FC = () => {
                             <div className="relative flex-1 md:w-[260px] px-2 text-center">
                                 <button onClick={() => setIsWeekSelectorOpen(!isWeekSelectorOpen)} className="w-full flex items-center justify-center gap-2 py-1">
                                     <div className="flex flex-col items-center">
-                                        <span className="block text-[8px] font-black uppercase tracking-widest text-slate-400">Semaine {currentIdx + 1} / {currentList.length}</span>
-                                        <span className="text-xs font-black text-white truncate max-w-[180px]">{currentWeek?.title}</span>
+                                        <span className="block text-[8px] font-black uppercase tracking-widest text-slate-400">
+                                            {currentIdx === -1 ? 'Semaine Actuelle' : `Semaine ${currentIdx + 1} / ${currentList.length}`}
+                                        </span>
+                                        <span className="text-xs font-black text-white truncate max-w-[180px]">
+                                            {currentIdx === -1 ? "Pas de planning" : currentWeek?.title}
+                                        </span>
                                     </div>
                                     <ChevronRight size={14} className={`text-slate-400 transition-transform duration-200 ${isWeekSelectorOpen ? 'rotate-90' : ''}`} />
                                 </button>
@@ -485,6 +495,21 @@ export const PlanningWidget: React.FC = () => {
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Choisir une semaine</span>
                                             </div>
                                             <div className="max-h-[220px] overflow-y-auto py-1">
+                                                {findCurrentWeekIdx(currentList) === -1 && (
+                                                    <button
+                                                        onClick={() => { setCurrentIdx(-1); setIsWeekSelectorOpen(false); }}
+                                                        className={`w-full text-left px-4 py-3 text-xs font-bold flex items-center justify-between gap-2 transition-all ${currentIdx === -1
+                                                            ? 'bg-abysse text-white'
+                                                            : 'text-slate-600 hover:bg-slate-50'
+                                                            }`}
+                                                    >
+                                                        <span className="flex items-center gap-3">
+                                                            <span className={`size-6 rounded-lg flex items-center justify-center text-[10px] font-black ${currentIdx === -1 ? 'bg-turquoise text-abysse' : 'bg-slate-100 text-slate-400'}`}>-</span>
+                                                            <span className="truncate">Semaine en cours</span>
+                                                        </span>
+                                                        {currentIdx === -1 && <span className="text-turquoise text-[10px] font-black uppercase">Actuel</span>}
+                                                    </button>
+                                                )}
                                                 {currentList.map((p, idx) => (
                                                     <button
                                                         key={idx}
@@ -516,8 +541,8 @@ export const PlanningWidget: React.FC = () => {
             </div>
 
             {/* BODY CONTENT */}
-            <div className="flex-1 overflow-auto bg-slate-50 p-4 md:p-6">
-                {!currentWeek ? (
+            <div className="bg-slate-50 p-4 md:p-6">
+                {currentList.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center gap-4 py-16">
                         <div className="size-16 rounded-2xl bg-slate-100 flex items-center justify-center">
                             <Calendar size={28} className="text-slate-300" />
@@ -527,23 +552,26 @@ export const PlanningWidget: React.FC = () => {
                             <p className="text-xs text-slate-300 mt-1">Revenez prochainement</p>
                         </div>
                     </div>
+                ) : currentIdx === -1 ? (
+                    <div className="flex flex-col items-center justify-center py-16 gap-5">
+                        <div className="size-16 rounded-2xl bg-slate-200 border border-slate-300 flex items-center justify-center shadow-inner">
+                            <Calendar size={28} className="text-slate-400" />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-sm md:text-base font-black uppercase tracking-widest text-slate-500">Pas d'activité cette semaine</p>
+                            <p className="text-[10px] md:text-xs text-slate-400 mt-2 font-bold uppercase tracking-wide">
+                                Utilisez le sélecteur ou les flèches en haut pour voir les plannings à venir.
+                            </p>
+                        </div>
+                        <button
+                            onClick={nextWeek}
+                            className="mt-4 px-6 py-2.5 bg-slate-800 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-turquoise hover:text-abysse transition-colors flex items-center gap-2"
+                        >
+                            Semaine Prochaine <ChevronRight size={16} />
+                        </button>
+                    </div>
                 ) : (
                     <div className="flex flex-col gap-4">
-                        {!hasCurrentWeek && (
-                            <div className="flex items-start gap-4 bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                                <div className="size-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
-                                    <Info size={18} className="text-amber-500" />
-                                </div>
-                                <div>
-                                    <p className="font-black uppercase text-sm text-amber-700 tracking-wide">
-                                        Pas d'activité{activeTab === 'voile' ? ' de stage voile' : activeTab === 'char' ? ' de char à voile' : ' de marche aquatique'} cette semaine
-                                    </p>
-                                    <p className="text-xs text-amber-600/70 mt-0.5">
-                                        Prochain planning disponible ci-dessous — utilisez les flèches pour naviguer.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
                         {activeTab === 'voile' ? renderVoileTable(currentWeek) :
                             activeTab === 'char' ? renderCharTable(currentWeek) :
                                 renderMarcheTable(currentWeek)}

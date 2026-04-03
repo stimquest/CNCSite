@@ -6,6 +6,9 @@ const activityOptions = [
   { title: 'Catamaran', value: 'catamaran' },
   { title: 'Paddle / Kayak', value: 'paddle' },
   { title: 'Char à voile', value: 'char' },
+  { title: 'Planche à voile', value: 'planche' },
+  { title: 'Kite', value: 'kite' },
+  { title: 'Multiglisse', value: 'multiglisse' },
 ];
 
 export const weeklyPlanning = defineType({
@@ -45,6 +48,12 @@ export const weeklyPlanning = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
+      name: 'isPublished',
+      title: 'En ligne',
+      type: 'boolean',
+      initialValue: false
+    }),
+    defineField({
       name: 'days',
       title: 'Jours de la semaine',
       description: '5 jours par défaut (Lun-Ven). Ajoutez Samedi/Dimanche si besoin.',
@@ -58,7 +67,7 @@ export const weeklyPlanning = defineType({
             {
               name: 'name',
               title: 'Nom du jour',
-              type: 'string', // Lundi, Mardi...
+              type: 'string',
               initialValue: 'Lundi'
             },
             {
@@ -67,62 +76,64 @@ export const weeklyPlanning = defineType({
               type: 'date',
               validation: Rule => Rule.required()
             },
-            { name: 'isRaidDay', title: 'Journée Raid ?', type: 'boolean', initialValue: false },
             {
-              name: 'raidTarget',
-              title: 'Cible du Raid',
-              type: 'string',
-              options: {
-                list: [
-                  { title: 'Aucun', value: 'none' },
-                  { title: 'Initiation', value: 'initiation' },
-                  { title: 'Perfectionnement', value: 'perfectionnement' },
-                  { title: 'Moussaillons', value: 'mousses' },
-                  { title: 'Mini-Mousses', value: 'miniMousses' }
-                ],
-                layout: 'radio'
-              },
-              initialValue: 'none'
+              name: 'isRaidDay',
+              title: 'Journée Raid ?',
+              type: 'boolean',
+              initialValue: false
             },
-
-            // MINI MOUSSES
             {
-              name: 'miniMousses',
-              title: 'Mini-Mousses',
-              type: 'object',
-              fields: [
-                { name: 'time', title: 'Horaire', type: 'string' },
-                { name: 'activity', title: 'Activité', type: 'string', options: { list: activityOptions } },
-                { name: 'description', title: 'Description', type: 'string' }
+              name: 'raidStageKey',
+              title: 'Stage concerné par le Raid',
+              type: 'string',
+              description: 'Clé du stage qui part en raid ce jour (ex: "initiation", "perfectionnement")',
+            },
+            {
+              name: 'stageSlots',
+              title: 'Créneaux par stage',
+              description: 'Un créneau par stage actif. Laisser vide si un stage n\'a pas séance ce jour.',
+              type: 'array',
+              of: [
+                defineArrayMember({
+                  type: 'object',
+                  name: 'stageSlot',
+                  fields: [
+                    {
+                      name: 'stageKey',
+                      title: 'Stage',
+                      type: 'string',
+                      description: 'Clé du stage (ex: mini-mousses, moussaillons, initiation…)',
+                      validation: Rule => Rule.required()
+                    },
+                    {
+                      name: 'time',
+                      title: 'Horaire',
+                      type: 'string',
+                      description: 'Ex: "10h - 12h", "Raid", "FERMÉ", "COMPLET"'
+                    },
+                    {
+                      name: 'activity',
+                      title: 'Activité',
+                      type: 'string',
+                      options: { list: activityOptions }
+                    },
+                    {
+                      name: 'description',
+                      title: 'Description',
+                      type: 'string'
+                    }
+                  ],
+                  preview: {
+                    select: { stageKey: 'stageKey', time: 'time', activity: 'activity' },
+                    prepare({ stageKey, time, activity }) {
+                      return {
+                        title: stageKey,
+                        subtitle: [time, activity].filter(Boolean).join(' · ')
+                      };
+                    }
+                  }
+                })
               ]
-            },
-
-            // MOUSSES
-            {
-              name: 'mousses',
-              title: 'Moussaillons',
-              type: 'object',
-              fields: [
-                { name: 'time', title: 'Horaire', type: 'string' },
-                { name: 'activity', title: 'Activité', type: 'string', options: { list: activityOptions } },
-                { name: 'description', title: 'Description', type: 'string' }
-              ]
-            },
-
-            // INITIATION
-            {
-              name: 'initiation',
-              title: 'Initiation',
-              type: 'string',
-              description: 'Format: "HHhMM - HHhMM" OU "Raid"'
-            },
-
-            // PERFECTIONNEMENT
-            {
-              name: 'perfectionnement',
-              title: 'Perfectionnement',
-              type: 'string',
-              description: 'Format: "HHhMM - HHhMM" OU "Raid"'
             }
           ],
           preview: {
@@ -135,13 +146,14 @@ export const weeklyPlanning = defineType({
   preview: {
     select: {
       title: 'title',
-      date: 'startDate'
+      date: 'startDate',
+      published: 'isPublished'
     },
-    prepare({ title, date }) {
+    prepare({ title, date, published }) {
       return {
-        title: title,
+        title: `${published ? '🟢' : '⚪'} ${title}`,
         subtitle: date
-      }
+      };
     }
   }
 });

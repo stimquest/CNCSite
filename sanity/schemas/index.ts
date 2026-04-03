@@ -32,6 +32,7 @@ import { agendaEvent } from './agendaEvent';
 import { charSession } from './charSession';
 import { charBooking } from './charBooking';
 import { charAVoilePage } from './charAVoilePage';
+import { stageDefinition } from './stageDefinition';
 
 // Page Builder Sections
 import { heroSection } from './sections/heroSection';
@@ -73,6 +74,7 @@ export const schemaTypes = [
   charSession,
   charBooking,
   charAVoilePage,
+  stageDefinition,
   
   // Page Builder Sections
   heroSection,

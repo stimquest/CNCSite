@@ -1,4 +1,4 @@
-# 📘 MANUEL DE GESTION DU SITE — C.N. COUTAINVILLE
+# 📘 MANUEL DE GESTION DU SITE — C.N.C COUTAINVILLE
 
 > **Dernière mise à jour : Avril 2026**
 >
@@ -37,7 +37,7 @@ Le site du CNC fonctionne avec **3 outils distincts**, pensés pour 3 fréquence
 
 | Outil | À quelle fréquence ? | Pour faire quoi ? | Adresse web |
 | :--- | :--- | :--- | :--- |
-| **🟢 Le Cockpit** | **Tous les matins** | Dire si les activités du jour sont confirmées, annulées ou adaptées selon la météo. | `cncoutainville.fr/cockpit` |
+| **🟢 Le Cockpit** | **Tous les matins** | Dire si les activités du jour sont confirmées, annulées ou adaptées selon la météo. | `cncoutainville.fr/admin` → onglet 🚀 Cockpit |
 | **🔵 La Page Admin** | **En semaine / à la saison** | Gérer les réservations du Char, créer les plannings de stages, envoyer des messages d'urgence aux élèves. | `cncoutainville.fr/admin` |
 | **🟣 Sanity Studio** | **En début/fin de saison** | Modifier les textes des pages du site, publier des articles de blog, mettre à jour les tarifs, gérer l'écran TV du club house. | `cncoutainville.sanity.studio` |
 
@@ -49,7 +49,7 @@ Le site du CNC fonctionne avec **3 outils distincts**, pensés pour 3 fréquence
 
 ## 2. LE COCKPIT — CHAQUE MATIN AVANT LA MISE À L'EAU
 
-**Adresse :** `cncoutainville.fr/cockpit`
+**Accès :** Page Admin (`cncoutainville.fr/admin`) → onglet **🚀 Cockpit** (tout à droite de la barre de navigation)
 
 Le Cockpit est le tableau de bord météo du club. C'est ici que vous informez les élèves en temps réel de l'état des activités — est-ce que la session de char est confirmée ? Le stage Moussaillons se déroule-t-il normalement ? Y a-t-il un ajustement à faire à cause du vent ?
 
@@ -61,25 +61,69 @@ Tout ce que vous modifiez ici s'affiche **immédiatement** sur la page publique 
 
 Chaque matin, le système vérifie si quelqu'un du club a validé les informations récemment. Si le tableau n'a pas été touché depuis plus de 20 heures, une **alerte orange** clignote en haut de la page pour signaler que les infos peuvent être périmées.
 
-👉 **La première chose à faire chaque matin** : cliquer sur le grand bouton vert **"Tout va bien — Confirmer les conditions"**. Ce simple clic dit aux élèves "oui, quelqu'un a vérifié ce matin, les infos sont à jour". Même si rien n'a changé depuis la veille, ce geste est important pour la confiance des familles.
+👉 **La première chose à faire chaque matin** : cliquer sur le grand bouton vert **"Tout va bien — Confirmer les conditions"**. Ce simple clic dit aux élèves "oui, quelqu'un a vérifié ce matin, les infos sont à jour". Même si rien n'a changé depuis la veille, ce geste est important pour la confiance des familles, des clients et des adhérents.  
+
+Une fois confirmé, le bouton devient discret (fond vert pâle) et affiche l'heure de la dernière confirmation.
 
 ---
 
-### Mettre à jour le statut d'une activité
+### Les 7 activités gérées — organisées en 2 colonnes
 
-Pour chaque activité listée (Char à Voile, Mini-Mousses, Marche Aquatique…), vous avez 3 boutons :
+Le Cockpit gère **7 activités** réparties en deux groupes affichés côte à côte :
 
-- **OK** (vert) → La session se déroule normalement, conditions favorables.
-- **~** (orange) → La session a lieu mais avec des adaptations (parcours raccourci, matériel allégé, groupe réduit…).
-- **✕** (rouge) → La session est annulée ou reportée.
+**Colonne gauche — Pratiques autonomes :**
+- Sports Nautiques (voile libre, pratiquée de façon autonome par les pratiquants expérimentés)
 
-Vous pouvez aussi écrire un message court dans le champ texte juste en dessous du bouton (ex: *"Vent de Nord-Ouest soutenu, séance sur les chars légers uniquement"*). Ce message s'affiche directement sur La Vigie.
+**Colonne droite — Activités encadrées :**
+- Char à Voile
+- Marche Aquatique
+- Mini-Mousses
+- Moussaillons
+- Initiation
+- Perfectionnement
 
-**Les suggestions rapides** : sous chaque champ texte, de petites bulles de texte proposent des formulations toutes faites (ex: *"+ Vent soutenu, séance dynamique"*, *"+ Report en fin d'après-midi si amélioration"*). Cliquez dessus pour les ajouter en un clic sans avoir à tout retaper.
+---
 
-**Les actions groupées** : en haut du Cockpit, des boutons permettent de tout passer d'un coup :
-- *"Tout → Confirmé"* : toutes les activités sont vertes d'un seul clic.
+### Les statuts — des labels adaptés à chaque activité
+
+Les boutons de statut ne sont pas identiques pour toutes les activités. Les **libellés s'adaptent** au type d'activité pour être plus précis :
+
+| Activité | Vert (favorable) | Orange (adapté) | Rouge (arrêt) | Gris (absent) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Sports Nautiques** | Favorables | Techniques (Exp.) | Déconseillée | — |
+| **Stages** (Mini-Mousses, Moussaillons, Initiation, Perf) | Confirmée | Cond. techniques | Annulée | **Hors Période** |
+| **Marche Aquatique** | Confirmée | Parcours adapté | Reportée | **Pas de séance** |
+| **Char à Voile** | Confirmée | Cond. techniques | Annulée | **Hors Période** |
+
+> Le statut **Hors Période / Pas de séance** (gris) est important : il indique que l'activité n'est simplement pas au programme ce jour-là — ni annulée, ni adaptée, juste absente. À utiliser pour les activités hors saison ou sans séance planifiée.
+
+⚠️ **Quand vous changez le statut d'une activité, la note textuelle est automatiquement effacée.** C'est voulu : le message de la veille ne colle plus forcément au nouveau statut. Réécrivez une note si nécessaire.
+
+---
+
+### Ajouter ou modifier une note
+
+Sous chaque activité, un champ texte permet d'ajouter une précision visible sur La Vigie (ex: *"Vent de Nord-Ouest soutenu, séance sur les chars légers uniquement"*).
+
+**Les suggestions rapides** : des petites bulles de texte proposent des formulations toutes faites selon le statut choisi (ex: *"+ Vent soutenu, séance dynamique"*). Cliquez dessus pour les insérer en un clic — elles s'ajoutent à la fin du texte existant et sont enregistrées immédiatement.
+
+**Effacer une note** : quand une note est présente, un bouton **"Effacer note"** (rouge pâle) apparaît à droite des suggestions. Cliquez dessus pour vider le champ en un clic.
+
+---
+
+### Les actions rapides — mettre à jour tout d'un coup
+
+En haut du Cockpit, 6 boutons permettent de changer le statut de plusieurs activités en un seul clic :
+
+**Ligne 1 — Tout basculer d'un coup :**
+- *"Tout → Oui"* : toutes les activités passent en vert (conditions favorables).
+- *"Tout → Adapté"* : toutes passent en orange (conditions techniques / adaptées).
+- *"Tout → Non"* : toutes passent en rouge (annulé / déconseillé).
+
+**Ligne 2 — Actions ciblées :**
+- *"Autonomes → Déconseillée"* : uniquement les Sports Nautiques passent en rouge.
 - *"Encadrées → Annulé"* : pratique en cas de gros coup de vent — annule toutes les activités encadrées d'un seul coup.
+- *"Encadrées → Hors Saison"* : met toutes les activités encadrées en statut gris "Hors Période". À utiliser en dehors de la saison.
 
 ---
 

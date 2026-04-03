@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from 'react';
-import { Plus, Trash2, Save, Phone, Users, CheckCircle, Clock, XCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, RefreshCw, Eye, EyeOff, Pencil, X } from 'lucide-react';
+import { Plus, Trash2, Save, Phone, Users, CheckCircle, Clock, XCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, RefreshCw, Eye, EyeOff, Pencil, X, BarChart2, AlertTriangle } from 'lucide-react';
 import { CharSessionDoc, CharBookingDoc, CharBookingStatut } from '@/types';
 
 // --- UTILS ---
@@ -48,6 +48,14 @@ const STATUT_CONFIG: Record<CharBookingStatut, { label: string; icon: React.Reac
     confirme: { label: 'Confirmé', icon: <CheckCircle size={12} />, color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
     liste_attente: { label: 'Liste attente', icon: <Clock size={12} />, color: 'text-amber-600 bg-amber-50 border-amber-200' },
     annule: { label: 'Annulé', icon: <XCircle size={12} />, color: 'text-red-500 bg-red-50 border-red-200' },
+};
+
+const getCapacityProps = (reserved: number, max: number) => {
+    const rate = max > 0 ? (reserved / max) * 100 : 0;
+    if (rate < 50) return { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', activeBg: 'bg-emerald-500' };
+    if (rate < 80) return { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', activeBg: 'bg-amber-500' };
+    if (rate < 100) return { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', activeBg: 'bg-orange-500' };
+    return { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', activeBg: 'bg-red-500' };
 };
 
 interface Props {
@@ -101,6 +109,9 @@ export default function CharBookingAdmin({ sessions, onRefresh }: Props) {
     const [editBookingForm, setEditBookingForm] = useState<Partial<NewBookingForm>>({});
     const [showNewSession, setShowNewSession] = useState(false);
     const [showNewBooking, setShowNewBooking] = useState(false);
+    const [showDashboardModal, setShowDashboardModal] = useState(false);
+    const [dashYear, setDashYear] = useState(() => new Date().getFullYear());
+    const [dashMonth, setDashMonth] = useState(() => new Date().getMonth());
     const [sessionForm, setSessionForm] = useState<NewSessionForm>(emptySessionForm());
     const [bookingForm, setBookingForm] = useState<NewBookingForm>(emptyBookingForm());
     const [isSaving, setIsSaving] = useState(false);
@@ -260,16 +271,41 @@ export default function CharBookingAdmin({ sessions, onRefresh }: Props) {
         }
     };
 
+    const computeStats = (list: CharSessionDoc[]) => {
+        let totalCap = 0;
+        let totalRes = 0;
+        list.forEach(s => {
+            totalCap += s.capaciteMax;
+            totalRes += ((s as any).placesReservees ?? 0);
+        });
+        const fillRate = totalCap > 0 ? Math.round((totalRes / totalCap) * 100) : 0;
+        return { count: list.length, totalCap, totalRes, fillRate };
+    };
+
+    const nowIso = today();
+    const upcomingSessions = sessions.filter(s => s.date >= nowIso);
+    const upStats = computeStats(upcomingSessions);
+    const allStats = computeStats(sessions);
+
     return (
         <div className="flex flex-col lg:flex-row gap-6">
             {/* SIDEBAR — Sessions */}
             <div className="lg:w-80 shrink-0 space-y-4">
-                <button
-                    onClick={() => setShowNewSession(v => !v)}
-                    className="w-full py-3 bg-orange-500 text-white rounded-xl font-black uppercase tracking-widest hover:bg-abysse transition-all shadow-md flex items-center justify-center gap-2 text-sm"
-                >
-                    <Plus size={16} /> Nouvelle Session
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setShowNewSession(v => !v)}
+                        className="flex-1 py-3 bg-orange-500 text-white rounded-xl font-black uppercase tracking-widest hover:bg-abysse transition-all shadow-md flex items-center justify-center gap-2 text-sm"
+                    >
+                        <Plus size={16} /> Session
+                    </button>
+                    <button
+                        onClick={() => setShowDashboardModal(true)}
+                        className="p-3 bg-white text-abysse border border-slate-200 rounded-xl font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-2"
+                        title="Vue d'ensemble"
+                    >
+                        <BarChart2 size={16} />
+                    </button>
+                </div>
 
                 {/* Formulaire nouvelle session */}
                 {showNewSession && (
@@ -404,9 +440,15 @@ export default function CharBookingAdmin({ sessions, onRefresh }: Props) {
                                             </span>
                                         </div>
                                         <div className="flex flex-col items-end gap-1.5">
-                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${isFull ? 'text-red-500 bg-red-50 border-red-200' : 'text-emerald-600 bg-emerald-50 border-emerald-200'}`}>
-                                                {remaining}/{s.capaciteMax}
-                                            </span>
+                                            <div className={`flex flex-col gap-1 w-20 px-2 py-1 rounded-lg border ${getCapacityProps(reserved, s.capaciteMax).bg} ${getCapacityProps(reserved, s.capaciteMax).border} ${getCapacityProps(reserved, s.capaciteMax).text}`}>
+                                                <div className="flex justify-between w-full text-[9px] font-black leading-none">
+                                                    <span>{remaining} libr.</span>
+                                                    <span>/{s.capaciteMax}</span>
+                                                </div>
+                                                <div className="h-1 w-full bg-white/50 rounded-full overflow-hidden">
+                                                    <div className={`h-full opacity-80 ${getCapacityProps(reserved, s.capaciteMax).activeBg}`} style={{ width: `${s.capaciteMax > 0 ? (reserved / s.capaciteMax) * 100 : 0}%` }} />
+                                                </div>
+                                            </div>
                                             <span className={`text-[9px] font-bold ${s.actif === false ? 'text-slate-400' : 'text-emerald-500'}`}>
                                                 {s.actif === false ? '🔒 masqué' : '🟢 visible'}
                                             </span>
@@ -444,12 +486,14 @@ export default function CharBookingAdmin({ sessions, onRefresh }: Props) {
                                 </div>
                                 <div className="flex items-start gap-3">
                                     {/* Capacité */}
-                                    <div className="text-center bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
-                                        <span className={`block text-2xl font-black ${placesRestantes <= 0 ? 'text-red-500' : placesRestantes <= 2 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                                    <div className="text-center bg-white border border-slate-200 rounded-2xl p-4 shadow-sm min-w-[120px]">
+                                        <span className={`block text-3xl font-black ${getCapacityProps(placesReservees, selectedSession.capaciteMax).text.replace('text-', 'text-').replace('700', '500')}`}>
                                             {placesRestantes}
                                         </span>
-                                        <span className="block text-[9px] font-black uppercase text-slate-400 tracking-wider">places libres</span>
-                                        <span className="block text-[9px] text-slate-300">sur {selectedSession.capaciteMax}</span>
+                                        <span className="block text-[9px] font-black uppercase text-slate-400 tracking-wider">places libres sur {selectedSession.capaciteMax}</span>
+                                        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden mt-2">
+                                            <div className={`h-full opacity-80 ${getCapacityProps(placesReservees, selectedSession.capaciteMax).activeBg}`} style={{ width: `${selectedSession.capaciteMax > 0 ? (placesReservees / selectedSession.capaciteMax) * 100 : 0}%` }} />
+                                        </div>
                                     </div>
                                     {/* Actions */}
                                     <div className="flex flex-col gap-2">
@@ -469,6 +513,41 @@ export default function CharBookingAdmin({ sessions, onRefresh }: Props) {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Alertes d'état (Complet vs Masqué) */}
+                            {selectedSession.actif !== false && placesRestantes <= 0 && (
+                                <div className="bg-amber-50 border-t border-amber-200 p-4 px-6 md:px-8 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-1">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-amber-100/50 text-amber-600 rounded-lg shrink-0">
+                                            <AlertTriangle size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[11px] font-black uppercase tracking-widest text-amber-800 leading-tight">Session Complète</p>
+                                            <p className="text-xs text-amber-700/80 font-bold mt-0.5">Cette session est à 100% mais toujours visible en ligne.</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => handleToggleActif(selectedSession)} disabled={isSaving} className="px-4 py-2 bg-amber-500 text-white font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-amber-600 transition-all shrink-0 text-center flex items-center justify-center gap-2">
+                                        <EyeOff size={14} /> Masquer
+                                    </button>
+                                </div>
+                            )}
+
+                            {selectedSession.actif === false && placesRestantes > 0 && (
+                                <div className="bg-emerald-50 border-t border-emerald-200 p-4 px-6 md:px-8 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-1">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-emerald-100/50 text-emerald-600 rounded-lg shrink-0">
+                                            <CheckCircle size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[11px] font-black uppercase tracking-widest text-emerald-800 leading-tight">Places Libérées</p>
+                                            <p className="text-xs text-emerald-700/80 font-bold mt-0.5">Cette session n'est plus complète, vous pouvez la réactiver.</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => handleToggleActif(selectedSession)} disabled={isSaving} className="px-4 py-2 bg-emerald-500 text-white font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-emerald-600 transition-all shrink-0 text-center flex items-center justify-center gap-2">
+                                        <Eye size={14} /> Laisser visible
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Bookings */}
@@ -651,6 +730,119 @@ export default function CharBookingAdmin({ sessions, onRefresh }: Props) {
                     </div>
                 )}
             </div>
+            {/* Modal Dashboard */}
+            {showDashboardModal && (
+                <div className="fixed inset-0 bg-abysse/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-200">
+                        <div className="p-6 md:p-8 flex items-center justify-between border-b border-slate-100 bg-slate-50">
+                            <h2 className="text-2xl font-black uppercase italic text-abysse tracking-tighter flex items-center gap-3">
+                                <BarChart2 className="text-orange-500" size={28} />
+                                Vue d'ensemble (Char à voile)
+                            </h2>
+                            <button onClick={() => setShowDashboardModal(false)} className="p-2 hover:bg-slate-200 rounded-xl transition-colors text-slate-400 hover:text-abysse">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6 md:p-8 overflow-y-auto max-h-[80vh] space-y-8">
+                            
+                            {/* Chiffres Globaux */}
+                            <div>
+                                <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-4">À Venir (à partir d'aujourd'hui)</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="p-4 bg-orange-50/50 rounded-2xl border border-orange-100/50 flex flex-col items-center justify-center text-center">
+                                        <span className="text-3xl font-black text-orange-500">{upStats.count}</span>
+                                        <span className="text-[9px] font-bold uppercase text-orange-800/60 mt-1">Sessions</span>
+                                    </div>
+                                    <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 flex flex-col items-center justify-center text-center">
+                                        <span className="text-3xl font-black text-emerald-600">{upStats.totalRes}</span>
+                                        <span className="text-[9px] font-bold uppercase text-emerald-800/60 mt-1">Inscrits</span>
+                                    </div>
+                                    <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50 flex flex-col items-center justify-center text-center">
+                                        <span className="text-3xl font-black text-blue-600">{upStats.totalCap}</span>
+                                        <span className="text-[9px] font-bold uppercase text-blue-800/60 mt-1">Capacité max</span>
+                                    </div>
+                                    <div className={`p-4 rounded-2xl border flex flex-col items-center justify-center text-center ${upStats.fillRate >= 80 ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-slate-50 border-slate-200 text-abysse'}`}>
+                                        <span className="text-3xl font-black">{upStats.fillRate}%</span>
+                                        <span className="text-[9px] font-bold uppercase mt-1 opacity-70">Remplissage</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Historique et Calendrier */}
+                            <div className="flex flex-col xl:flex-row gap-6">
+                                <div className="xl:flex-1 shrink-0">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-400">Calendrier des sessions</h3>
+                                        <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 p-1 rounded-xl text-abysse">
+                                            <button onClick={() => { if (dashMonth === 0) { setDashYear(y => y - 1); setDashMonth(11); } else setDashMonth(m => m - 1); }} className="p-1 hover:bg-white rounded-lg transition-colors"><ChevronLeft size={16} /></button>
+                                            <span className="text-[10px] font-black uppercase min-w-[100px] text-center">{MONTHS_FR[dashMonth]} {dashYear}</span>
+                                            <button onClick={() => { if (dashMonth === 11) { setDashYear(y => y + 1); setDashMonth(0); } else setDashMonth(m => m + 1); }} className="p-1 hover:bg-white rounded-lg transition-colors"><ChevronRight size={16} /></button>
+                                        </div>
+                                    </div>
+                                    <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+                                        <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/50">
+                                            {DAYS_SHORT.map((d, i) => <div key={i} className="py-2 text-center text-[10px] font-black uppercase text-slate-400 border-r last:border-0 border-slate-100">{d}</div>)}
+                                        </div>
+                                        <div className="grid grid-cols-7 auto-rows-[minmax(90px,auto)] text-center md:text-left">
+                                            {(() => {
+                                                const days = getCalendarDays(dashYear, dashMonth);
+                                                return days.map((day, i) => {
+                                                    if (!day) return <div key={i} className="border-b border-r border-slate-50 bg-slate-50/30" />;
+                                                    const iso = toIso(day);
+                                                    const daySessions = sessions.filter(s => s.date === iso);
+                                                    const isToday = iso === nowIso;
+                                                    return (
+                                                        <div key={i} className={`p-1.5 md:p-2 border-b border-r last:border-r-0 border-slate-100 flex flex-col gap-1 transition-colors hover:bg-slate-50/50 ${isToday ? 'bg-orange-50/50' : ''}`}>
+                                                            <span className={`text-[10px] font-black ${isToday ? 'text-orange-600' : 'text-slate-400'}`}>{day.getDate()}</span>
+                                                            <div className="flex flex-col gap-1">
+                                                                {daySessions.map(s => {
+                                                                    const reserved = (s as any).placesReservees ?? 0;
+                                                                    const rem = s.capaciteMax - reserved;
+                                                                    const capProps = getCapacityProps(reserved, s.capaciteMax);
+                                                                    
+                                                                    return (
+                                                                        <div key={s._id} className={`p-1.5 rounded-lg border text-[9px] cursor-default flex flex-col gap-1.5 transition-all hover:brightness-95 ${capProps.bg} ${capProps.border} ${capProps.text}`} title={`${s.heureDebut}-${s.heureFin} (${rem} libres sur ${s.capaciteMax})`}>
+                                                                            <div className="font-bold flex flex-col xl:flex-row xl:justify-between gap-0.5 leading-none">
+                                                                                <span>{s.heureDebut}</span>
+                                                                                <span className="font-black tracking-tighter">{rem}/{s.capaciteMax}</span>
+                                                                            </div>
+                                                                            <div className="hidden md:block h-1 w-full bg-white/50 rounded-sm overflow-hidden">
+                                                                                <div className={`h-full opacity-80 ${capProps.activeBg}`} style={{ width: `${s.capaciteMax > 0 ? (reserved / s.capaciteMax) * 100 : 0}%` }} />
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                });
+                                            })()}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="xl:w-64 shrink-0">
+                                    <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-4">Historique Global</h3>
+                                    <div className="flex flex-col gap-3">
+                                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
+                                            <span className="text-2xl font-black text-slate-700">{allStats.count}</span>
+                                            <span className="text-[9px] font-bold uppercase text-slate-400 mt-1">Total Sessions</span>
+                                        </div>
+                                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
+                                            <span className="text-2xl font-black text-slate-700">{allStats.totalRes}</span>
+                                            <span className="text-[9px] font-bold uppercase text-slate-400 mt-1">Total Inscrits</span>
+                                        </div>
+                                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
+                                            <span className="text-2xl font-black text-slate-700">{allStats.fillRate}%</span>
+                                            <span className="text-[9px] font-bold uppercase text-slate-400 mt-1">Taux Rempliss. Moyen</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

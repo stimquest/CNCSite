@@ -277,7 +277,7 @@ export const FloatingActions: React.FC = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-5xl bg-white rounded-4xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+                            className="relative w-full max-w-7xl h-[90vh] md:h-[85vh] max-h-[900px] bg-white rounded-4xl shadow-2xl overflow-hidden flex flex-col"
                         >
                             {/* Header Modal */}
                             <div className="p-6 md:p-8 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
@@ -303,7 +303,7 @@ export const FloatingActions: React.FC = () => {
                             </div>
 
                             {/* Body Modal */}
-                            <div className="flex-1 overflow-y-auto p-6 md:p-10 no-scrollbar">
+                            <div className={`flex-1 overflow-y-auto no-scrollbar ${activeModal === 'planning' ? 'p-0' : 'p-6 md:p-10'}`}>
 
                                 {activeModal === 'weather' && (
                                     <div className="space-y-8">
@@ -379,7 +379,7 @@ export const FloatingActions: React.FC = () => {
                                 )}
 
                                 {activeModal === 'planning' && (
-                                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="w-full h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
                                         <PlanningWidget />
                                     </div>
                                 )}

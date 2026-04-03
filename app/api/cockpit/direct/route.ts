@@ -25,10 +25,7 @@ export async function GET() {
                 charStatus, charMessage, charTags,
                 marcheStatus, marcheMessage, marcheTags,
                 nautiqueStatus, nautiqueMessage, nautiqueTags,
-                stagesMiniMoussesStatus, stagesMiniMoussesMessage,
-                stagesMoussaillonsStatus, stagesMoussaillonsMessage,
-                stagesInitiationStatus, stagesInitiationMessage,
-                stagesPerfStatus, stagesPerfMessage,
+                stageStatuses[] { stageKey, status, message },
                 lastPublishedAt, lastConfirmedAt, planningsLastUpdatedAt
             }`,
             { id: SINGLETON_ID },
@@ -54,16 +51,70 @@ export async function POST(req: Request) {
         const { type, patch } = body;
 
         if (type === 'PATCH') {
-            // 1. Crée le document s'il n'existe pas encore (published, pas draft)
             await serverClient.createIfNotExists({
                 _id: SINGLETON_ID,
                 _type: 'spotSettings',
             });
 
-            // 2. Met à jour les champs
+            // Séparer les mises à jour standard des statuts de stages
+            const { stageStatuses: newStageStatuses, ...standardPatch } = patch;
+
+            const patchBuilder = serverClient
+                .patch(SINGLETON_ID)
+                .set({ ...standardPatch, lastPublishedAt: new Date().toISOString() });
+
+            if (newStageStatuses !== undefined) {
+                // stageStatuses est un tableau complet qu'on remplace entièrement
+                patchBuilder.set({ stageStatuses: newStageStatuses });
+            }
+
+            await patchBuilder.commit();
+
+            revalidatePath('/');
+            revalidatePath('/fil-info');
+            return NextResponse.json({ success: true }, { headers: NO_CACHE_HEADERS });
+        }
+
+        if (type === 'PATCH_STAGE') {
+            // Mise à jour d'un seul stage dans le tableau stageStatuses
+            // body: { type: 'PATCH_STAGE', stageKey, status?, message? }
+            const { stageKey, status, message } = body;
+            if (!stageKey) {
+                return NextResponse.json({ error: 'stageKey requis' }, { status: 400 });
+            }
+
+            await serverClient.createIfNotExists({
+                _id: SINGLETON_ID,
+                _type: 'spotSettings',
+            });
+
+            // Récupérer le tableau actuel
+            const current = await client.fetch(
+                `*[_type == "spotSettings" && _id == $id][0] { stageStatuses[] { stageKey, status, message } }`,
+                { id: SINGLETON_ID },
+                { useCdn: false, cache: 'no-store' as RequestCache }
+            );
+
+            const currentStatuses: any[] = current?.stageStatuses || [];
+            const existingIdx = currentStatuses.findIndex((s: any) => s.stageKey === stageKey);
+
+            let updatedStatuses: any[];
+            if (existingIdx >= 0) {
+                updatedStatuses = currentStatuses.map((s: any) =>
+                    s.stageKey === stageKey
+                        ? { ...s, ...(status !== undefined ? { status } : {}), ...(message !== undefined ? { message } : {}) }
+                        : s
+                );
+            } else {
+                updatedStatuses = [
+                    ...currentStatuses,
+                    { _key: `stage-${stageKey}-${Date.now()}`, stageKey, status: status || 'OPEN', message: message || '' }
+                ];
+            }
+
             await serverClient
                 .patch(SINGLETON_ID)
-                .set({ ...patch, lastPublishedAt: new Date().toISOString() })
+                .set({ stageStatuses: updatedStatuses, lastPublishedAt: new Date().toISOString() })
                 .commit();
 
             revalidatePath('/');

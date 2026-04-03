@@ -247,10 +247,7 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
         spotStatus, lastPublishedAt, lastConfirmedAt,
         charStatus, charMessage, nautiqueStatus, nautiqueMessage,
         marcheStatus, marcheMessage,
-        stagesMiniMoussesStatus, stagesMiniMoussesMessage,
-        stagesMoussaillonsStatus, stagesMoussaillonsMessage,
-        stagesInitiationStatus, stagesInitiationMessage,
-        stagesPerfStatus, stagesPerfMessage
+        stageStatuses, stageDefinitions
     } = useLiveStatus();
 
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -511,12 +508,12 @@ export default function HomePageClient({ homePageData, dicoWords, homeGallery, i
                                         { label: 'Sports Nautiques', status: nautiqueStatus, msg: nautiqueMessage, category: 'autonome_voile' as const },
                                         { label: 'Marche Aqa.', status: marcheStatus, msg: marcheMessage, category: 'marche' as const },
                                     ];
-                                    const stages = [
-                                        { label: 'Mini-Mousses', status: stagesMiniMoussesStatus, msg: stagesMiniMoussesMessage, category: 'encadree' as const },
-                                        { label: 'Moussaillons', status: stagesMoussaillonsStatus, msg: stagesMoussaillonsMessage, category: 'encadree' as const },
-                                        { label: 'Initiation', status: stagesInitiationStatus, msg: stagesInitiationMessage, category: 'encadree' as const },
-                                        { label: 'Perf.', status: stagesPerfStatus, msg: stagesPerfMessage, category: 'encadree' as const },
-                                    ];
+                                    const stages = stageDefinitions.map(s => ({
+                                        label: s.shortLabel || s.label,
+                                        status: stageStatuses[s.key]?.status || 'OPEN',
+                                        msg: stageStatuses[s.key]?.message || '',
+                                        category: 'encadree' as const,
+                                    }));
                                     const getActCfg = (s: string, category: 'encadree' | 'autonome_voile' | 'marche') => {
                                         let label = '';
                                         if (s === 'INACTIVE') {

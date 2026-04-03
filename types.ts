@@ -151,25 +151,39 @@ export interface OccazItem {
   image: string;
 }
 
-export type ActivityType = 'piscine' | 'optimist' | 'paddle' | 'char' | 'catamaran';
+export type ActivityType = 'piscine' | 'optimist' | 'paddle' | 'char' | 'catamaran' | 'planche' | 'kite' | 'multiglisse';
+
+// --- STAGE DEFINITIONS ---
+export interface StageDefinition {
+  _id: string;
+  key: string;            // GROQ résout key.current → string directement
+  label: string;
+  shortLabel?: string;
+  vigieGroupId: string;   // ex: 'stage-minimousses'
+  order: number;
+  isActive: boolean;
+  planningType: 'kid' | 'simple';
+  color?: string;
+}
 
 // --- STAGES (WeeklyPlanning) ---
-export interface KidSession {
-  time: string;
-  activity: ActivityType;
+
+/** Un créneau pour un stage donné sur une journée */
+export interface StageSlot {
+  _key?: string;
+  stageKey: string;       // matches StageDefinition.key.current
+  time?: string;          // "10h - 12h", "Raid", "FERMÉ", "COMPLET"
+  activity?: ActivityType;
   description?: string;
 }
 
 export interface DayEntry {
   _key: string;
-  name: string; // "Lundi", "Mardi"...
-  date: string; // ISO Date "2025-07-07"
+  name: string;         // "Lundi", "Mardi"...
+  date: string;         // ISO Date "2025-07-07"
   isRaidDay: boolean;
-  raidTarget?: 'none' | 'initiation' | 'perfectionnement' | 'mousses' | 'miniMousses';
-  miniMousses?: KidSession;
-  mousses?: KidSession;
-  initiation?: string; // "14h-17h" ou "Raid"
-  perfectionnement?: string; // "14h-17h" ou "Raid"
+  raidStageKey?: string; // clé du stage concerné par le raid
+  stageSlots: StageSlot[];
 }
 
 export interface WeeklyPlanning {
@@ -180,6 +194,13 @@ export interface WeeklyPlanning {
   endDate: string;   // ISO Date
   isPublished?: boolean;
   days: DayEntry[];
+}
+
+/** Statut d'un stage dans le Cockpit */
+export interface StageStatus {
+  stageKey: string;
+  status: SpotStatus;
+  message: string;
 }
 
 // --- CHAR A VOILE (PlanningChar) ---
