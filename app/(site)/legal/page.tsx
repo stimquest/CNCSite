@@ -104,7 +104,7 @@ export default function LegalPage() {
                         <div className="space-y-12 text-slate-600 leading-relaxed font-medium">
                             <section>
                                 <p>
-                                    Au **Club Nautique de Coutainville**, nous respectons votre vie privée. Ce site est conçu pour être minimaliste dans sa collecte de données.
+                                    Au **Club Nautique de Coutainville**, nous respectons votre vie privée. Ce site est conçu pour être transparent sur la collecte de données nécessaire au bon fonctionnement de nos services.
                                 </p>
                             </section>
 
@@ -129,16 +129,29 @@ export default function LegalPage() {
                                 </div>
                             </section>
 
-                            <section>
                                 <div className="flex items-center gap-2 mb-4">
                                     <Eye size={18} className="text-turquoise" />
                                     <h3 className="text-lg text-abysse font-bold">Vos Droits (RGPD)</h3>
                                 </div>
-                                <p>
-                                    Ce site ne collecte aucune donnée personnelle identifiable ou de tracking publicitaire.
-                                    Pour toute question relative à vos données, vous pouvez nous contacter directement au club.
-                                </p>
-                            </section>
+                                <div className="space-y-4">
+                                    <p>
+                                        Dans le cadre de nos activités, nous collectons des données personnelles via nos formulaires (Réservations, Groupes, Contact) :
+                                    </p>
+                                    <ul className="list-disc pl-6 space-y-2">
+                                        <li><strong className="text-abysse">Identité :</strong> Nom, Prénom.</li>
+                                        <li><strong className="text-abysse">Contact :</strong> Numéro de téléphone, Adresse e-mail, Adresse postale.</li>
+                                        <li><strong className="text-abysse">Réservation :</strong> Détails du projet (nombre de participants, dates, activité).</li>
+                                    </ul>
+                                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 mt-6">
+                                        <p className="text-sm">
+                                            <strong className="text-abysse uppercase text-[10px] tracking-wider block mb-2">Finalité & Conservation</strong>
+                                            Ces données sont utilisées exclusivement pour le traitement de vos demandes et la gestion de vos réservations. Elles ne sont jamais cédées à des tiers. Les données sont conservées pendant la durée nécessaire à la gestion de la relation commerciale.
+                                        </p>
+                                    </div>
+                                    <p className="pt-4">
+                                        Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et d'effacement de vos données. Pour exercer ce droit, contactez-nous directement par e-mail à <span className="text-turquoise">contact@cncoutainville.fr</span> ou par courrier au club.
+                                    </p>
+                                </div>
                         </div>
                     </div>
 

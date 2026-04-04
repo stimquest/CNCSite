@@ -732,7 +732,7 @@ export default function CharBookingAdmin({ sessions, onRefresh }: Props) {
             </div>
             {/* Modal Dashboard */}
             {showDashboardModal && (
-                <div className="fixed inset-0 bg-abysse/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-abysse/80 backdrop-blur-sm z-100 flex items-center justify-center p-4">
                     <div className="bg-white rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-200">
                         <div className="p-6 md:p-8 flex items-center justify-between border-b border-slate-100 bg-slate-50">
                             <h2 className="text-2xl font-black uppercase italic text-abysse tracking-tighter flex items-center gap-3">

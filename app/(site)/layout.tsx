@@ -10,6 +10,7 @@ import { FloatingActions } from '@/components/FloatingActions';
 import { SmoothScroll } from '@/components/SmoothScroll';
 import { CookieBanner } from '@/components/CookieBanner';
 import { Analytics } from '@vercel/analytics/next';
+import { WelcomeGuide } from '@/components/WelcomeGuide';
 
 
 const outfit = Outfit({
@@ -129,6 +130,7 @@ export default async function SiteLayout({
                   {children}
                 </main>
                 <Footer />
+                <WelcomeGuide />
                 <FloatingActions />
                 <CookieBanner />
                 <Analytics />
