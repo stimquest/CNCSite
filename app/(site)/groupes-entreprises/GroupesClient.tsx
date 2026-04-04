@@ -144,8 +144,19 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
         );
     };
 
+    // Build anchor ID map from block types
+    const getAnchorId = (block: any, blockType: string) => {
+        if (block.anchorId) return block.anchorId;
+        switch (blockType) {
+            case 'twoColumnsFeature': return 'entreprises';
+            case 'gridShowcase': return 'particuliers';
+            case 'ctaContact': return 'contact';
+            default: return undefined;
+        }
+    };
+
     return (
-        <div id="scolaires" className="min-h-screen bg-white font-sans selection:bg-turquoise selection:text-white scroll-mt-20">
+        <div className="min-h-screen bg-white font-sans selection:bg-turquoise selection:text-white">
             {renderHero()}
             
             {pageBuilder.map((block: any, index: number) => {
@@ -157,7 +168,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
                 switch (block._type) {
                     case 'twoColumnsFeature':
                         return (
-                            <section id="entreprises" key={key} className="container mx-auto px-6 max-w-375 relative z-20 py-24 scroll-mt-20">
+                            <section id={getAnchorId(block, block._type)} key={key} className="container mx-auto px-6 max-w-375 relative z-20 py-24 scroll-mt-20">
                                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                                     <div className="lg:col-span-8 bg-white rounded-[3rem] shadow-xl border border-slate-100 overflow-hidden group">
                                         <div className="grid grid-cols-1 md:grid-cols-2 h-full">
@@ -241,7 +252,7 @@ const GroupesClient: React.FC<GroupesClientProps> = ({ initialGroupsData }) => {
 
                     case 'gridShowcase':
                         return (
-                            <section id="particuliers" key={key} className="py-24 bg-slate-50 overflow-hidden relative scroll-mt-20">
+                            <section id={getAnchorId(block, block._type)} key={key} className="py-24 bg-slate-50 overflow-hidden relative scroll-mt-20">
                                 <div className="absolute top-0 right-0 p-32 opacity-5 pointer-events-none">
                                     <Compass size={400} className="text-abysse rotate-12" />
                                 </div>

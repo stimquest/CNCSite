@@ -39,6 +39,8 @@ import {
   AnimatePresence,
   useScroll,
   useTransform,
+  useMotionValue,
+  animate as motionAnimate,
 } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
@@ -426,83 +428,74 @@ export default function HomePageClient({
   const [isCharModalOpen, setIsCharModalOpen] = useState(false);
   const [currentFocusIndex, setCurrentFocusIndex] = useState(0);
   const [activeSpiritIndex, setActiveSpiritIndex] = useState(0);
-  const [focusX, setFocusX] = useState(0);
+  const motionX = useMotionValue(0);
   const focusWheelLockRef = useRef(false);
   const focusSectionRef = useRef<HTMLDivElement>(null);
   const focusSnapLockRef = useRef(false);
-  const [isTransitioning, setIsTransitioning] = useState(true);
+  const focusIdxRef = useRef(0); // mirror of currentFocusIndex, avoids stale closures
+  const isAnimatingRef = useRef(false); // lock to prevent rapid-fire navigation during reset
 
   // TRUE INFINITE SCROLL LOGIC
   const originalCards = homePageData?.focusCards || [];
-  const loopCards = [...originalCards, ...originalCards, ...originalCards]; // Buffer for loop
+  const loopCards = [...originalCards, ...originalCards, ...originalCards];
   const initialIndex = originalCards.length;
 
-  useEffect(() => {
-    if (originalCards.length > 0) {
-      setCurrentFocusIndex(initialIndex);
-      const vwRatio = window.innerWidth < 1024 ? 0.85 : 0.58;
-      const cardWidth = window.innerWidth * vwRatio;
-      const gap = 24;
-      const viewportCenter = window.innerWidth / 2;
-      const cardCenter = cardWidth / 2;
-      const initialX = -(initialIndex * (cardWidth + gap) - (viewportCenter - cardCenter));
-      setFocusX(initialX);
-    }
-  }, [originalCards.length]);
-
-  const updateFocusX = (index: number, animate = true) => {
-    setIsTransitioning(animate);
+  const calcFocusX = (index: number) => {
     const vwRatio = window.innerWidth < 1024 ? 0.85 : 0.58;
     const cardWidth = window.innerWidth * vwRatio;
     const gap = 24;
-
     const viewportCenter = window.innerWidth / 2;
     const cardCenter = cardWidth / 2;
-    const offsetInList = index * (cardWidth + gap);
-
-    setFocusX(-(offsetInList - (viewportCenter - cardCenter)));
+    return -(index * (cardWidth + gap) - (viewportCenter - cardCenter));
   };
+
+  useEffect(() => {
+    if (originalCards.length > 0) {
+      const idx = initialIndex;
+      setCurrentFocusIndex(idx);
+      focusIdxRef.current = idx;
+      motionX.set(calcFocusX(idx));
+    }
+  }, [originalCards.length]);
 
   const navigateFocus = (index: number) => {
     const totalOriginal = originalCards.length;
-    if (totalOriginal === 0) return;
+    if (totalOriginal === 0 || isAnimatingRef.current) return;
 
+    // Update React state for active card highlighting + dots
     setCurrentFocusIndex(index);
-    updateFocusX(index);
+    focusIdxRef.current = index;
 
-    // Silent reset for infinite loop — uses rAF to guarantee zero flash
-    const needsReset = index >= totalOriginal * 2 || index < totalOriginal;
-    if (needsReset) {
-      const resetIdx = index >= totalOriginal * 2
-        ? index - totalOriginal
-        : index + totalOriginal;
+    // Animate X directly on the DOM via motionValue — NO re-render
+    const targetX = calcFocusX(index);
+    motionAnimate(motionX, targetX, {
+      duration: 0.6,
+      ease: [0.32, 0.72, 0, 1],
+      onComplete: () => {
+        // Silent reset if we've gone past the buffer boundary
+        const needsReset = index >= totalOriginal * 2 || index < totalOriginal;
+        if (needsReset) {
+          const resetIdx = index >= totalOriginal * 2
+            ? index - totalOriginal
+            : index + totalOriginal;
 
-      // Wait for the CSS transition to fully complete (0.6s = 600ms + safety)
-      setTimeout(() => {
-        // 1. Kill transitions
-        setIsTransitioning(false);
+          // Block navigation during the instant jump
+          isAnimatingRef.current = true;
 
-        // 2. Compute the exact target position for the equivalent card
-        const vwRatio = window.innerWidth < 1024 ? 0.85 : 0.58;
-        const cardWidth = window.innerWidth * vwRatio;
-        const gap = 24;
-        const viewportCenter = window.innerWidth / 2;
-        const cardCenter = cardWidth / 2;
-        const newX = -(resetIdx * (cardWidth + gap) - (viewportCenter - cardCenter));
+          // Instant jump — motionValue.set() is synchronous, no animation, no re-render
+          motionX.set(calcFocusX(resetIdx));
+          setCurrentFocusIndex(resetIdx);
+          focusIdxRef.current = resetIdx;
 
-        // 3. Jump index + position in one batch
-        setCurrentFocusIndex(resetIdx);
-        setFocusX(newX);
-
-        // 4. Wait TWO frames so the browser paints the jumped position,
-        //    THEN re-enable transitions. This prevents the flash.
-        requestAnimationFrame(() => {
+          // Unlock after browser paints the new position
           requestAnimationFrame(() => {
-            setIsTransitioning(true);
+            requestAnimationFrame(() => {
+              isAnimatingRef.current = false;
+            });
           });
-        });
-      }, 650);
-    }
+        }
+      },
+    });
   };
 
   const touchStartRef = useRef(0);
@@ -513,8 +506,8 @@ export default function HomePageClient({
     const touchEnd = e.changedTouches[0].clientX;
     const diff = touchStartRef.current - touchEnd;
     if (Math.abs(diff) > 40) {
-      if (diff > 0) navigateFocus(currentFocusIndex + 1);
-      else navigateFocus(currentFocusIndex - 1);
+      if (diff > 0) navigateFocus(focusIdxRef.current + 1);
+      else navigateFocus(focusIdxRef.current - 1);
     }
   };
 
@@ -525,8 +518,8 @@ export default function HomePageClient({
     setTimeout(() => {
       focusWheelLockRef.current = false;
     }, 700);
-    if (e.deltaX > 20) navigateFocus(currentFocusIndex + 1);
-    else if (e.deltaX < -20) navigateFocus(currentFocusIndex - 1);
+    if (e.deltaX > 20) navigateFocus(focusIdxRef.current + 1);
+    else if (e.deltaX < -20) navigateFocus(focusIdxRef.current - 1);
   };
 
   useEffect(() => {
@@ -1192,12 +1185,7 @@ export default function HomePageClient({
               <motion.div
                 id="focus-slider"
                 className="flex gap-6 will-change-transform"
-                style={{
-                  transform: `translateX(${focusX}px)`,
-                  transition: isTransitioning
-                    ? "transform 0.6s cubic-bezier(0.32, 0.72, 0, 1)"
-                    : "none",
-                }}
+                style={{ x: motionX }}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
               >

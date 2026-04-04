@@ -69,6 +69,12 @@ export const gridShowcase = defineType({
             },
             initialValue: 'turquoise'
         }),
+        defineField({
+          name: 'anchorId',
+          title: 'ID d\'ancrage (Navigation)',
+          type: 'string',
+          description: 'Identifiant unique pour les liens d\'ancrage (ex: "particuliers"). Utilisé dans les URLs comme #particuliers.',
+        }),
     ],
     preview: {
         select: { title: 'titlePart1' },

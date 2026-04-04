@@ -74,6 +74,12 @@ export const twoColumnsFeature = defineType({
           },
           initialValue: 'turquoise'
         }),
+        defineField({
+          name: 'anchorId',
+          title: 'ID d\'ancrage (Navigation)',
+          type: 'string',
+          description: 'Identifiant unique pour les liens d\'ancrage (ex: "scolaires", "entreprises"). Utilisé dans les URLs comme #entreprises.',
+        }),
     ],
     preview: {
         select: { title: 'titlePart1', subtitle: 'titlePart2' },

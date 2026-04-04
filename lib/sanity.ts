@@ -148,10 +148,10 @@ export const queries = {
         subtitle, "heroImage": heroImage.asset->url, stats, servicesText
       },
       _type == 'twoColumnsFeature' => {
-        tag, titlePart1, titlePart2, description, features, buttonText, buttonLink, "mainImage": mainImage.asset->url, sideCard { "image": image.asset->url, title, description, bottomText }
+        anchorId, tag, titlePart1, titlePart2, description, features, buttonText, buttonLink, "mainImage": mainImage.asset->url, sideCard { "image": image.asset->url, title, description, bottomText }
       },
       _type == 'gridShowcase' => {
-        tag, titlePart1, titlePart2, cards[] { title, description, iconName, colorTheme, points, buttonText, buttonLink }
+        anchorId, tag, titlePart1, titlePart2, cards[] { title, description, iconName, colorTheme, points, buttonText, buttonLink }
       },
       _type == 'ctaContact' => {
         tag, titlePart1, titlePart2, "bgImage": bgImage.asset->url, primaryButton, secondaryButton

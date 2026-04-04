@@ -86,24 +86,64 @@ export const SmoothScroll = ({ children }: SmoothScrollProps) => {
         return () => window.removeEventListener('popstate', handlePopState);
     }, []);
 
-    // Handle route changes: Reset scroll to top ONLY on new navigations (not back/forward)
+    // Handle route changes: scroll to anchor if hash present, otherwise scroll to top
     useEffect(() => {
-        // We use a small timeout to let Next.js complete the layout change
         const timeout = setTimeout(() => {
-            if (!wasPopState.current) {
+            const hash = window.location.hash;
+
+            if (hash) {
+                const target = document.querySelector(hash);
+                if (target) {
+                    if (lenisRef.current) {
+                        lenisRef.current.scrollTo(target as HTMLElement, {
+                            offset: -80,
+                            duration: 1.2,
+                        });
+                    } else {
+                        target.scrollIntoView({ behavior: "smooth" });
+                    }
+                }
+            } else if (!wasPopState.current) {
                 if (lenisRef.current) {
                     lenisRef.current.scrollTo(0, { immediate: true });
                 }
                 window.scrollTo(0, 0);
             }
-            // Ensure ScrollTrigger is refreshed for the new page layout
+
             ScrollTrigger.refresh();
-            // Reset for the next navigation
             wasPopState.current = false;
-        }, 100);
+        }, 150);
 
         return () => clearTimeout(timeout);
     }, [pathname]);
+
+    // Intercept all anchor link clicks so Lenis handles the scroll
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            const anchor = (e.target as HTMLElement).closest("a");
+            if (!anchor) return;
+
+            const href = anchor.getAttribute("href");
+            if (!href) return;
+
+            // Same-page anchor (e.g. "#section")
+            if (href.startsWith("#")) {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target && lenisRef.current) {
+                    lenisRef.current.scrollTo(target as HTMLElement, {
+                        offset: -80,
+                        duration: 1.2,
+                    });
+                }
+                // Update URL hash without triggering navigation
+                window.history.pushState(null, "", href);
+            }
+        };
+
+        document.addEventListener("click", handleClick);
+        return () => document.removeEventListener("click", handleClick);
+    }, []);
 
     return (
         <LenisContext.Provider value={contextValue}>
