@@ -99,6 +99,7 @@ export const WeatherExpert: React.FC = () => {
     if (!data) return null;
 
     const { weather, currents, waves, updatedAt } = data;
+    if (!weather?.minutely_15) return null;
     const w15 = weather.minutely_15;
     const wHor = weather.hourly;
     const cHor = currents.hourly;

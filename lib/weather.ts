@@ -1,10 +1,6 @@
 
 import { WeatherData } from "../types";
 
-// Coordonnées Agon-Coutainville
-const LAT = 49.043;
-const LON = -1.593;
-
 // Conversion degrés -> Point cardinal
 const getWindDirection = (degrees: number): string => {
   const directions = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
@@ -37,10 +33,7 @@ const getWeatherDescription = (code: number): string => {
 
 export const fetchRealtimeWeather = async (): Promise<Partial<WeatherData> | null> => {
   try {
-    // Appel API Open-Meteo (Gratuit, sans clé)
-    const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&wind_speed_unit=kn`
-    );
+    const response = await fetch('/api/weather');
 
     if (!response.ok) throw new Error('Erreur météo');
 
