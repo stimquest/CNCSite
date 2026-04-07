@@ -23,7 +23,10 @@ import {
     Play,
     Bell,
     Printer,
-    Zap
+    Zap,
+    Pencil,
+    X,
+    CalendarClock,
 } from 'lucide-react';
 import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, ActivityType, CharWeek, CharDay, CharSession, StageDefinition, StageSlot } from '@/types';
 import { CharSessionDoc } from '@/types';
@@ -74,15 +77,28 @@ const START_HOURS = Array.from({ length: 14 }, (_, i) => {
 
 import { useRouter } from 'next/navigation';
 
+interface InfoMessage {
+    _id: string;
+    title: string;
+    content: string;
+    category: string;
+    isPinned: boolean;
+    targetGroups: string[];
+    externalLink?: string;
+    publishedAt: string;
+    expiresAt?: string;
+}
+
 interface Props {
     plannings: WeeklyPlanning[];
     marchePlannings: PlanningMarche[];
     charSessions: CharSessionDoc[];
     agendaEvents: any[];
     articles: any[];
+    infoMessages: InfoMessage[];
 }
 
-export default function AdminClient({ plannings, marchePlannings, charSessions, agendaEvents, articles }: Props) {
+export default function AdminClient({ plannings, marchePlannings, charSessions, agendaEvents, articles, infoMessages }: Props) {
     const router = useRouter();
     const refreshData = async () => {
         router.refresh();
@@ -103,6 +119,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
         externalLink: '',
         expiresAt: '',
     });
+    const [editingVigieId, setEditingVigieId] = useState<string | null>(null);
 
     // SELECTORS
     const [selectedDate, setSelectedDate] = useState<string>(formatDate(new Date())); // Selected Monday
@@ -433,36 +450,33 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
         }
     };
 
+    const resetVigieForm = () => {
+        setVigieMsg({ title: '', content: '', category: 'info', targetGroups: [] as string[], isPinned: false, externalLink: '', expiresAt: '' });
+        setEditingVigieId(null);
+    };
+
     const handleSendVigie = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!vigieMsg.title || !vigieMsg.content) return alert("Titre et contenu obligatoires");
         if (vigieMsg.targetGroups.length === 0) return alert("Sélectionnez au moins un groupe cible.");
         setIsSaving(true);
+        const patch = {
+            ...vigieMsg,
+            externalLink: vigieMsg.externalLink ? vigieMsg.externalLink : undefined,
+            expiresAt: vigieMsg.expiresAt ? new Date(vigieMsg.expiresAt).toISOString() : undefined,
+        };
         try {
             const res = await fetch('/api/cockpit/update', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'CREATE_INFO',
-                    patch: {
-                        ...vigieMsg,
-                        externalLink: vigieMsg.externalLink ? vigieMsg.externalLink : undefined,
-                        publishedAt: new Date().toISOString(),
-                        expiresAt: vigieMsg.expiresAt ? new Date(vigieMsg.expiresAt).toISOString() : undefined,
-                    }
-                })
+                body: JSON.stringify(
+                    editingVigieId
+                        ? { type: 'UPDATE_INFO', _id: editingVigieId, patch }
+                        : { type: 'CREATE_INFO', patch: { ...patch, publishedAt: new Date().toISOString() } }
+                )
             });
             if (res.ok) {
-                alert("Message publié avec succès !");
-                setVigieMsg({
-                    title: '',
-                    content: '',
-                    category: 'info',
-                    targetGroups: [] as string[],
-                    isPinned: false,
-                    externalLink: '',
-                    expiresAt: '',
-                });
+                resetVigieForm();
                 refreshData();
             } else {
                 alert("Erreur lors de la publication");
@@ -475,6 +489,37 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
         }
     };
 
+    const handleDeleteVigie = async (id: string) => {
+        if (!confirm("Supprimer ce message Vigie ?")) return;
+        setIsSaving(true);
+        try {
+            await fetch('/api/cockpit/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'DELETE_INFO', _id: id })
+            });
+            if (editingVigieId === id) resetVigieForm();
+            refreshData();
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleEditVigie = (msg: InfoMessage) => {
+        setVigieMsg({
+            title: msg.title,
+            content: msg.content,
+            category: msg.category,
+            targetGroups: msg.targetGroups,
+            isPinned: msg.isPinned,
+            externalLink: msg.externalLink ?? '',
+            expiresAt: msg.expiresAt ? new Date(msg.expiresAt).toISOString().slice(0, 16) : '',
+        });
+        setEditingVigieId(msg._id);
+    };
+
 
     // --- RENDER DASHBOARD ---
     return (
@@ -482,7 +527,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
             <div className="flex flex-col flex-1">
 
                 {/* HEADER */}
-                <header className="bg-white border-b border-slate-200 sticky top-0 z-40 py-3 md:py-0 md:h-20">
+                <header className="bg-white border-b border-slate-200 sticky top-16 z-40 py-3 md:py-0 md:h-20">
                     <div className="max-w-400 mx-auto px-4 md:px-6 h-full flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6 w-full overflow-hidden">
                             <div className="flex items-center justify-between w-full md:w-auto shrink-0">
@@ -502,7 +547,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                     </div>
                 </header>
 
-                <main className="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-10">
+                <main className="flex-1 w-full max-w-350 mx-auto p-6 md:p-10">
                     {/* (Editor content will stay as is, but now it's inside a no-print parent) */}
 
                     {/* TAB: COCKPIT */}
@@ -904,106 +949,173 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                             </div>
 
                             {/* VIGIE DROITE */}
-                            <div className="xl:w-[450px] shrink-0 w-full no-print">
-                                <div className="bg-white p-8 rounded-4xl shadow-xl border border-slate-200 xl:sticky xl:top-28">
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <div className="p-3 bg-turquoise/10 text-turquoise rounded-xl">
-                                            <Bell size={24} />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl font-black uppercase italic text-abysse tracking-tighter">Vigie Direct</h3>
-                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Alerte en temps réel sur le site</p>
-                                        </div>
+                            <div className="xl:w-[450px] shrink-0 w-full no-print xl:sticky xl:top-40">
+                                {/* Titre hors carte — même pattern que Pilotage */}
+                                <div className="mb-6 flex items-center gap-4">
+                                    <div className="p-3 bg-turquoise/10 text-turquoise rounded-xl">
+                                        <Bell size={24} />
                                     </div>
+                                    <div>
+                                        <h3 className="text-xl font-black uppercase italic text-abysse tracking-tighter">Vigie Direct</h3>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Alerte en temps réel sur le site</p>
+                                    </div>
+                                </div>
 
-                                    <form onSubmit={handleSendVigie} className="space-y-6">
-                                        <div className="space-y-4">
-                                            <input
-                                                type="text"
-                                                value={vigieMsg.title}
-                                                onChange={(e) => setVigieMsg({ ...vigieMsg, title: e.target.value })}
-                                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise focus:ring-2 ring-turquoise/5 font-bold text-sm text-abysse transition-all"
-                                                placeholder="Titre (Ex: Alerte Vent Fort)"
-                                            />
-                                            
-                                            <textarea
-                                                rows={3}
-                                                value={vigieMsg.content}
-                                                onChange={(e) => setVigieMsg({ ...vigieMsg, content: e.target.value })}
-                                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise focus:ring-2 ring-turquoise/5 font-medium text-sm text-abysse transition-all"
-                                                placeholder="Message adressé au public..."
-                                            />
-
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <select
-                                                    value={vigieMsg.category}
-                                                    onChange={(e) => setVigieMsg({ ...vigieMsg, category: e.target.value })}
-                                                    className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-xs text-abysse appearance-none"
-                                                >
-                                                    <option value="info">ℹ️ Info</option>
-                                                    <option value="alert">🚨 Alerte</option>
-                                                    <option value="weather">🌦️ Météo</option>
-                                                    <option value="event">🎉 Événement</option>
-                                                    <option value="vibe">🤙 Vibe</option>
-                                                </select>
-                                                
-                                                <input
-                                                    type="url"
-                                                    value={vigieMsg.externalLink}
-                                                    onChange={(e) => setVigieMsg({ ...vigieMsg, externalLink: e.target.value })}
-                                                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-medium text-xs text-abysse"
-                                                    placeholder="Lien (Opt)"
-                                                />
-                                            </div>
-
-                                            {/* Scrollable Groups for compactness */}
-                                            <div className="space-y-2">
-                                                <label className="text-[9px] font-black uppercase text-slate-400 px-1">Cibles</label>
-                                                <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto custom-scrollbar pr-1">
-                                                    {[
-                                                        { id: 'all', label: 'Tous' },
-                                                        { id: 'club-hebdo', label: 'Club Hebdo' },
-                                                        { id: 'char-voile', label: 'Char Voile' },
-                                                        ...stageDefinitions.map(s => ({ id: s.vigieGroupId, label: s.shortLabel || s.label })),
-                                                        { id: 'marche-aquatique', label: 'Marche' },
-                                                        { id: 'pratique-libre', label: 'Libre' }
-                                                    ].map(group => (
-                                                        <label key={group.id} className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${vigieMsg.targetGroups.includes(group.id) ? 'bg-turquoise/5 border-turquoise/30 text-abysse' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}>
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={vigieMsg.targetGroups.includes(group.id)}
-                                                                onChange={(e) => {
-                                                                    const newGroups = e.target.checked
-                                                                        ? [...vigieMsg.targetGroups, group.id]
-                                                                        : vigieMsg.targetGroups.filter(id => id !== group.id);
-                                                                    setVigieMsg({ ...vigieMsg, targetGroups: newGroups });
-                                                                }}
-                                                                className="size-3 accent-turquoise"
-                                                            />
-                                                            <span className="text-[9px] font-black uppercase tracking-tight line-clamp-1">{group.label}</span>
-                                                        </label>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <label className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${vigieMsg.isPinned ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
-                                                <div className="flex items-center gap-2">
-                                                    <Anchor size={16} className={vigieMsg.isPinned ? 'text-amber-500' : 'text-slate-400'} />
-                                                    <span className={`text-[10px] font-black uppercase ${vigieMsg.isPinned ? 'text-amber-700' : 'text-slate-500'}`}>Épingler en haut</span>
-                                                </div>
-                                                <input type="checkbox" checked={vigieMsg.isPinned} onChange={e => setVigieMsg({ ...vigieMsg, isPinned: e.target.checked })} className="size-4 accent-amber-500" />
-                                            </label>
+                                <div className="bg-white rounded-4xl shadow-xl border border-slate-200 overflow-hidden">
+                                    {/* Liste des messages en cours */}
+                                    {infoMessages.length > 0 && (
+                                        <div className="border-b border-slate-100">
+                                            <p className="text-[9px] font-black uppercase text-slate-400 px-6 pt-5 pb-2 tracking-widest">Messages en cours ({infoMessages.length})</p>
+                                            <ul className="max-h-48 overflow-y-auto custom-scrollbar divide-y divide-slate-50">
+                                                {infoMessages.map(msg => {
+                                                    const isExpired = msg.expiresAt ? new Date(msg.expiresAt) < new Date() : false;
+                                                    const isEditing = editingVigieId === msg._id;
+                                                    const categoryIcon: Record<string, string> = { info: 'ℹ️', alert: '🚨', weather: '🌦️', event: '🎉', vibe: '🤙' };
+                                                    return (
+                                                        <li key={msg._id} className={`flex items-center gap-3 px-6 py-3 transition-all ${isEditing ? 'bg-turquoise/5' : 'hover:bg-slate-50'}`}>
+                                                            <span className="text-base shrink-0">{categoryIcon[msg.category] ?? 'ℹ️'}</span>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className={`text-xs font-black truncate ${isExpired ? 'text-slate-400 line-through' : 'text-abysse'}`}>{msg.title}</p>
+                                                                {msg.expiresAt && (
+                                                                    <p className={`text-[9px] font-medium mt-0.5 ${isExpired ? 'text-red-400' : 'text-slate-400'}`}>
+                                                                        expire le {new Date(msg.expiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                                    </p>
+                                                                )}
+                                                                {msg.isPinned && <span className="text-[8px] font-black text-amber-500 uppercase">📌 Épinglé</span>}
+                                                            </div>
+                                                            <div className="flex gap-1 shrink-0">
+                                                                <button onClick={() => handleEditVigie(msg)} className={`p-1.5 rounded-lg transition-all ${isEditing ? 'bg-turquoise text-white' : 'text-slate-400 hover:text-turquoise hover:bg-turquoise/10'}`} title="Modifier">
+                                                                    <Pencil size={13} />
+                                                                </button>
+                                                                <button onClick={() => handleDeleteVigie(msg._id)} className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all" title="Supprimer">
+                                                                    <Trash2 size={13} />
+                                                                </button>
+                                                            </div>
+                                                        </li>
+                                                    );
+                                                })}
+                                            </ul>
                                         </div>
+                                    )}
 
-                                        <button
-                                            type="submit"
-                                            disabled={isSaving}
-                                            className="w-full py-4 bg-abysse text-white rounded-xl font-black text-[11px] uppercase tracking-widest shadow-xl hover:bg-turquoise transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                                        >
-                                            {isSaving ? <RefreshCw size={16} className="animate-spin" /> : <Zap size={16} />}
-                                            Publier le message
-                                        </button>
-                                    </form>
+                                    {/* Formulaire création / édition */}
+                                    <div className="p-6">
+                                        {editingVigieId && (
+                                            <div className="flex items-center justify-between mb-4 p-2 bg-turquoise/5 border border-turquoise/20 rounded-xl">
+                                                <span className="text-[10px] font-black uppercase text-turquoise tracking-wider">Mode édition</span>
+                                                <button onClick={resetVigieForm} className="p-1 text-slate-400 hover:text-slate-600 transition-all">
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        )}
+                                        <form onSubmit={handleSendVigie} className="space-y-4">
+                                            <div className="space-y-3">
+                                                <input
+                                                    type="text"
+                                                    value={vigieMsg.title}
+                                                    onChange={(e) => setVigieMsg({ ...vigieMsg, title: e.target.value })}
+                                                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise focus:ring-2 ring-turquoise/5 font-bold text-sm text-abysse transition-all"
+                                                    placeholder="Titre (Ex: Alerte Vent Fort)"
+                                                />
+
+                                                <textarea
+                                                    rows={3}
+                                                    value={vigieMsg.content}
+                                                    onChange={(e) => setVigieMsg({ ...vigieMsg, content: e.target.value })}
+                                                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise focus:ring-2 ring-turquoise/5 font-medium text-sm text-abysse transition-all"
+                                                    placeholder="Message adressé au public..."
+                                                />
+
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <select
+                                                        value={vigieMsg.category}
+                                                        onChange={(e) => setVigieMsg({ ...vigieMsg, category: e.target.value })}
+                                                        className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-xs text-abysse appearance-none"
+                                                    >
+                                                        <option value="info">ℹ️ Info</option>
+                                                        <option value="alert">🚨 Alerte</option>
+                                                        <option value="weather">🌦️ Météo</option>
+                                                        <option value="event">🎉 Événement</option>
+                                                        <option value="vibe">🤙 Vibe</option>
+                                                    </select>
+
+                                                    <input
+                                                        type="url"
+                                                        value={vigieMsg.externalLink}
+                                                        onChange={(e) => setVigieMsg({ ...vigieMsg, externalLink: e.target.value })}
+                                                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-medium text-xs text-abysse"
+                                                        placeholder="Lien (Opt)"
+                                                    />
+                                                </div>
+
+                                                {/* Date de péremption */}
+                                                <label className="flex items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer focus-within:border-turquoise transition-all">
+                                                    <CalendarClock size={15} className="text-slate-400 shrink-0" />
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-0.5">Expire le (Opt)</p>
+                                                        <input
+                                                            type="datetime-local"
+                                                            value={vigieMsg.expiresAt}
+                                                            onChange={(e) => setVigieMsg({ ...vigieMsg, expiresAt: e.target.value })}
+                                                            className="w-full bg-transparent outline-none font-bold text-xs text-abysse"
+                                                        />
+                                                    </div>
+                                                    {vigieMsg.expiresAt && (
+                                                        <button type="button" onClick={() => setVigieMsg({ ...vigieMsg, expiresAt: '' })} className="text-slate-300 hover:text-slate-500 transition-all">
+                                                            <X size={13} />
+                                                        </button>
+                                                    )}
+                                                </label>
+
+                                                {/* Cibles */}
+                                                <div className="space-y-2">
+                                                    <label className="text-[9px] font-black uppercase text-slate-400 px-1">Cibles</label>
+                                                    <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto custom-scrollbar pr-1">
+                                                        {[
+                                                            { id: 'all', label: 'Tous' },
+                                                            { id: 'club-hebdo', label: 'Club Hebdo' },
+                                                            { id: 'char-voile', label: 'Char Voile' },
+                                                            ...stageDefinitions.map(s => ({ id: s.vigieGroupId, label: s.shortLabel || s.label })),
+                                                            { id: 'marche-aquatique', label: 'Marche' },
+                                                            { id: 'pratique-libre', label: 'Libre' }
+                                                        ].map(group => (
+                                                            <label key={group.id} className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${vigieMsg.targetGroups.includes(group.id) ? 'bg-turquoise/5 border-turquoise/30 text-abysse' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={vigieMsg.targetGroups.includes(group.id)}
+                                                                    onChange={(e) => {
+                                                                        const newGroups = e.target.checked
+                                                                            ? [...vigieMsg.targetGroups, group.id]
+                                                                            : vigieMsg.targetGroups.filter(id => id !== group.id);
+                                                                        setVigieMsg({ ...vigieMsg, targetGroups: newGroups });
+                                                                    }}
+                                                                    className="size-3 accent-turquoise"
+                                                                />
+                                                                <span className="text-[9px] font-black uppercase tracking-tight line-clamp-1">{group.label}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <label className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${vigieMsg.isPinned ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
+                                                    <div className="flex items-center gap-2">
+                                                        <Anchor size={16} className={vigieMsg.isPinned ? 'text-amber-500' : 'text-slate-400'} />
+                                                        <span className={`text-[10px] font-black uppercase ${vigieMsg.isPinned ? 'text-amber-700' : 'text-slate-500'}`}>Épingler en haut</span>
+                                                    </div>
+                                                    <input type="checkbox" checked={vigieMsg.isPinned} onChange={e => setVigieMsg({ ...vigieMsg, isPinned: e.target.checked })} className="size-4 accent-amber-500" />
+                                                </label>
+                                            </div>
+
+                                            <button
+                                                type="submit"
+                                                disabled={isSaving}
+                                                className="w-full py-4 bg-abysse text-white rounded-xl font-black text-[11px] uppercase tracking-widest shadow-xl hover:bg-turquoise transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                            >
+                                                {isSaving ? <RefreshCw size={16} className="animate-spin" /> : <Zap size={16} />}
+                                                {editingVigieId ? 'Mettre à jour' : 'Publier le message'}
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>

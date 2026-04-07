@@ -399,7 +399,7 @@ export default function CharBookingAdmin({ sessions, onRefresh }: Props) {
                                                     <span className={`text-[11px] font-bold leading-none
                                                         ${isToday ? 'text-orange-500 font-black' : isSelectedWeek ? 'text-abysse font-black' : 'text-slate-500'}
                                                     `}>{day.getDate()}</span>
-                                                    {hasSession && <span className={`w-1 h-1 rounded-full mt-0.5 ${isSelectedWeek ? 'bg-orange-400' : 'bg-emerald-400'}`} />}
+                                                    {hasSession && <span className="w-1 h-1 rounded-full mt-0.5 bg-turquoise/70" />}
                                                 </button>
                                             );
                                         })}

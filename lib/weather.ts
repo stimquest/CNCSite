@@ -54,12 +54,7 @@ export const fetchRealtimeWeather = async (): Promise<Partial<WeatherData> | nul
       description: getWeatherDescription(current.weather_code)
     };
   } catch (error) {
-    // Éviter de polluer la console si c'est une erreur réseau classique
-    if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      console.warn("Météo : Impossible de contacter l'API (Problème réseau ou CORS)");
-    } else {
-      console.error("Erreur fetch météo:", error);
-    }
+    console.warn("Météo : API indisponible", error instanceof Error ? error.message : error);
     return null;
   }
 };

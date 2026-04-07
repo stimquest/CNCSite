@@ -85,6 +85,9 @@ export const queries = {
   infoMessages: `*[_type == "infoMessage" && (!defined(expiresAt) || expiresAt > now())] | order(isPinned desc, publishedAt desc)[0...50] {
     _id, title, content, category, isPinned, targetGroups, externalLink, publishedAt, expiresAt
   }`,
+  adminInfoMessages: `*[_type == "infoMessage"] | order(isPinned desc, publishedAt desc)[0...100] {
+    _id, title, content, category, isPinned, targetGroups, externalLink, publishedAt, expiresAt
+  }`,
   vibeMessages: `*[_type == "vibeMessage" && isActive == true] | order(priority desc) {
     _id, title, subtitle, conditionType, minWind, maxWind, windDirection, priority, isActive
   }`,

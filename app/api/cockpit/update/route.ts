@@ -44,6 +44,22 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true, id: result._id });
         }
 
+        if (type === 'UPDATE_INFO') {
+            if (!_id || _id === SINGLETON_ID) return NextResponse.json({ error: 'ID manquant' }, { status: 400 });
+            await serverClient.patch(_id).set(patch).commit();
+            revalidatePath('/');
+            revalidatePath('/fil-info');
+            return NextResponse.json({ success: true });
+        }
+
+        if (type === 'DELETE_INFO') {
+            if (!_id || _id === SINGLETON_ID) return NextResponse.json({ error: 'ID manquant' }, { status: 400 });
+            await serverClient.delete(_id);
+            revalidatePath('/');
+            revalidatePath('/fil-info');
+            return NextResponse.json({ success: true });
+        }
+
         if (type === 'UPSERT_PLANNING') {
             if (!document || typeof document !== 'object' || !ALLOWED_PLANNING_TYPES.has((document as { _type?: string })._type || '')) {
                 return NextResponse.json({ error: 'Invalid planning document' }, { status: 400 });
