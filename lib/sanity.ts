@@ -206,6 +206,13 @@ export const queries = {
     proFormations[] { ..., "image": image.asset->url },
     ecoleAnnee { sectionTitle, sectionSubtitle, sectionDescription, groups[] { title, age, jour, activite, detail, price, priceSuffix, accentColor, color, iconName } }
   }`,
+  schoolStages: `*[_type == "schoolPage"][0]{
+    "stages": stages[] {
+      id, officialName, age, price, hook, description, logistique,
+      "pricingTiers": pricingTiers[]{ label, value },
+      "image": image.asset->url
+    }
+  }`,
   dicoWords: `*[_type == "dicoWord"] | order(word asc) {
     _id, word, slug, pronunciation, childQuote, parentFear, reality, quizAnswers, correctAnswerIdx
   }`,

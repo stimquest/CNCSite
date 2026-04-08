@@ -32,9 +32,22 @@ import ClubActivitiesView from '@/components/ClubActivitiesView';
 import { ActivityFinder } from '../../../components/ActivityFinder';
 import Link from 'next/link';
 
+interface SchoolStage {
+    id: string;
+    officialName: string;
+    age: string;
+    price: string;
+    hook: string;
+    description: any[];
+    logistique: string[];
+    pricingTiers: { label: string; value: string }[];
+    image: string;
+}
+
 interface ActivitiesClientProps {
     initialActivities: Activity[];
     initialActivitiesData: any;
+    schoolStages: SchoolStage[];
 }
 
 const modalPortableTextComponents = {
@@ -83,7 +96,7 @@ const modalPortableTextComponents = {
     },
 };
 
-const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, initialActivitiesData }) => {
+const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, initialActivitiesData, schoolStages }) => {
     const activities = initialActivities;
     const activitiesData = initialActivitiesData;
     const [activeFilter, setActiveFilter] = useState<ActivityCategory | 'TOUTES'>('TOUTES');
@@ -348,6 +361,155 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
                             exit={{ opacity: 0 }}
                             className="space-y-8"
                         >
+                            {/* STAGES VACANCES — depuis la page École */}
+                            {(activeFilter === 'TOUTES' || activeFilter === 'Jeunesse') && schoolStages.length > 0 && (
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-10 bg-turquoise/10 text-turquoise rounded-xl flex items-center justify-center">
+                                                <GraduationCap size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-turquoise">École de Voile</p>
+                                                <h3 className="text-xl font-black text-abysse italic tracking-tight leading-none">Stages Vacances</h3>
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 h-px bg-slate-200"></div>
+                                        <Link
+                                            href="/ecole-voile"
+                                            className="text-[10px] font-black uppercase tracking-widest text-turquoise hover:text-abysse transition-colors flex items-center gap-1.5"
+                                        >
+                                            Voir la page École <ExternalLink size={12} />
+                                        </Link>
+                                    </div>
+                                    {schoolStages.map((stage) => {
+                                        const isExpanded = expandedId === `school-${stage.id}`;
+                                        return (
+                                            <div
+                                                key={stage.id}
+                                                id={`school-${stage.id}`}
+                                                className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-turquoise/20 transition-all duration-300 hover:shadow-lg"
+                                            >
+                                                <div className="flex flex-col lg:flex-row">
+                                                    <div className="relative lg:w-[35%] min-h-75 lg:min-h-95 bg-slate-100">
+                                                        {stage.image ? (
+                                                            <img
+                                                                src={stage.image}
+                                                                alt={stage.officialName}
+                                                                className="absolute inset-0 w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                <Anchor size={48} className="text-slate-300" />
+                                                            </div>
+                                                        )}
+                                                        <div className="absolute inset-0 pointer-events-none">
+                                                            <div className="absolute top-0 left-0">
+                                                                <div className="bg-abysse/25 backdrop-blur-md text-white px-5 py-4 rounded-br-2xl border-b border-r border-white/20 flex flex-col items-center">
+                                                                    <span className="text-[7px] font-black uppercase tracking-[0.2em] text-white/80 mb-1 leading-none">Âge</span>
+                                                                    <span className="text-lg font-black italic tracking-tighter leading-none">{stage.age}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="absolute top-6 right-6">
+                                                                <div className="bg-turquoise/80 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm">Stages Vacances</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-1 p-8 lg:p-10 flex flex-col justify-between">
+                                                        <div className="flex flex-col lg:flex-row justify-between gap-8">
+                                                            <div className="flex-1">
+                                                                <h2 className="text-2xl md:text-3xl text-abysse mb-3">{stage.officialName}</h2>
+                                                                {stage.hook && (
+                                                                    <p className="text-turquoise text-xs font-black uppercase tracking-widest mb-6 leading-relaxed">"{stage.hook}"</p>
+                                                                )}
+                                                                <div className="text-slate-600 font-medium text-sm leading-loose mb-6 text-justify prose prose-slate prose-sm max-w-none">
+                                                                    {stage.description ? (
+                                                                        Array.isArray(stage.description)
+                                                                            ? <PortableText value={stage.description} />
+                                                                            : <p>{stage.description}</p>
+                                                                    ) : null}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex flex-col gap-3 min-w-55 border-t lg:border-t-0 lg:border-l border-slate-100 pt-6 lg:pt-0 lg:pl-8">
+                                                                {stage.price && (
+                                                                    <div className="flex items-center justify-between px-5 py-4 bg-slate-50 rounded-xl border border-slate-200">
+                                                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">À partir de</span>
+                                                                        <span className="text-lg font-black text-abysse">{stage.price}</span>
+                                                                    </div>
+                                                                )}
+                                                                <a
+                                                                    href="https://coutainville.axyomes.com/"
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 bg-turquoise text-white hover:bg-abysse transition-all shadow-xl shadow-turquoise/20"
+                                                                >
+                                                                    <Calendar size={14} /> S'inscrire
+                                                                </a>
+                                                                <div className="h-px bg-slate-100 my-2"></div>
+                                                                <button
+                                                                    onClick={() => toggleExpand(`school-${stage.id}`)}
+                                                                    className={`w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl ${isExpanded ? 'bg-abysse text-white' : 'bg-turquoise text-white hover:bg-abysse shadow-turquoise/20'}`}
+                                                                >
+                                                                    {isExpanded ? 'Masquer les infos' : 'Voir Détails & Tarifs'}
+                                                                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className={`grid transition-all duration-500 ease-in-out bg-slate-50 ${isExpanded ? 'grid-rows-[1fr] opacity-100 border-t border-slate-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                                                    <div className="overflow-hidden">
+                                                        <div className="p-8 lg:p-10 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                                                            {stage.pricingTiers?.length > 0 && (
+                                                                <div>
+                                                                    <h4 className="flex items-center gap-3 text-sm text-abysse mb-6"><Euro size={18} className="text-turquoise" /> Tarifs</h4>
+                                                                    <ul className="space-y-3">
+                                                                        {stage.pricingTiers.map((tier, idx) => (
+                                                                            <li key={idx} className="flex justify-between items-center pb-2 border-b border-slate-200/50">
+                                                                                <span className="text-xs font-bold text-slate-500 uppercase">{tier.label}</span>
+                                                                                <span className="text-sm font-black text-abysse">{tier.value}</span>
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            )}
+                                                            {stage.logistique?.length > 0 && (
+                                                                <div>
+                                                                    <h4 className="flex items-center gap-3 text-sm text-abysse mb-6"><CheckCircle2 size={18} className="text-turquoise" /> Pratique</h4>
+                                                                    <ul className="space-y-2">
+                                                                        {stage.logistique.map((item, idx) => (
+                                                                            <li key={idx} className="flex items-start gap-2">
+                                                                                <div className="mt-1 size-1.5 rounded-full bg-turquoise shrink-0"></div>
+                                                                                <span className="text-xs font-medium text-slate-600">{item}</span>
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    <div className="h-px bg-slate-200 my-4"></div>
+                                </div>
+                            )}
+
+                            {/* ACTIVITÉS & STAGES TOUS PUBLICS */}
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="size-10 bg-abysse/10 text-abysse rounded-xl flex items-center justify-center">
+                                        <Waves size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-abysse/60">Catalogue</p>
+                                        <h3 className="text-xl font-black text-abysse italic tracking-tight leading-none">Activités & Stages Tous Publics</h3>
+                                    </div>
+                                </div>
+                                <div className="flex-1 h-px bg-slate-200"></div>
+                            </div>
+
                             {filteredActivities.map((activity) => {
                                 const isExpanded = expandedId === activity.id;
                                 return (
@@ -357,7 +519,7 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
                                         className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-200 transition-all duration-300 hover:shadow-lg"
                                     >
                                         <div className="flex flex-col lg:flex-row">
-                                            <div className="relative lg:w-[35%] min-h-[300px] lg:min-h-[380px]">
+                                            <div className="relative lg:w-[35%] min-h-75 lg:min-h-95">
                                                 <ActivityGallery
                                                     images={activity.gallery}
                                                     defaultImage={activity.image}
@@ -386,7 +548,7 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
                                                             ) : <p>{activity.description}</p>}
                                                         </div>
                                                     </div>
-                                                    <div className="flex flex-col gap-3 min-w-[220px] border-t lg:border-t-0 lg:border-l border-slate-100 pt-6 lg:pt-0 lg:pl-8">
+                                                    <div className="flex flex-col gap-3 min-w-55 border-t lg:border-t-0 lg:border-l border-slate-100 pt-6 lg:pt-0 lg:pl-8">
                                                         <ActionButton activity={activity} type="stage" icon={Calendar} label="S'inscrire en Stage" />
                                                         <ActionButton activity={activity} type="reservation" icon={Wind} label="Réserver Séance" />
                                                         <ActionButton activity={activity} type="rental" icon={Anchor} label="Louer le matériel" />

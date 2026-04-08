@@ -10,14 +10,19 @@ export const metadata = {
 export const revalidate = 60;
 
 export default async function ActivitiesPage() {
-    const [activities, activitiesData] = await Promise.all([
+    const [activities, activitiesData, schoolStagesData] = await Promise.all([
         client.fetch(queries.activities).catch(() => []),
-        client.fetch(queries.activitiesPage).catch(() => null)
+        client.fetch(queries.activitiesPage).catch(() => null),
+        client.fetch(queries.schoolStages).catch(() => null),
     ]);
 
     return (
         <Suspense fallback={<div className="min-h-screen bg-abysse flex items-center justify-center text-white">Chargement...</div>}>
-            <ActivitiesClient initialActivities={activities || []} initialActivitiesData={activitiesData || null} />
+            <ActivitiesClient
+                initialActivities={activities || []}
+                initialActivitiesData={activitiesData || null}
+                schoolStages={schoolStagesData?.stages || []}
+            />
         </Suspense>
     );
 }

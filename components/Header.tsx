@@ -65,7 +65,7 @@ export const Header: React.FC<HeaderProps> = () => {
         { label: 'Planning & Dispos', href: '/ecole-voile#planning' },
       ]
     },
-    { label: 'Activités', href: '/activites' },
+    { label: 'Les Activités', href: '/activites' },
     {
       label: 'Groupes',
       href: '/groupes-entreprises',
@@ -78,7 +78,7 @@ export const Header: React.FC<HeaderProps> = () => {
     {
       label: 'Le Club',
       subItems: [
-        { label: 'Le Club', href: '/club' },
+        { label: 'Présentation', href: '/club' },
         { label: 'Infos Pratiques', href: '/infos-pratiques' },
       ]
     },
