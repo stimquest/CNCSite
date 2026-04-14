@@ -2,8 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Maximize2, Minimize2 } from 'lucide-react';
-import gsap from 'gsap';
+import { X, ChevronLeft, ChevronRight, Minimize2 } from 'lucide-react';
 import { useLenis } from './SmoothScroll';
 
 interface PhotoWallGalleryProps {
@@ -25,14 +24,14 @@ export const PhotoWallGallery: React.FC<PhotoWallGalleryProps> = ({
     const [selectedIndex, setSelectedIndex] = useState(0);
     const { stop, start } = useLenis();
 
-    // Scroll Lock logic - Now integrates with Lenis
+    // Scroll Lock
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-            stop(); // Stop Lenis smooth scrolling
+            stop();
         } else {
             document.body.style.overflow = '';
-            start(); // Resume Lenis smooth scrolling
+            start();
         }
         return () => {
             document.body.style.overflow = '';
@@ -40,37 +39,22 @@ export const PhotoWallGallery: React.FC<PhotoWallGalleryProps> = ({
         };
     }, [isOpen, stop, start]);
 
-    // Intelligent mouse-panning logic
+    // Mouse-pan via CSS transform natif (sans GSAP)
     useEffect(() => {
         if (!isOpen || selectedImage) return;
 
         const handleMouseMove = (e: MouseEvent) => {
             if (!wallRef.current) return;
-
-            const { clientX, clientY } = e;
-            const { innerWidth, innerHeight } = window;
-
-            // Calculate movement factor (-0.5 to 0.5)
-            const xMove = (clientX / innerWidth) - 0.5;
-            const yMove = (clientY / innerHeight) - 0.5;
-
-            // Pan intensity (how much the wall moves)
-            const xRange = 100; // pixels
-            const yRange = 100; // pixels
-
-            gsap.to(wallRef.current, {
-                x: -xMove * xRange,
-                y: -yMove * yRange,
-                duration: 1.5,
-                ease: "power2.out"
-            });
+            const xMove = (e.clientX / window.innerWidth) - 0.5;
+            const yMove = (e.clientY / window.innerHeight) - 0.5;
+            wallRef.current.style.transform = `translate(${-xMove * 80}px, ${-yMove * 80}px)`;
         };
 
         window.addEventListener('mousemove', handleMouseMove);
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, [isOpen, selectedImage]);
 
-    // Handle key navigation in zoom mode
+    // Key navigation
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!selectedImage) return;
@@ -93,9 +77,10 @@ export const PhotoWallGallery: React.FC<PhotoWallGalleryProps> = ({
     return (
         <div ref={containerRef} className="fixed inset-0 z-100 flex items-center justify-center overflow-hidden bg-black font-sans p-10 md:p-20">
 
-            {/* THE PHOTO WALL (Background Layer) */}
+            {/* THE PHOTO WALL */}
             <div
                 ref={wallRef}
+                style={{ transition: 'transform 1.2s cubic-bezier(0.25,0.46,0.45,0.94)' }}
                 className="relative z-0 flex flex-wrap justify-center items-center gap-6 md:gap-10 opacity-60 w-full max-w-7xl mx-auto"
             >
                 {images.map((img, i) => (
@@ -157,12 +142,10 @@ export const PhotoWallGallery: React.FC<PhotoWallGalleryProps> = ({
                         exit={{ opacity: 0 }}
                         className="absolute inset-0 z-50 bg-black/95 flex items-center justify-center p-4 md:p-12"
                     >
-                        {/* Background Blurred Image */}
                         <div className="absolute inset-0 z-0">
                             <img src={selectedImage} className="w-full h-full object-cover blur-3xl opacity-20" alt="" />
                         </div>
 
-                        {/* Controls */}
                         <button
                             onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}
                             className="absolute top-8 right-8 text-white/60 hover:text-white transition-colors z-30"
@@ -172,19 +155,18 @@ export const PhotoWallGallery: React.FC<PhotoWallGalleryProps> = ({
 
                         <button
                             onClick={() => navigate(-1)}
-                            className="absolute left-8 text-white/40 hover:text-white transition-all transform hover:scale-120 z-30 hidden md:block"
+                            className="absolute left-8 text-white/40 hover:text-white transition-all z-30 hidden md:block"
                         >
                             <ChevronLeft size={64} strokeWidth={1} />
                         </button>
 
                         <button
                             onClick={() => navigate(1)}
-                            className="absolute right-8 text-white/40 hover:text-white transition-all transform hover:scale-120 z-30 hidden md:block"
+                            className="absolute right-8 text-white/40 hover:text-white transition-all z-30 hidden md:block"
                         >
                             <ChevronRight size={64} strokeWidth={1} />
                         </button>
 
-                        {/* Focused Image */}
                         <motion.div
                             key={selectedImage}
                             initial={{ scale: 0.8, opacity: 0 }}
@@ -199,7 +181,6 @@ export const PhotoWallGallery: React.FC<PhotoWallGalleryProps> = ({
                                 onClick={() => setSelectedImage(null)}
                                 alt=""
                             />
-
                             <div className="text-center">
                                 <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.5em] mb-2">
                                     IMAGE {selectedIndex + 1} / {images.length}

@@ -49,6 +49,8 @@
 
 html {
   font-size: 15px;
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px; /* Compense le header fixe */
 }
 
 @layer base {

@@ -8,7 +8,7 @@ interface SecondaryNavProps {
 
 export const SecondaryNav: React.FC<SecondaryNavProps> = ({ sections }) => {
     return (
-        <nav className="sticky top-16 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-100/50 overflow-x-auto no-scrollbar">
+        <nav className="sticky top-16 z-40 bg-white border-b border-slate-100 overflow-x-auto no-scrollbar">
             <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-start md:justify-center gap-1 h-14">
                 {sections.map((section, index) => (
                     <a

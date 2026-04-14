@@ -102,7 +102,7 @@ export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages 
             </header>
 
             {/* FILTRES — sticky, toutes tailles */}
-            <div className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-100 overflow-x-auto no-scrollbar">
+            <div className="sticky top-0 z-40 bg-white border-b border-slate-100 overflow-x-auto no-scrollbar">
                 <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-1">
                     {/* Bouton Tout (reset) */}
                     <button

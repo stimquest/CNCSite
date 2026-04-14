@@ -162,7 +162,7 @@ export const Header: React.FC<HeaderProps> = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 h-16">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 shadow-sm h-16">
         <div className="max-w-[1600px] mx-auto px-6 h-full flex items-center justify-between">
 
           {/* Left: Logo */}

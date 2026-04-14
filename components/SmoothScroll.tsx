@@ -1,26 +1,37 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode, useEffect, useRef, useState } from "react";
+/**
+ * SmoothScroll — Provider léger sans Lenis.
+ *
+ * Lenis + l'inertie native du navigateur (trackpad macOS / Windows Precision)
+ * créaient un double-lissage nauséeux. On utilise désormais le scroll natif
+ * du navigateur, qui est parfaitement fluide sur tous les OS.
+ *
+ * L'API useLenis() est maintenue pour ne pas casser les consommateurs existants.
+ * Les appels stop/start/scrollTo sont remplacés par des équivalents natifs.
+ */
+
+import React, { createContext, useContext, ReactNode, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import Lenis from "lenis";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 interface LenisContextType {
-    lenis: Lenis | null;
+    lenis: null;
     stop: () => void;
     start: () => void;
 }
 
-const LenisContext = createContext<LenisContextType | null>(null);
+const LenisContext = createContext<LenisContextType>({
+    lenis: null,
+    stop: () => {},
+    start: () => {},
+});
 
-export const useLenis = () => {
-    const context = useContext(LenisContext);
-    if (!context) {
-        // Return a no-op version if used outside provider (e.g. during SSR or in Studio)
-        return { lenis: null, stop: () => { }, start: () => { } };
-    }
-    return context;
+export const useLenis = () => useContext(LenisContext);
+
+const ctxValue: LenisContextType = {
+    lenis: null,
+    stop: () => { document.documentElement.style.overflow = "hidden"; },
+    start: () => { document.documentElement.style.overflow = ""; },
 };
 
 interface SmoothScrollProps {
@@ -29,116 +40,50 @@ interface SmoothScrollProps {
 
 export const SmoothScroll = ({ children }: SmoothScrollProps) => {
     const pathname = usePathname();
-    const lenisRef = useRef<Lenis | null>(null);
-    const [contextValue, setContextValue] = useState<LenisContextType>({
-        lenis: null,
-        stop: () => { },
-        start: () => { }
-    });
-
-    useEffect(() => {
-        // Initialize Lenis
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            orientation: "vertical",
-            gestureOrientation: "vertical",
-            smoothWheel: true,
-            wheelMultiplier: 1,
-            touchMultiplier: 2,
-            infinite: false,
-        });
-
-        lenisRef.current = lenis;
-
-        // Expose stop/start functions via context
-        setContextValue({
-            lenis: lenis,
-            stop: () => lenis.stop(),
-            start: () => lenis.start()
-        });
-
-        lenis.on("scroll", ScrollTrigger.update);
-
-        const handleTicker = (time: number) => {
-            lenis.raf(time * 1000);
-        };
-
-        gsap.ticker.add(handleTicker);
-
-        gsap.ticker.lagSmoothing(0);
-
-        return () => {
-            gsap.ticker.remove(handleTicker);
-            lenis.destroy();
-            lenisRef.current = null;
-        };
-    }, []);
-
     const wasPopState = useRef(false);
 
-    // Track back/forward navigation globally
+    // Track back/forward navigation
     useEffect(() => {
-        const handlePopState = () => {
-            wasPopState.current = true;
-        };
-        window.addEventListener('popstate', handlePopState);
-        return () => window.removeEventListener('popstate', handlePopState);
+        const handlePopState = () => { wasPopState.current = true; };
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
     }, []);
 
-    // Handle route changes: scroll to anchor if hash present, otherwise scroll to top
+    // Scroll to top or anchor on route change
     useEffect(() => {
         const timeout = setTimeout(() => {
             const hash = window.location.hash;
-
             if (hash) {
                 const target = document.querySelector(hash);
                 if (target) {
-                    if (lenisRef.current) {
-                        lenisRef.current.scrollTo(target as HTMLElement, {
-                            offset: -80,
-                            duration: 1.2,
-                        });
-                    } else {
-                        target.scrollIntoView({ behavior: "smooth" });
-                    }
+                    const offset = 80;
+                    const top = target.getBoundingClientRect().top + window.scrollY - offset;
+                    window.scrollTo({ top, behavior: "smooth" });
                 }
             } else if (!wasPopState.current) {
-                if (lenisRef.current) {
-                    lenisRef.current.scrollTo(0, { immediate: true });
-                }
-                window.scrollTo(0, 0);
+                window.scrollTo({ top: 0, behavior: "instant" });
             }
-
-            ScrollTrigger.refresh();
             wasPopState.current = false;
-        }, 150);
+        }, 100);
 
         return () => clearTimeout(timeout);
     }, [pathname]);
 
-    // Intercept all anchor link clicks so Lenis handles the scroll
+    // Intercept same-page anchor clicks
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
             const anchor = (e.target as HTMLElement).closest("a");
             if (!anchor) return;
-
             const href = anchor.getAttribute("href");
-            if (!href) return;
-
-            // Same-page anchor (e.g. "#section")
-            if (href.startsWith("#")) {
-                e.preventDefault();
-                const target = document.querySelector(href);
-                if (target && lenisRef.current) {
-                    lenisRef.current.scrollTo(target as HTMLElement, {
-                        offset: -80,
-                        duration: 1.2,
-                    });
-                }
-                // Update URL hash without triggering navigation
-                window.history.pushState(null, "", href);
+            if (!href?.startsWith("#")) return;
+            e.preventDefault();
+            const target = document.querySelector(href);
+            if (target) {
+                const offset = 80;
+                const top = target.getBoundingClientRect().top + window.scrollY - offset;
+                window.scrollTo({ top, behavior: "smooth" });
             }
+            window.history.pushState(null, "", href);
         };
 
         document.addEventListener("click", handleClick);
@@ -146,7 +91,7 @@ export const SmoothScroll = ({ children }: SmoothScrollProps) => {
     }, []);
 
     return (
-        <LenisContext.Provider value={contextValue}>
+        <LenisContext.Provider value={ctxValue}>
             {children}
         </LenisContext.Provider>
     );
