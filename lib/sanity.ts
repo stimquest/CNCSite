@@ -208,7 +208,7 @@ export const queries = {
   }`,
   schoolStages: `*[_type == "schoolPage"][0]{
     "stages": stages[] {
-      id, officialName, age, price, hook, description, logistique,
+      id, officialName, age, price, hook, description, logistique, registrationUrl,
       "pricingTiers": pricingTiers[]{ label, value },
       "image": image.asset->url
     }

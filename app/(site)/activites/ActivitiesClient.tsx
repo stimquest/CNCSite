@@ -42,6 +42,7 @@ interface SchoolStage {
     logistique: string[];
     pricingTiers: { label: string; value: string }[];
     image: string;
+    registrationUrl?: string;
 }
 
 interface ActivitiesClientProps {
@@ -437,14 +438,16 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
                                                                         <span className="text-lg font-black text-abysse">{stage.price}</span>
                                                                     </div>
                                                                 )}
+                                                                {stage.registrationUrl && (
                                                                 <a
-                                                                    href="https://coutainville.axyomes.com/"
+                                                                    href={stage.registrationUrl}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 bg-turquoise text-white hover:bg-abysse transition-all shadow-xl shadow-turquoise/20"
+                                                                    className="w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 border bg-slate-50 text-abysse border-slate-200 hover:border-turquoise hover:text-turquoise transition-all cursor-pointer"
                                                                 >
                                                                     <Calendar size={14} /> S'inscrire
                                                                 </a>
+                                                                )}
                                                                 <div className="h-px bg-slate-100 my-2"></div>
                                                                 <button
                                                                     onClick={() => toggleExpand(`school-${stage.id}`)}

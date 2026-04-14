@@ -523,6 +523,7 @@ export interface SchoolStage {
   image?: string;
   pricingTiers?: { label: string; value: string; }[];
   gallery?: string[];
+  registrationUrl?: string;
 }
 
 export interface SchoolPageData {

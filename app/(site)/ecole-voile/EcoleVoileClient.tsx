@@ -459,11 +459,13 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
                 </div>
                 {/* CTA fixé visuellement en bas de la zone de scroll */}
                 <div className="px-5 pb-5 pt-2">
-                  <a href="https://coutainville.axyomes.com/" target="_blank"
+                  {selected.registrationUrl && (
+                  <a href={selected.registrationUrl} target="_blank" rel="noopener noreferrer"
                     className={`flex items-center justify-center gap-2 w-full py-4 rounded-xl ${selected.bgColor} text-white font-black uppercase tracking-widest text-sm hover:opacity-90 transition-opacity shadow-md`}
                     onClick={e => e.stopPropagation()}>
                     S'inscrire <ArrowRight size={14} />
                   </a>
+                  )}
                 </div>
               </div>
 
@@ -576,11 +578,13 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
                     </div>
                   </div>
                   <div className="px-6 py-4 border-t border-slate-100 bg-white">
-                    <a href="https://coutainville.axyomes.com/" target="_blank"
+                    {selected.registrationUrl && (
+                    <a href={selected.registrationUrl} target="_blank" rel="noopener noreferrer"
                       className={`flex items-center justify-center gap-2 w-full py-4 rounded-xl ${selected.bgColor} text-white font-black uppercase tracking-widest text-sm hover:opacity-90 transition-opacity shadow-md`}
                       onClick={e => e.stopPropagation()}>
                       S'inscrire <ArrowRight size={14} />
                     </a>
+                    )}
                   </div>
                 </div>
               </div>

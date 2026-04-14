@@ -102,7 +102,8 @@ export default defineType({
                                 { name: 'value', type: 'string', title: 'Prix' },
                             ]
                         }]
-                    }
+                    },
+                    { name: 'registrationUrl', type: 'url', title: 'Lien d\'inscription (Axyomes)' },
                 ],
                 preview: {
                     select: {
