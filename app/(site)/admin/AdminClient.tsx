@@ -69,6 +69,36 @@ const calculateTimeRange = (start: string, duration: number) => {
     const format = (v: number) => v < 10 ? `0${v}` : v;
     return `${format(h)}h${format(m)} - ${format(endH)}h${format(m)}`;
 };
+
+// Normalise un horaire du type "10h - 12h" -> "10h00 - 12h00" pour compat dropdown.
+// Gère aussi les formats déjà corrects et les minutes non padées ("9h5" -> "09h05").
+const normalizeTimePiece = (s: string): string => {
+    const trimmed = s.trim();
+    const m = trimmed.match(/^(\d+)h(\d*)$/);
+    if (!m) return trimmed;
+    const h = parseInt(m[1]);
+    const min = (m[2] || '00').padStart(2, '0');
+    const hStr = h < 10 ? `0${h}` : `${h}`;
+    return `${hStr}h${min}`;
+};
+const normalizeTimeFormat = (time: string | undefined): string => {
+    if (!time) return '';
+    if (time.includes(' - ')) {
+        const [start, end] = time.split(' - ');
+        return `${normalizeTimePiece(start)} - ${normalizeTimePiece(end)}`;
+    }
+    return normalizeTimePiece(time);
+};
+const normalizeWeeklyPlanning = (p: WeeklyPlanning): WeeklyPlanning => ({
+    ...p,
+    days: (p.days || []).map(day => ({
+        ...day,
+        stageSlots: (day.stageSlots || []).map(slot => ({
+            ...slot,
+            time: normalizeTimeFormat(slot.time),
+        })),
+    })),
+});
 const START_HOURS = Array.from({ length: 14 }, (_, i) => {
     const h = i + 7;
     const hStr = h < 10 ? `0${h}` : `${h}`;
@@ -147,21 +177,16 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
         // Check if planning exists for this start date
         const existing = plannings.find(p => p.startDate === mondayStr);
         if (existing) {
-            setSelectedStage({ ...existing }); // Clone to edit
+            setSelectedStage(normalizeWeeklyPlanning(existing));
         } else {
             // Initialize New Week (Mon-Fri default)
             initNewStage(mondayStr);
         }
     };
 
-    const buildDefaultSlots = (): StageSlot[] =>
-        stageDefinitions.map(s => ({
-            _key: `slot-${s.key}-${Date.now()}`,
-            stageKey: s.key,
-            time: s.planningType === 'kid' ? '10h - 12h' : '14h - 17h',
-            activity: s.planningType === 'kid' ? 'optimist' as ActivityType : undefined,
-            description: ''
-        }));
+    // Ne pas pré-créer de slots : ils seront créés à la volée par updateSlot()
+    // uniquement pour les stages auxquels l'admin renseigne réellement un horaire.
+    const buildDefaultSlots = (): StageSlot[] => [];
 
     const initNewStage = (startDate: string) => {
         const days = DAYS_STAGES.map((name, i) => ({
@@ -256,11 +281,31 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
         return data;
     };
 
+    const clearAllSlots = () => {
+        if (!selectedStage) return;
+        if (!confirm("Vider TOUS les créneaux de cette semaine ? (irréversible avant sauvegarde)")) return;
+        const clearedDays = selectedStage.days.map(day => ({ ...day, stageSlots: [] }));
+        setSelectedStage({ ...selectedStage, days: clearedDays });
+    };
+
     const saveStage = async () => {
         if (!selectedStage) return;
         setIsSaving(true);
         try {
-            const doc = { ...selectedStage, _type: 'weeklyPlanning' as const };
+            // Nettoyage : on ne garde QUE les slots avec un horaire réel
+            const cleanedDays = selectedStage.days.map(day => ({
+                ...day,
+                stageSlots: (day.stageSlots || []).filter(s => typeof s.time === 'string' && s.time.trim() !== ''),
+            }));
+
+            // --- DIAGNOSTIC : voir exactement ce qui part dans Sanity ---
+            console.log('[SAVE] Slots envoyés à Sanity :');
+            cleanedDays.forEach(day => {
+                console.log(`  ${day.name}:`, day.stageSlots.map(s => `${s.stageKey}=${s.time}`).join(', ') || '(vide)');
+            });
+            // --- FIN DIAGNOSTIC ---
+
+            const doc = { ...selectedStage, days: cleanedDays, _type: 'weeklyPlanning' as const };
             await upsertPlanning(doc);
             await refreshData();
             alert("Planning enregistré !");
@@ -572,7 +617,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                                 key={p._id}
                                                 onClick={() => {
                                                     setSelectedDate(p.startDate);
-                                                    setSelectedStage({ ...p });
+                                                    setSelectedStage(normalizeWeeklyPlanning(p));
                                                 }}
                                                 className={`w-full text-left p-2.5 rounded-xl transition-all border ${selectedStage?._id === p._id ? 'bg-turquoise/10 border-turquoise/30 text-turquoise shadow-sm' : 'border-transparent hover:bg-slate-50 text-slate-500'}`}
                                             >
@@ -655,6 +700,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                                         </button>
                                                     </>
                                                 )}
+                                                <button onClick={clearAllSlots} className="px-4 py-3 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-500 hover:text-white transition-all shadow-sm font-black uppercase text-xs tracking-widest flex items-center gap-2" title="Vider tous les créneaux de la semaine"><Zap size={14} /> Tout vider</button>
                                                 {selectedStage._id && <button onClick={deleteStage} className="p-3 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"><Trash2 size={16} /></button>}
                                                 <button onClick={saveStage} disabled={isSaving} className="px-6 py-3 bg-abysse text-white rounded-xl font-black uppercase text-xs tracking-widest hover:bg-turquoise transition-all shadow-md flex items-center gap-2"><Save size={16} /> Enregistrer</button>
                                             </div>
@@ -736,10 +782,12 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                                                                         return String(parseInt(parts[1].split('h')[0]) - parseInt(parts[0].split('h')[0]));
                                                                                     })()}
                                                                                     onChange={(e) => {
-                                                                                        const start = (slot?.time || '').split(' - ')[0] || '10h00';
+                                                                                        const start = (slot?.time || '').split(' - ')[0];
+                                                                                        if (!start) return; // pas d'heure de début → ne pas créer de créneau
                                                                                         updateSlot({ time: calculateTimeRange(start, parseInt(e.target.value)) });
                                                                                     }}
-                                                                                    className="w-12 p-1 bg-turquoise/10 border border-turquoise/20 rounded text-[9px] font-black text-turquoise-700 outline-none focus:border-turquoise"
+                                                                                    disabled={!(slot?.time || '').split(' - ')[0]}
+                                                                                    className="w-12 p-1 bg-turquoise/10 border border-turquoise/20 rounded text-[9px] font-black text-turquoise-700 outline-none focus:border-turquoise disabled:opacity-40 disabled:cursor-not-allowed"
                                                                                 >
                                                                                     {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d}h</option>)}
                                                                                 </select>
@@ -780,10 +828,12 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                                                                         return String(parseInt(parts[1].split('h')[0]) - parseInt(parts[0].split('h')[0]));
                                                                                     })()}
                                                                                     onChange={(e) => {
-                                                                                        const start = (slot?.time || '').split(' - ')[0] || '14h00';
+                                                                                        const start = (slot?.time || '').split(' - ')[0];
+                                                                                        if (!start) return; // pas d'heure de début → ne pas créer de créneau
                                                                                         updateSlot({ time: calculateTimeRange(start, parseInt(e.target.value)) });
                                                                                     }}
-                                                                                    className="w-12 p-1 bg-abysse/10 border border-abysse/20 rounded text-[9px] font-black text-abysse outline-none focus:border-abysse"
+                                                                                    disabled={!(slot?.time || '').split(' - ')[0]}
+                                                                                    className="w-12 p-1 bg-abysse/10 border border-abysse/20 rounded text-[9px] font-black text-abysse outline-none focus:border-abysse disabled:opacity-40 disabled:cursor-not-allowed"
                                                                                 >
                                                                                     {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d}h</option>)}
                                                                                 </select>

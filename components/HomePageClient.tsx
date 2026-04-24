@@ -1435,7 +1435,11 @@ export default function HomePageClient({
             {/* Events list */}
             {/* Events list */}
             <div className="lg:w-2/3 w-full flex overflow-x-auto gap-6 snap-x snap-mandatory scroll-smooth scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden -mx-6 px-6 lg:-m-10 lg:p-10 lg:mx-0 lg:px-0 lg:overflow-x-auto pb-12 lg:pb-10">
-              {upcomingEvents.slice(0, 8).map((event: any, idx: number) => {
+              {upcomingEvents.filter((event: any) => {
+                const now = new Date();
+                const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                return event.startDate >= todayStr;
+              }).slice(0, 8).map((event: any, idx: number) => {
                 const eventDate = new Date(event.startDate);
                 return (
                   <div

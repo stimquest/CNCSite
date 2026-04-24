@@ -11,47 +11,27 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
+interface StageSlot { _key: string; stageKey: string; time?: string; activity?: string; description?: string; }
 interface DayEntry {
   _key: string;
   name: string;
   date: string;
   isRaidDay?: boolean;
-  raidTarget?: string;
-  miniMousses?: { time?: string; activity?: string; description?: string };
-  mousses?: { time?: string; activity?: string; description?: string };
-  initiation?: string;
-  perfectionnement?: string;
-  sessions?: { _key: string; time: string }[];
+  raidStageKey?: string;
+  stageSlots?: StageSlot[];
+  sessions?: { time: string }[];
 }
-
-interface WeeklyPlanning {
-  _id: string;
-  title: string;
-  startDate: string;
-  endDate: string;
-  days: DayEntry[];
-}
-
-interface CharWeek {
-  _key: string;
-  title: string;
-  startDate: string;
-  endDate: string;
-  days: DayEntry[];
-}
-
-interface CharPlanning {
-  _id: string;
-  title: string;
-  startDate: string;
-  endDate: string;
-  weeks: CharWeek[];
-}
-
+interface StageDefinition { _id: string; key: string; label: string; shortLabel?: string; color?: string; }
+interface WeeklyPlanning { _id: string; title: string; startDate: string; endDate: string; days: DayEntry[]; }
+interface CharSession { _id: string; date: string; heureDebut: string; heureFin: string; }
+interface CharWeek { startDate: string; endDate: string; days: DayEntry[]; }
+interface MarcheWeek { _key: string; startDate: string; endDate: string; days: DayEntry[]; }
+interface MarchePlanning { _id: string; startDate: string; endDate: string; weeks: MarcheWeek[]; }
 interface PlanningsData {
   plannings: WeeklyPlanning[];
-  charPlannings: CharPlanning[];
-  marchePlannings: CharPlanning[];
+  charSessions: CharSession[];
+  marchePlannings: MarchePlanning[];
+  stageDefinitions: StageDefinition[];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -64,6 +44,36 @@ const ACTIVITY_LABELS: Record<string, string> = {
   paddle: 'Paddle / Kayak',
   char: 'Char à voile',
 };
+const STAGE_COLORS: Record<string, string> = {
+  yellow: '#fbbf24', turquoise: '#00A9CE', blue: '#60a5fa',
+  purple: '#a78bfa', orange: '#fb923c', rose: '#fb7185',
+};
+function stageColor(color?: string) { return STAGE_COLORS[color || ''] ?? '#94a3b8'; }
+
+const DAYS_FR = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+function buildCharWeeks(sessions: CharSession[]): CharWeek[] {
+  const weekMap: Record<string, CharWeek> = {};
+  sessions.forEach(s => {
+    const d = new Date(s.date);
+    const diff = d.getDay() === 0 ? -6 : 1 - d.getDay();
+    const ws = new Date(d); ws.setDate(d.getDate() + diff);
+    const weekKey = ws.toISOString().split('T')[0];
+    if (!weekMap[weekKey]) {
+      const we = new Date(ws); we.setDate(ws.getDate() + 6);
+      weekMap[weekKey] = {
+        startDate: weekKey,
+        endDate: we.toISOString().split('T')[0],
+        days: Array.from({ length: 7 }, (_, i) => {
+          const dd = new Date(ws); dd.setDate(ws.getDate() + i);
+          return { _key: `${weekKey}-${i}`, name: DAYS_FR[i], date: dd.toISOString().split('T')[0], sessions: [] };
+        }),
+      };
+    }
+    const dayIdx = (new Date(s.date).getDay() + 6) % 7;
+    weekMap[weekKey].days[dayIdx].sessions!.push({ time: `${s.heureDebut} — ${s.heureFin}` });
+  });
+  return Object.keys(weekMap).sort().map(k => weekMap[k]);
+}
 
 function isCurrentWeek(startDate: string, endDate: string) {
   const now = new Date();
@@ -215,14 +225,7 @@ const SectionHeader: React.FC<{ icon: React.ReactNode; title: string; subtitle: 
 );
 
 // Slide Stages Voile
-const StagesSlide: React.FC<{ week: WeeklyPlanning }> = ({ week }) => {
-  const groups = [
-    { key: 'miniMousses', label: 'Mini-Mousses', color: '#a78bfa' },
-    { key: 'mousses', label: 'Moussaillons', color: '#34d399' },
-    { key: 'initiation', label: 'Initiation', color: '#60a5fa' },
-    { key: 'perfectionnement', label: 'Perfectionnement', color: '#00A9CE' },
-  ];
-
+const StagesSlide: React.FC<{ week: WeeklyPlanning; stageDefinitions: StageDefinition[] }> = ({ week, stageDefinitions }) => {
   return (
     <div className="h-full flex flex-col p-6 animate-in fade-in duration-700">
       <SectionHeader
@@ -245,62 +248,53 @@ const StagesSlide: React.FC<{ week: WeeklyPlanning }> = ({ week }) => {
           ))}
         </div>
 
-        {/* Lignes groupes */}
-        {groups.map((group, gi) => (
-          <div key={group.key} className="grid border-b last:border-b-0" style={{ gridTemplateColumns: '140px repeat(5, 1fr)', borderColor: 'rgba(255,255,255,0.06)', background: gi % 2 === 0 ? 'rgba(255,255,255,0.02)' : undefined, flex: 1 }}>
-            {/* Label groupe */}
-            <div className="flex items-center gap-2 px-3 py-2 border-r" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-              <div className="size-2 rounded-full shrink-0" style={{ background: group.color }} />
-              <span className="text-[10px] font-black uppercase tracking-wider" style={{ color: group.color }}>{group.label}</span>
+        {/* Lignes stages */}
+        {stageDefinitions.map((stage, gi) => {
+          const color = stageColor(stage.color);
+          return (
+            <div key={stage.key} className="grid border-b last:border-b-0" style={{ gridTemplateColumns: '140px repeat(5, 1fr)', borderColor: 'rgba(255,255,255,0.06)', background: gi % 2 === 0 ? 'rgba(255,255,255,0.02)' : undefined, flex: 1 }}>
+              {/* Label stage */}
+              <div className="flex items-center gap-2 px-3 py-2 border-r" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                <div className="size-2 rounded-full shrink-0" style={{ background: color }} />
+                <span className="text-[10px] font-black uppercase tracking-wider" style={{ color }}>{stage.shortLabel || stage.label}</span>
+              </div>
+              {/* Cellules jours */}
+              {week.days.slice(0, 5).map((day) => {
+                const slot = (day.stageSlots || []).find(s => s.stageKey === stage.key);
+                const isRaid = day.isRaidDay && (day.raidStageKey || '').split(',').includes(stage.key);
+                const time = slot?.time || '';
+                const actLabel = slot?.activity ? (ACTIVITY_LABELS[slot.activity] || slot.activity) : (slot?.description || '');
+                return (
+                  <div key={day._key} className="flex flex-col items-center justify-center p-2 border-l text-center" style={{ borderColor: 'rgba(255,255,255,0.06)', background: isToday(day.date) ? 'rgba(0,169,206,0.08)' : undefined }}>
+                    {isRaid ? (
+                      <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: 'rgba(251,146,60,0.2)', color: '#fb923c' }}>RAID</span>
+                    ) : (!time && !actLabel) ? (
+                      <span className="text-white/15 text-lg">—</span>
+                    ) : (
+                      <>
+                        {time     && <span className="text-sm font-black text-white leading-tight">{time}</span>}
+                        {actLabel && <span className="text-[9px] font-bold text-white/40 leading-tight mt-0.5">{actLabel}</span>}
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            {/* Cellules jours */}
-            {week.days.slice(0, 5).map((day) => {
-              const raw = (day as any)[group.key];
-              let time = '';
-              let label = '';
-              if (day.isRaidDay && (day.raidTarget === group.key || (day.raidTarget === 'mousses' && group.key === 'mousses') || (day.raidTarget === 'miniMousses' && group.key === 'miniMousses') || (day.raidTarget === 'initiation' && group.key === 'initiation') || (day.raidTarget === 'perfectionnement' && group.key === 'perfectionnement'))) {
-                label = 'RAID';
-              } else if (typeof raw === 'string') {
-                time = raw;
-              } else if (raw && typeof raw === 'object') {
-                time = raw.time || '';
-                label = raw.activity ? (ACTIVITY_LABELS[raw.activity] || raw.activity) : (raw.description || '');
-              }
-
-              const isEmpty = !time && !label;
-              return (
-                <div key={day._key} className="flex flex-col items-center justify-center p-2 border-l text-center" style={{ borderColor: 'rgba(255,255,255,0.06)', background: isToday(day.date) ? 'rgba(0,169,206,0.08)' : undefined }}>
-                  {label === 'RAID' ? (
-                    <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: 'rgba(251,146,60,0.2)', color: '#fb923c' }}>RAID</span>
-                  ) : isEmpty ? (
-                    <span className="text-white/15 text-lg">—</span>
-                  ) : (
-                    <>
-                      {time && <span className="text-sm font-black text-white leading-tight">{time}</span>}
-                      {label && <span className="text-[9px] font-bold text-white/40 leading-tight mt-0.5">{label}</span>}
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 };
 
 // Slide Char à voile
-const CharSlide: React.FC<{ planning: CharPlanning }> = ({ planning }) => {
-  const currentWeek = planning.weeks?.find(w => isCurrentWeek(w.startDate, w.endDate)) || planning.weeks?.[0];
-  if (!currentWeek) return null;
-
+const CharSlide: React.FC<{ week: CharWeek }> = ({ week: currentWeek }) => {
   return (
     <div className="h-full flex flex-col p-6 animate-in fade-in duration-700">
       <SectionHeader
         icon={<ChevronRight size={18} className="text-orange-300" />}
         title="Char à Voile"
-        subtitle={`${formatDate(currentWeek.startDate)} → ${formatDate(currentWeek.endDate)} · ${currentWeek.title}`}
+        subtitle={`${formatDate(currentWeek.startDate)} → ${formatDate(currentWeek.endDate)}`}
         color="#fb923c"
       />
       <div className="flex-1 min-h-0 overflow-hidden rounded-2xl" style={{ border: '1px solid rgba(251,146,60,0.2)' }}>
@@ -339,16 +333,13 @@ const CharSlide: React.FC<{ planning: CharPlanning }> = ({ planning }) => {
 };
 
 // Slide Marche Aquatique
-const MarcheSlide: React.FC<{ planning: CharPlanning }> = ({ planning }) => {
-  const currentWeek = planning.weeks?.find(w => isCurrentWeek(w.startDate, w.endDate)) || planning.weeks?.[0];
-  if (!currentWeek) return null;
-
+const MarcheSlide: React.FC<{ week: MarcheWeek }> = ({ week: currentWeek }) => {
   return (
     <div className="h-full flex flex-col p-6 animate-in fade-in duration-700">
       <SectionHeader
         icon={<Waves size={18} className="text-emerald-400" />}
         title="Marche Aquatique"
-        subtitle={`${formatDate(currentWeek.startDate)} → ${formatDate(currentWeek.endDate)} · ${currentWeek.title}`}
+        subtitle={`${formatDate(currentWeek.startDate)} → ${formatDate(currentWeek.endDate)}`}
         color="#34d399"
       />
       <div className="flex-1 min-h-0 overflow-hidden rounded-2xl" style={{ border: '1px solid rgba(52,211,153,0.2)' }}>
@@ -411,18 +402,21 @@ export default function AgendaSignagePage() {
   const slides = React.useMemo(() => {
     if (!data) return [];
     const result: React.ReactNode[] = [];
+    const stageDefinitions = data.stageDefinitions || [];
 
     // Stages voile - semaine en cours
     const currentStage = data.plannings.find(p => isCurrentWeek(p.startDate, p.endDate));
-    if (currentStage) result.push(<StagesSlide key="stages" week={currentStage} />);
+    if (currentStage) result.push(<StagesSlide key="stages" week={currentStage} stageDefinitions={stageDefinitions} />);
 
-    // Char à voile - période en cours
-    const currentChar = data.charPlannings.find(p => isCurrentWeek(p.startDate, p.endDate));
-    if (currentChar) result.push(<CharSlide key="char" planning={currentChar} />);
+    // Char à voile - semaine en cours reconstituée depuis les sessions individuelles
+    const charWeeks = buildCharWeeks(data.charSessions || []);
+    const currentChar = charWeeks.find(w => isCurrentWeek(w.startDate, w.endDate));
+    if (currentChar) result.push(<CharSlide key="char" week={currentChar} />);
 
-    // Marche aquatique - période en cours
-    const currentMarche = data.marchePlannings.find(p => isCurrentWeek(p.startDate, p.endDate));
-    if (currentMarche) result.push(<MarcheSlide key="marche" planning={currentMarche} />);
+    // Marche aquatique - semaine en cours
+    const marchePeriod = data.marchePlannings.find(p => isCurrentWeek(p.startDate, p.endDate));
+    const currentMarche = marchePeriod?.weeks?.find(w => isCurrentWeek(w.startDate, w.endDate));
+    if (currentMarche) result.push(<MarcheSlide key="marche" week={currentMarche} />);
 
     return result;
   }, [data]);

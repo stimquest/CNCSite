@@ -221,10 +221,10 @@ const ClubClient: React.FC<ClubClientProps> = ({ initialClubData }) => {
             .sort((a, b) => new Date(a.startDate!).getTime() - new Date(b.startDate!).getTime());
 
         const now = new Date();
-        const currentYearMonth = now.toISOString().slice(0, 7);
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-        // Always show all upcoming events (from the current month onwards)
-        return events.filter(e => e.startDate!.slice(0, 7) >= currentYearMonth);
+        // Only show upcoming events (today included, past days excluded)
+        return events.filter(e => e.startDate! >= todayStr);
     }, [agendaData.events]);
 
     const uniqueMonths = useMemo(() => {

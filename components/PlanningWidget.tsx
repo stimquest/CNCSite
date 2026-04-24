@@ -200,55 +200,59 @@ export const PlanningWidget: React.FC = () => {
     );
 
     // --- RENDER VOILE ---
-    const renderVoileDayContent = (day: any, isDesktop: boolean) => {
-        return stageDefinitions.map((stage: any) => {
-            const colors = STAGE_COLOR_MAP[stage.color || ''] ?? DEFAULT_COLORS;
-            const slot = (day?.stageSlots || []).find((s: any) => s.stageKey === stage.key);
-            const isRaid = day?.isRaidDay && (day?.raidStageKey || '').split(',').includes(stage.key);
-            const time = slot?.time;
-            const desc = slot?.description;
-
-            if (isDesktop) {
-                if (!time) {
-                    // Empty row alignment spacer for desktop grid
-                    return <div key={stage.key} className="h-[72px] border border-transparent shrink-0" />;
-                }
-                return (
-                    <div key={stage.key} className={`flex flex-col items-center justify-center shrink-0 h-[72px] p-2 rounded-xl border text-center transition-all ${isRaid ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-100'}`}>
-                        {isRaid && <span className="text-[8px] font-black uppercase text-orange-500 mb-0.5">Raid</span>}
-                        <span className={`text-[10px] md:text-[11px] font-black uppercase leading-tight line-clamp-2 ${colors.text}`}>{stage.shortLabel || stage.label}</span>
-                        <span className={`text-[11px] md:text-xs font-black mt-0.5 ${time ? 'text-abysse' : 'text-slate-300'}`}>{time}</span>
-                        {slot?.activity && <span className="text-[9px] font-bold text-slate-400 mt-0.5 max-w-[70px] truncate uppercase">{getActivityLabel(slot.activity)}</span>}
-                    </div>
-                );
-            } else {
-                // Mobile list view
-                return (
-                    <div key={stage.key} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${isRaid ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-100'} ${!time ? 'opacity-50 grayscale' : ''}`}>
-                        <div className="flex items-center gap-2">
-                            <div className={`size-2.5 rounded-full ${colors.iconColor} shrink-0`} />
-                            <span className={`text-xs font-black uppercase ${colors.text}`}>{stage.shortLabel || stage.label}</span>
-                        </div>
-                        <div className="flex flex-col items-end gap-0.5">
-                            {isRaid && <span className="text-[8px] font-black uppercase text-orange-500">Raid</span>}
-                            <span className={`text-sm font-black leading-none ${time ? 'text-abysse' : 'text-slate-300'}`}>{time || '—'}</span>
-                            {slot?.activity && <span className="text-[9px] font-bold text-slate-400 mt-0.5 uppercase">{getActivityLabel(slot.activity)}</span>}
-                        </div>
-                    </div>
-                );
-            }
-        });
-    };
-
     const renderVoileTable = (week: any) => {
         const selectedDay = week.days?.[selectedDayIdx];
+        const days = week.days || [];
+
+        // Seuls les stages ayant au moins un horaire sur l'une des journées de la semaine
+        const activeStages = stageDefinitions.filter((stage: any) =>
+            days.some((day: any) =>
+                (day.stageSlots || []).some((s: any) => s.stageKey === stage.key && s.time)
+            )
+        );
+
+        if (activeStages.length === 0) {
+            return (
+                <div className="flex flex-col items-center justify-center py-16 gap-4">
+                    <p className="text-sm font-black uppercase tracking-widest text-slate-400">Aucun horaire saisi pour cette semaine</p>
+                </div>
+            );
+        }
+
         return (
             <>
                 {/* MOBILE VIEW */}
                 <div className="md:hidden flex flex-col gap-3">
                     {renderDayTabs(week, 'bg-abysse text-white')}
                     <div className="flex flex-col gap-1.5 pb-2">
-                        {renderVoileDayContent(selectedDay, false)}
+                        {activeStages.map((stage: any) => {
+                            const colors = STAGE_COLOR_MAP[stage.color || ''] ?? DEFAULT_COLORS;
+                            const slot = (selectedDay?.stageSlots || []).find((s: any) => s.stageKey === stage.key);
+                            const isRaid = selectedDay?.isRaidDay && (selectedDay?.raidStageKey || '').split(',').includes(stage.key);
+                            const time = slot?.time;
+                            if (!time && !isRaid) return null;
+                            return (
+                                <div key={stage.key} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${isRaid ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-100'}`}>
+                                    <div className="flex items-center gap-2">
+                                        <div className={`size-2.5 rounded-full ${colors.iconColor} shrink-0`} />
+                                        <span className={`text-xs font-black uppercase ${colors.text}`}>{stage.shortLabel || stage.label}</span>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-0.5">
+                                        {isRaid && <span className="text-[8px] font-black uppercase text-orange-500">Raid</span>}
+                                        <span className="text-sm font-black leading-none text-abysse">{time}</span>
+                                        {slot?.activity && <span className="text-[9px] font-bold text-slate-400 mt-0.5 uppercase">{getActivityLabel(slot.activity)}</span>}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {activeStages.every((stage: any) => {
+                            const slot = (selectedDay?.stageSlots || []).find((s: any) => s.stageKey === stage.key);
+                            return !slot?.time;
+                        }) && (
+                            <div className="p-4 rounded-xl border border-slate-100 bg-white text-center">
+                                <span className="text-xs font-bold text-slate-300 uppercase">Pas de séance ce jour</span>
+                            </div>
+                        )}
                     </div>
                 </div>
                 {/* DESKTOP VIEW (TABLE) */}
@@ -257,9 +261,9 @@ export const PlanningWidget: React.FC = () => {
                         <thead>
                             <tr>
                                 <th className="p-3 w-[150px]"></th>
-                                {week.days?.map((day: any, i: number) => (
+                                {days.map((day: any, i: number) => (
                                     <th key={i} className={`p-2 text-center border-b-2 ${day.date === new Date().toISOString().split('T')[0] ? 'border-abysse' : 'border-slate-200'}`}>
-                                        <p className="text-xs font-black uppercase text-slate-800 tracking-wider disabled-if-empty">{day.name}</p>
+                                        <p className="text-xs font-black uppercase text-slate-800 tracking-wider">{day.name}</p>
                                         <p className="text-[10px] text-slate-400 font-bold mt-0.5">
                                             {day.date ? new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''}
                                         </p>
@@ -268,30 +272,30 @@ export const PlanningWidget: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {stageDefinitions.map((stage: any) => {
+                            {activeStages.map((stage: any) => {
                                 const colors = STAGE_COLOR_MAP[stage.color || ''] ?? DEFAULT_COLORS;
                                 return (
-                                    <tr key={stage.key} className="bg-white hover:bg-slate-50 transition-colors group">
+                                    <tr key={stage.key} className="bg-white hover:bg-slate-50 transition-colors">
                                         <td className="p-3 rounded-l-2xl border-y border-l border-slate-100 shadow-sm align-middle">
                                             <div className="flex items-center gap-2">
                                                 <div className={`size-3 rounded-full ${colors.iconColor} shrink-0`} />
                                                 <span className={`text-[10px] lg:text-[11px] font-black uppercase ${colors.text} leading-tight`}>{stage.shortLabel || stage.label}</span>
                                             </div>
                                         </td>
-                                        {week.days?.map((day: any, i: number) => {
+                                        {days.map((day: any, i: number) => {
                                             const slot = (day?.stageSlots || []).find((s: any) => s.stageKey === stage.key);
                                             const isRaid = day?.isRaidDay && (day?.raidStageKey || '').split(',').includes(stage.key);
                                             const time = slot?.time;
                                             return (
-                                                <td key={i} className={`p-2 border-y border-slate-100 text-center align-middle ${i === 6 ? 'border-r rounded-r-2xl' : ''} shadow-sm`}>
+                                                <td key={i} className={`p-2 border-y border-slate-100 text-center align-middle ${i === days.length - 1 ? 'border-r rounded-r-2xl' : ''} shadow-sm`}>
                                                     {time ? (
                                                         <div className={`mx-auto flex flex-col items-center justify-center p-2 rounded-xl transition-all max-w-[120px] ${isRaid ? 'bg-orange-50 border border-orange-200' : 'bg-slate-50 border border-slate-100'}`}>
                                                             {isRaid && <span className="text-[8px] font-black uppercase text-orange-500 mb-0.5">Raid</span>}
-                                                            <span className={`text-xs font-black ${time ? 'text-abysse' : 'text-slate-300'}`}>{time}</span>
-                                                            {slot?.activity && <span className="text-[8px] font-bold text-slate-400 mt-0.5 max-w-full truncate px-1 uppercase" title={getActivityLabel(slot.activity)}>{getActivityLabel(slot.activity)}</span>}
+                                                            <span className="text-xs font-black text-abysse">{time}</span>
+                                                            {slot?.activity && <span className="text-[8px] font-bold text-slate-400 mt-0.5 max-w-full truncate px-1 uppercase">{getActivityLabel(slot.activity)}</span>}
                                                         </div>
                                                     ) : (
-                                                        <span className="text-slate-200 font-bold opacity-0 group-hover:opacity-50 transition-opacity select-none">—</span>
+                                                        <span className="text-slate-200 select-none">—</span>
                                                     )}
                                                 </td>
                                             );

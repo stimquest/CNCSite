@@ -74,7 +74,38 @@ function LogoModel() {
   );
 }
 
+function checkWebGL(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
+    );
+  } catch {
+    return false;
+  }
+}
+
+const LogoFallback: React.FC = () => (
+  <div className="w-full h-full flex items-center justify-center">
+    <div className="relative flex items-center justify-center">
+      <div className="absolute size-24 rounded-full animate-ping" style={{ background: 'rgba(0,169,206,0.12)', animationDuration: '2.5s' }} />
+      <div className="absolute size-16 rounded-full" style={{ background: 'rgba(0,169,206,0.08)', border: '1px solid rgba(0,169,206,0.25)' }} />
+      <span className="relative text-2xl font-black italic uppercase tracking-tighter text-turquoise select-none">CNC</span>
+    </div>
+  </div>
+);
+
 export const SignageLogo3D: React.FC = () => {
+  const [webglOk, setWebglOk] = React.useState<boolean | null>(null);
+
+  React.useEffect(() => {
+    setWebglOk(checkWebGL());
+  }, []);
+
+  if (webglOk === null) return null;
+  if (!webglOk) return <LogoFallback />;
+
   return (
     <Canvas
       frameloop="always"
