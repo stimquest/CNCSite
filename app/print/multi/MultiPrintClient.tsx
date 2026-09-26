@@ -2,11 +2,13 @@
 
 import React, { useEffect } from 'react';
 import { CalendarDays, Ship } from 'lucide-react';
-import { ActivityType } from '@/types';
+import { ActivityType, StageSlot } from '@/types';
+import { getPrintStageGroups, PrintStageDefinition } from '@/lib/print-stages';
 
 interface Props {
     type: string;
     idsString?: string;
+    stageDefinitions: PrintStageDefinition[];
     plannings: any[];
     charPlannings: any[];
     marchePlannings: any[];
@@ -15,12 +17,15 @@ interface Props {
 const ACTIVITY_OPTIONS: { label: string, value: ActivityType }[] = [
     { label: 'Piscine / Cerf-volant', value: 'piscine' },
     { label: 'Optimist', value: 'optimist' },
+    { label: 'Planche à voile', value: 'planche' },
+    { label: 'Kite', value: 'kite' },
+    { label: 'Multiglisse', value: 'multiglisse' },
     { label: 'Catamaran', value: 'catamaran' },
     { label: 'Paddle / Kayak', value: 'paddle' },
     { label: 'Char à voile', value: 'char' },
 ];
 
-export default function MultiPrintClient({ type, idsString, plannings, charPlannings, marchePlannings }: Props) {
+export default function MultiPrintClient({ type, idsString, plannings, charPlannings, marchePlannings, stageDefinitions }: Props) {
     const ids = idsString ? idsString.split(',') : [];
 
     useEffect(() => {
@@ -100,19 +105,14 @@ export default function MultiPrintClient({ type, idsString, plannings, charPlann
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {[
-                                        { id: 'miniMousses', label: 'Mini-Mousses' },
-                                        { id: 'mousses', label: 'Moussaillons' },
-                                        { id: 'initiation', label: 'Initiation' },
-                                        { id: 'perfectionnement', label: 'Perfectionnement' }
-                                    ].map((group) => (
+                                    {getPrintStageGroups(selectedStage, stageDefinitions).map((group) => (
                                         <tr key={group.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors">
                                             <td className="p-2 print:p-1.5 bg-slate-50/50 font-black text-[10px] uppercase text-abysse border-r border-slate-200 tracking-tight leading-tight">
                                                 {group.label}
                                             </td>
                                             {selectedStage.days?.map((day: any, dIdx: number) => {
-                                                const session = (day as any)[group.id];
-                                                const isRaid = day.raidTarget === group.id;
+                                                const session = day.stageSlots?.find((slot: StageSlot) => slot.stageKey === group.id);
+                                                const isRaid = (day.raidStageKey || '').split(',').includes(group.id);
 
                                                 let activity = "";
                                                 let time = "";

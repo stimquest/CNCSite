@@ -22,5 +22,6 @@ export const config = {
         '/cockpit/:path*',
         '/studio/:path*',
         '/api/cockpit/:path*',
+        '/api/char/bookings/:path*',
     ]
 };

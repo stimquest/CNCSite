@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import { WaveHalftone } from './WaveHalftone';
 
 interface YouTubeBackgroundProps {
     videoUrl: string;
@@ -75,7 +76,7 @@ export const YouTubeBackground: React.FC<YouTubeBackgroundProps> = ({ videoUrl }
     ].join('');
 
     return (
-        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none bg-[#06111a]">
 
             {/* Iframe YouTube — toujours dans le DOM une fois injectée */}
             {phase !== 'photo' && (
@@ -83,7 +84,12 @@ export const YouTubeBackground: React.FC<YouTubeBackgroundProps> = ({ videoUrl }
                     src={embedUrl}
                     onLoad={handleIframeLoad}
                     className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550%] h-[120%] md:w-[130%] md:h-[130%] min-h-full min-w-full scale-110"
-                    style={{ border: 0, pointerEvents: 'none', zIndex: 1 }}
+                    style={{
+                        border: 0,
+                        pointerEvents: 'none',
+                        zIndex: 1,
+                        filter: 'saturate(0.82) contrast(1.08) brightness(0.94)',
+                    }}
                     allow="autoplay; encrypted-media"
                     allowFullScreen={false}
                     tabIndex={-1}
@@ -102,14 +108,17 @@ export const YouTubeBackground: React.FC<YouTubeBackgroundProps> = ({ videoUrl }
                     opacity: phase === 'video' ? 0 : 1,
                     transition: phase === 'video' ? 'opacity 1.8s ease' : 'none',
                     zIndex: 2,
+                    filter: 'saturate(0.82) contrast(1.08) brightness(0.94)',
                 }}
             />
+
+            <WaveHalftone />
 
             {/* Loader — visible uniquement en phase loading */}
             <div
                 className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2"
                 style={{
-                    zIndex: 3,
+                    zIndex: 4,
                     opacity: phase === 'loading' ? 1 : 0,
                     transition: 'opacity 0.5s ease',
                     pointerEvents: 'none',

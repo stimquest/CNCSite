@@ -27,6 +27,7 @@ import {
     Pencil,
     X,
     CalendarClock,
+    Copy,
 } from 'lucide-react';
 import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, ActivityType, CharWeek, CharDay, CharSession, StageDefinition, StageSlot } from '@/types';
 import { CharSessionDoc } from '@/types';
@@ -34,6 +35,10 @@ import Link from 'next/link';
 import CharBookingAdmin from '@/components/admin/CharBookingAdmin';
 
 import CockpitClient from '@/components/admin/CockpitClient';
+import FrenchWeekDatePicker from '@/components/admin/FrenchWeekDatePicker';
+import StagePlanningGrid from '@/components/admin/StagePlanningGrid';
+import ArticleManager from './ArticleEditor';
+import SchoolStagesEditor from '@/components/admin/SchoolStagesEditor';
 
 // --- CONSTANTS ---
 const ACTIVITY_OPTIONS: { label: string, value: ActivityType }[] = [
@@ -52,6 +57,12 @@ const DAYS_CHAR = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", 
 
 // --- UTILS ---
 const formatDate = (date: Date) => date.toISOString().split('T')[0];
+const getWeekMondayDate = (date = new Date()) => {
+    const monday = new Date(date);
+    const day = monday.getDay();
+    monday.setDate(monday.getDate() - (day === 0 ? 6 : day - 1));
+    return formatDate(monday);
+};
 const addDays = (dateStr: string, days: number) => {
     const d = new Date(dateStr);
     d.setDate(d.getDate() + days);
@@ -59,16 +70,6 @@ const addDays = (dateStr: string, days: number) => {
 };
 // Helper to get formatted date for local display
 const toFRDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-
-const calculateTimeRange = (start: string, duration: number) => {
-    const match = start.match(/(\d+)h(\d+)/);
-    if (!match) return start;
-    const h = parseInt(match[1]);
-    const m = parseInt(match[2]);
-    const endH = h + duration;
-    const format = (v: number) => v < 10 ? `0${v}` : v;
-    return `${format(h)}h${format(m)} - ${format(endH)}h${format(m)}`;
-};
 
 // Normalise un horaire du type "10h - 12h" -> "10h00 - 12h00" pour compat dropdown.
 // Gère aussi les formats déjà corrects et les minutes non padées ("9h5" -> "09h05").
@@ -99,12 +100,6 @@ const normalizeWeeklyPlanning = (p: WeeklyPlanning): WeeklyPlanning => ({
         })),
     })),
 });
-const START_HOURS = Array.from({ length: 14 }, (_, i) => {
-    const h = i + 7;
-    const hStr = h < 10 ? `0${h}` : `${h}`;
-    return [`${hStr}h00`, `${hStr}h15`, `${hStr}h30`, `${hStr}h45`];
-}).flat();
-
 import { useRouter } from 'next/navigation';
 
 interface InfoMessage {
@@ -136,8 +131,9 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
 
     const { stageDefinitions } = useLiveStatus();
 
-    const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'COCKPIT' | 'STAGES' | 'MARCHE' | 'AGENDA'>('DASHBOARD');
+    const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'COCKPIT' | 'STAGES' | 'FICHES' | 'MARCHE' | 'AGENDA'>('DASHBOARD');
     const [isSaving, setIsSaving] = useState(false);
+    const [isEditingArticle, setIsEditingArticle] = useState(false);
 
     // --- VIGIE STATE ---
     const [vigieMsg, setVigieMsg] = useState({
@@ -152,8 +148,12 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
     const [editingVigieId, setEditingVigieId] = useState<string | null>(null);
 
     // SELECTORS
-    const [selectedDate, setSelectedDate] = useState<string>(formatDate(new Date())); // Selected Monday
-    const [selectedStage, setSelectedStage] = useState<WeeklyPlanning | null>(null);
+    const currentWeekStart = getWeekMondayDate();
+    const [selectedDate, setSelectedDate] = useState<string>(currentWeekStart);
+    const [selectedStage, setSelectedStage] = useState<WeeklyPlanning | null>(() => {
+        const currentWeek = plannings.find(planning => planning.startDate === currentWeekStart);
+        return currentWeek ? normalizeWeeklyPlanning(currentWeek) : null;
+    });
 
     const [selectedMarchePeriod, setSelectedMarchePeriod] = useState<PlanningMarche | null>(null);
     const [selectedAgendaEvent, setSelectedAgendaEvent] = useState<any | null>(null);
@@ -204,7 +204,38 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
             startDate: startDate,
             endDate: addDays(startDate, 6),
             days: days,
-            isPublished: true
+            isPublished: false
+        });
+    };
+
+    const previousStageForCopy = selectedStage && !selectedStage._id
+        ? [...plannings]
+            .filter(planning => planning.startDate < selectedStage.startDate)
+            .sort((a, b) => b.startDate.localeCompare(a.startDate))[0]
+        : undefined;
+
+    const copyPreviousStage = () => {
+        if (!selectedStage || selectedStage._id || !previousStageForCopy) return;
+        const previousStart = Date.parse(`${previousStageForCopy.startDate}T00:00:00Z`);
+        const copiedDays = (previousStageForCopy.days || []).map((day, index) => {
+            const offset = Math.round((Date.parse(`${day.date}T00:00:00Z`) - previousStart) / 86400000);
+            return {
+                ...day,
+                _key: `day-copy-${index}-${Date.now()}`,
+                date: addDays(selectedStage.startDate, offset),
+                stageSlots: (day.stageSlots || []).map((slot, slotIndex) => ({
+                    ...slot,
+                    _key: `slot-copy-${index}-${slotIndex}-${Date.now()}`,
+                })),
+            };
+        });
+
+        setSelectedStage({
+            ...selectedStage,
+            title: `Semaine du ${toFRDate(selectedStage.startDate)}`,
+            endDate: addDays(selectedStage.startDate, 6),
+            days: copiedDays,
+            isPublished: false,
         });
     };
 
@@ -306,10 +337,14 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
             // --- FIN DIAGNOSTIC ---
 
             const doc = { ...selectedStage, days: cleanedDays, _type: 'weeklyPlanning' as const };
-            await upsertPlanning(doc);
+            const saved = await upsertPlanning(doc);
+            setSelectedStage({ ...doc, _id: saved.id });
             await refreshData();
             alert("Planning enregistré !");
-        } catch (err) { console.error(err); alert("Erreur sauvegarde"); }
+        } catch (err) {
+            console.error(err);
+            alert(err instanceof Error ? `Erreur sauvegarde : ${err.message}` : "Erreur sauvegarde");
+        }
         finally { setIsSaving(false); }
     };
 
@@ -583,6 +618,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                 <button onClick={() => setActiveTab('DASHBOARD')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'DASHBOARD' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Bell size={12} /> Dashboard / Vigie</button>
                                 <button onClick={() => setActiveTab('STAGES')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'STAGES' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Stages</button>
 
+                                <button onClick={() => setActiveTab('FICHES')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'FICHES' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Fiches Stages</button>
                                 <button onClick={() => setActiveTab('MARCHE')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'MARCHE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Marche</button>
                                 <button onClick={() => setActiveTab('AGENDA')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'AGENDA' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><CalendarDays size={12}/> Blog & Agenda</button>
                                 <button onClick={() => setActiveTab('COCKPIT')} className={`shrink-0 ml-auto md:ml-2 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'COCKPIT' ? 'bg-turquoise text-white shadow-sm' : 'bg-turquoise/10 text-turquoise hover:bg-turquoise/20'}`}>🚀 Cockpit</button>
@@ -612,7 +648,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                 <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
                                     <h3 className="text-sm font-black uppercase text-abysse mb-3 px-1">Plannings</h3>
                                     <div className="space-y-1 max-h-100 overflow-y-auto pr-2 custom-scrollbar">
-                                        {(plannings || []).map(p => (
+                                        {[...(plannings || [])].sort((a, b) => b.startDate.localeCompare(a.startDate)).map(p => (
                                             <button
                                                 key={p._id}
                                                 onClick={() => {
@@ -630,13 +666,16 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                 </div>
 
                                 <div className="bg-orange-50/50 p-5 rounded-3xl border border-orange-100 italic">
-                                    <h4 className="font-black text-orange-800 text-[10px] uppercase mb-1">Nouveau Planning</h4>
-                                    <input
-                                        type="date"
-                                        value={selectedDate || ''}
-                                        onChange={(e) => handleStageDateSelect(e.target.value)}
-                                        className="w-full p-2 bg-white border border-orange-200 rounded-lg font-bold text-orange-900 text-xs outline-none focus:ring-2 ring-orange-100"
-                                    />
+                                    <h4 className="font-black text-orange-800 text-[10px] uppercase mb-3">Nouveau planning</h4>
+                                    <FrenchWeekDatePicker value={selectedDate} onChange={handleStageDateSelect} />
+                                    {previousStageForCopy && (
+                                        <button
+                                            onClick={copyPreviousStage}
+                                            className="mt-3 w-full py-2.5 px-3 bg-white border border-orange-200 rounded-lg text-orange-800 text-[10px] font-black uppercase tracking-wide hover:bg-orange-100 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <Copy size={13} /> Reprendre les horaires précédents
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -645,7 +684,13 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                 {!selectedStage ? (
                                     <div className="h-full min-h-75 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 rounded-4xl bg-white/50">
                                         <CalendarDays size={40} className="mb-3 opacity-30" />
-                                        <p className="font-bold uppercase tracking-widest text-[10px]">Sélectionnez ou créez un planning</p>
+                                        <p className="font-bold uppercase tracking-widest text-[10px]">Aucun planning pour cette semaine</p>
+                                        <button
+                                            onClick={() => initNewStage(selectedDate)}
+                                            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-abysse px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-turquoise"
+                                        >
+                                            <Plus size={14} /> Créer le planning de la semaine
+                                        </button>
                                     </div>
                                 ) : (
                                     <div className="bg-white p-6 md:p-8 rounded-4xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-2">
@@ -706,156 +751,13 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                             </div>
                                         </div>
 
-                                        {/* COMPACT TABLE GRID */}
-                                        <div className="overflow-x-auto -mx-4 px-4 pb-4">
-                                            <div className="min-w-200 border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
-                                                {/* HEADER ROW */}
-                                                <div className="grid grid-cols-[180px_repeat(auto-fit,minmax(120px,1fr))] bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
-                                                    <div className="p-3 font-black text-[10px] uppercase text-slate-400 flex items-center">Groupe / Jour</div>
-                                                    {selectedStage.days?.map((day, dIdx) => (
-                                                        <div key={dIdx} className="p-3 border-l border-slate-100">
-                                                            <div className="font-black text-[11px] uppercase text-abysse leading-tight">{day.name}</div>
-                                                            <div className="text-[9px] font-bold text-slate-400">{new Date(day.date).getDate()} {new Date(day.date).toLocaleDateString('fr-FR', { month: 'short' })}</div>
-
-
-                                                        </div>
-                                                    ))}
-                                                </div>
-
-                                                {/* GROUP ROWS — dynamique depuis stageDefinitions */}
-                                                {stageDefinitions.map((stage) => (
-                                                    <div key={stage.key} className="grid grid-cols-[180px_repeat(auto-fit,minmax(120px,1fr))] border-b border-slate-50 last:border-0 group">
-                                                        <div className="p-3 bg-slate-50/30 flex items-center gap-2 border-r border-slate-50">
-                                                            <div className={`p-1.5 rounded-lg bg-${stage.color || 'blue'}-50 text-${stage.color || 'blue'}-500 shadow-sm`}>
-                                                                <Ship size={14} />
-                                                            </div>
-                                                            <span className="font-black text-[10px] uppercase tracking-tighter text-slate-600">{stage.label}</span>
-                                                        </div>
-
-                                                        {selectedStage.days.map((day, dIdx) => {
-                                                            const isRaid = (day.raidStageKey || '').split(',').includes(stage.key);
-                                                            const slot = day.stageSlots?.find(s => s.stageKey === stage.key);
-
-                                                            const updateSlot = (updates: Partial<StageSlot>) => {
-                                                                const nd = [...selectedStage.days];
-                                                                const slots = [...(nd[dIdx].stageSlots || [])];
-                                                                const idx = slots.findIndex(s => s.stageKey === stage.key);
-                                                                if (idx >= 0) {
-                                                                    slots[idx] = { ...slots[idx], ...updates };
-                                                                } else {
-                                                                    slots.push({ _key: `slot-${stage.key}-${Date.now()}`, stageKey: stage.key, time: '', ...updates });
-                                                                }
-                                                                nd[dIdx] = { ...nd[dIdx], stageSlots: slots };
-                                                                setSelectedStage({ ...selectedStage, days: nd });
-                                                            };
-
-                                                            const toggleRaid = (e: React.ChangeEvent<HTMLInputElement>) => {
-                                                                const current = (day.raidStageKey || '').split(',').filter(Boolean);
-                                                                const next = e.target.checked ? [...current, stage.key] : current.filter(k => k !== stage.key);
-                                                                const nd = [...selectedStage.days];
-                                                                nd[dIdx].raidStageKey = next.join(',');
-                                                                nd[dIdx].isRaidDay = next.length > 0;
-                                                                setSelectedStage({ ...selectedStage, days: nd });
-                                                            };
-
-                                                            if (stage.planningType === 'kid') {
-                                                                return (
-                                                                    <div key={dIdx} className={`p-2 border-l border-slate-50 transition-colors relative ${isRaid ? 'bg-orange-50/50' : 'hover:bg-slate-50/30'}`}>
-                                                                        <label className="flex items-center justify-between mb-1 cursor-pointer group">
-                                                                            <span className={`text-[8px] font-black uppercase transition-colors ${isRaid ? 'text-orange-500' : 'text-slate-300 group-hover:text-slate-400'}`}>Raid</span>
-                                                                            <input type="checkbox" checked={isRaid} onChange={toggleRaid} className="size-2.5 accent-orange-500 cursor-pointer" />
-                                                                        </label>
-                                                                        <div className="flex flex-col gap-1.5 mt-1">
-                                                                            <div className="flex items-center gap-1">
-                                                                                <select
-                                                                                    value={(slot?.time || '').split(' - ')[0]}
-                                                                                    onChange={(e) => updateSlot({ time: calculateTimeRange(e.target.value, 2) })}
-                                                                                    className="flex-1 p-1 bg-white border border-slate-100 rounded text-[10px] font-bold outline-none focus:border-turquoise"
-                                                                                >
-                                                                                    <option value="">Début</option>
-                                                                                    {START_HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                                                                                </select>
-                                                                                <select
-                                                                                    value={(() => {
-                                                                                        const parts = (slot?.time || '').split(' - ');
-                                                                                        if (parts.length < 2) return '2';
-                                                                                        return String(parseInt(parts[1].split('h')[0]) - parseInt(parts[0].split('h')[0]));
-                                                                                    })()}
-                                                                                    onChange={(e) => {
-                                                                                        const start = (slot?.time || '').split(' - ')[0];
-                                                                                        if (!start) return; // pas d'heure de début → ne pas créer de créneau
-                                                                                        updateSlot({ time: calculateTimeRange(start, parseInt(e.target.value)) });
-                                                                                    }}
-                                                                                    disabled={!(slot?.time || '').split(' - ')[0]}
-                                                                                    className="w-12 p-1 bg-turquoise/10 border border-turquoise/20 rounded text-[9px] font-black text-turquoise-700 outline-none focus:border-turquoise disabled:opacity-40 disabled:cursor-not-allowed"
-                                                                                >
-                                                                                    {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d}h</option>)}
-                                                                                </select>
-                                                                            </div>
-                                                                            <select
-                                                                                value={slot?.activity || 'optimist'}
-                                                                                onChange={(e) => updateSlot({ activity: e.target.value as ActivityType })}
-                                                                                className="w-full p-1.5 bg-white border border-slate-100 rounded text-[9px] font-bold outline-none focus:border-turquoise"
-                                                                                title="Activité"
-                                                                            >
-                                                                                {ACTIVITY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label.split(' / ')[0]}</option>)}
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            } else {
-                                                                // planningType === 'simple' : heure de début + durée + activité optionnelle
-                                                                return (
-                                                                    <div key={dIdx} className={`p-2 border-l border-slate-50 transition-colors relative ${isRaid ? 'bg-orange-50/50' : 'hover:bg-slate-50/30'}`}>
-                                                                        <label className="flex items-center justify-between mb-1 cursor-pointer group">
-                                                                            <span className={`text-[8px] font-black uppercase transition-colors ${isRaid ? 'text-orange-500' : 'text-slate-300 group-hover:text-slate-400'}`}>Raid</span>
-                                                                            <input type="checkbox" checked={isRaid} onChange={toggleRaid} className="size-2.5 accent-orange-500 cursor-pointer" />
-                                                                        </label>
-                                                                        <div className="flex flex-col gap-1.5 mt-1">
-                                                                            <div className="flex items-center gap-1">
-                                                                                <select
-                                                                                    value={(slot?.time || '').split(' - ')[0]}
-                                                                                    onChange={(e) => updateSlot({ time: calculateTimeRange(e.target.value, 3) })}
-                                                                                    className="flex-1 p-1 bg-white border border-slate-100 rounded text-[10px] font-bold outline-none focus:border-turquoise"
-                                                                                >
-                                                                                    <option value="">Début</option>
-                                                                                    {START_HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                                                                                </select>
-                                                                                <select
-                                                                                    value={(() => {
-                                                                                        const parts = (slot?.time || '').split(' - ');
-                                                                                        if (parts.length < 2) return '3';
-                                                                                        return String(parseInt(parts[1].split('h')[0]) - parseInt(parts[0].split('h')[0]));
-                                                                                    })()}
-                                                                                    onChange={(e) => {
-                                                                                        const start = (slot?.time || '').split(' - ')[0];
-                                                                                        if (!start) return; // pas d'heure de début → ne pas créer de créneau
-                                                                                        updateSlot({ time: calculateTimeRange(start, parseInt(e.target.value)) });
-                                                                                    }}
-                                                                                    disabled={!(slot?.time || '').split(' - ')[0]}
-                                                                                    className="w-12 p-1 bg-abysse/10 border border-abysse/20 rounded text-[9px] font-black text-abysse outline-none focus:border-abysse disabled:opacity-40 disabled:cursor-not-allowed"
-                                                                                >
-                                                                                    {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d}h</option>)}
-                                                                                </select>
-                                                                            </div>
-                                                                            <select
-                                                                                value={slot?.activity || ''}
-                                                                                onChange={(e) => updateSlot({ activity: e.target.value as ActivityType || undefined })}
-                                                                                className="w-full p-1 bg-white border border-slate-100 rounded text-[9px] font-bold outline-none focus:border-turquoise"
-                                                                                title="Activité (optionnel)"
-                                                                            >
-                                                                                <option value="">Activité…</option>
-                                                                                {ACTIVITY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            }
-                                                        })}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
+                                        <StagePlanningGrid
+                                            key={selectedStage._id || selectedStage.startDate}
+                                            planning={selectedStage}
+                                            stages={stageDefinitions}
+                                            activities={ACTIVITY_OPTIONS}
+                                            onChange={setSelectedStage}
+                                        />
 
                                         {/* WEEKEND TOGGLES COMPACT */}
                                         <div className="flex gap-3 justify-center mt-6 pt-6 border-t border-slate-50">
@@ -1171,11 +1073,14 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                         </div>
                     )}
 
+                    {/* TAB: FICHES STAGES (page École) */}
+                    {activeTab === 'FICHES' && <SchoolStagesEditor />}
+
                     {/* TAB: AGENDA & BLOG */}
                     {activeTab === 'AGENDA' && (
                         <div className="flex flex-col lg:flex-row gap-10 animate-in fade-in slide-in-from-bottom-2">
                             {/* AGENDA SECTION */}
-                            <div className="lg:w-1/2 flex flex-col gap-4">
+                            <div className={`lg:w-1/2 flex-col gap-4 ${isEditingArticle ? 'hidden' : 'flex'}`}>
                                 <div className="flex items-center justify-between mb-2">
                                     <div>
                                         <h3 className="text-xl font-black uppercase italic text-abysse">Agenda Simplifié</h3>
@@ -1238,28 +1143,11 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                 )}
                             </div>
 
-                            <div className="hidden lg:block w-px bg-slate-200"></div>
+                            {!isEditingArticle && <div className="hidden lg:block w-px bg-slate-200"></div>}
 
                             {/* BLOG SECTION */}
-                            <div className="lg:w-1/2 flex flex-col gap-4">
-                                <div className="flex items-center justify-between mb-2">
-                                    <div>
-                                        <h3 className="text-xl font-black uppercase italic text-abysse">Blog & Articles</h3>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Articles riches via Sanity Studio</p>
-                                    </div>
-                                    <button onClick={() => window.open('/studio/intent/create/template=article;type=article/', '_blank')} className="px-4 py-2 bg-abysse text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-turquoise transition-all shadow-md flex items-center gap-2"><Plus size={14}/> Nouvel Article</button>
-                                </div>
-                                <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-                                    {(articles || []).map((art) => (
-                                        <div key={art._id} className="w-full p-5 flex items-center justify-between border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-all">
-                                            <div className="flex-1 pr-4">
-                                                <span className="block font-black text-abysse uppercase tracking-tighter line-clamp-1">{art.title}</span>
-                                                <span className="block text-[10px] text-slate-400 mt-1 italic capitalize">{art.category} · {new Date(art.publishedAt).toLocaleDateString()}</span>
-                                            </div>
-                                            <button onClick={() => window.open(`/studio/intent/edit/id=${art._id};type=article/`, '_blank')} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all shrink-0">Éditer Studio</button>
-                                        </div>
-                                    ))}
-                                </div>
+                            <div className={`${isEditingArticle ? 'w-full' : 'lg:w-1/2'} flex flex-col gap-4`}>
+                                <ArticleManager initialArticles={articles || []} onEditingChange={setIsEditingArticle} />
                             </div>
                         </div>
                     )}

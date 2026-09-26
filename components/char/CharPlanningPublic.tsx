@@ -101,7 +101,7 @@ function PhoneCallCta({ phoneNumber, label = 'Appeler pour réserver', size = 'l
 }
 
 
-export default function CharPlanningPublic({ sessions, phoneNumber = '02 XX XX XX XX' }: Props) {
+export default function CharPlanningPublic({ sessions, phoneNumber = '02 33 47 14 81' }: Props) {
     const now = new Date();
     const [currentYear, setCurrentYear] = useState(now.getFullYear());
     const [currentMonth, setCurrentMonth] = useState(now.getMonth());

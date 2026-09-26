@@ -25,7 +25,7 @@ export default async function CharAVoilePlanningPage() {
     ]);
 
     // Phone from env or fallback
-    const phoneNumber = process.env.NEXT_PUBLIC_CLUB_PHONE ?? '02 33 47 XX XX';
+    const phoneNumber = process.env.NEXT_PUBLIC_CLUB_PHONE?.trim() || '02 33 47 14 81';
 
     // Extraction des données Sanity avec fallbacks robustes
     const hero = pageData?.hero || {

@@ -195,8 +195,8 @@ html {
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
   background: linear-gradient(135deg,
-      rgba(228, 228, 228, 0.3) 0%,
-      rgba(255, 255, 255, 0.055) 50%);
+      rgba(228, 228, 228, 0.12) 0%,
+      rgba(255, 255, 255, 0.02) 50%);
 
   /* L'élément est masqué par la forme du logo SVG */
   mask-size: contain;

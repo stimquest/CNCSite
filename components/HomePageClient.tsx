@@ -196,14 +196,14 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
 
   return (
     <div
-      className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6"
+      className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setMousePos({ x: 0, y: 0 })}
       style={{ perspective: "1500px" }}
     >
       {/* Tilted Logo */}
       <motion.div
-        className="relative w-[85vw] h-[35vh] md:w-[60vw] md:h-[50vh] flex items-center justify-center"
+        className="relative w-[74vw] h-[29vh] md:w-[52vw] md:h-[43vh] flex items-center justify-center"
         animate={{
           rotateX: mousePos.y * -15,
           rotateY: mousePos.x * 15,
@@ -236,17 +236,31 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
       </motion.div>
 
       {/* Static Text - Now properly positioned under the logo */}
-      <div className="flex flex-col items-center mt-8 md:mt-12 hero-subtitle pointer-events-none text-center">
+      <div className="flex flex-col items-center mt-5 md:mt-7 hero-subtitle text-center">
         <RenderText
           content={homePageData?.hero?.title}
-          className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm"
+          className="text-white font-bold uppercase tracking-[0.22em] text-[10px] md:text-sm drop-shadow-lg"
           fallback="Club Nautique de Coutainville"
         />
         <RenderText
           content={homePageData?.hero?.subtitle}
-          className="text-white font-bold uppercase tracking-[0.4em] text-[10px] md:text-sm mt-2 opacity-80"
+          className="text-white/85 font-bold uppercase tracking-[0.22em] text-[10px] md:text-sm mt-2 drop-shadow-lg"
           fallback="Sauvetage et Secourisme"
         />
+        <div className="mt-5 inline-flex flex-col min-[420px]:flex-row items-stretch min-[420px]:items-center gap-2 rounded-2xl border border-white/20 bg-abysse/35 p-2 shadow-xl backdrop-blur-md">
+          <Link
+            href="#vacances"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-abysse transition hover:bg-turquoise hover:text-white"
+          >
+            Stages & séances
+          </Link>
+          <Link
+            href="/activites/char-a-voile"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/35 bg-white/5 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-white transition hover:bg-white hover:text-abysse"
+          >
+            Char à voile
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -524,7 +538,7 @@ export default function HomePageClient({
 
   useEffect(() => {
     const section = focusSectionRef.current;
-    if (!section) return;
+    if (!section || window.matchMedia("(max-width: 767px)").matches) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (
@@ -1031,133 +1045,69 @@ export default function HomePageClient({
         </div>
       </section>
 
-      {/* SECTION : L'ESPRIT DU CLUB - REPAIRED & REFINED */}
-      <section
-        id="esprit-club"
-        className="py-24 max-w-400 mx-auto px-6 relative z-10"
-      >
-        <div className="mb-12 px-2">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-              Expérience CNC
-            </span>
+      {/* INFORMATIONS PRATIQUES : offres des vacances et activité à la séance */}
+      <section id="vacances" className="py-14 md:py-20 bg-slate-50 relative z-10">
+        <div className="max-w-400 mx-auto px-5 md:px-6">
+          <div className="mb-8 md:mb-10">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="size-2 rounded-full bg-orange-500"></div>
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">
+                Préparer les vacances
+              </span>
+            </div>
+            <h2 className="text-2xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic leading-tight">
+              Que faire pendant les vacances ?
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm md:text-base leading-relaxed text-slate-600">
+              Un stage pour apprendre à naviguer ou une séance de char à voile : trouvez la formule qui vous correspond.
+            </p>
           </div>
-          <h2 className="text-2xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
-            {homePageData?.spirit?.titlePart1 || "L'Esprit"}{" "}
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">
-              {homePageData?.spirit?.titlePart2 || "du Club."}
-            </span>
-          </h2>
-        </div>
 
-        <div className="relative rounded-[3.5rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-175 md:h-150 group/container border border-white/5">
-          {/* CARTES DYNAMIQUES */}
-          {(
-            homePageData?.spirit?.cards || [
-              {
-                tag: "Sensation",
-                title: "DOMPTER",
-                description:
-                  "Vitesse et adrénaline. Stages de catamaran, char à voile et sports de glisse pour faire le plein de sensations fortes.",
-                buttonText: "Voir les activités sensation",
-                link: "/activites?cat=Sensations",
-                iconName: "Zap",
-                colorTheme: "orange",
-                image: "/images/imgBank/Navigation.jpg",
-              },
-              {
-                tag: "Exploration",
-                title: "DÉCOUVRIR",
-                description:
-                  "Louez un paddle ou un kayak, longez la côte à votre rythme. La liberté absolue entre dunes et grand large.",
-                buttonText: "Louer du matériel",
-                link: "/activites",
-                iconName: "Compass",
-                colorTheme: "purple",
-                image: "/images/imgBank/paddlekayak.jpg",
-              },
-              {
-                tag: "Nature",
-                title: "RESSENTIR",
-                description:
-                  "De l'éveil des sens à l'autonomie. L'école de voile pour les enfants de 5 à 12 ans et la découverte de l'estran.",
-                buttonText: "Découvrir l'école",
-                link: "/ecole-voile",
-                iconName: "Leaf",
-                colorTheme: "turquoise",
-                image: "/images/imgBank/Cata001.jpg",
-              },
-            ]
-          ).map((card: any, idx: number) => {
-            const themeColor =
-              card.colorTheme === "orange"
-                ? "text-orange-400"
-                : card.colorTheme === "purple"
-                  ? "text-purple-400"
-                  : "text-turquoise";
-            const btnTheme =
-              card.colorTheme === "orange"
-                ? "border-orange-500 text-orange-400 hover:bg-orange-500"
-                : card.colorTheme === "purple"
-                  ? "border-purple-500 text-purple-400 hover:bg-purple-500"
-                  : "border-turquoise text-turquoise hover:bg-turquoise";
-
-            return (
-              <div
-                key={idx}
-                onMouseEnter={() => setActiveSpiritIndex(idx)}
-                onClick={() => setActiveSpiritIndex(idx)}
-                className={`group/panel relative transition-all duration-700 ease-in-out overflow-hidden md:cursor-pointer flex flex-col ${activeSpiritIndex === idx ? "flex-3 md:flex-2" : "flex-1"} focus-within:flex-3`}
-                tabIndex={0}
-              >
-                <div className="absolute inset-0 bg-abysse/40 group-hover/panel:bg-abysse/10 transition-colors z-10 duration-500"></div>
-                <img
-                  src={card.image}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-105"
-                  alt={card.title}
-                />
-
-                <div className="absolute bottom-0 left-0 w-full p-8 md:p-10 z-20 bg-linear-to-t from-abysse via-abysse/60 to-transparent flex flex-col justify-end h-full md:h-auto">
-                  <div className="flex items-center gap-4 mb-3">
-                    <div
-                      className={`size-12 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center ${themeColor} shadow-lg shrink-0 group-hover:scale-110 transition-transform duration-500`}
-                    >
-                      {(() => {
-                        const Icon = getIcon(card.iconName);
-                        return <Icon size={24} />;
-                      })()}
-                    </div>
-                    <span
-                      className={`${themeColor} font-black uppercase tracking-[0.2em] text-[10px]`}
-                    >
-                      {card.tag}
-                    </span>
-                  </div>
-
-                  <h3 className="text-3xl md:text-5xl font-black text-white uppercase italic mb-4 leading-none transition-all">
-                    {card.title}
-                  </h3>
-
-                  <div
-                    className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${activeSpiritIndex === idx ? "grid-rows-[1fr]" : "grid-rows-[0fr]"} md:grid-rows-[0fr] md:group-hover/panel:grid-rows-[1fr]`}
-                  >
-                    <div className="overflow-hidden">
-                      <p className="text-slate-200 text-sm mb-6 leading-relaxed font-medium">
-                        {card.description}
-                      </p>
-                      <Link
-                        href={card.link || "#"}
-                        className={`inline-flex items-center gap-3 bg-transparent border-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all hover:text-white ${btnTheme}`}
-                      >
-                        {card.buttonText} <ArrowRight size={16} />
-                      </Link>
-                    </div>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+            {[
+              { eyebrow: "Vacances scolaires", title: "Stages de voile", description: "Catamaran, planche, Mini-Mousses, Moussaillons… Découvrez les formules, les âges et les tarifs pour choisir votre stage.", image: "/images/imgBank/CataPharePointeAgon.jpg", href: "/ecole-voile#stages-vacances", cta: "Choisir mon stage" },
+              { eyebrow: "À la séance", title: "Char à voile", description: "Découvrez la glisse sur le sable. Consultez les informations pratiques et les séances proposées selon les marées.", image: "/images/imgBank/charSpeed.jpg", href: "/activites/char-a-voile", cta: "Découvrir les séances" },
+            ].map((offer) => (
+              <Link key={offer.title} href={offer.href} className="group overflow-hidden rounded-3xl border border-abysse/10 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise">
+                <div className="relative h-44 md:h-52 overflow-hidden bg-abysse">
+                  <img src={offer.image} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                  <div className="absolute inset-0 bg-linear-to-t from-abysse/80 via-abysse/10 to-transparent" />
+                  <span className="absolute bottom-3 left-4 rounded-full border border-white/30 bg-abysse/45 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white backdrop-blur">{offer.eyebrow}</span>
                 </div>
-              </div>
+                <div className="flex items-center justify-between gap-3 p-4 md:p-5">
+                  <div>
+                    <h3 className="text-lg md:text-xl font-black uppercase italic tracking-tight text-abysse">{offer.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600">{offer.description}</p>
+                    <span className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-turquoise">{offer.cta} <ArrowRight size={13} /></span>
+                  </div>
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-turquoise/10 text-abysse transition group-hover:bg-turquoise group-hover:text-white"><ArrowRight size={18} /></div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {(() => {
+            const today = new Date();
+            const todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
+            const featuredEvent = upcomingEvents.find((event: any) => event.startDate >= todayStr && event.image);
+            if (!featuredEvent) return null;
+            const eventDate = new Date(featuredEvent.startDate);
+            const eventHref = featuredEvent.articleSlug ? "/blog/" + featuredEvent.articleSlug : "/club#agenda";
+            return (
+              <Link href={eventHref} className="mt-6 md:mt-8 grid overflow-hidden rounded-3xl bg-abysse text-white shadow-lg transition hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise md:grid-cols-[minmax(240px,0.8fr)_1.2fr]">
+                <div className="relative h-48 md:h-56">
+                  <img src={featuredEvent.image} alt={"Affiche ou illustration : " + featuredEvent.title} className="h-full w-full object-cover" loading="lazy" />
+                  <span className="absolute left-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white">À la une</span>
+                </div>
+                <div className="flex flex-col justify-center p-5 md:p-8">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-turquoise">{featuredEvent.badge || "Événement du club"} · {eventDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}</span>
+                  <h3 className="mt-2 text-2xl md:text-3xl font-black uppercase italic tracking-tight">{featuredEvent.title}</h3>
+                  {featuredEvent.time && <p className="mt-2 text-sm font-semibold text-white/75">{featuredEvent.time}</p>}
+                  <span className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest">Découvrir l’événement <ArrowRight size={15} /></span>
+                </div>
+              </Link>
             );
-          })}
+          })()}
         </div>
       </section>
 
@@ -1180,7 +1130,7 @@ export default function HomePageClient({
             </h2>
           </div>
 
-          <div className="overflow-hidden" onWheel={handleFocusWheel}>
+          <div className="hidden md:block overflow-hidden" onWheel={handleFocusWheel}>
             <div className="relative w-full h-full">
               <motion.div
                 id="focus-slider"
@@ -1368,6 +1318,27 @@ export default function HomePageClient({
             </div>
           </div>
 
+          <div className="grid grid-cols-1 gap-4 px-5 md:hidden">
+            {originalCards.filter((card: any) => card.cardType !== "cta").slice(0, 3).map((card: any, index: number) => {
+              const image = card.images?.[0] || CHAR_IMAGES[index % CHAR_IMAGES.length];
+              const href = card.ctaButton?.link || card.infoButton?.link || "/activites";
+              return (
+                <article key={index} className="overflow-hidden rounded-3xl bg-abysse shadow-lg">
+                  <div className="relative h-40 bg-abysse">
+                    <img src={image} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    <div className="absolute inset-0 bg-linear-to-t from-abysse/80 to-transparent" />
+                    {card.tagline && <span className="absolute bottom-3 left-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/80">{card.tagline}</span>}
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-2xl font-black uppercase italic tracking-tight text-white">{card.title} {card.highlightSuffix}</h3>
+                    {card.subTagline && <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-turquoise">{card.subTagline}</p>}
+                    <Link href={href} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-abysse">Découvrir <ArrowRight size={14} /></Link>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
           {/* Slots / Progress Indicators */}
           {originalCards.length > 0 && (
             <div className="max-w-400 mx-auto px-6 mt-8 flex justify-center gap-3">
@@ -1519,6 +1490,138 @@ export default function HomePageClient({
               )}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* SECTION : L'ESPRIT DU CLUB - REPAIRED & REFINED */}
+      <section
+        id="esprit-club"
+        className="py-24 max-w-400 mx-auto px-6 relative z-10"
+      >
+        <div className="mb-12 px-2">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+              Expérience CNC
+            </span>
+          </div>
+          <h2 className="text-2xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
+            {homePageData?.spirit?.title || "L'Esprit du Club"}
+          </h2>
+          {(homePageData?.spirit?.message || homePageData?.spirit?.description) && (
+            <p className="mt-4 max-w-2xl text-sm md:text-base leading-relaxed text-slate-500">
+              {homePageData.spirit.message || homePageData.spirit.description}
+            </p>
+          )}
+        </div>
+
+        <div className="relative rounded-[3.5rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-auto md:h-150 group/container border border-white/5">
+          {/* CARTES DYNAMIQUES */}
+          {(
+            homePageData?.spirit?.cards || [
+              {
+                tag: "Sensation",
+                title: "DOMPTER",
+                description:
+                  "Vitesse et adrénaline. Stages de catamaran, char à voile et sports de glisse pour faire le plein de sensations fortes.",
+                buttonText: "Voir les activités sensation",
+                link: "/activites?cat=Sensations",
+                iconName: "Zap",
+                colorTheme: "orange",
+                image: "/images/imgBank/Navigation.jpg",
+              },
+              {
+                tag: "Exploration",
+                title: "DÉCOUVRIR",
+                description:
+                  "Louez un paddle ou un kayak, longez la côte à votre rythme. La liberté absolue entre dunes et grand large.",
+                buttonText: "Louer du matériel",
+                link: "/activites",
+                iconName: "Compass",
+                colorTheme: "purple",
+                image: "/images/imgBank/paddlekayak.jpg",
+              },
+              {
+                tag: "Nature",
+                title: "RESSENTIR",
+                description:
+                  "De l'éveil des sens à l'autonomie. L'école de voile pour les enfants de 5 à 12 ans et la découverte de l'estran.",
+                buttonText: "Découvrir l'école",
+                link: "/ecole-voile",
+                iconName: "Leaf",
+                colorTheme: "turquoise",
+                image: "/images/imgBank/Cata001.jpg",
+              },
+            ]
+          ).map((card: any, idx: number) => {
+            const themeColor =
+              card.colorTheme === "orange"
+                ? "text-orange-400"
+                : card.colorTheme === "purple"
+                  ? "text-purple-400"
+                  : "text-turquoise";
+            const btnTheme =
+              card.colorTheme === "orange"
+                ? "border-orange-500 text-orange-400 hover:bg-orange-500"
+                : card.colorTheme === "purple"
+                  ? "border-purple-500 text-purple-400 hover:bg-purple-500"
+                  : "border-turquoise text-turquoise hover:bg-turquoise";
+
+            return (
+              <div
+                key={idx}
+                onMouseEnter={() => setActiveSpiritIndex(idx)}
+                onClick={() => setActiveSpiritIndex(idx)}
+                className={`group/panel relative transition-all duration-700 ease-in-out overflow-hidden md:cursor-pointer flex flex-col ${activeSpiritIndex === idx ? "flex-3 md:flex-2" : "flex-1"} focus-within:flex-3 min-h-64 md:min-h-0`}
+                tabIndex={0}
+              >
+                <div className="absolute inset-0 bg-abysse/40 group-hover/panel:bg-abysse/10 transition-colors z-10 duration-500"></div>
+                <img
+                  src={card.image}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-105"
+                  alt={card.title}
+                />
+
+                <div className="absolute bottom-0 left-0 w-full p-8 md:p-10 z-20 bg-linear-to-t from-abysse via-abysse/60 to-transparent flex flex-col justify-end h-full md:h-auto">
+                  <div className="flex items-center gap-4 mb-3">
+                    <div
+                      className={`size-12 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center ${themeColor} shadow-lg shrink-0 group-hover:scale-110 transition-transform duration-500`}
+                    >
+                      {(() => {
+                        const Icon = getIcon(card.iconName);
+                        return <Icon size={24} />;
+                      })()}
+                    </div>
+                    <span
+                      className={`${themeColor} font-black uppercase tracking-[0.2em] text-[10px]`}
+                    >
+                      {card.tag}
+                    </span>
+                  </div>
+
+                  <h3 className="text-3xl md:text-5xl font-black text-white uppercase italic mb-4 leading-none transition-all">
+                    {card.title}
+                  </h3>
+
+                  <div
+                    className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${activeSpiritIndex === idx ? "grid-rows-[1fr]" : "grid-rows-[0fr]"} md:grid-rows-[0fr] md:group-hover/panel:grid-rows-[1fr]`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="text-slate-200 text-sm mb-6 leading-relaxed font-medium">
+                        {card.description}
+                      </p>
+                      <Link
+                        href={card.link || "#"}
+                        className={`inline-flex items-center gap-3 bg-transparent border-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all hover:text-white ${btnTheme}`}
+                      >
+                        {card.buttonText} <ArrowRight size={16} />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
