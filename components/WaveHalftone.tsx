@@ -2,7 +2,22 @@
 
 import { useEffect, useRef } from "react";
 
-/** White halftone: travelling swells modulate dot size and opacity. */
+/**
+ * Halftone "lumière sur l'eau" : les houles modulent taille, opacité et teinte des points.
+ * Creux bleu ciel, crêtes cyan puis presque blanches, avec de brefs scintillements
+ * là où deux ondes se croisent. Fusion additive pour éclaircir la vidéo comme un reflet.
+ */
+
+// Palette du creux vers la crête : bleu ciel → cyan → reflet blanc
+const TROUGH = [125, 200, 245]; // bleu ciel
+const MID = [70, 215, 240]; // cyan
+const GLINT = [235, 252, 255]; // reflet
+
+const mix = (a: number[], b: number[], t: number) =>
+  `rgb(${Math.round(a[0] + (b[0] - a[0]) * t)},${Math.round(a[1] + (b[1] - a[1]) * t)},${Math.round(a[2] + (b[2] - a[2]) * t)})`;
+
+const colorFor = (light: number) =>
+  light < 0.6 ? mix(TROUGH, MID, light / 0.6) : mix(MID, GLINT, (light - 0.6) / 0.4);
 export function WaveHalftone() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -18,11 +33,11 @@ export function WaveHalftone() {
     let visible = true;
     let lastTime = 0;
     let elapsed = 0;
-    let dots: { x: number; y: number; size: number; edge: number }[] = [];
+    let dots: { x: number; y: number; size: number; edge: number; phase: number }[] = [];
 
     const paint = () => {
       context.clearRect(0, 0, width, height);
-      context.fillStyle = "#fff";
+      context.globalCompositeOperation = "lighter";
       const t = elapsed / 1000;
       for (const dot of dots) {
         // Curved fronts travel diagonally, with a slower secondary swell.
@@ -30,13 +45,19 @@ export function WaveHalftone() {
           + 0.75 * Math.sin(dot.x / 270 - t * 0.18));
         const swell = Math.sin(dot.y / 190 - dot.x / 310 - t * 0.3);
         const crest = (wave * 0.75 + swell * 0.25 + 1) / 2;
-        const radius = dot.size * (0.45 + crest * 0.95);
-        context.globalAlpha = dot.edge * (0.12 + crest * 0.65);
+        // Scintillement : onde courte et rapide, ne ressort qu'au sommet des crêtes
+        const ripple = Math.sin(dot.x / 23 - dot.y / 31 + t * 2.1 + dot.phase);
+        const glint = Math.pow(Math.max(0, ripple), 8) * crest * crest;
+        const light = Math.min(1, crest * 0.8 + glint * 0.9);
+        const radius = dot.size * (0.45 + crest * 0.95 + glint * 0.35);
+        context.fillStyle = colorFor(light);
+        context.globalAlpha = dot.edge * Math.min(1, 0.1 + crest * 0.6 + glint * 0.5);
         context.beginPath();
         context.arc(dot.x, dot.y, radius, 0, Math.PI * 2);
         context.fill();
       }
       context.globalAlpha = 1;
+      context.globalCompositeOperation = "source-over";
     };
 
     const tick = (time: number) => {
@@ -77,7 +98,7 @@ export function WaveHalftone() {
           const distance = Math.hypot((x / width - 0.5) / 0.64, (y / height - 0.48) / 0.59);
           const edge = Math.max(0, Math.min(1, (distance - 0.24) / 0.65));
           const bottomFade = Math.min(1, (1 - y / height) / 0.1);
-          dots.push({ x, y, size: 2 + variation * 2.8, edge: edge * edge * bottomFade });
+          dots.push({ x, y, size: 2 + variation * 2.8, edge: edge * edge * bottomFade, phase: variation * 6.28 });
         }
       }
       paint();

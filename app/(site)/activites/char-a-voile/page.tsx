@@ -77,10 +77,10 @@ export default async function CharAVoilePlanningPage() {
 
             {/* Layout Principal : Colonnes Gauche (Médias/Infos) / Droite (Calendrier) */}
             <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 -mt-16 md:-mt-20 relative z-10 flex flex-col gap-10">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 xl:gap-10">
                     
                     {/* COLONNE GAUCHE (7/12) : Vidéo, Infos, FAQ */}
-                    <div className="lg:col-span-1 xl:col-span-7 flex flex-col gap-8 order-2 lg:order-1">
+                    <div className="xl:col-span-7 flex flex-col gap-8 order-2 xl:order-1">
                         
                         {/* Média Bento : Vidéo intégrée depuis Sanity */}
                         {media.videoUrl && (
@@ -170,8 +170,8 @@ export default async function CharAVoilePlanningPage() {
                     </div>
 
                     {/* COLONNE DROITE (5/12) : Calendrier (Sticky sur Desktop) */}
-                    <div className="lg:col-span-1 xl:col-span-5 relative order-1 lg:order-2">
-                        <div className="lg:sticky lg:top-8 w-full flex flex-col gap-6">
+                    <div className="xl:col-span-5 relative order-1 xl:order-2">
+                        <div className="xl:sticky xl:top-8 w-full flex flex-col gap-6">
                             <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 p-6 md:p-8 w-full">
                                 {/* Composant principal (Calendrier) */}
                                 <CharPlanningPublic sessions={sessions} phoneNumber={phoneNumber} />

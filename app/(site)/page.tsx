@@ -23,13 +23,15 @@ export default async function Page() {
         dicoWords,
         homeGallery,
         infoMessages,
-        upcomingEvents
+        upcomingEvents,
+        schoolStages
     ] = await Promise.all([
         client.fetch(queries.homePage),
         client.fetch(queries.dicoWords),
         client.fetch(queries.homeGallery),
         client.fetch(queries.infoMessages),
         client.fetch(queries.homeAgenda),
+        client.fetch(queries.schoolStages).catch(() => null),
     ]);
 
     return (
@@ -39,6 +41,7 @@ export default async function Page() {
             homeGallery={homeGallery} 
             infoMessages={infoMessages} 
             upcomingEvents={upcomingEvents || []}
+            schoolStages={schoolStages?.stages || []}
         />
     );
 }

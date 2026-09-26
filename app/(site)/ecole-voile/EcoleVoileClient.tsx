@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
 import {
@@ -276,6 +276,13 @@ const ANNEE_GROUPS = [
 const StagesVacancesGrid = ({ items }: { items: any[] }) => {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const selected = items.find(i => (i._key || i.id) === selectedKey);
+
+  // Lien depuis l'accueil : /ecole-voile?stage=<id>#stages-vacances ouvre directement la fiche
+  useEffect(() => {
+    const stageId = new URLSearchParams(window.location.search).get('stage');
+    const match = stageId && items.find(i => i.id === stageId);
+    if (match) setSelectedKey(match._key || match.id);
+  }, [items]);
   const descScrollRef = React.useRef<HTMLDivElement>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
   const [canScrollUp, setCanScrollUp] = useState(false);

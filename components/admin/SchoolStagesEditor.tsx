@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { PortableTextBlock } from '@portabletext/editor';
-import { ArrowDown, ArrowLeft, ArrowUp, Copy, Loader2, Plus, RefreshCw, Save, Trash2, Upload, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowUp, Copy, Eye, EyeOff, Loader2, Plus, RefreshCw, Save, Trash2, Upload, X } from 'lucide-react';
 
 import RichTextField from '@/components/admin/RichTextField';
 import { uploadImage } from '@/components/admin/uploadImage';
@@ -26,6 +26,7 @@ type SchoolStage = {
     bgColor?: string;
     pricingTiers?: PricingTier[];
     registrationUrl?: string;
+    showOnHome?: boolean;
 };
 
 // Teintes proposées : couleur de fond du badge + couleur de texte assortie.
@@ -63,6 +64,19 @@ const cloneBlocks = (blocks?: PortableTextBlock[]) =>
 
 const inputClass = 'w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-sm text-abysse';
 const labelClass = 'text-[10px] font-black uppercase text-slate-400 ml-1';
+
+// ─── Interrupteur "Sur l'accueil" (absent = affiché) ────────────────────────
+function HomeToggle({ stage, onToggle, compact }: { stage: SchoolStage; onToggle: () => void; compact?: boolean }) {
+    const shown = stage.showOnHome !== false;
+    return (
+        <button type="button" onClick={onToggle} role="switch" aria-checked={shown}
+            title={shown ? "Affiché sur l'accueil (cliquer pour masquer)" : "Masqué de l'accueil (cliquer pour afficher)"}
+            className={`flex shrink-0 items-center gap-2 rounded-full transition-all ${compact ? "p-2" : "px-3 py-2"} ${shown ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" : "bg-slate-100 text-slate-400 hover:bg-slate-200"}`}>
+            {shown ? <Eye size={14} /> : <EyeOff size={14} />}
+            {!compact && <span className="text-[10px] font-black uppercase tracking-widest">{shown ? "Sur l'accueil" : "Masqué de l'accueil"}</span>}
+        </button>
+    );
+}
 
 // ─── Aperçu de la carte (reprend la carte de la page École) ─────────────────
 function CardPreview({ stage }: { stage: SchoolStage }) {
@@ -327,10 +341,11 @@ export default function SchoolStagesEditor() {
                             <span className="absolute bottom-0 inset-x-0 h-1.5" style={{ background: hexOf(stage) }} />
                         </div>
                         <div className="min-w-0">
-                            <span className="block font-black text-abysse uppercase tracking-tighter line-clamp-1">{stage.officialName || 'Sans nom'}</span>
+                            <span className={`block font-black uppercase tracking-tighter line-clamp-1 ${stage.showOnHome === false ? "text-slate-400" : "text-abysse"}`}>{stage.officialName || 'Sans nom'}</span>
                             <span className="block text-[10px] text-slate-400 mt-0.5 italic line-clamp-1">{[stage.age, stage.price].filter(Boolean).join(' · ')}</span>
                         </div>
                     </button>
+                    <HomeToggle compact stage={stage} onToggle={() => updateStage(stage._key, { showOnHome: stage.showOnHome === false })} />
                     <div className="flex flex-col pr-2">
                         <button onClick={() => move(i, -1)} disabled={i === 0} className="p-1 text-slate-300 hover:text-abysse disabled:opacity-30" title="Monter"><ArrowUp size={14} /></button>
                         <button onClick={() => move(i, 1)} disabled={i === stages.length - 1} className="p-1 text-slate-300 hover:text-abysse disabled:opacity-30" title="Descendre"><ArrowDown size={14} /></button>
@@ -345,7 +360,7 @@ export default function SchoolStagesEditor() {
             <div className="flex flex-wrap items-center gap-3 mb-2">
                 <div className="flex-1 min-w-[200px]">
                     <h3 className="text-xl font-black uppercase italic text-abysse">Fiches Stages Vacances</h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Cartes affichées sur la page École de voile</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Page École de voile · l'œil choisit ceux mis en avant sur l'accueil</p>
                 </div>
                 <button onClick={() => { if (!dirty || window.confirm('Abandonner les modifications non enregistrées ?')) load(); }} className="p-2 text-slate-400 hover:text-abysse" title="Recharger"><RefreshCw size={16} /></button>
                 <button onClick={addStage} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2"><Plus size={14} /> Nouveau stage</button>
@@ -369,6 +384,7 @@ export default function SchoolStagesEditor() {
                             <button onClick={() => setSelectedKey(null)} className="p-2 text-slate-400 hover:text-abysse xl:hidden" title="Retour"><ArrowLeft size={18} /></button>
                             <span className="size-3 rounded-full" style={{ background: hexOf(selected) }} />
                             <h4 className="flex-1 font-black text-sm uppercase text-abysse line-clamp-1">{selected.officialName || 'Sans nom'}</h4>
+                            <HomeToggle stage={selected} onToggle={() => updateStage(selected._key, { showOnHome: selected.showOnHome === false })} />
                             <button onClick={() => move(selectedIndex, -1)} disabled={selectedIndex === 0} className="p-2 text-slate-400 hover:text-abysse disabled:opacity-30" title="Monter"><ArrowUp size={16} /></button>
                             <button onClick={() => move(selectedIndex, 1)} disabled={selectedIndex === stages.length - 1} className="p-2 text-slate-400 hover:text-abysse disabled:opacity-30" title="Descendre"><ArrowDown size={16} /></button>
                             <button onClick={() => duplicate(selected)} className="p-2 text-slate-400 hover:text-abysse" title="Dupliquer"><Copy size={16} /></button>

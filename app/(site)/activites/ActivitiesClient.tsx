@@ -97,6 +97,22 @@ const modalPortableTextComponents = {
     },
 };
 
+// Format dans l'URL (lisible) ↔ clé des actions Sanity
+const FORMAT_FROM_URL: Record<string, string> = {
+    seance: 'reservation', 'séance': 'reservation', reservation: 'reservation',
+    stage: 'stage',
+    location: 'rental', rental: 'rental',
+};
+const FORMAT_TO_URL: Record<string, string> = { reservation: 'seance', stage: 'stage', rental: 'location' };
+
+const CATEGORIES = ['TOUTES', 'Sensations', 'Voile', 'Jeunesse', 'Bien-être', 'Sécurité'] as const;
+const stripAccents = (v: string) => v.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const parseCategory = (param: string | null): ActivityCategory | 'TOUTES' => {
+    if (!param) return 'TOUTES';
+    const match = CATEGORIES.find(c => stripAccents(c) === stripAccents(param));
+    return (match || 'TOUTES') as ActivityCategory | 'TOUTES';
+};
+
 const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, initialActivitiesData, schoolStages }) => {
     const activities = initialActivities;
     const activitiesData = initialActivitiesData;
@@ -107,34 +123,17 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
     const [searchFormat, setSearchFormat] = useState<string | null>(null);
     const searchParams = useSearchParams();
 
-    // -- DEEP LINKING SUPPORT --
+    // -- DEEP LINKING : l'URL porte les filtres (?cat=Voile&format=seance&age=11) --
     useEffect(() => {
-        const modeParam = searchParams.get('mode');
-        if (modeParam === 'club') {
+        if (searchParams.get('mode') === 'club') {
             setViewMode('club');
             return;
         }
-
-        const catParam = searchParams.get('cat');
-        if (catParam) {
-            const catMap: Record<string, string> = {
-                'bien-etre': 'Bien-être',
-                'bien-être': 'Bien-être',
-                'securite': 'Sécurité',
-                'sécurité': 'Sécurité',
-                'toutes': 'TOUTES'
-            };
-            const normalizedParam = catParam.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            const validCats = ['TOUTES', 'Sensations', 'Voile', 'Jeunesse', 'Bien-être', 'Sécurité'];
-            const exactMatch = validCats.find(c => c === catParam);
-            if (exactMatch) { setActiveFilter(exactMatch as any); return; }
-            const mappedMatch = catMap[catParam.toLowerCase()];
-            if (mappedMatch) { setActiveFilter(mappedMatch as any); return; }
-            const fuzzyMatch = validCats.find(c =>
-                c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === normalizedParam
-            );
-            if (fuzzyMatch) { setActiveFilter(fuzzyMatch as any); }
-        }
+        setViewMode('activities');
+        setActiveFilter(parseCategory(searchParams.get('cat')));
+        setSearchFormat(FORMAT_FROM_URL[(searchParams.get('format') || '').toLowerCase()] || null);
+        const age = Number(searchParams.get('age'));
+        setSearchAge(Number.isFinite(age) && age > 0 ? age : null);
 
         const openParam = searchParams.get('open');
         if (openParam) {
@@ -147,6 +146,24 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
         }
     }, [searchParams]);
 
+    // Tous les contrôles (onglets + moteur) passent par ici : état + URL partageable
+    const updateFilters = (next: { category?: ActivityCategory | 'TOUTES'; age?: number | null; format?: string | null }) => {
+        const category = next.category !== undefined ? next.category : activeFilter;
+        const age = next.age !== undefined ? next.age : searchAge;
+        const format = next.format !== undefined ? next.format : searchFormat;
+        setViewMode('activities');
+        setActiveFilter(category);
+        setSearchAge(age);
+        setSearchFormat(format);
+
+        const params = new URLSearchParams();
+        if (category !== 'TOUTES') params.set('cat', category);
+        if (format) params.set('format', FORMAT_TO_URL[format] || format);
+        if (age) params.set('age', String(age));
+        const query = params.toString();
+        window.history.replaceState(null, '', query ? `?${query}` : window.location.pathname);
+    };
+
     const filteredActivities = useMemo(() => {
         let result = activities;
         
@@ -155,26 +172,10 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
         }
         
         if (searchAge) {
-            result = result.filter(a => {
-                const minReq = a.minAge || 0;
-
-                // Si l'utilisateur est trop jeune
-                if (minReq > searchAge) return false;
-
-                // Si c'est une activité explicitement orientée "très jeunes" (Jardin des mers, Mini-mousses)
-                // On évite de les montrer aux ados/adultes.
-                // Règle: Si searchAge >= minReq + 4 pour les catégories Jeunesse, on exclut.
-                if (a.category === 'Jeunesse') {
-                    if (searchAge >= minReq + 4) return false;
-                }
-                
-                // Sécurité forte pour ne rien montrer en "Jeunesse" aux vrais adultes.
-                if (searchAge >= 16 && a.category === 'Jeunesse') return false;
-                
-                return true;
-            });
+            // Accessible à cet âge, et pas d'activités "Jeunesse" pour les adultes
+            result = result.filter(a => (a.minAge || 0) <= searchAge && !(searchAge >= 16 && a.category === 'Jeunesse'));
         }
-        
+
         if (searchFormat) {
             result = result.filter(a => {
                 const config = a.actions?.[searchFormat as 'stage' | 'reservation' | 'rental'];
@@ -186,16 +187,9 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
         return result;
     }, [activeFilter, activities, searchAge, searchFormat]);
 
-    const handleSearch = (age: number | null, category: string | null, format: string | null) => {
-        setSearchAge(age);
-        setSearchFormat(format);
-        if (category) {
-            setActiveFilter(category as any);
-        } else if (age !== null && activeFilter === 'TOUTES') {
-            // garder tous les filtres si juste on cherche par age
-        }
-        setViewMode('activities');
-    };
+    const showSchoolStages = schoolStages.length > 0
+        && (activeFilter === 'TOUTES' || activeFilter === 'Jeunesse')
+        && (!searchFormat || searchFormat === 'stage');
 
     const toggleExpand = (id: string) => {
         setExpandedId(expandedId === id ? null : id);
@@ -303,13 +297,10 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
             <section className="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm py-4">
                 <div className="max-w-[1400px] mx-auto px-6 flex flex-wrap justify-center items-center gap-2 md:gap-4">
                     <div className="flex flex-wrap justify-center gap-2 md:gap-4">
-                        {['TOUTES', 'Sensations', 'Voile', 'Jeunesse', 'Bien-être', 'Sécurité'].map((cat) => (
+                        {CATEGORIES.map((cat) => (
                             <button
                                 key={cat}
-                                onClick={() => {
-                                    setViewMode('activities');
-                                    setActiveFilter(cat as any);
-                                }}
+                                onClick={() => updateFilters({ category: cat as ActivityCategory | 'TOUTES' })}
                                 className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${viewMode === 'activities' && activeFilter === cat
                                     ? 'bg-abysse text-white border-abysse shadow-lg scale-105'
                                     : 'bg-white text-slate-400 border-slate-100 hover:border-turquoise hover:text-turquoise hover:bg-slate-50'
@@ -339,7 +330,17 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
 
             {/* 1.5 ACTIVITY FINDER ENGINE */}
             <div className="relative z-30 max-w-[1400px] mx-auto px-4 md:px-6 py-8">
-                 <ActivityFinder onSearch={handleSearch} />
+                 <ActivityFinder
+                     age={searchAge}
+                     category={activeFilter === 'TOUTES' ? null : activeFilter}
+                     format={searchFormat}
+                     resultCount={filteredActivities.length + (showSchoolStages ? schoolStages.length : 0)}
+                     onChange={(next) => updateFilters({
+                         ...next,
+                         category: next.category === undefined ? undefined : ((next.category || 'TOUTES') as ActivityCategory | 'TOUTES'),
+                     })}
+                     onReset={() => updateFilters({ category: 'TOUTES', age: null, format: null })}
+                 />
             </div>
 
             {/* 3. CONTENT AREA */}
@@ -363,7 +364,7 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
                             className="space-y-8"
                         >
                             {/* STAGES VACANCES — depuis la page École */}
-                            {(activeFilter === 'TOUTES' || activeFilter === 'Jeunesse') && schoolStages.length > 0 && (
+                            {showSchoolStages && (
                                 <div className="space-y-6">
                                     <div className="flex items-center gap-4">
                                         <div className="flex items-center gap-3">
@@ -513,6 +514,12 @@ const ActivitiesClient: React.FC<ActivitiesClientProps> = ({ initialActivities, 
                                 <div className="flex-1 h-px bg-slate-200"></div>
                             </div>
 
+                            {filteredActivities.length === 0 && (
+                                <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
+                                    <p className="text-sm font-bold text-slate-500">Aucune activité ne correspond à ces critères.</p>
+                                    <button onClick={() => updateFilters({ category: 'TOUTES', age: null, format: null })} className="mt-4 text-[10px] font-black uppercase tracking-widest text-turquoise hover:underline">Réinitialiser les filtres</button>
+                                </div>
+                            )}
                             {filteredActivities.map((activity) => {
                                 const isExpanded = expandedId === activity.id;
                                 return (

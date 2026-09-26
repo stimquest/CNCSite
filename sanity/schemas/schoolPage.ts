@@ -104,6 +104,7 @@ export default defineType({
                         }]
                     },
                     { name: 'registrationUrl', type: 'url', title: 'Lien d\'inscription (Axyomes)' },
+                    { name: 'showOnHome', type: 'boolean', title: "Afficher sur l'accueil", description: "Décocher pour masquer ce stage de l'accueil (ex: non proposé aux prochaines vacances). Il reste sur la page École.", initialValue: true },
                 ],
                 preview: {
                     select: {

@@ -60,17 +60,19 @@ const CustomSelect = ({ label, value, options, onChange, placeholder }: any) => 
 };
 
 interface ActivityFinderProps {
-    onSearch: (age: number | null, category: string | null, format: string | null) => void;
+    age: number | null;
+    category: string | null;
+    format: string | null;
+    resultCount: number;
+    onChange: (next: { age?: number | null; category?: string | null; format?: string | null }) => void;
+    onReset: () => void;
 }
 
-export const ActivityFinder: React.FC<ActivityFinderProps> = ({ onSearch }) => {
-    const [selectedAge, setSelectedAge] = useState<number | null>(null);
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
+// Filtres appliqués immédiatement ; le bouton ne sert qu'à descendre vers les résultats.
+export const ActivityFinder: React.FC<ActivityFinderProps> = ({ age, category, format, resultCount, onChange, onReset }) => {
+    const hasFilters = age !== null || category !== null || format !== null;
 
-    const handleSearch = () => {
-        onSearch(selectedAge, selectedCategory, selectedFormat);
-        
+    const scrollToResults = () => {
         const target = document.getElementById('activities-list');
         if (target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -87,17 +89,17 @@ export const ActivityFinder: React.FC<ActivityFinderProps> = ({ onSearch }) => {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="bg-white/80 backdrop-blur-xl border border-slate-200 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-[2rem] p-4 flex flex-col md:flex-row items-center gap-4"
             >
-                {/* Age Selector */}
+                {/* Age Selector : la valeur est l'âge le plus élevé de la tranche */}
                 <CustomSelect 
                     label="Pour qui ? (Âge)"
                     placeholder="Tous les âges"
-                    value={selectedAge}
-                    onChange={(val: any) => setSelectedAge(val)}
+                    value={age}
+                    onChange={(val: any) => onChange({ age: val })}
                     options={[
                         { value: null, label: 'Tous les âges' },
-                        { value: 5, label: 'Petits (4-6 ans)' },
-                        { value: 8, label: 'Enfants (7-11 ans)' },
-                        { value: 13, label: 'Ados (12-15 ans)' },
+                        { value: 6, label: 'Petits (4-6 ans)' },
+                        { value: 11, label: 'Enfants (7-11 ans)' },
+                        { value: 15, label: 'Ados (12-15 ans)' },
                         { value: 18, label: 'Adultes (16+ ans)' },
                     ]}
                 />
@@ -109,14 +111,15 @@ export const ActivityFinder: React.FC<ActivityFinderProps> = ({ onSearch }) => {
                 <CustomSelect 
                     label="Quelle envie ?"
                     placeholder="Toutes les envies"
-                    value={selectedCategory}
-                    onChange={(val: any) => setSelectedCategory(val)}
+                    value={category}
+                    onChange={(val: any) => onChange({ category: val })}
                     options={[
                         { value: null, label: 'Toutes les envies' },
                         { value: 'Voile', label: 'Naviguer (Voile & Cata)' },
-                        { value: 'Sensations', label: 'Sensations (Kite, Char)' },
-                        { value: 'Bien-être', label: 'Nature (Paddle, Longe-côte)' },
-                        { value: 'Jeunesse', label: 'Clubs Enfants / Jardin' },
+                        { value: 'Sensations', label: 'Sensations (Kite, Wing, Char)' },
+                        { value: 'Bien-être', label: 'Nature (Paddle, Kayak, Marche aquatique)' },
+                        { value: 'Jeunesse', label: 'Enfants' },
+                        { value: 'Sécurité', label: 'Sauvetage & secourisme' },
                     ]}
                 />
 
@@ -127,24 +130,31 @@ export const ActivityFinder: React.FC<ActivityFinderProps> = ({ onSearch }) => {
                 <CustomSelect 
                     label="Quel format ?"
                     placeholder="Tous les formats"
-                    value={selectedFormat}
-                    onChange={(val: any) => setSelectedFormat(val)}
+                    value={format}
+                    onChange={(val: any) => onChange({ format: val })}
                     options={[
                         { value: null, label: 'Tous les formats' },
+                        { value: 'reservation', label: 'Séance (à l’unité)' },
                         { value: 'stage', label: 'Stage (plusieurs jours)' },
-                        { value: 'reservation', label: 'Séance (à l unité)' },
                         { value: 'rental', label: 'Location / Libre' },
                     ]}
                 />
 
                 {/* Action Button */}
-                <button 
-                    onClick={handleSearch}
-                    className="w-full md:w-auto px-8 py-5 bg-linear-to-r from-abysse to-turquoise text-white rounded-3xl text-[11px] font-black uppercase tracking-widest hover:shadow-lg hover:shadow-turquoise/30 transition-all flex items-center justify-center gap-2 transform hover:scale-105"
-                >
-                    <Search size={16} />
-                    Trouver l'Activité
-                </button>
+                <div className="w-full md:w-auto flex flex-col items-center gap-1">
+                    <button 
+                        onClick={scrollToResults}
+                        className="w-full md:w-auto px-8 py-5 bg-linear-to-r from-abysse to-turquoise text-white rounded-3xl text-[11px] font-black uppercase tracking-widest hover:shadow-lg hover:shadow-turquoise/30 transition-all flex items-center justify-center gap-2 transform hover:scale-105 whitespace-nowrap"
+                    >
+                        <Search size={16} />
+                        Voir {resultCount} résultat{resultCount > 1 ? 's' : ''}
+                    </button>
+                    {hasFilters && (
+                        <button onClick={onReset} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-turquoise">
+                            Réinitialiser
+                        </button>
+                    )}
+                </div>
             </motion.div>
         </div>
     );

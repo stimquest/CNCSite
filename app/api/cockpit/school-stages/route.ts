@@ -11,7 +11,7 @@ const DRAFT_ID = `drafts.${DOC_ID}`;
 
 const STAGE_FIELDS = [
     '_key', 'id', 'title', 'officialName', 'age', 'price', 'hook', 'description', 'longDescription',
-    'logistique', 'image', 'color', 'bgColor', 'pricingTiers', 'registrationUrl',
+    'logistique', 'image', 'color', 'bgColor', 'pricingTiers', 'registrationUrl', 'showOnHome',
 ] as const;
 
 const cleanStage = (input: Record<string, unknown>) => {

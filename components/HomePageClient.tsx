@@ -5,6 +5,7 @@ import { useLiveStatus } from "../contexts/LiveStatusContext";
 import * as LucideIcons from "lucide-react";
 import {
   ArrowRight,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Zap,
@@ -34,6 +35,7 @@ import Link from "next/link";
 import { PortableText } from "@portabletext/react";
 import { CharDiscoveryModal } from "./CharDiscoveryModal";
 import { WelcomeGuide } from "./WelcomeGuide";
+import FindActivity from "./home/FindActivity";
 import {
   motion,
   AnimatePresence,
@@ -46,6 +48,15 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 const getIcon = (name: string) => (name && (LucideIcons as any)[name]) || Zap;
+
+// Règle visuelle de l'accueil : seuls les liens qui mènent à une réservation utilisent ce bouton orange.
+const BOOKING_BTN =
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-md transition hover:bg-orange-600";
+
+const todayIso = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+};
 
 const RenderText = ({
   content,
@@ -248,19 +259,22 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
           fallback="Sauvetage et Secourisme"
         />
         <div className="mt-5 inline-flex flex-col min-[420px]:flex-row items-stretch min-[420px]:items-center gap-2 rounded-2xl border border-white/20 bg-abysse/35 p-2 shadow-xl backdrop-blur-md">
-          <Link
-            href="#vacances"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-abysse transition hover:bg-turquoise hover:text-white"
-          >
-            Stages & séances
+          <Link href="#trouver" className={BOOKING_BTN}>
+            Je cherche un stage <ChevronDown size={13} />
           </Link>
           <Link
-            href="/activites/char-a-voile"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/35 bg-white/5 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-white transition hover:bg-white hover:text-abysse"
+            href="#autres-activites"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/35 bg-white/5 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-white transition hover:bg-white hover:text-abysse"
           >
-            Char à voile
+            Une autre activité <ChevronDown size={13} />
           </Link>
         </div>
+        <Link
+          href="#decouvrir"
+          className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white/85 underline-offset-4 transition hover:text-white hover:underline drop-shadow"
+        >
+          Première visite ? Je découvre le club <ChevronDown size={13} />
+        </Link>
       </div>
     </div>
   );
@@ -417,6 +431,7 @@ export default function HomePageClient({
   homeGallery,
   infoMessages,
   upcomingEvents = [],
+  schoolStages = [],
 }: any) {
   const {
     weather,
@@ -450,7 +465,12 @@ export default function HomePageClient({
   const isAnimatingRef = useRef(false); // lock to prevent rapid-fire navigation during reset
 
   // TRUE INFINITE SCROLL LOGIC
-  const originalCards = homePageData?.focusCards || [];
+  // La carte "Organisez les vacances" fait doublon avec la section Réserver : on la masque.
+  const featuredEvent = upcomingEvents.find((event: any) => event.startDate >= todayIso() && event.image);
+
+  const originalCards = (homePageData?.focusCards || []).filter(
+    (card: any) => !/vacances/i.test(card?.title || ""),
+  );
   const loopCards = [...originalCards, ...originalCards, ...originalCards];
   const initialIndex = originalCards.length;
 
@@ -1045,322 +1065,155 @@ export default function HomePageClient({
         </div>
       </section>
 
-      {/* INFORMATIONS PRATIQUES : offres des vacances et activité à la séance */}
-      <section id="vacances" className="py-14 md:py-20 bg-slate-50 relative z-10">
-        <div className="max-w-400 mx-auto px-5 md:px-6">
-          <div className="mb-8 md:mb-10">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="size-2 rounded-full bg-orange-500"></div>
-              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">
-                Préparer les vacances
-              </span>
-            </div>
-            <h2 className="text-2xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic leading-tight">
-              Que faire pendant les vacances ?
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm md:text-base leading-relaxed text-slate-600">
-              Un stage pour apprendre à naviguer ou une séance de char à voile : trouvez la formule qui vous correspond.
+      {/* JE SAIS CE QUE JE CHERCHE : aiguillage vers les bonnes pages */}
+      <FindActivity stages={schoolStages}>
+          {featuredEvent && (
+            <Link href={featuredEvent.articleSlug ? "/blog/" + featuredEvent.articleSlug : "/club#agenda"} className="mt-6 md:mt-8 grid overflow-hidden rounded-3xl bg-abysse text-white shadow-lg transition hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise md:grid-cols-[minmax(240px,0.8fr)_1.2fr]">
+              <div className="relative h-48 md:h-56">
+                <img src={featuredEvent.image} alt={"Affiche ou illustration : " + featuredEvent.title} className="h-full w-full object-cover" loading="lazy" />
+                <span className="absolute left-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white">À la une</span>
+              </div>
+              <div className="flex flex-col justify-center p-5 md:p-8">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-turquoise">{featuredEvent.badge || "Événement du club"} · {new Date(featuredEvent.startDate).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}</span>
+                <h3 className="mt-2 text-2xl md:text-3xl font-black uppercase italic tracking-tight">{featuredEvent.title}</h3>
+                {featuredEvent.time && <p className="mt-2 text-sm font-semibold text-white/75">{featuredEvent.time}</p>}
+                <span className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest">Découvrir l’événement <ArrowRight size={15} /></span>
+              </div>
+            </Link>
+          )}
+      </FindActivity>
+
+      {/* JE DÉCOUVRE LE CLUB : les angles de communication du club (Sensation / Exploration / Nature) */}
+      <section
+        id="decouvrir"
+        className="scroll-mt-20 py-16 md:py-24 max-w-400 mx-auto px-6 relative z-10"
+      >
+        <div className="mb-12 px-2">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+              Je découvre le club
+            </span>
+          </div>
+          <h2 className="text-2xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
+            {homePageData?.spirit?.title || "L'Esprit du Club"}
+          </h2>
+          {(homePageData?.spirit?.message || homePageData?.spirit?.description) && (
+            <p className="mt-4 max-w-2xl text-sm md:text-base leading-relaxed text-slate-500">
+              {homePageData.spirit.message || homePageData.spirit.description}
             </p>
-          </div>
+          )}
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-            {[
-              { eyebrow: "Vacances scolaires", title: "Stages de voile", description: "Catamaran, planche, Mini-Mousses, Moussaillons… Découvrez les formules, les âges et les tarifs pour choisir votre stage.", image: "/images/imgBank/CataPharePointeAgon.jpg", href: "/ecole-voile#stages-vacances", cta: "Choisir mon stage" },
-              { eyebrow: "À la séance", title: "Char à voile", description: "Découvrez la glisse sur le sable. Consultez les informations pratiques et les séances proposées selon les marées.", image: "/images/imgBank/charSpeed.jpg", href: "/activites/char-a-voile", cta: "Découvrir les séances" },
-            ].map((offer) => (
-              <Link key={offer.title} href={offer.href} className="group overflow-hidden rounded-3xl border border-abysse/10 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise">
-                <div className="relative h-44 md:h-52 overflow-hidden bg-abysse">
-                  <img src={offer.image} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                  <div className="absolute inset-0 bg-linear-to-t from-abysse/80 via-abysse/10 to-transparent" />
-                  <span className="absolute bottom-3 left-4 rounded-full border border-white/30 bg-abysse/45 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white backdrop-blur">{offer.eyebrow}</span>
-                </div>
-                <div className="flex items-center justify-between gap-3 p-4 md:p-5">
-                  <div>
-                    <h3 className="text-lg md:text-xl font-black uppercase italic tracking-tight text-abysse">{offer.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-slate-600">{offer.description}</p>
-                    <span className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-turquoise">{offer.cta} <ArrowRight size={13} /></span>
-                  </div>
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-turquoise/10 text-abysse transition group-hover:bg-turquoise group-hover:text-white"><ArrowRight size={18} /></div>
-                </div>
-              </Link>
-            ))}
-          </div>
+        <div className="relative rounded-[3.5rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-auto md:h-150 group/container border border-white/5">
+          {/* CARTES DYNAMIQUES */}
+          {(
+            homePageData?.spirit?.cards || [
+              {
+                tag: "Sensation",
+                title: "DOMPTER",
+                description:
+                  "Vitesse et adrénaline. Stages de catamaran, char à voile et sports de glisse pour faire le plein de sensations fortes.",
+                buttonText: "Voir les activités sensation",
+                link: "/activites?cat=Sensations",
+                iconName: "Zap",
+                colorTheme: "orange",
+                image: "/images/imgBank/Navigation.jpg",
+              },
+              {
+                tag: "Exploration",
+                title: "DÉCOUVRIR",
+                description:
+                  "Louez un paddle ou un kayak, longez la côte à votre rythme. La liberté absolue entre dunes et grand large.",
+                buttonText: "Louer du matériel",
+                link: "/activites",
+                iconName: "Compass",
+                colorTheme: "purple",
+                image: "/images/imgBank/paddlekayak.jpg",
+              },
+              {
+                tag: "Nature",
+                title: "RESSENTIR",
+                description:
+                  "De l'éveil des sens à l'autonomie. L'école de voile pour les enfants de 5 à 12 ans et la découverte de l'estran.",
+                buttonText: "Découvrir l'école",
+                link: "/ecole-voile",
+                iconName: "Leaf",
+                colorTheme: "turquoise",
+                image: "/images/imgBank/Cata001.jpg",
+              },
+            ]
+          ).map((card: any, idx: number) => {
+            const themeColor =
+              card.colorTheme === "orange"
+                ? "text-orange-400"
+                : card.colorTheme === "purple"
+                  ? "text-purple-400"
+                  : "text-turquoise";
+            const btnTheme =
+              card.colorTheme === "orange"
+                ? "border-orange-500 text-orange-400 hover:bg-orange-500"
+                : card.colorTheme === "purple"
+                  ? "border-purple-500 text-purple-400 hover:bg-purple-500"
+                  : "border-turquoise text-turquoise hover:bg-turquoise";
 
-          {(() => {
-            const today = new Date();
-            const todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
-            const featuredEvent = upcomingEvents.find((event: any) => event.startDate >= todayStr && event.image);
-            if (!featuredEvent) return null;
-            const eventDate = new Date(featuredEvent.startDate);
-            const eventHref = featuredEvent.articleSlug ? "/blog/" + featuredEvent.articleSlug : "/club#agenda";
             return (
-              <Link href={eventHref} className="mt-6 md:mt-8 grid overflow-hidden rounded-3xl bg-abysse text-white shadow-lg transition hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise md:grid-cols-[minmax(240px,0.8fr)_1.2fr]">
-                <div className="relative h-48 md:h-56">
-                  <img src={featuredEvent.image} alt={"Affiche ou illustration : " + featuredEvent.title} className="h-full w-full object-cover" loading="lazy" />
-                  <span className="absolute left-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white">À la une</span>
+              <div
+                key={idx}
+                onMouseEnter={() => setActiveSpiritIndex(idx)}
+                onClick={() => setActiveSpiritIndex(idx)}
+                className={`group/panel relative transition-all duration-700 ease-in-out overflow-hidden md:cursor-pointer flex flex-col ${activeSpiritIndex === idx ? "flex-3 md:flex-2" : "flex-1"} focus-within:flex-3 min-h-64 md:min-h-0`}
+                tabIndex={0}
+              >
+                <div className="absolute inset-0 bg-abysse/40 group-hover/panel:bg-abysse/10 transition-colors z-10 duration-500"></div>
+                <img
+                  src={card.image}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-105"
+                  alt={card.title}
+                />
+
+                <div className="absolute bottom-0 left-0 w-full p-8 md:p-10 z-20 bg-linear-to-t from-abysse via-abysse/60 to-transparent flex flex-col justify-end h-full md:h-auto">
+                  <div className="flex items-center gap-4 mb-3">
+                    <div
+                      className={`size-12 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center ${themeColor} shadow-lg shrink-0 group-hover:scale-110 transition-transform duration-500`}
+                    >
+                      {(() => {
+                        const Icon = getIcon(card.iconName);
+                        return <Icon size={24} />;
+                      })()}
+                    </div>
+                    <span
+                      className={`${themeColor} font-black uppercase tracking-[0.2em] text-[10px]`}
+                    >
+                      {card.tag}
+                    </span>
+                  </div>
+
+                  <h3 className="text-3xl md:text-5xl font-black text-white uppercase italic mb-4 leading-none transition-all">
+                    {card.title}
+                  </h3>
+
+                  <div
+                    className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${activeSpiritIndex === idx ? "grid-rows-[1fr]" : "grid-rows-[0fr]"} md:grid-rows-[0fr] md:group-hover/panel:grid-rows-[1fr]`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="text-slate-200 text-sm mb-6 leading-relaxed font-medium">
+                        {card.description}
+                      </p>
+                      <Link
+                        href={card.link || "#"}
+                        className={`inline-flex items-center gap-3 bg-transparent border-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all hover:text-white ${btnTheme}`}
+                      >
+                        {card.buttonText} <ArrowRight size={16} />
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col justify-center p-5 md:p-8">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-turquoise">{featuredEvent.badge || "Événement du club"} · {eventDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}</span>
-                  <h3 className="mt-2 text-2xl md:text-3xl font-black uppercase italic tracking-tight">{featuredEvent.title}</h3>
-                  {featuredEvent.time && <p className="mt-2 text-sm font-semibold text-white/75">{featuredEvent.time}</p>}
-                  <span className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest">Découvrir l’événement <ArrowRight size={15} /></span>
-                </div>
-              </Link>
+              </div>
             );
-          })()}
+          })}
         </div>
       </section>
-
-      {/* GROUPE FOCUS : Carrousel style Apple */}
-      <div id="focus" ref={focusSectionRef} className="bg-sky-50 py-12">
-        <section className="relative z-10">
-          {/* Header */}
-          <div className="max-w-400 mx-auto px-6 mb-8">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="size-2 rounded-full bg-orange-500 animate-pulse"></div>
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500">
-                Activités phares
-              </span>
-            </div>
-            <h2 className="text-2xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic leading-none">
-              Vibrez au rythme{" "}
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-abysse to-turquoise">
-                des Marées.
-              </span>
-            </h2>
-          </div>
-
-          <div className="hidden md:block overflow-hidden" onWheel={handleFocusWheel}>
-            <div className="relative w-full h-full">
-              <motion.div
-                id="focus-slider"
-                className="flex gap-6 will-change-transform"
-                style={{ x: motionX }}
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-              >
-                {loopCards.map((card: any, idx: number) => {
-                  const isActive = idx === currentFocusIndex;
-                  const isCta = card.cardType === "cta";
-
-                  const length = originalCards.length;
-                  const hasPrev = true;
-                  const hasNext = true;
-                  const handlePrev = () => navigateFocus(idx - 1);
-                  const handleNext = () => navigateFocus(idx + 1);
-
-                    // Local theme colors
-                    const colors = {
-                      orange: {
-                        bg: "bg-orange-500",
-                        text: "text-orange-500",
-                        textLight: "text-orange-400",
-                        from: "from-orange-400",
-                        to: "to-red-600",
-                        via: "via-orange-500",
-                      },
-                      blue: {
-                        bg: "bg-blue-600",
-                        text: "text-blue-500",
-                        textLight: "text-blue-400",
-                        from: "from-blue-400",
-                        to: "to-purple-600",
-                        via: "via-indigo-500",
-                      },
-                      emerald: {
-                        bg: "bg-emerald-600",
-                        text: "text-emerald-500",
-                        textLight: "text-emerald-400",
-                        from: "from-emerald-400",
-                        to: "to-cyan-600",
-                        via: "via-teal-500",
-                      },
-                      turquoise: {
-                        bg: "bg-turquoise",
-                        text: "text-turquoise",
-                        textLight: "text-turquoise",
-                        from: "from-abysse",
-                        to: "to-cyan-400",
-                        via: "via-turquoise",
-                      },
-                      purple: {
-                        bg: "bg-purple-600",
-                        text: "text-purple-500",
-                        textLight: "text-purple-400",
-                        from: "from-purple-400",
-                        to: "to-pink-600",
-                        via: "via-purple-500",
-                      },
-                    };
-
-                    const theme =
-                      colors[card.themeColor as keyof typeof colors] ||
-                      colors.orange;
-
-                    if (isCta) {
-                    return (
-                      <div
-                        key={`focus-${idx}`}
-                        className="shrink-0 w-[85vw] lg:w-[58vw] group relative overflow-hidden rounded-4xl shadow-xl ring-1 ring-white/15 flex flex-col justify-center min-h-120 lg:min-h-150 bg-linear-to-r transition-all duration-700"
-                        style={{
-                          opacity: isActive ? 1 : 0.6,
-                          transform: isActive ? "scale(1)" : "scale(0.95)",
-                          backgroundImage: `linear-gradient(to right, var(--color-abysse), ${theme.bg === "bg-turquoise" ? "#14b8a6" : theme.bg.replace("bg-", "")})`,
-                        }}
-                      >
-                          <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
-                          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-[100px] rounded-full group-hover:scale-110 transition-transform duration-1000"></div>
-
-                          <div className="relative z-10 p-8 md:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 h-full">
-                            <div className="max-w-xl text-center lg:text-left flex flex-col justify-center h-full">
-                              <div className="flex items-center justify-center lg:justify-start gap-3 mb-5">
-                                <div className="size-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-xl group-hover:scale-110 transition-transform duration-700">
-                                  {(() => {
-                                    const Icon = getIcon(card.iconName);
-                                    return <Icon size={20} />;
-                                  })()}
-                                </div>
-                                <span className="text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-xs drop-shadow-sm">
-                                  {card.tagline}
-                                </span>
-                              </div>
-                              <h2 className="text-2xl md:text-3xl lg:text-5xl font-black text-white italic tracking-tighter leading-tight mb-6 drop-shadow-md">
-                                {card.title} <br className="hidden md:block" />{" "}
-                                {card.highlightSuffix}
-                              </h2>
-                              <RenderText
-                                content={card.description}
-                                className="text-slate-100 border-l-3 border-white/30 pl-6 text-base md:text-lg font-medium leading-relaxed max-w-xl mx-auto lg:mx-0 italic mb-10"
-                              />
-                              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                                {card.ctaButton?.link && (
-                                  <Link
-                                    href={card.ctaButton.link}
-                                    className="inline-flex items-center justify-center px-8 py-5 bg-white text-abysse rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-slate-50 hover:scale-105 transition-all shadow-xl group/btn"
-                                  >
-                                    {card.ctaButton.text}
-                                    <ArrowRight
-                                      size={18}
-                                      className="ml-3 group-hover/btn:translate-x-2 transition-transform"
-                                    />
-                                  </Link>
-                                )}
-                                {card.infoButton?.link && (
-                                  <Link
-                                    href={card.infoButton.link}
-                                    className="inline-flex items-center justify-center px-8 py-5 bg-white/15 border-2 border-white/20 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs hover:bg-white hover:text-abysse transition-all backdrop-blur-md shadow-2xl"
-                                  >
-                                    {card.infoButton.text}
-                                  </Link>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                      </div>
-                    );
-                  }
-
-                  // Standard Card Component to handle its own image slider
-                  return (
-                    <FocusCardItem
-                      key={`focus-${idx}`}
-                      card={card}
-                      idx={idx}
-                      isActive={isActive}
-                      theme={theme}
-                      images={card.images || []}
-                      onPrev={handlePrev}
-                      onNext={handleNext}
-                      hasPrev={hasPrev}
-                      hasNext={hasNext}
-                    />
-                  );
-                  },
-                )}
-              </motion.div>
-            </div>
-
-            {/* Overlay Navigation - Centers perfectly aligned with central card borders */}
-            <div className="hidden lg:block absolute inset-0 pointer-events-none z-50 h-full overflow-visible">
-              {/* Using same responsive widths as cards for 1:1 alignment */}
-              <div 
-                className="absolute inset-y-0 left-1/2 -translate-x-1/2 h-full pointer-events-none w-[85vw] lg:w-[58vw]"
-              >
-                {/* Left Arrow Button - Center aligned with LEFT vertical border */}
-                <button
-                  onClick={() => navigateFocus(currentFocusIndex - 1)}
-                  className="absolute left-0 top-0 bottom-0 pointer-events-auto flex items-center justify-center group/nav-btn outline-none"
-                  style={{ transform: "translateX(-50%)" }}
-                >
-                  <div className="size-14 flex items-center justify-center bg-white/10 hover:bg-white/20 border border-white/20 text-white/50 group-hover/nav-btn:text-white rounded-full transition-all backdrop-blur-xl shadow-2xl scale-90 group-hover/nav-btn:scale-110">
-                    <ChevronLeft
-                      size={28}
-                      strokeWidth={2.5}
-                    />
-                  </div>
-                </button>
-
-                {/* Right Arrow Button - Center aligned with RIGHT vertical border */}
-                <button
-                  onClick={() => navigateFocus(currentFocusIndex + 1)}
-                  className="absolute right-0 top-0 bottom-0 pointer-events-auto flex items-center justify-center group/nav-btn outline-none"
-                  style={{ transform: "translateX(50%)" }}
-                >
-                  <div className="size-14 flex items-center justify-center bg-white/10 hover:bg-white/20 border border-white/20 text-white/50 group-hover/nav-btn:text-white rounded-full transition-all backdrop-blur-xl shadow-2xl scale-90 group-hover/nav-btn:scale-110">
-                    <ChevronRight
-                      size={28}
-                      strokeWidth={2.5}
-                    />
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 px-5 md:hidden">
-            {originalCards.filter((card: any) => card.cardType !== "cta").slice(0, 3).map((card: any, index: number) => {
-              const image = card.images?.[0] || CHAR_IMAGES[index % CHAR_IMAGES.length];
-              const href = card.ctaButton?.link || card.infoButton?.link || "/activites";
-              return (
-                <article key={index} className="overflow-hidden rounded-3xl bg-abysse shadow-lg">
-                  <div className="relative h-40 bg-abysse">
-                    <img src={image} alt="" className="h-full w-full object-cover" loading="lazy" />
-                    <div className="absolute inset-0 bg-linear-to-t from-abysse/80 to-transparent" />
-                    {card.tagline && <span className="absolute bottom-3 left-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/80">{card.tagline}</span>}
-                  </div>
-                  <div className="p-5">
-                    <h3 className="text-2xl font-black uppercase italic tracking-tight text-white">{card.title} {card.highlightSuffix}</h3>
-                    {card.subTagline && <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-turquoise">{card.subTagline}</p>}
-                    <Link href={href} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-abysse">Découvrir <ArrowRight size={14} /></Link>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-
-          {/* Slots / Progress Indicators */}
-          {originalCards.length > 0 && (
-            <div className="max-w-400 mx-auto px-6 mt-8 flex justify-center gap-3">
-              {originalCards.map((_: any, i: number) => {
-                const normalizedIndex = currentFocusIndex % originalCards.length;
-                const isSelected = normalizedIndex === i;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => navigateFocus(i + originalCards.length)}
-                    className="group py-3 focus:outline-none"
-                  >
-                    <div
-                      className={`h-1.5 rounded-full transition-all duration-500 ${isSelected ? "w-12 bg-abysse" : "w-6 bg-abysse/10 group-hover:bg-abysse/20"}`}
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      </div>
 
       {/* --- SECTION : AGENDA / ÉVÉNEMENTS --- */}
       <section id="agenda" className="py-24 relative z-10 overflow-hidden">
@@ -1490,138 +1343,6 @@ export default function HomePageClient({
               )}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* SECTION : L'ESPRIT DU CLUB - REPAIRED & REFINED */}
-      <section
-        id="esprit-club"
-        className="py-24 max-w-400 mx-auto px-6 relative z-10"
-      >
-        <div className="mb-12 px-2">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-              Expérience CNC
-            </span>
-          </div>
-          <h2 className="text-2xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
-            {homePageData?.spirit?.title || "L'Esprit du Club"}
-          </h2>
-          {(homePageData?.spirit?.message || homePageData?.spirit?.description) && (
-            <p className="mt-4 max-w-2xl text-sm md:text-base leading-relaxed text-slate-500">
-              {homePageData.spirit.message || homePageData.spirit.description}
-            </p>
-          )}
-        </div>
-
-        <div className="relative rounded-[3.5rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-auto md:h-150 group/container border border-white/5">
-          {/* CARTES DYNAMIQUES */}
-          {(
-            homePageData?.spirit?.cards || [
-              {
-                tag: "Sensation",
-                title: "DOMPTER",
-                description:
-                  "Vitesse et adrénaline. Stages de catamaran, char à voile et sports de glisse pour faire le plein de sensations fortes.",
-                buttonText: "Voir les activités sensation",
-                link: "/activites?cat=Sensations",
-                iconName: "Zap",
-                colorTheme: "orange",
-                image: "/images/imgBank/Navigation.jpg",
-              },
-              {
-                tag: "Exploration",
-                title: "DÉCOUVRIR",
-                description:
-                  "Louez un paddle ou un kayak, longez la côte à votre rythme. La liberté absolue entre dunes et grand large.",
-                buttonText: "Louer du matériel",
-                link: "/activites",
-                iconName: "Compass",
-                colorTheme: "purple",
-                image: "/images/imgBank/paddlekayak.jpg",
-              },
-              {
-                tag: "Nature",
-                title: "RESSENTIR",
-                description:
-                  "De l'éveil des sens à l'autonomie. L'école de voile pour les enfants de 5 à 12 ans et la découverte de l'estran.",
-                buttonText: "Découvrir l'école",
-                link: "/ecole-voile",
-                iconName: "Leaf",
-                colorTheme: "turquoise",
-                image: "/images/imgBank/Cata001.jpg",
-              },
-            ]
-          ).map((card: any, idx: number) => {
-            const themeColor =
-              card.colorTheme === "orange"
-                ? "text-orange-400"
-                : card.colorTheme === "purple"
-                  ? "text-purple-400"
-                  : "text-turquoise";
-            const btnTheme =
-              card.colorTheme === "orange"
-                ? "border-orange-500 text-orange-400 hover:bg-orange-500"
-                : card.colorTheme === "purple"
-                  ? "border-purple-500 text-purple-400 hover:bg-purple-500"
-                  : "border-turquoise text-turquoise hover:bg-turquoise";
-
-            return (
-              <div
-                key={idx}
-                onMouseEnter={() => setActiveSpiritIndex(idx)}
-                onClick={() => setActiveSpiritIndex(idx)}
-                className={`group/panel relative transition-all duration-700 ease-in-out overflow-hidden md:cursor-pointer flex flex-col ${activeSpiritIndex === idx ? "flex-3 md:flex-2" : "flex-1"} focus-within:flex-3 min-h-64 md:min-h-0`}
-                tabIndex={0}
-              >
-                <div className="absolute inset-0 bg-abysse/40 group-hover/panel:bg-abysse/10 transition-colors z-10 duration-500"></div>
-                <img
-                  src={card.image}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-105"
-                  alt={card.title}
-                />
-
-                <div className="absolute bottom-0 left-0 w-full p-8 md:p-10 z-20 bg-linear-to-t from-abysse via-abysse/60 to-transparent flex flex-col justify-end h-full md:h-auto">
-                  <div className="flex items-center gap-4 mb-3">
-                    <div
-                      className={`size-12 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center ${themeColor} shadow-lg shrink-0 group-hover:scale-110 transition-transform duration-500`}
-                    >
-                      {(() => {
-                        const Icon = getIcon(card.iconName);
-                        return <Icon size={24} />;
-                      })()}
-                    </div>
-                    <span
-                      className={`${themeColor} font-black uppercase tracking-[0.2em] text-[10px]`}
-                    >
-                      {card.tag}
-                    </span>
-                  </div>
-
-                  <h3 className="text-3xl md:text-5xl font-black text-white uppercase italic mb-4 leading-none transition-all">
-                    {card.title}
-                  </h3>
-
-                  <div
-                    className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${activeSpiritIndex === idx ? "grid-rows-[1fr]" : "grid-rows-[0fr]"} md:grid-rows-[0fr] md:group-hover/panel:grid-rows-[1fr]`}
-                  >
-                    <div className="overflow-hidden">
-                      <p className="text-slate-200 text-sm mb-6 leading-relaxed font-medium">
-                        {card.description}
-                      </p>
-                      <Link
-                        href={card.link || "#"}
-                        className={`inline-flex items-center gap-3 bg-transparent border-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all hover:text-white ${btnTheme}`}
-                      >
-                        {card.buttonText} <ArrowRight size={16} />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </div>
       </section>
 
