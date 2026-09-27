@@ -8,6 +8,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { FloatingActions } from '@/components/FloatingActions';
 import { SmoothScroll } from '@/components/SmoothScroll';
+import { MotionProvider } from '@/components/MotionProvider';
 import { CookieBanner } from '@/components/CookieBanner';
 import { Analytics } from '@vercel/analytics/next';
 import { WelcomeGuide } from '@/components/WelcomeGuide';
@@ -124,6 +125,7 @@ export default async function SiteLayout({
       <div className={`${outfit.variable} ${syncopate.variable} ${shrikhand.variable} font-sans text-abysse antialiased selection:bg-turquoise selection:text-white`}>
           <LiveStatusProvider initialData={spotSettings} stageDefinitions={stageDefinitions ?? []}>
             <SmoothScroll>
+            <MotionProvider>
               <div className="min-h-screen flex flex-col">
                 <Header />
                 <main className="grow pt-16">
@@ -135,6 +137,7 @@ export default async function SiteLayout({
                 <CookieBanner />
                 <Analytics />
               </div>
+            </MotionProvider>
             </SmoothScroll>
           </LiveStatusProvider>
       </div>

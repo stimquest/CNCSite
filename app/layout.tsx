@@ -1,8 +1,16 @@
+import type { Viewport } from 'next';
 /**
  * Layout racine minimal - les layouts spécifiques sont dans :
  * - (site)/layout.tsx - Site public avec Header/Footer
  * - (studio)/layout.tsx - Sanity Studio sans décoration
  */
+// Barre d'état / chrome du navigateur assortis au header blanc
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#ffffff',
+};
+
 export default function RootLayout({
   children,
 }: {

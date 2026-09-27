@@ -51,6 +51,24 @@ html {
   font-size: 15px;
   scroll-behavior: smooth;
   scroll-padding-top: 80px; /* Compense le header fixe */
+  -webkit-tap-highlight-color: transparent; /* pas de flash gris au tap (iOS/Android) */
+  -webkit-text-size-adjust: 100%; /* pas de grossissement du texte en paysage */
+}
+
+/* Mobile : réponse immédiate au tap et pas de sélection du libellé à l'appui long */
+a, button, [role="button"], summary, label {
+  touch-action: manipulation;
+}
+button, [role="button"], [role="tab"], [role="switch"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* iOS zoome sur les champs < 16px (racine à 15px ici) : on force 16px au doigt */
+@media (pointer: coarse) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
 }
 
 @layer base {
@@ -223,5 +241,28 @@ html {
 @media print {
   .no-print {
     display: none !important;
+  }
+}
+
+/* Fondu court quand un contenu filtré change (ex: filtre d'âge des stages) */
+@keyframes fade-in-soft {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.fade-in-soft {
+  animation: fade-in-soft 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Réglage système "réduire les animations" : on coupe les animations CSS décoratives */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

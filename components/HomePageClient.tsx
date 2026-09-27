@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   Wind,
+  Sailboat,
   Bird,
   Navigation,
   Image as ImageIcon,
@@ -42,16 +43,14 @@ import {
   useScroll,
   useTransform,
   useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useMotionTemplate,
   animate as motionAnimate,
 } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 const getIcon = (name: string) => (name && (LucideIcons as any)[name]) || Zap;
 
-// Règle visuelle de l'accueil : seuls les liens qui mènent à une réservation utilisent ce bouton orange.
-const BOOKING_BTN =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-md transition hover:bg-orange-600";
 
 const todayIso = () => {
   const now = new Date();
@@ -95,10 +94,6 @@ const CATEGORY_CONFIG: Record<
   vibe: { dot: "bg-emerald-400", color: "text-emerald-600", label: "Ambiance" },
   info: { dot: "bg-slate-300", color: "text-slate-400", label: "Info" },
 };
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 const PARTNERS = [
   {
@@ -195,32 +190,41 @@ const HeroCarouselItem = ({
 );
 
 const HeroLogo = ({ homePageData }: { homePageData: any }) => {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  // Position de la souris en valeurs de mouvement : pas de rendu React à chaque déplacement
+  const reduceMotion = useReducedMotion();
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 150, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 150, damping: 20 });
+  const rotateX = useTransform(springY, (v) => v * -15);
+  const rotateY = useTransform(springX, (v) => v * 15);
+  const glareX = useTransform(springX, (v) => 50 + v * 50);
+  const glareY = useTransform(springY, (v) => 50 + v * 50);
+  const glare = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.4) 0%, transparent 60%)`;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (reduceMotion) return;
     const { clientX, clientY, currentTarget } = e;
     const { width, height, left, top } = currentTarget.getBoundingClientRect();
-    const x = ((clientX - left) / width - 0.5) * 2;
-    const y = ((clientY - top) / height - 0.5) * 2;
-    setMousePos({ x, y });
+    mouseX.set(((clientX - left) / width - 0.5) * 2);
+    mouseY.set(((clientY - top) / height - 0.5) * 2);
+  };
+  const resetMouse = () => {
+    mouseX.set(0);
+    mouseY.set(0);
   };
 
   return (
     <div
       className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6"
       onMouseMove={handleMouseMove}
-      onMouseLeave={() => setMousePos({ x: 0, y: 0 })}
+      onMouseLeave={resetMouse}
       style={{ perspective: "1500px" }}
     >
       {/* Tilted Logo */}
       <motion.div
-        className="relative w-[74vw] h-[29vh] md:w-[52vw] md:h-[43vh] flex items-center justify-center"
-        animate={{
-          rotateX: mousePos.y * -15,
-          rotateY: mousePos.x * 15,
-        }}
-        transition={{ type: "spring", stiffness: 150, damping: 20 }}
-        style={{ transformStyle: "preserve-3d" }}
+        className="relative w-[74vw] h-[26vh] md:w-[46vw] md:h-[36vh] flex items-center justify-center"
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
       >
         <div
           className="hero-logo-glass-layer logo-drop-shadow"
@@ -231,10 +235,8 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
         />
         <motion.div
           className="absolute inset-0 pointer-events-none"
-          animate={{
-            background: `radial-gradient(circle at ${50 + mousePos.x * 50}% ${50 + mousePos.y * 50}%, rgba(255,255,255,0.4) 0%, transparent 60%)`,
-          }}
           style={{
+            background: glare,
             mixBlendMode: "overlay",
             maskImage: "url('/images/LogoCNC2S.png')",
             WebkitMaskImage: "url('/images/LogoCNC2S.png')",
@@ -247,26 +249,35 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
       </motion.div>
 
       {/* Static Text - Now properly positioned under the logo */}
-      <div className="flex flex-col items-center mt-5 md:mt-7 hero-subtitle text-center">
+      <div className="flex flex-col items-center mt-6 md:mt-9 hero-subtitle text-center">
         <RenderText
           content={homePageData?.hero?.title}
           className="text-white font-bold uppercase tracking-[0.22em] text-[10px] md:text-sm drop-shadow-lg"
           fallback="Club Nautique de Coutainville"
         />
-        <RenderText
-          content={homePageData?.hero?.subtitle}
-          className="text-white/85 font-bold uppercase tracking-[0.22em] text-[10px] md:text-sm mt-2 drop-shadow-lg"
-          fallback="Sauvetage et Secourisme"
-        />
-        <div className="mt-5 inline-flex flex-col min-[420px]:flex-row items-stretch min-[420px]:items-center gap-2 rounded-2xl border border-white/20 bg-abysse/35 p-2 shadow-xl backdrop-blur-md">
-          <Link href="#trouver" className={BOOKING_BTN}>
-            Je cherche un stage <ChevronDown size={13} />
+        {/* Deux entrées : le stage (5 jours, tous âges dès 5 ans) ou la séance (surtout ados & adultes) */}
+        <div className="mt-7 grid w-full max-w-2xl grid-cols-1 min-[560px]:grid-cols-2 gap-3 text-left">
+          <Link
+            href="#trouver"
+            className="group flex items-center gap-3 rounded-2xl border border-orange-300/50 bg-orange-500/55 p-3.5 pr-4 text-white shadow-xl shadow-black/20 backdrop-blur-md backdrop-saturate-150 transition-[background-color,transform] duration-200 hover:bg-orange-500/75 active:scale-[0.98]"
+          >
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/20"><Sailboat size={22} /></span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[13px] font-black uppercase tracking-wide leading-tight">Un stage vacances</span>
+              <span className="block text-[11px] font-semibold text-white/85">Dès 5 ans · 5 jours</span>
+            </span>
+            <ChevronDown size={18} className="shrink-0 opacity-80 transition-transform group-hover:translate-y-0.5" />
           </Link>
           <Link
             href="#autres-activites"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/35 bg-white/5 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-white transition hover:bg-white hover:text-abysse"
+            className="group flex items-center gap-3 rounded-2xl border border-white/30 bg-abysse/40 p-3.5 pr-4 text-white shadow-xl shadow-black/20 backdrop-blur-md backdrop-saturate-150 transition-[background-color,transform] duration-200 hover:bg-abysse/70 active:scale-[0.98]"
           >
-            Une autre activité <ChevronDown size={13} />
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/15"><Wind size={22} /></span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[13px] font-black uppercase tracking-wide leading-tight">Char à voile & séances</span>
+              <span className="block text-[11px] font-semibold text-white/80">Ados & adultes · à l’heure</span>
+            </span>
+            <ChevronDown size={18} className="shrink-0 opacity-80 transition-transform group-hover:translate-y-0.5" />
           </Link>
         </div>
         <Link
@@ -451,9 +462,6 @@ export default function HomePageClient({
 
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
-  const [currentCharIndex, setCurrentCharIndex] = useState(0);
-  const [currentGlisseIndex, setCurrentGlisseIndex] = useState(0);
-  const [currentWellbeingIndex, setCurrentWellbeingIndex] = useState(0);
   const [isCharModalOpen, setIsCharModalOpen] = useState(false);
   const [currentFocusIndex, setCurrentFocusIndex] = useState(0);
   const [activeSpiritIndex, setActiveSpiritIndex] = useState(0);
@@ -579,62 +587,24 @@ export default function HomePageClient({
     return () => observer.disconnect();
   }, []);
 
-  const CHAR_IMAGES = homePageData?.focusChar?.images?.length
-    ? homePageData.focusChar.images
-    : [
-        "/images/imgBank/Char001.jpg",
-        "/images/imgBank/Char002.jpg",
-        "/images/imgBank/Char003.jpg",
-      ];
-
-  const GLISSE_IMAGES = homePageData?.focusGlisse?.images?.length
-    ? homePageData.focusGlisse.images
-    : [
-        "https://images.unsplash.com/photo-1598514983053-ec5507ad2ea4?q=80&w=2000",
-        "https://images.unsplash.com/photo-1506477331477-33d5d8b3dc85?q=80&w=2000",
-        "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?q=80&w=2000",
-      ];
-
-  const WELLBEING_IMAGES = homePageData?.focusBienEtre?.images?.length
-    ? homePageData.focusBienEtre.images
-    : [
-        "https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=2000",
-        "/images/imgBank/paddleKayak.jpg",
-        "/images/imgBank/paddleGeant.jpg",
-      ];
-
+  // Diaporama du hero : seulement quand il n'y a pas de vidéo
+  const hasHeroVideo = !!homePageData?.hero?.videoUrl;
   useEffect(() => {
+    if (hasHeroVideo) return;
     const heroTimer = setInterval(
       () => setCurrentHeroIndex((p) => (p + 1) % HERO_IMAGES.length),
       6000,
     );
-    const charTimer = setInterval(
-      () => setCurrentCharIndex((p) => (p + 1) % CHAR_IMAGES.length),
-      5000,
-    );
-    const glisseTimer = setInterval(
-      () => setCurrentGlisseIndex((p) => (p + 1) % GLISSE_IMAGES.length),
-      5500,
-    );
-    const wellbeingTimer = setInterval(
-      () => setCurrentWellbeingIndex((p) => (p + 1) % WELLBEING_IMAGES.length),
-      6000,
-    );
-
-    return () => {
-      clearInterval(heroTimer);
-      clearInterval(charTimer);
-      clearInterval(glisseTimer);
-      clearInterval(wellbeingTimer);
-    };
-  }, [CHAR_IMAGES.length, GLISSE_IMAGES.length, WELLBEING_IMAGES.length]);
+    return () => clearInterval(heroTimer);
+  }, [hasHeroVideo]);
 
   // Scroll Parallax for Waves & Photos
   const { scrollY } = useScroll();
-  const waveX1 = useTransform(scrollY, [0, 1000], ["0%", "-33%"]);
-  const waveY2 = useTransform(scrollY, [0, 500], [0, 30]);
+  const reduceMotion = useReducedMotion();
+  const waveX1 = useTransform(scrollY, [0, 1000], reduceMotion ? ["0%", "0%"] : ["0%", "-33%"]);
+  const waveY2 = useTransform(scrollY, [0, 500], reduceMotion ? [0, 0] : [0, 30]);
   // Balayage vertical du point focal (exploite la hauteur de l'image HD)
-  const photoYPos = useTransform(scrollY, [0, 1500], ["20%", "80%"]);
+  const photoYPos = useTransform(scrollY, [0, 1500], reduceMotion ? ["50%", "50%"] : ["20%", "80%"]);
 
   // State for Mouse Interactions (Tilt, Transparency, Blur)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -653,19 +623,6 @@ export default function HomePageClient({
       spotSection.scrollIntoView({ behavior: "smooth" });
     }
   };
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.to(".hero-subtitle", {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        delay: 0.8,
-      });
-    });
-
-    return () => ctx.revert();
-  }, []);
 
   const [galleryImages, setGalleryImages] = useState<any[]>([]);
   useEffect(() => {
@@ -699,7 +656,7 @@ export default function HomePageClient({
         </div>
 
         {/* Overlay sombre pour le contraste (Texte blanc sur image) */}
-        <div className="absolute inset-0 bg-black/20 z-10" />
+        <div className="absolute inset-0 z-10 bg-linear-to-b from-black/15 via-black/20 to-black/60" />
 
         {/* SEPARATOR : REFINED WAVE (Plus de galbe, sans bouffer le bouton) */}
         <div className="absolute inset-x-0 bottom-0 pointer-events-none z-10 leading-0 overflow-hidden">
@@ -1069,8 +1026,10 @@ export default function HomePageClient({
       <FindActivity stages={schoolStages}>
           {featuredEvent && (
             <Link href={featuredEvent.articleSlug ? "/blog/" + featuredEvent.articleSlug : "/club#agenda"} className="mt-6 md:mt-8 grid overflow-hidden rounded-3xl bg-abysse text-white shadow-lg transition hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise md:grid-cols-[minmax(240px,0.8fr)_1.2fr]">
-              <div className="relative h-48 md:h-56">
-                <img src={featuredEvent.image} alt={"Affiche ou illustration : " + featuredEvent.title} className="h-full w-full object-cover" loading="lazy" />
+              {/* Affiche entière (contain) sur un fond flouté de la même image : le texte de l'affiche n'est jamais coupé */}
+              <div className="relative h-64 md:h-80 overflow-hidden bg-abysse">
+                <img src={featuredEvent.image} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-xl" loading="lazy" />
+                <img src={featuredEvent.image} alt={"Affiche ou illustration : " + featuredEvent.title} className="relative h-full w-full object-contain p-3" loading="lazy" />
                 <span className="absolute left-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white">À la une</span>
               </div>
               <div className="flex flex-col justify-center p-5 md:p-8">
@@ -1162,7 +1121,7 @@ export default function HomePageClient({
                 key={idx}
                 onMouseEnter={() => setActiveSpiritIndex(idx)}
                 onClick={() => setActiveSpiritIndex(idx)}
-                className={`group/panel relative transition-all duration-700 ease-in-out overflow-hidden md:cursor-pointer flex flex-col ${activeSpiritIndex === idx ? "flex-3 md:flex-2" : "flex-1"} focus-within:flex-3 min-h-64 md:min-h-0`}
+                className={`group/panel relative transition-[flex-grow] duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden md:cursor-pointer flex flex-col ${activeSpiritIndex === idx ? "flex-3 md:flex-2" : "flex-1"} focus-within:flex-3 min-h-64 md:min-h-0`}
                 tabIndex={0}
               >
                 <div className="absolute inset-0 bg-abysse/40 group-hover/panel:bg-abysse/10 transition-colors z-10 duration-500"></div>
@@ -1194,7 +1153,7 @@ export default function HomePageClient({
                   </h3>
 
                   <div
-                    className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${activeSpiritIndex === idx ? "grid-rows-[1fr]" : "grid-rows-[0fr]"} md:grid-rows-[0fr] md:group-hover/panel:grid-rows-[1fr]`}
+                    className={`grid transition-[grid-template-rows] duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] ${activeSpiritIndex === idx ? "grid-rows-[1fr]" : "grid-rows-[0fr]"} md:grid-rows-[0fr] md:group-hover/panel:grid-rows-[1fr]`}
                   >
                     <div className="overflow-hidden">
                       <p className="text-slate-200 text-sm mb-6 leading-relaxed font-medium">

@@ -11,6 +11,7 @@ type SchoolStage = {
   price?: string;
   image?: string;
   bgColor?: string;
+  hook?: string;
   showOnHome?: boolean;
 };
 
@@ -81,76 +82,71 @@ export default function FindActivity({ stages: allStages, children }: { stages: 
           <h2 className="text-2xl md:text-4xl font-black text-abysse uppercase tracking-tighter italic leading-tight">Trouver mon activité</h2>
         </div>
 
-        {/* STAGES VACANCES : filtre par âge */}
+        {/* STAGES VACANCES : d'abord l'âge, puis les stages correspondants */}
         <div className="rounded-3xl bg-white border border-abysse/10 shadow-sm p-5 md:p-8">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 md:gap-6">
             <div>
-              <h3 className="text-lg md:text-2xl font-black uppercase italic tracking-tight text-abysse">Stages vacances · 5 jours</h3>
-              <p className="mt-1 text-sm text-slate-500">Pâques, été, Toussaint. Choisissez un âge pour voir les stages adaptés.</p>
+              <h3 className="text-xl md:text-3xl font-black uppercase italic tracking-tight text-abysse">Stages vacances</h3>
+              <p className="mt-1 text-sm text-slate-500">5 jours sur l’eau, encadrés par les moniteurs du club.</p>
             </div>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 md:pt-2">
+              <Link href="/ecole-voile#planning" className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-turquoise hover:underline">
+                Voir les dates <ArrowRight size={13} />
+              </Link>
+              {hiddenCount > 0 && (
+                <Link href="/ecole-voile#stages-vacances" className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-turquoise hover:underline">
+                  Toute l’offre de l’année <ArrowRight size={13} />
+                </Link>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-5 md:mt-6 flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl bg-slate-50 p-3 md:p-4">
+            <span className="shrink-0 pl-1 text-[10px] font-black uppercase tracking-[0.2em] text-abysse">Pour quel âge ?</span>
             <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer par âge">
-              <button
-                type="button"
-                onClick={() => setRange(null)}
-                aria-pressed={range === null}
-                className={`min-h-10 px-4 rounded-full text-[11px] font-black uppercase tracking-wider transition ${range === null ? 'bg-abysse text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-              >
+              <button type="button" onClick={() => setRange(null)} aria-pressed={range === null} className={`min-h-10 px-4 rounded-full text-[11px] font-black uppercase tracking-wider transition-colors ${range === null ? 'bg-abysse text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-500 hover:border-turquoise hover:text-turquoise'}`}>
                 Tous
               </button>
               {AGE_RANGES.map((r, i) => (
-                <button
-                  key={r.label}
-                  type="button"
-                  onClick={() => setRange(i)}
-                  aria-pressed={range === i}
-                  className={`min-h-10 px-4 rounded-full text-[11px] font-black uppercase tracking-wider transition ${range === i ? 'bg-abysse text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-                >
+                <button key={r.label} type="button" onClick={() => setRange(i)} aria-pressed={range === i} className={`min-h-10 px-4 rounded-full text-[11px] font-black uppercase tracking-wider transition-colors ${range === i ? 'bg-abysse text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-500 hover:border-turquoise hover:text-turquoise'}`}>
                   {r.label}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* La grille est remontée à chaque filtre pour un court fondu */}
+          <div key={range ?? 'all'} className="mt-5 md:mt-6 grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4 gap-4 fade-in-soft">
             {visibleStages.map((stage, i) => (
               <Link
                 key={stage.id || i}
                 href={`/ecole-voile${stage.id ? `?stage=${encodeURIComponent(stage.id)}` : ''}#stages-vacances`}
-                className="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-2.5 pr-4 transition hover:border-turquoise hover:bg-white hover:shadow-md"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise"
               >
-                <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-abysse">
-                  {stage.image && <img src={`${stage.image}?w=160&h=160&fit=crop`} alt="" className="h-full w-full object-cover" loading="lazy" />}
+                <div className="relative aspect-[4/3] overflow-hidden bg-abysse">
+                  {stage.image && <img src={`${stage.image}?w=600&h=450&fit=crop`} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />}
+                  <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow ${stage.bgColor || 'bg-turquoise'}`}>{stage.age}</span>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <span className={`inline-block rounded-md px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white ${stage.bgColor || 'bg-turquoise'}`}>{stage.age}</span>
-                  <span className="mt-1 block text-sm font-black uppercase leading-tight tracking-tight text-abysse line-clamp-2">{stage.officialName}</span>
-                  {stage.price && <span className="block text-[11px] font-bold text-slate-400">{stage.price}</span>}
+                <div className="flex flex-1 flex-col p-4">
+                  <span className="text-base font-black uppercase italic leading-tight tracking-tight text-abysse">{stage.officialName}</span>
+                  {stage.hook && <p className="mt-1.5 text-xs leading-relaxed text-slate-500 line-clamp-2">{stage.hook}</p>}
+                  <div className="mt-auto flex items-center justify-between gap-2 pt-4">
+                    {stage.price ? <span className="text-sm font-black text-abysse">{stage.price}</span> : <span />}
+                    <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-turquoise">
+                      Voir le stage <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  </div>
                 </div>
-                <ArrowRight size={16} className="shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-turquoise" />
               </Link>
             ))}
           </div>
 
           {visibleStages.length === 0 && (
-            <p className="rounded-2xl bg-slate-50 p-5 text-center text-sm text-slate-500">
+            <p className="mt-5 rounded-2xl bg-slate-50 p-6 text-center text-sm text-slate-500">
               Pas de stage pour cet âge aux prochaines vacances.{" "}
               <Link href="/ecole-voile#stages-vacances" className="font-bold text-turquoise hover:underline">Voir toute l’offre de l’année</Link>
             </p>
           )}
-
-          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <Link href="/ecole-voile#stages-vacances" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-md transition hover:bg-orange-600">
-              Voir les stages et s’inscrire <ArrowRight size={13} />
-            </Link>
-            <Link href="/ecole-voile#planning" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-turquoise hover:underline">
-              Voir les dates <ArrowRight size={13} />
-            </Link>
-            {hiddenCount > 0 && (
-              <Link href="/ecole-voile#stages-vacances" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-turquoise hover:underline">
-                Toute l’offre de l’année <ArrowRight size={13} />
-              </Link>
-            )}
-          </div>
         </div>
 
         {/* AUTRES BESOINS : le char à voile en grand, puis les raccourcis */}
