@@ -33,6 +33,7 @@ import { SpotConditionsBento } from "../components/SpotConditionsBento";
 import { LogoComponent } from "../components/Logo";
 import { DicoParents } from "../components/DicoParents";
 import Link from "next/link";
+import SpiritVerbs from "./home/SpiritVerbs";
 import { PortableText } from "@portabletext/react";
 import { CharDiscoveryModal } from "./CharDiscoveryModal";
 import { WelcomeGuide } from "./WelcomeGuide";
@@ -464,7 +465,6 @@ export default function HomePageClient({
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
   const [isCharModalOpen, setIsCharModalOpen] = useState(false);
   const [currentFocusIndex, setCurrentFocusIndex] = useState(0);
-  const [activeSpiritIndex, setActiveSpiritIndex] = useState(0);
   const motionX = useMotionValue(0);
   const focusWheelLockRef = useRef(false);
   const focusSectionRef = useRef<HTMLDivElement>(null);
@@ -618,7 +618,7 @@ export default function HomePageClient({
   };
 
   const scrollToSpot = () => {
-    const spotSection = document.getElementById("esprit-club");
+    const spotSection = document.getElementById("decouvrir");
     if (spotSection) {
       spotSection.scrollIntoView({ behavior: "smooth" });
     }
@@ -1042,137 +1042,8 @@ export default function HomePageClient({
           )}
       </FindActivity>
 
-      {/* JE DÉCOUVRE LE CLUB : les angles de communication du club (Sensation / Exploration / Nature) */}
-      <section
-        id="decouvrir"
-        className="scroll-mt-20 py-16 md:py-24 max-w-400 mx-auto px-6 relative z-10"
-      >
-        <div className="mb-12 px-2">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="size-2 rounded-full bg-turquoise animate-pulse"></div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-              Je découvre le club
-            </span>
-          </div>
-          <h2 className="text-2xl md:text-5xl font-black text-abysse uppercase tracking-tighter italic leading-none">
-            {homePageData?.spirit?.title || "L'Esprit du Club"}
-          </h2>
-          {(homePageData?.spirit?.message || homePageData?.spirit?.description) && (
-            <p className="mt-4 max-w-2xl text-sm md:text-base leading-relaxed text-slate-500">
-              {homePageData.spirit.message || homePageData.spirit.description}
-            </p>
-          )}
-        </div>
-
-        <div className="relative rounded-[3.5rem] overflow-hidden bg-abysse shadow-2xl flex flex-col md:flex-row h-auto md:h-150 group/container border border-white/5">
-          {/* CARTES DYNAMIQUES */}
-          {(
-            homePageData?.spirit?.cards || [
-              {
-                tag: "Sensation",
-                title: "DOMPTER",
-                description:
-                  "Vitesse et adrénaline. Stages de catamaran, char à voile et sports de glisse pour faire le plein de sensations fortes.",
-                buttonText: "Voir les activités sensation",
-                link: "/activites?cat=Sensations",
-                iconName: "Zap",
-                colorTheme: "orange",
-                image: "/images/imgBank/Navigation.jpg",
-              },
-              {
-                tag: "Exploration",
-                title: "DÉCOUVRIR",
-                description:
-                  "Louez un paddle ou un kayak, longez la côte à votre rythme. La liberté absolue entre dunes et grand large.",
-                buttonText: "Louer du matériel",
-                link: "/activites",
-                iconName: "Compass",
-                colorTheme: "purple",
-                image: "/images/imgBank/paddlekayak.jpg",
-              },
-              {
-                tag: "Nature",
-                title: "RESSENTIR",
-                description:
-                  "De l'éveil des sens à l'autonomie. L'école de voile pour les enfants de 5 à 12 ans et la découverte de l'estran.",
-                buttonText: "Découvrir l'école",
-                link: "/ecole-voile",
-                iconName: "Leaf",
-                colorTheme: "turquoise",
-                image: "/images/imgBank/Cata001.jpg",
-              },
-            ]
-          ).map((card: any, idx: number) => {
-            const themeColor =
-              card.colorTheme === "orange"
-                ? "text-orange-400"
-                : card.colorTheme === "purple"
-                  ? "text-purple-400"
-                  : "text-turquoise";
-            const btnTheme =
-              card.colorTheme === "orange"
-                ? "border-orange-500 text-orange-400 hover:bg-orange-500"
-                : card.colorTheme === "purple"
-                  ? "border-purple-500 text-purple-400 hover:bg-purple-500"
-                  : "border-turquoise text-turquoise hover:bg-turquoise";
-
-            return (
-              <div
-                key={idx}
-                onMouseEnter={() => setActiveSpiritIndex(idx)}
-                onClick={() => setActiveSpiritIndex(idx)}
-                className={`group/panel relative transition-[flex-grow] duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden md:cursor-pointer flex flex-col ${activeSpiritIndex === idx ? "flex-3 md:flex-2" : "flex-1"} focus-within:flex-3 min-h-64 md:min-h-0`}
-                tabIndex={0}
-              >
-                <div className="absolute inset-0 bg-abysse/40 group-hover/panel:bg-abysse/10 transition-colors z-10 duration-500"></div>
-                <img
-                  src={card.image}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/panel:scale-105"
-                  alt={card.title}
-                />
-
-                <div className="absolute bottom-0 left-0 w-full p-8 md:p-10 z-20 bg-linear-to-t from-abysse via-abysse/60 to-transparent flex flex-col justify-end h-full md:h-auto">
-                  <div className="flex items-center gap-4 mb-3">
-                    <div
-                      className={`size-12 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center ${themeColor} shadow-lg shrink-0 group-hover:scale-110 transition-transform duration-500`}
-                    >
-                      {(() => {
-                        const Icon = getIcon(card.iconName);
-                        return <Icon size={24} />;
-                      })()}
-                    </div>
-                    <span
-                      className={`${themeColor} font-black uppercase tracking-[0.2em] text-[10px]`}
-                    >
-                      {card.tag}
-                    </span>
-                  </div>
-
-                  <h3 className="text-3xl md:text-5xl font-black text-white uppercase italic mb-4 leading-none transition-all">
-                    {card.title}
-                  </h3>
-
-                  <div
-                    className={`grid transition-[grid-template-rows] duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] ${activeSpiritIndex === idx ? "grid-rows-[1fr]" : "grid-rows-[0fr]"} md:grid-rows-[0fr] md:group-hover/panel:grid-rows-[1fr]`}
-                  >
-                    <div className="overflow-hidden">
-                      <p className="text-slate-200 text-sm mb-6 leading-relaxed font-medium">
-                        {card.description}
-                      </p>
-                      <Link
-                        href={card.link || "#"}
-                        className={`inline-flex items-center gap-3 bg-transparent border-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all hover:text-white ${btnTheme}`}
-                      >
-                        {card.buttonText} <ArrowRight size={16} />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      {/* JE DÉCOUVRE LE CLUB : les 3 grandes intentions du club, en "spot publicitaire" animé au scroll */}
+      <SpiritVerbs spirit={homePageData?.spirit} />
 
       {/* --- SECTION : AGENDA / ÉVÉNEMENTS --- */}
       <section id="agenda" className="py-24 relative z-10 overflow-hidden">

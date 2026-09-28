@@ -8,17 +8,19 @@ if (typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
 }
 
+// Doit suivre l'ordre des sections de components/HomePageClient.tsx (les numéros sont calculés)
 const SECTIONS = [
-    { id: 'hero', label: 'Évasion', number: '01', isDark: true },
-    { id: 'dashboard', label: 'Pilotage', number: '02', isDark: false },
-    { id: 'esprit-club', label: 'L\'Esprit', number: '03', isDark: false },
-    { id: 'focus', label: 'Les Focus', number: '04', isDark: true },
-    { id: 'agenda', label: 'Agenda', number: '05', isDark: false },
-    { id: 'institution', label: 'Académie', number: '06', isDark: false },
-    { id: 'pedagogie', label: 'Apprendre', number: '07', isDark: true },
-    { id: 'dico-parents', label: 'Le Dico', number: '08', isDark: false },
-    { id: 'immersion', label: 'Immersion', number: '09', isDark: false }
-];
+    { id: 'hero', label: 'Évasion', isDark: true },
+    { id: 'dashboard', label: 'Pilotage', isDark: false },
+    { id: 'trouver', label: 'Activités', isDark: false },
+    { id: 'decouvrir', label: 'L\'Esprit', isDark: true },
+    { id: 'agenda', label: 'Agenda', isDark: false },
+    { id: 'institution', label: 'Académie', isDark: false },
+    { id: 'pedagogie', label: 'Apprendre', isDark: true },
+    { id: 'dico-parents', label: 'Le Dico', isDark: false },
+    { id: 'immersion', label: 'Immersion', isDark: false },
+    { id: 'reseau', label: 'Partenaires', isDark: false }
+].map((section, i) => ({ ...section, number: String(i + 1).padStart(2, '0') }));
 
 const PageNavigation = () => {
     const [activeSection, setActiveSection] = useState('hero');
