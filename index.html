@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Découvrir le char à voile — CNC Coutainville</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, Arial, sans-serif; --navy:#071c3c; --cream:#fff4d7; --orange:#ff683c; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; background:#071830; color:white; }
+    .presentation { width:min(100vw, 1500px); padding:clamp(0px,2vw,32px); }
+    .stage { position:relative; overflow:hidden; width:100%; aspect-ratio:16/9; min-height:520px; background:#0b50ad; border-radius:10px; box-shadow:0 30px 80px #0008; }
+    .slide { position:absolute; inset:0; opacity:0; visibility:hidden; transform:scale(1.025); transition:opacity .55s ease,transform 1.1s ease,visibility .55s; }
+    .slide.active { opacity:1; visibility:visible; transform:scale(1); z-index:1; }
+    .slide img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+    .slide::after { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,rgba(4,22,58,.86),rgba(4,22,58,.47) 33%,transparent 62%); }
+    .slide[data-align="right"]::after { background:linear-gradient(270deg,rgba(4,22,58,.83),rgba(4,22,58,.46) 35%,transparent 64%); }
+    .story { position:absolute; z-index:2; left:7%; top:12%; width:min(38%,470px); }
+    .slide[data-align="right"] .story { left:auto; right:6%; width:min(38%,490px); }
+    .eyebrow { display:inline-block; margin:0 0 30px; padding:8px 12px; border:1px solid #ffffff9c; color:white; font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+    .number { display:block; margin:0 0 12px; color:#ffd777; font-size:14px; font-weight:900; letter-spacing:.12em; }
+    h1 { margin:0 0 22px; font-size:clamp(35px,4.5vw,70px); line-height:.98; font-weight:900; letter-spacing:-.055em; text-wrap:balance; text-transform:uppercase; }
+    p { margin:0; max-width:440px; color:var(--cream); font-size:clamp(17px,1.35vw,21px); line-height:1.45; font-weight:550; }
+    .dek { display:block; max-width:470px; margin:0 0 15px; color:#fff; font-size:clamp(20px,2vw,29px); line-height:1.17; font-weight:800; }
+    h1.long { font-size:clamp(32px,4.1vw,62px); }
+    .cta { display:inline-flex; align-items:center; gap:18px; margin-top:25px; padding:13px 20px; border-radius:3px; background:#ff663d; color:#fff; font-size:14px; font-weight:850; letter-spacing:.02em; text-decoration:none; }
+    .cta:hover,.cta:focus-visible { background:#d94a24; outline:2px solid #fff; }
+    .line { display:block; width:64px; height:5px; background:var(--orange); margin:0 0 24px; }
+    .chrome { position:absolute; z-index:4; left:0; right:0; bottom:0; display:flex; align-items:center; gap:16px; padding:26px max(26px,5%); background:linear-gradient(transparent,#061b3ce8); }
+    .brand { margin-right:auto; font-size:12px; font-weight:800; letter-spacing:.13em; white-space:nowrap; text-transform:uppercase; }
+    .dots { display:flex; gap:10px; align-items:center; }
+    .dot { width:28px; height:4px; padding:0; border:0; background:#ffffff67; cursor:pointer; transition:background .2s,width .2s; }
+    .dot[aria-current="true"] { width:52px; background:#ffac48; }
+    .nav { width:46px; height:46px; display:grid; place-items:center; border:1px solid #ffffffa0; border-radius:50%; background:#09244a91; color:#fff; font-size:26px; cursor:pointer; }
+    .nav:hover,.nav:focus-visible { background:#ff683c; outline:none; }
+    .nav:disabled { opacity:.3; cursor:default; background:#09244a91; }
+    .hint { margin:14px 4px 0; color:#aebed5; font-size:13px; text-align:right; }
+    @media (max-width:700px) {
+      .presentation { padding:0; width:100%; }
+      .stage { min-height:0; height:100svh; aspect-ratio:auto; border-radius:0; }
+      .slide { display:flex; flex-direction:column; background:var(--navy); }
+      .slide img { position:relative; height:54%; object-fit:contain; object-position:center; background:#065dba; }
+      .slide::after,.slide[data-align="right"]::after { display:none; }
+      .story,.slide[data-align="right"] .story { position:relative; left:auto; right:auto; top:auto; width:auto; padding:22px 7% 100px; }
+      .eyebrow { margin-bottom:16px; font-size:10px; }
+      .number { margin-bottom:8px; }
+      h1,h1.long { font-size:clamp(31px,8vw,56px); margin-bottom:14px; }
+      .dek { font-size:19px; }
+      .dot { width:18px; } .dot[aria-current="true"] { width:30px; }
+      .nav { width:40px; height:40px; }
+      p { font-size:16px; }
+      .line { margin-bottom:14px; }
+      .chrome { padding:16px 6%; }
+      .brand { display:none; }
+      .dots { margin-right:auto; }
+      .hint { display:none; }
+    }
+    @media (prefers-reduced-motion:reduce) { .slide,.dot { transition:none; } }
+  </style>
+</head>
+<body>
+  <main class="presentation" aria-label="Découvrir le char à voile au CNC Coutainville">
+    <section class="stage" aria-roledescription="diaporama" aria-label="Une première séance de char à voile">
+      <article class="slide active" data-align="right" aria-hidden="false">
+        <img src="assets/01-avant-de-partir.webp" alt="Un moniteur présente le mât et les commandes à un pilote installé dans un char du club">
+        <div class="story">
+          <span class="eyebrow">CNC Coutainville · Char à voile</span>
+          <span class="number">01 / 05 — AVANT DE PARTIR</span>
+          <span class="line"></span>
+          <h1>Ça a l’air<br>technique.</h1>
+          <strong class="dek">Les premiers gestes sont simples.</strong>
+          <p>On prend quelques minutes pour comprendre les commandes et repérer le vent. Pas besoin d’avoir déjà piloté : le moniteur explique l’essentiel, puis on essaie.</p>
+          
+        </div>
+      </article>
+      <article class="slide" data-align="left" aria-hidden="true">
+        <img src="assets/02-premiers-metres.webp" alt="Les chars bleus du club évoluent sur la plage sous le regard du moniteur">
+        <div class="story">
+          <span class="eyebrow">CNC Coutainville · Char à voile</span>
+          <span class="number">02 / 05 — LES PREMIERS MÈTRES</span>
+          <span class="line"></span>
+          <h1>On apprend<br>en roulant.</h1>
+          
+          <p>On prend les commandes et on fait un premier aller-retour. On teste les gestes, on sent comment le char réagit. C’est en roulant que tout devient concret.</p>
+          
+        </div>
+      </article>
+      <article class="slide" data-align="left" aria-hidden="true">
+        <img src="assets/03-le-vent-prend-la-voile.webp" alt="Plusieurs pilotes en chars à voile bleus se dirigent sur la vaste plage de Coutainville">
+        <div class="story">
+          <span class="eyebrow">CNC Coutainville · Char à voile</span>
+          <span class="number">03 / 05 — LE VENT PREND LA VOILE</span>
+          <span class="line"></span>
+          <h1>On ajuste.<br>Le char répond.</h1>
+          
+          <p>La voile se remplit, le char accélère. On corrige sa trajectoire et l’on comprend vite le lien entre le vent, la voile et le mouvement.</p>
+          
+        </div>
+      </article>
+      <article class="slide" data-align="right" aria-hidden="true">
+        <img src="assets/04-ca-file.webp" alt="Vue embarquée depuis un char du club avec deux autres chars devant sur la plage">
+        <div class="story">
+          <span class="eyebrow">CNC Coutainville · Char à voile</span>
+          <span class="number">04 / 05 — ET LÀ, ÇA FILE</span>
+          <span class="line"></span>
+          <h1 class="long">La plage s’ouvre.<br>Le char glisse.</h1>
+          
+          <p>Les premières consignes laissent place aux sensations : le vent tire dans la voile, le sable défile et l’on prend de la vitesse — quand les conditions le permettent.</p>
+          
+        </div>
+      </article>
+      <article class="slide" data-align="left" aria-hidden="true">
+        <img src="assets/05-on-prend-le-coup.webp" alt="Plusieurs chars du club roulent sur la plage en fin de journée">
+        <div class="story">
+          <span class="eyebrow">CNC Coutainville · Char à voile</span>
+          <span class="number">05 / 05 — ON PREND LE COUP</span>
+          <span class="line"></span>
+          <h1>On prend<br>le coup.</h1>
+          <strong class="dek">Les gestes deviennent naturels. On ose aller plus loin.</strong>
+          <p>À chaque passage, on pilote plus facilement. Le regard porte plus loin, la trajectoire devient plus fluide et l’on profite pleinement de la glisse.</p>
+          <a class="cta" href="https://www.cncoutainville.fr/activites/char-a-voile">Découvrir une séance <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+      <div class="chrome">
+        <span class="brand">Club Nautique de Coutainville</span>
+        <div class="dots" aria-label="Choisir une scène">
+          <button class="dot" type="button" aria-label="Scène 1" aria-current="true"></button>
+          <button class="dot" type="button" aria-label="Scène 2" aria-current="false"></button>
+          <button class="dot" type="button" aria-label="Scène 3" aria-current="false"></button>
+          <button class="dot" type="button" aria-label="Scène 4" aria-current="false"></button>
+          <button class="dot" type="button" aria-label="Scène 5" aria-current="false"></button>
+        </div>
+        <button class="nav prev" type="button" aria-label="Scène précédente" disabled>‹</button>
+        <button class="nav next" type="button" aria-label="Scène suivante">›</button>
+      </div>
+    </section>
+    <p class="hint">Navigation au clavier : flèches gauche et droite. Le défilement reste manuel pour laisser le temps de lire.</p>
+  </main>
+  <script>
+    const slides=[...document.querySelectorAll('.slide')];
+    const dots=[...document.querySelectorAll('.dot')];
+    const prev=document.querySelector('.prev');
+    const next=document.querySelector('.next');
+    let active=0;
+    function show(index){
+      active=Math.max(0,Math.min(slides.length-1,index));
+      slides.forEach((slide,i)=>{slide.classList.toggle('active',i===active);slide.setAttribute('aria-hidden',String(i!==active));});
+      dots.forEach((dot,i)=>dot.setAttribute('aria-current',String(i===active)));
+      prev.disabled=active===0;next.disabled=active===slides.length-1;
+    }
+    prev.addEventListener('click',()=>show(active-1));
+    next.addEventListener('click',()=>show(active+1));
+    dots.forEach((dot,i)=>dot.addEventListener('click',()=>show(i)));
+    addEventListener('keydown',event=>{if(event.key==='ArrowRight')show(active+1);if(event.key==='ArrowLeft')show(active-1);});
+    let touchX=null;
+    document.querySelector('.stage').addEventListener('touchstart',e=>{touchX=e.touches[0].clientX;},{passive:true});
+    document.querySelector('.stage').addEventListener('touchend',e=>{if(touchX===null)return;const dx=e.changedTouches[0].clientX-touchX;if(Math.abs(dx)>55)show(active+(dx<0?1:-1));touchX=null;},{passive:true});
+  </script>
+</body>
+</html>

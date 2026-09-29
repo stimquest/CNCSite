@@ -1,6 +1,8 @@
 import React from 'react';
 import { client, queries } from '@/lib/sanity';
 import CharPlanningPublic from '@/components/char/CharPlanningPublic';
+import CharStorySlideshow from '@/components/char/CharStorySlideshow';
+import { PageHero } from '@/components/PageHero';
 import { Metadata } from 'next';
 import { User, ShieldCheck, Footprints, Wind } from 'lucide-react';
 
@@ -28,15 +30,7 @@ export default async function CharAVoilePlanningPage() {
     const phoneNumber = process.env.NEXT_PUBLIC_CLUB_PHONE?.trim() || '02 33 47 14 81';
 
     // Extraction des données Sanity avec fallbacks robustes
-    const hero = pageData?.hero || {
-        tag: '🏁 Char à Voile',
-        title: 'Sensations de glisse sur le sable',
-        description: 'Découvrez le char à voile à Agon-Coutainville, dans la Manche (Cotentin). Activité encadrée par l\'École Française de Char à Voile.'
-    };
-
-    const media = pageData?.media || {
-        videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?controls=0&mute=1&autoplay=1&loop=1'
-    };
+    const heroTag = 'Dès 8 ans · Tous niveaux';
 
     const practicalInfos = pageData?.practicalInfos || {
         ageMin: 'À partir de 8 ans.',
@@ -57,56 +51,26 @@ export default async function CharAVoilePlanningPage() {
 
     return (
         <main className="min-h-screen bg-slate-50 pb-24">
-            {/* HERO ORIGINAL CNC */}
-            <section className="relative bg-abysse overflow-hidden py-24 pb-32">
-                <div className="absolute inset-0 opacity-10"
-                    style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }}
-                />
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center">
-                    <span className="inline-block bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">
-                        {hero.tag}
-                    </span>
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase italic text-white tracking-tighter leading-tight mb-4">
-                        {hero.title}
-                    </h1>
-                    <p className="text-white/80 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mx-auto">
-                        {hero.description}
-                    </p>
-                </div>
-            </section>
+            <PageHero
+                image="/images/imgBank/Char001.jpg"
+                imageAlt="Des chars à voile aux voiles rouges sur la plage sous un grand ciel bleu"
+                tagIcon={<Wind size={14} />}
+                tagText={heroTag}
+                title="Char à voile"
+                subtitle="sur la plage de Coutainville."
+                description="Découvrez les sensations de la glisse sur le sable, accompagné par nos moniteurs. Consultez les créneaux et préparez votre prochaine séance."
+                size="default"
+                headingSize="compact"
+                bottomColor="slate"
+            />
 
-            {/* Layout Principal : Colonnes Gauche (Médias/Infos) / Droite (Calendrier) */}
-            <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 -mt-16 md:-mt-20 relative z-10 flex flex-col gap-10">
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 xl:gap-10">
+            {/* Déroulé de la séance, informations et calendrier */}
+            <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12 flex flex-col gap-10">
+                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-8 lg:gap-10">
                     
-                    {/* COLONNE GAUCHE (7/12) : Vidéo, Infos, FAQ */}
-                    <div className="xl:col-span-7 flex flex-col gap-8 order-2 xl:order-1">
-                        
-                        {/* Média Bento : Vidéo intégrée depuis Sanity */}
-                        {media.videoUrl && (
-                            <div className="w-full aspect-video bg-slate-900 rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden relative group">
-                                <iframe 
-                                    className="w-full h-full object-cover" 
-                                    src={(() => {
-                                        const url = media.videoUrl;
-                                        if (!url) return '';
-                                        // Parser YouTube
-                                        const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/);
-                                        if (ytMatch && ytMatch[1]) return `https://www.youtube.com/embed/${ytMatch[1]}?controls=1&rel=0`;
-                                        // Parser Vimeo
-                                        const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?([0-9]+)/);
-                                        if (vimeoMatch && vimeoMatch[1]) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-                                        return url;
-                                    })()}
-                                    title="Vidéo Char à Voile"
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                />
-                                {/* Voile assombrissant léger pour l'intégration UX */}
-                                <div className="absolute inset-0 bg-black/5 pointer-events-none" />
-                            </div>
-                        )}
+                    {/* COLONNE GAUCHE : Diaporama, Infos, FAQ */}
+                    <div className="min-w-0 flex flex-col gap-8 order-2 lg:order-1">
+                        <CharStorySlideshow />
 
                         {/* Infos pratiques avec icônes Lucide */}
                         <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 p-8 space-y-6">
@@ -169,9 +133,9 @@ export default async function CharAVoilePlanningPage() {
 
                     </div>
 
-                    {/* COLONNE DROITE (5/12) : Calendrier (Sticky sur Desktop) */}
-                    <div className="xl:col-span-5 relative order-1 xl:order-2">
-                        <div className="xl:sticky xl:top-8 w-full flex flex-col gap-6">
+                    {/* COLONNE DROITE : Calendrier (Sticky sur Desktop) */}
+                    <div id="reservations" className="min-w-0 relative order-1 lg:order-2 scroll-mt-24">
+                        <div className="lg:sticky lg:top-8 w-full flex flex-col gap-6">
                             <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 p-6 md:p-8 w-full">
                                 {/* Composant principal (Calendrier) */}
                                 <CharPlanningPublic sessions={sessions} phoneNumber={phoneNumber} />

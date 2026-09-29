@@ -1,0 +1,108 @@
+.frame {
+    position: relative;
+    min-width: 0;
+    z-index: 1;
+}
+
+.stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 2rem;
+    background: #071c3c;
+    color: #fff;
+    box-shadow: 0 20px 36px rgba(15, 23, 42, .13);
+    isolation: isolate;
+    container-type: inline-size;
+    transform-origin: right center;
+    transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+    .frame:hover { z-index: 10; }
+}
+
+@media (max-width: 1023px), (hover: none), (pointer: coarse) {
+    .stage { transform: none !important; }
+}
+
+.stage:focus-visible { outline: 3px solid #ffac48; outline-offset: 4px; }
+.slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transform: scale(1.015); transition: opacity .45s ease, transform .8s ease, visibility .45s; }
+.active { opacity: 1; visibility: visible; transform: scale(1); z-index: 1; }
+.photo { position: absolute; inset: 0; }
+.image { object-fit: cover; }
+.photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(4,22,58,.9), rgba(4,22,58,.67) 39%, transparent 75%); }
+.right .photo::after { background: linear-gradient(270deg, rgba(4,22,58,.9), rgba(4,22,58,.67) 39%, transparent 75%); }
+.story { position: absolute; z-index: 1; top: 9%; left: 6%; width: 48%; }
+.right .story { left: auto; right: 6%; }
+.headingRow { display: flex; align-items: center; gap: 10px; margin-bottom: 13px; }
+.step { flex: none; color: #ffd777; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+.step span { padding: 0 2px; opacity: .7; }
+.rule { width: 28px; height: 3px; background: #ff683c; }
+.title { margin: 0 0 12px; font-size: clamp(25px, 2.9vw, 38px); line-height: 1; font-weight: 900; letter-spacing: -.05em; text-wrap: balance; }
+.description { margin: 0; color: #fff5dc; font-size: clamp(13px, 1.2vw, 16px); line-height: 1.38; font-weight: 550; text-wrap: pretty; }
+.tip { margin: 14px 0 0; padding-left: 11px; border-left: 3px solid #ff683c; color: #fff; font-size: clamp(12px, 1.05vw, 14px); line-height: 1.35; font-weight: 650; }
+.tipLabel { display: block; margin-bottom: 3px; color: #ffd777; font-size: 9px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.controls { position: absolute; z-index: 2; right: 0; bottom: 0; left: 0; height: 56px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 0 6%; background: linear-gradient(transparent, rgba(4,22,58,.9)); }
+.dots { display: flex; align-items: center; gap: 6px; }
+.dot { width: 28px; height: 28px; padding: 0; border: 0; border-bottom: 3px solid rgba(255,255,255,.55); background: transparent; color: rgba(255,255,255,.8); font-size: 10px; font-weight: 800; font-variant-numeric: tabular-nums; cursor: pointer; transition: color .2s, border-color .2s; }
+.dot.current { border-color: #ffac48; color: #fff; }
+.dot { position: relative; }
+.dot:has(.tempo) { border-bottom-color: rgba(255,255,255,.3); }
+.tempo { position: absolute; left: 0; right: 0; bottom: -3px; height: 3px; background: #ffac48; transform-origin: left; animation: slideTempo linear both; pointer-events: none; }
+@keyframes slideTempo { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.dot:hover { color: #fff; border-color: #ffac48; }
+.dot:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.nav { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid rgba(255,255,255,.7); border-radius: 50%; background: rgba(7,28,60,.45); color: #fff; cursor: pointer; transition: background .2s, transform .2s; }
+.nav:hover:not(:disabled) { background: #e9663e; }
+.nav:active:not(:disabled) { transform: scale(.96); }
+.nav:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.nav:disabled { opacity: .35; cursor: default; }
+
+@container (max-width: 620px) {
+    .story { top: 6%; left: 5%; width: 68%; }
+    .right .story { left: auto; right: 5%; }
+    .headingRow { gap: 6px; margin-bottom: 6px; }
+    .step { font-size: 9px; letter-spacing: .03em; }
+    .rule { width: 18px; height: 2px; }
+    .title { margin-bottom: 6px; font-size: clamp(19px, 4.4cqw, 26px); }
+    .description { font-size: clamp(10px, 2.3cqw, 13px); line-height: 1.25; }
+    .tip { margin-top: 7px; padding-left: 7px; border-left-width: 2px; font-size: clamp(9px, 2cqw, 11px); line-height: 1.2; }
+    .tipLabel { display: inline; margin: 0; font-size: inherit; letter-spacing: 0; text-transform: none; }
+    .tipLabel::after { content: ' · '; }
+    .controls { height: 38px; padding: 0 5%; }
+    .dots { gap: 3px; }
+    .dot { width: 20px; height: 22px; border-bottom-width: 2px; font-size: 8px; }
+    .tempo { bottom: -2px; height: 2px; }
+    .nav { width: 27px; height: 27px; }
+    .nav svg { width: 16px; height: 16px; }
+}
+
+@media (max-width: 767px) {
+    .stage { height: calc(56.25vw + 320px); aspect-ratio: auto; border-radius: 1.25rem; }
+    .slide { inset: 0 0 46px; display: flex; flex-direction: column; }
+    .photo { position: relative; width: 100%; aspect-ratio: 16 / 9; flex: none; }
+    .photo::after, .right .photo::after { display: none; }
+    .story, .right .story { position: relative; top: auto; right: auto; left: auto; width: 100%; flex: 1; padding: 20px 6% 12px; background: #071c3c; }
+    .headingRow { gap: 8px; margin-bottom: 10px; }
+    .step { font-size: 10px; letter-spacing: .05em; }
+    .rule { width: 24px; height: 2px; }
+    .title { margin-bottom: 9px; font-size: clamp(22px, 5.5vw, 29px); line-height: 1.02; }
+    .description { font-size: 14px; line-height: 1.4; }
+    .tip { margin-top: 13px; padding-left: 9px; border-left-width: 2px; font-size: 12px; line-height: 1.35; }
+    .tipLabel { display: inline; margin: 0; font-size: inherit; letter-spacing: 0; text-transform: none; }
+    .tipLabel::after { content: ' · '; }
+    .controls { height: 46px; gap: 8px; padding: 0 6%; background: #071c3c; }
+    .dots { gap: 4px; }
+    .dot { width: 23px; height: 25px; border-bottom-width: 2px; font-size: 9px; }
+    .tempo { bottom: -2px; height: 2px; }
+    .nav { width: 29px; height: 29px; }
+    .nav svg { width: 17px; height: 17px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tempo { animation-timing-function: steps(4, end); }
+    .stage { transform: none !important; transition: none; }
+    .slide, .dot, .nav { transition: none; }
+}

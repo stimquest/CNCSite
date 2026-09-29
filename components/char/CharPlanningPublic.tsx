@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Phone, Monitor } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Phone, Monitor, CalendarDays } from 'lucide-react';
 
 interface CharSessionPublic {
     _id: string;
@@ -103,9 +103,13 @@ function PhoneCallCta({ phoneNumber, label = 'Appeler pour réserver', size = 'l
 
 export default function CharPlanningPublic({ sessions, phoneNumber = '02 33 47 14 81' }: Props) {
     const now = new Date();
-    const [currentYear, setCurrentYear] = useState(now.getFullYear());
-    const [currentMonth, setCurrentMonth] = useState(now.getMonth());
-    const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const todayIso = toIso(now);
+    const upcomingDates = useMemo(() => [...new Set(sessions.map(s => s.date))]
+        .filter(date => date >= todayIso).sort(), [sessions, todayIso]);
+    const firstDate = upcomingDates[0];
+    const [currentYear, setCurrentYear] = useState(() => firstDate ? Number(firstDate.slice(0, 4)) : now.getFullYear());
+    const [currentMonth, setCurrentMonth] = useState(() => firstDate ? Number(firstDate.slice(5, 7)) - 1 : now.getMonth());
+    const [selectedDate, setSelectedDate] = useState<string | null>(() => firstDate ?? null);
 
     const sessionsByDate = useMemo(() => {
         const map: Record<string, CharSessionPublic[]> = {};
@@ -113,28 +117,32 @@ export default function CharPlanningPublic({ sessions, phoneNumber = '02 33 47 1
             if (!map[s.date]) map[s.date] = [];
             map[s.date].push(s);
         }
+        Object.values(map).forEach(daySessions => daySessions.sort((a, b) => a.heureDebut.localeCompare(b.heureDebut)));
         return map;
     }, [sessions]);
 
     const selectedSessions = selectedDate ? (sessionsByDate[selectedDate] ?? []) : [];
-    const todayIso = toIso(now);
     const calendarDays = getCalendarDays(currentYear, currentMonth);
+    const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+    const monthDates = upcomingDates.filter(date => date.startsWith(monthPrefix));
+    const nextScheduledDate = upcomingDates.find(date => date.slice(0, 7) > monthPrefix);
 
-    const prevMonth = () => {
-        if (currentMonth === 0) { setCurrentYear(y => y - 1); setCurrentMonth(11); }
-        else setCurrentMonth(m => m - 1);
-        setSelectedDate(null);
+    const showMonth = (offset: number) => {
+        const date = new Date(currentYear, currentMonth + offset, 1);
+        const prefix = toIso(date).slice(0, 7);
+        setCurrentYear(date.getFullYear());
+        setCurrentMonth(date.getMonth());
+        setSelectedDate(upcomingDates.find(day => day.startsWith(prefix)) ?? null);
     };
-    const nextMonth = () => {
-        if (currentMonth === 11) { setCurrentYear(y => y + 1); setCurrentMonth(0); }
-        else setCurrentMonth(m => m + 1);
-        setSelectedDate(null);
+    const jumpToDate = (date: string) => {
+        setCurrentYear(Number(date.slice(0, 4)));
+        setCurrentMonth(Number(date.slice(5, 7)) - 1);
+        setSelectedDate(date);
     };
 
     const getAvailability = (session: CharSessionPublic) => {
-        const remaining = session.capaciteMax - (session.placesReservees ?? 0);
-        if ((session.placesReservees ?? 0) >= session.capaciteMax * 0.6) return { label: 'Très demandé', color: 'bg-amber-400', textColor: 'text-amber-600', badgeColor: 'bg-amber-100 text-amber-700 border-amber-200', remaining };
-        return { label: 'Disponible', color: 'bg-emerald-500', textColor: 'text-emerald-600', badgeColor: 'bg-emerald-100 text-emerald-700 border-emerald-200', remaining };
+        if ((session.placesReservees ?? 0) >= session.capaciteMax * 0.6) return { label: 'Très demandé', badgeColor: 'bg-amber-100 text-amber-800 border-amber-200' };
+        return { label: 'Disponible', badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
     };
 
     return (
@@ -145,26 +153,50 @@ export default function CharPlanningPublic({ sessions, phoneNumber = '02 33 47 1
                     Planning Char à Voile
                 </h2>
                 <p className="text-sm text-slate-500 mt-1">
-                    Consultez les créneaux disponibles et appelez-nous pour réserver.
+                    Choisissez un jour coloré pour voir les horaires, puis appelez-nous pour réserver.
                 </p>
             </div>
 
             {/* CTA téléphone — adaptatif mobile/desktop */}
             <PhoneCallCta phoneNumber={phoneNumber} size="lg" />
 
+            {firstDate && (
+                <button type="button" onClick={() => jumpToDate(firstDate)} className="w-full flex items-center gap-3 rounded-2xl bg-abysse px-4 py-3 text-left text-white hover:bg-abysse/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
+                    <CalendarDays size={22} className="shrink-0 text-turquoise" aria-hidden="true" />
+                    <span className="flex-1">
+                        <span className="block text-[10px] uppercase tracking-wider text-white/70 font-bold">Prochaine séance</span>
+                        <span className="block text-sm font-bold">{new Date(`${firstDate}T12:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                    </span>
+                    <ChevronRight size={18} aria-hidden="true" />
+                </button>
+            )}
+
             {/* CALENDAR VIEW */}
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                    <button onClick={prevMonth} className="p-2 hover:bg-white rounded-xl transition-all text-slate-400 hover:text-abysse">
+                    <button type="button" aria-label="Mois précédent" onClick={() => showMonth(-1)} className="p-2 hover:bg-white rounded-xl transition-all text-slate-400 hover:text-abysse">
                         <ChevronLeft size={18} />
                     </button>
                     <h3 className="font-black text-sm uppercase tracking-widest text-abysse">
                         {MONTHS_FR[currentMonth]} {currentYear}
                     </h3>
-                    <button onClick={nextMonth} className="p-2 hover:bg-white rounded-xl transition-all text-slate-400 hover:text-abysse">
+                    <button type="button" aria-label="Mois suivant" onClick={() => showMonth(1)} className="p-2 hover:bg-white rounded-xl transition-all text-slate-400 hover:text-abysse">
                         <ChevronRight size={18} />
                     </button>
                 </div>
+
+                {monthDates.length === 0 && (
+                    <div className="px-5 py-4 bg-slate-50 border-b border-slate-200" role="status">
+                        <p className="text-sm font-bold text-abysse">Aucune séance à venir en {MONTHS_FR[currentMonth].toLowerCase()}.</p>
+                        {nextScheduledDate ? (
+                            <button type="button" onClick={() => jumpToDate(nextScheduledDate)} className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-orange-700 underline underline-offset-4">
+                                Voir les prochaines séances <ChevronRight size={15} aria-hidden="true" />
+                            </button>
+                        ) : (
+                            <p className="mt-1 text-xs leading-relaxed text-slate-500">Appelez-nous pour connaître les prochaines possibilités.</p>
+                        )}
+                    </div>
+                )}
 
                 <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/30">
                     {DAYS_SHORT.map(d => (
@@ -174,7 +206,7 @@ export default function CharPlanningPublic({ sessions, phoneNumber = '02 33 47 1
 
                 <div className="grid grid-cols-7">
                     {calendarDays.map((day, idx) => {
-                        if (!day) return <div key={idx} className="h-14 border-b border-r border-slate-50 last:border-r-0 bg-slate-50/20" />;
+                        if (!day) return <div key={idx} className="min-h-[62px] bg-slate-50/40" />;
 
                         const iso = toIso(day);
                         const daySessions = sessionsByDate[iso] ?? [];
@@ -187,43 +219,42 @@ export default function CharPlanningPublic({ sessions, phoneNumber = '02 33 47 1
                         return (
                             <button
                                 key={idx}
-                                onClick={() => hasSession && !isPast ? setSelectedDate(isSelected ? null : iso) : undefined}
-                                className={`h-14 flex flex-col items-center justify-center relative border-b border-r border-slate-50 last:border-r-0 transition-all
-                                    ${isPast ? 'opacity-30 cursor-default' : ''}
-                                    ${hasSession && !isPast ? 'cursor-pointer hover:bg-orange-50/50' : 'cursor-default'}
-                                    ${isSelected ? 'bg-orange-50 ring-2 ring-inset ring-orange-300' : ''}
+                                type="button"
+                                disabled={!hasSession || isPast}
+                                aria-pressed={isSelected}
+                                aria-label={`${day.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} : ${isPast ? 'date passée' : hasSession ? `séance prévue${anyHigh ? ', très demandé' : ', disponible'}` : 'aucune séance'}${isToday ? ', aujourd’hui' : ''}`}
+                                onClick={() => setSelectedDate(iso)}
+                                className={`min-h-[62px] m-0.5 rounded-lg flex flex-col gap-1 items-center justify-center relative transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-abysse
+                                    ${hasSession && !isPast ? anyHigh ? 'bg-amber-100 text-amber-900 hover:bg-amber-200' : 'bg-emerald-100 text-emerald-900 hover:bg-emerald-200' : isPast ? 'text-slate-300' : 'text-slate-400'}
+                                    ${isSelected ? 'ring-2 ring-inset ring-abysse' : ''}
                                 `}
                             >
-                                <span className={`text-sm font-bold leading-none mb-1
-                                    ${isToday ? 'text-orange-500' : isPast ? 'text-slate-300' : 'text-slate-700'}
-                                    ${isSelected ? 'text-orange-600 font-black' : ''}
-                                `}>
+                                <span className={`text-sm font-extrabold leading-none ${isToday ? 'underline decoration-orange-500 decoration-2 underline-offset-4' : ''}`}>
                                     {day.getDate()}
                                 </span>
                                 {hasSession && !isPast && (
-                                    <span className={`w-5 h-1.5 rounded-full ${anyHigh ? 'bg-amber-400' : 'bg-emerald-500'}`} />
+                                    <span className="text-[9px] font-bold leading-none">{anyHigh ? 'Demandé' : 'Séance'}</span>
                                 )}
                             </button>
                         );
                     })}
                 </div>
 
-                <div className="flex items-center gap-4 px-6 py-3 border-t border-slate-100 bg-slate-50/30">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">Légende :</span>
-                    <span className="flex items-center gap-1.5 text-[10px] text-slate-500"><span className="w-3 h-1 rounded-full bg-emerald-500 inline-block"></span>Disponible</span>
-                    <span className="flex items-center gap-1.5 text-[10px] text-slate-500"><span className="w-3 h-1 rounded-full bg-amber-400 inline-block"></span>Très demandé</span>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 border-t border-slate-100 bg-slate-50/30">
+                    <span className="flex items-center gap-1.5 text-[11px] text-slate-600"><span className="w-3 h-3 rounded-sm bg-emerald-100 border border-emerald-300 inline-block" aria-hidden="true" />Disponible</span>
+                    <span className="flex items-center gap-1.5 text-[11px] text-slate-600"><span className="w-3 h-3 rounded-sm bg-amber-100 border border-amber-300 inline-block" aria-hidden="true" />Très demandé</span>
                 </div>
 
                 {selectedDate && selectedSessions.length > 0 && (
-                    <div className="border-t border-slate-100 p-5 md:p-6 bg-orange-50/30 animate-in fade-in slide-in-from-top-1">
+                    <div className="border-t border-slate-100 p-4 bg-slate-50" aria-live="polite" aria-atomic="true">
                         <p className="text-[10px] font-black uppercase text-orange-600 tracking-wider mb-3">
-                            {new Date(selectedDate).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                            Horaires du {new Date(`${selectedDate}T12:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
                         </p>
                         <div className="space-y-2">
                             {selectedSessions.map(s => {
                                 const avail = getAvailability(s);
                                 return (
-                                    <div key={s._id} className="flex items-center justify-between bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+                                    <div key={s._id} className="flex flex-wrap gap-2 items-center justify-between bg-white rounded-xl p-3 border border-slate-200">
                                         <span className="block font-black text-abysse text-sm">
                                             🕐 {s.heureDebut} — {s.heureFin}
                                         </span>

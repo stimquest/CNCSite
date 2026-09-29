@@ -22,6 +22,8 @@ interface PageHeroProps {
     children?: React.ReactNode;
     /** Height variant */
     size?: 'default' | 'compact';
+    /** Typography variant, independent from hero height */
+    headingSize?: 'default' | 'compact';
     /** Color the bottom fades into */
     bottomColor?: 'white' | 'slate';
 }
@@ -36,11 +38,15 @@ export const PageHero: React.FC<PageHeroProps> = ({
     description,
     children,
     size = 'default',
+    headingSize = size,
     bottomColor = 'white',
 }) => {
     const heightClass = size === 'compact'
         ? 'h-[55vh] min-h-[450px]'
         : 'h-[80vh] min-h-[600px]';
+    const titleSizeClass = headingSize === 'compact'
+        ? 'text-3xl md:text-5xl lg:text-6xl'
+        : 'text-5xl md:text-8xl lg:text-9xl';
 
     const bottomColorHex = bottomColor === 'slate' ? '#f8fafc' : '#ffffff';
 
@@ -78,7 +84,7 @@ export const PageHero: React.FC<PageHeroProps> = ({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-8xl lg:text-9xl text-white leading-[0.8] mb-12"
+                        className={`${titleSizeClass} text-white leading-[0.8] mb-12`}
                     >
                         {title} <br />
                         <span className="text-transparent bg-clip-text bg-linear-to-r from-turquoise to-white">

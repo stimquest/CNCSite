@@ -65,7 +65,13 @@ export const Header: React.FC<HeaderProps> = () => {
         { label: 'Planning & Dispos', href: '/ecole-voile#planning' },
       ]
     },
-    { label: 'Les Activités', href: '/activites' },
+    {
+      label: 'Les Activités',
+      subItems: [
+        { label: 'Char à voile', href: '/activites/char-a-voile' },
+        { label: 'Toutes les activités', href: '/activites' },
+      ]
+    },
     {
       label: 'Groupes',
       href: '/groupes-entreprises',
@@ -86,6 +92,7 @@ export const Header: React.FC<HeaderProps> = () => {
 
   const isActive = (href: string) => {
     if (!pathname) return false;
+    if (href === '/activites') return pathname === '/activites';
     if (href === '/' && pathname === '/') return true;
     if (href !== '/' && pathname.startsWith(href)) return true;
     return false;
@@ -185,6 +192,15 @@ export const Header: React.FC<HeaderProps> = () => {
                 className="relative h-16 flex items-center"
                 onMouseEnter={() => group.subItems && handleMouseEnter(group.label)}
                 onMouseLeave={handleMouseLeave}
+                onBlur={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget)) setActiveDropdown(null);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') {
+                    setActiveDropdown(null);
+                    event.currentTarget.querySelector('button')?.focus();
+                  }
+                }}
               >
                 {group.href ? (
                   <Link
@@ -198,6 +214,12 @@ export const Header: React.FC<HeaderProps> = () => {
                   </Link>
                 ) : (
                   <button
+                    type="button"
+                    aria-expanded={activeDropdown === group.label}
+                    onClick={() => {
+                      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                      setActiveDropdown((current) => current === group.label ? null : group.label);
+                    }}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${
                       isGroupActive(group) ? 'text-turquoise' : 'text-abysse hover:bg-slate-50'
                     }`}
