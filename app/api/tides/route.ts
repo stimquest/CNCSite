@@ -10,8 +10,9 @@ const WORLDTIDES_API_KEY = process.env.WORLDTIDES_API_KEY?.trim();
 const LAT = 49.017;
 const LON = -1.55;
 
-// Cache de 5 jours (432 000s) pour optimiser les crédits WorldTides
-export const revalidate = 86400; // Aligné sur 24h pour plus de sécurité
+// Les prévisions astronomiques sont stables : on conserve la réponse complète
+// de 7 jours. La route reste dynamique pour actualiser les coefficients locaux.
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -31,7 +32,7 @@ export async function GET() {
     const url = `https://www.worldtides.info/api/v3?heights&extremes&lat=${LAT}&lon=${LON}&key=${WORLDTIDES_API_KEY}&days=7&datum=CD&step=900`;
 
     const response = await fetch(url, {
-      next: { revalidate: 86400 } // Cache 24h même en cas de succès
+      next: { revalidate: 604800 } // Cache WorldTides pendant 7 jours
     });
 
     if (!response.ok) {

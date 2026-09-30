@@ -6,11 +6,36 @@ export interface TideWindow {
     peak: { time: number, height: number };
 }
 
+// Regnéville level used as the local equivalent of the Pointe d'Agon 5 m mark.
+export const TIDE_THRESHOLD_METERS = 4.75;
+const CROSSING_WINDOW_HALF_WIDTH_MS = 10 * 60 * 1000;
+const ROUNDING_STEP_MS = 5 * 60 * 1000;
+
+export function getRoundedCrossingWindow(time: number) {
+    const roundedCenter = Math.round(time / ROUNDING_STEP_MS) * ROUNDING_STEP_MS;
+    return {
+        start: roundedCenter - CROSSING_WINDOW_HALF_WIDTH_MS,
+        end: roundedCenter + CROSSING_WINDOW_HALF_WIDTH_MS,
+    };
+}
+
+function interpolateThresholdTime(
+    before: { time: number; height: number },
+    after: { time: number; height: number },
+    threshold: number,
+) {
+    const heightRange = after.height - before.height;
+    if (heightRange === 0) return before.time;
+
+    const ratio = (threshold - before.height) / heightRange;
+    return before.time + ratio * (after.time - before.time);
+}
+
 /**
  * Calcul les créneaux de passage aux 5m (ou autre seuil)
  * Basé sur la logique validée de AgonNavigationCard
  */
-export function calculateThresholdCrossings(tides: TideData[], threshold: number = 4.70): TideWindow[] {
+export function calculateThresholdCrossings(tides: TideData[], threshold: number = TIDE_THRESHOLD_METERS): TideWindow[] {
     if (!tides || tides.length === 0) return [];
 
     // Préparation des données lissées comme sur la page Spot
@@ -31,9 +56,8 @@ export function calculateThresholdCrossings(tides: TideData[], threshold: number
         // 2. Scan arrière (Montée)
         for (let i = pmIndex - 1; i >= 0; i--) {
             if (chartData[i].height < threshold) {
-                // Le point i est sous le seuil, le point i+1 est au dessus
-                // On prend le temps du premier point au dessus
-                start = chartData[i + 1]?.time || chartData[i].time;
+                // Interpolate between adjacent samples instead of snapping to the 15-minute grid.
+                start = interpolateThresholdTime(chartData[i], chartData[i + 1], threshold);
                 break;
             }
             start = chartData[i].time;
@@ -43,7 +67,7 @@ export function calculateThresholdCrossings(tides: TideData[], threshold: number
         // 3. Scan avant (Descente)
         for (let i = pmIndex + 1; i < chartData.length; i++) {
             if (chartData[i].height < threshold) {
-                end = chartData[i - 1]?.time || chartData[i].time;
+                end = interpolateThresholdTime(chartData[i - 1], chartData[i], threshold);
                 break;
             }
             end = chartData[i].time;

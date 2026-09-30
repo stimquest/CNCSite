@@ -79,8 +79,23 @@ export const queries = {
   merchItems: `*[_type == "merchItem"] {
     _id, name, price, description, category, badge, "image": image.asset->url
   }`,
+  adminMerchItems: `*[_type == "merchItem"] | order(name asc) {
+    _id, _type, name, price, description, category, badge,
+    "image": image.asset->url, "imageAssetId": image.asset._ref,
+    "hoverImage": hoverImage.asset->url, "hoverImageAssetId": hoverImage.asset._ref
+  }`,
   occazItems: `*[_type == "occazItem"] {
     _id, name, price, condition, year, description, "image": image.asset->url
+  }`,
+  adminOccazItems: `*[_type == "occazItem"] | order(name asc) {
+    _id, _type, name, price, condition, year, description,
+    "image": image.asset->url, "imageAssetId": image.asset._ref
+  }`,
+  adminSignageSlides: `*[_type == "signageSlide"] | order(order asc, title asc) {
+    _id, _type, title, type, "duration": coalesce(duration, 15000), "order": coalesce(order, 0), isActive,
+    promoContent { tag, title, description, showQrCode, "image": image.asset->url, "imageAssetId": image.asset._ref },
+    partnersContent { title, list[] { _key, name, "logo": logo.asset->url, "logoAssetId": logo.asset._ref } },
+    infoContent { title, message, category }
   }`,
   infoMessages: `*[_type == "infoMessage" && (!defined(expiresAt) || expiresAt > now())] | order(isPinned desc, publishedAt desc)[0...50] {
     _id, title, content, category, isPinned, targetGroups, externalLink, publishedAt, expiresAt

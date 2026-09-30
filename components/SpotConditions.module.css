@@ -1,0 +1,131 @@
+.pageContent { max-width: 1400px; margin: 0 auto; padding: 28px 32px 88px; color: #002b49; }
+.weather { min-width: 0; font-variant-numeric: tabular-nums; }
+.overview { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.webcam { min-width: 0; }
+.webcamHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.webcamHeader h2 { font-size: 22px; margin: 0; padding: 0; letter-spacing: -.04em; }
+.liveLabel { display: inline-flex; align-items: center; gap: 7px; color: #527081; font-size: 12px; font-weight: 600; }
+.liveLabel::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #00a9ce; }
+.video { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 20px; background: #002b49; box-shadow: 0 12px 30px -20px #002b4966; }
+.video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.webcamCaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 12px; color: #607687; font-size: 12px; }
+.webcamCaption a { color: #007e9b; text-decoration: underline; text-underline-offset: 3px; }
+.summary { min-width: 0; padding: 16px 0 0 28px; border-left: 1px solid #dce6ec; }
+.eyebrow { display: flex; align-items: center; gap: 8px; color: #007e9b; font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; margin: 0 0 12px; }
+.summaryTitle { font-size: clamp(23px, 2.25vw, 32px); margin: 0 0 10px; line-height: 1.12; padding: 0; }
+.muted { color: #607687; font-size: 12px; margin: 0; }
+.windReading { display: flex; align-items: center; gap: 26px; margin: 18px 0; }
+.windReading > strong { font-size: clamp(42px, 4.5vw, 64px); line-height: 1; letter-spacing: -.06em; font-weight: 750; }
+.windReading > strong > span { margin-left: 8px; font-size: 17px; font-weight: 500; letter-spacing: 0; color: #607687; }
+.windReading > div { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #607687; }
+.windReading b { color: #002b49; }
+.direction { display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: 12px; white-space: nowrap; color: #315c70; }
+.direction svg { flex: none; color: #0086a3; }
+.metrics { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0; padding: 16px 0; border-block: 1px solid #dce6ec; gap: 12px; }
+.metrics dt { display: flex; align-items: center; gap: 6px; color: #607687; font-size: 12px; }
+.metrics dt svg { color: #0086a3; }
+.metrics dd { font-size: 23px; font-weight: 700; margin: 5px 0 0; }
+.metrics small { font-size: 13px; color: #607687; font-weight: 500; }
+.sunTimes { display: flex; flex-wrap: wrap; gap: 12px 24px; padding: 16px 0; color: #607687; font-size: 12px; }
+.sunTimes span { display: flex; align-items: center; gap: 6px; }
+.sunTimes svg { color: #bc7229; }
+.sunTimes b { color: #002b49; }
+.textLink { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 650; color: #007e9b; text-decoration: none; }
+.textLink:hover { text-decoration: underline; text-underline-offset: 4px; }
+.forecasts { margin-top: 48px; scroll-margin-top: 90px; }
+.sectionHeader { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.sectionTitle { margin: 0; padding: 0; font-size: clamp(25px, 2.7vw, 36px); }
+.sectionHeader .eyebrow { margin-bottom: 8px; }
+.updated { display: flex; align-items: center; gap: 6px; margin: 0; color: #607687; font-size: 12px; }
+.forecastPanel { background: #fff; border: 1px solid #dce6ec; border-radius: 20px; overflow: hidden; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 20px; background: #f0f5f7; border-bottom: 1px solid #e2eaee; }
+.toolbar button { border: 0; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 650; color: #496374; background: transparent; cursor: pointer; transition: background .15s, color .15s; }
+.toolbar button:hover { background: #e1ecf0; color: #002b49; }
+.toolbar .selected { background: #002b49; color: white; }
+.toolbar .selected:hover { background: #003955; color: white; }
+.chartHeading { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 24px 24px 12px; }
+.chartHeading h3 { font-family: inherit; font-style: normal; text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 700; margin: 0; padding: 0; }
+.chartHeading > div { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: #496374; }
+.chartHeading span { display: flex; align-items: center; gap: 6px; }
+.windDot, .gustDot { width: 18px; height: 0; border-top: 3px solid #009bb8; }
+.gustDot { border-top-color: #d77a37; border-top-style: dashed; }
+.chart { height: 220px; margin: 0 16px 10px; }
+.tableTools { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding: 10px 20px; border-top: 1px solid #e2eaee; color: #607687; font-size: 11px; }
+.tableTools > div { display: flex; align-items: center; gap: 10px; }
+.tableTools button { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid #dce6ec; border-radius: 7px; background: #fff; color: #002b49; cursor: pointer; }
+.tableTools button:hover { background: #eaf4f7; }
+.tableScroll { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #94b5c3 #edf3f6; }
+.table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 13px; }
+.table th, .table td { min-width: 68px; height: 44px; padding: 8px 10px; text-align: center; border-bottom: 1px solid #e5edf1; border-right: 1px solid #e5edf155; white-space: nowrap; }
+.table thead th { background: #f0f5f7; color: #315366; font-size: 12px; font-weight: 650; }
+.table td { font-weight: 650; }
+.table th:first-child { position: sticky; left: 0; z-index: 1; min-width: 128px; text-align: left; padding-left: 20px; background: #f8fafb; color: #24475b; border-right: 1px solid #dce6ec; font-size: 12px; font-weight: 650; }
+.table th small { margin-left: 7px; color: #738895; font-weight: 450; font-size: 10px; }
+.table tbody tr:hover td { box-shadow: inset 0 0 0 999px #002b4905; }
+.tableFooter { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 20px; }
+.detailsButton { border: 0; padding: 4px 0; color: #007e9b; background: none; cursor: pointer; font-size: 12px; font-weight: 650; }
+.detailsButton:hover { text-decoration: underline; text-underline-offset: 3px; }
+.scale { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: #607687; font-size: 10px; }
+.scale span { display: flex; align-items: center; gap: 5px; }
+.scale i { display: inline-block; width: 16px; height: 8px; border-radius: 2px; }
+.sources { font-size: 11px; color: #607687; margin: 12px 0 0; }
+.message { padding: 24px; font-size: 14px; color: #496374; }
+.message button { color: #007e9b; text-decoration: underline; margin-left: 8px; cursor: pointer; }
+.skeleton, .loadingChart { min-height: 160px; display: grid; place-items: center; background: #edf3f6; color: #607687; font-size: 13px; border-radius: 12px; margin-block: 16px; }
+.loadingChart { min-height: 320px; margin: 20px; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.lowerGrid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 32px; align-items: start; margin-top: 48px; }
+.tides { min-width: 0; }
+.navigation { min-width: 0; padding-top: 54px; }
+.lowerGrid:has(.navigation:empty) { grid-template-columns: minmax(0, 1fr); }
+.navigation:empty { display: none; }
+.safety { margin-top: 40px; padding-top: 28px; border-top: 1px solid #dce6ec; }
+.safetyHeader { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
+.safetyHeader h2 { font-size: 23px; margin: 0; padding: 0; }
+.emergency { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #9c3642; }
+.emergency strong { font-size: 20px; }
+.rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.rule { display: flex; gap: 12px; }
+.rule > span { color: #0086a3; font-size: 14px; font-weight: 750; }
+.rule h3 { font-family: inherit; font-size: 14px; font-style: normal; text-transform: none; letter-spacing: 0; margin: 0 0 8px; padding: 0; }
+.rule p { color: #607687; font-size: 13px; line-height: 1.65; margin: 0; }
+.weather button:focus-visible, .weather a:focus-visible, .webcam a:focus-visible, .tableScroll:focus-visible { outline: 2px solid #0086a3; outline-offset: 4px; }
+@media (max-width: 1050px) {
+    .overview { gap: 24px; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
+    .summary { padding-left: 22px; }
+    .summaryTitle { font-size: 23px; }
+    .windReading { margin-block: 14px; }
+    .windReading > strong { font-size: 46px; }
+    .metrics { gap: 8px; }
+    .metrics dt { font-size: 11px; }
+    .metrics dd { font-size: 20px; }
+}
+@media (max-width: 767px) {
+    .pageContent { padding: 20px 16px 56px; }
+    .overview, .lowerGrid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .webcamHeader h2 { font-size: 19px; }
+    .video { border-radius: 14px; }
+    .summary { padding: 20px; border: 1px solid #dce6ec; border-radius: 16px; background: #fff; }
+    .summaryTitle { font-size: 23px; }
+    .summaryTitle br { display: none; }
+    .summaryTitle br::after { content: ' '; }
+    .forecasts, .lowerGrid { margin-top: 32px; }
+    .sectionHeader { align-items: start; flex-direction: column; gap: 10px; }
+    .sectionTitle { font-size: 26px; }
+    .toolbar { display: grid; grid-template-columns: repeat(2, 1fr); padding: 10px; }
+    .toolbar button { padding: 12px 8px; font-size: 12px; }
+    .chartHeading { padding: 18px 14px 8px; flex-direction: column; align-items: start; gap: 10px; }
+    .chart { height: 185px; margin-inline: 4px; }
+    .tableTools { padding: 10px 12px; }
+    .tableTools > div > span { display: none; }
+    .table th:first-child { min-width: 108px; padding-left: 12px; }
+    .table th, .table td { min-width: 66px; }
+    .tableFooter { padding: 14px; }
+    .forecastPanel { border-radius: 16px; }
+    .rules { grid-template-columns: 1fr; gap: 20px; }
+    .navigation { padding-top: 0; }
+    .safety { margin-top: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .toolbar button { transition: none; }
+}

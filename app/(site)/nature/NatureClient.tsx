@@ -187,7 +187,7 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
                         <span className="bg-white/10 backdrop-blur-md text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-[0.25em] border border-white/20 mb-8 inline-block shadow-2xl">
                             Espace Naturel Protégé
                         </span>
-                        <h1 className="text-6xl md:text-8xl lg:text-9xl text-white drop-shadow-2xl mb-8 leading-[0.85]">
+                        <h1 className="page-hero-title text-white drop-shadow-2xl mb-8">
                             {natureData?.hero?.title || "La Pointe"}<br />
                             <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-300 to-white">
                                 d'Agon.

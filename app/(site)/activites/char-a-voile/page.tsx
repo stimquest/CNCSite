@@ -53,6 +53,7 @@ export default async function CharAVoilePlanningPage() {
         <main className="min-h-screen bg-slate-50 pb-24">
             <PageHero
                 image="/images/imgBank/Char001.jpg"
+                imagePosition="center bottom"
                 imageAlt="Des chars à voile aux voiles rouges sur la plage sous un grand ciel bleu"
                 tagIcon={<Wind size={14} />}
                 tagText={heroTag}
@@ -60,7 +61,6 @@ export default async function CharAVoilePlanningPage() {
                 subtitle="sur la plage de Coutainville."
                 description="Découvrez les sensations de la glisse sur le sable, accompagné par nos moniteurs. Consultez les créneaux et préparez votre prochaine séance."
                 size="default"
-                headingSize="compact"
                 bottomColor="slate"
             />
 

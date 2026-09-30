@@ -92,7 +92,7 @@ export const FilInfoClient: React.FC<{ infoMessages: any[] }> = ({ infoMessages 
                             <span className="text-turquoise text-[10px] font-black uppercase tracking-[0.35em]">La Vigie Direct</span>
                         </div>
                     </div>
-                    <h1 className="text-5xl md:text-7xl text-white leading-none mb-3">
+                    <h1 className="page-hero-title text-white mb-3">
                         La <span className="text-turquoise">Vigie.</span>
                     </h1>
                     <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-md">

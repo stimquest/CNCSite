@@ -28,6 +28,7 @@ import {
     X,
     CalendarClock,
     Copy,
+    Monitor,
 } from 'lucide-react';
 import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarche, ActivityType, CharWeek, CharDay, CharSession, StageDefinition, StageSlot } from '@/types';
 import { CharSessionDoc } from '@/types';
@@ -39,6 +40,8 @@ import FrenchWeekDatePicker from '@/components/admin/FrenchWeekDatePicker';
 import StagePlanningGrid from '@/components/admin/StagePlanningGrid';
 import ArticleManager from './ArticleEditor';
 import SchoolStagesEditor from '@/components/admin/SchoolStagesEditor';
+import ShopManager from '@/components/admin/ShopManager';
+import SignageManager from '@/components/admin/SignageManager';
 
 // --- CONSTANTS ---
 const ACTIVITY_OPTIONS: { label: string, value: ActivityType }[] = [
@@ -121,9 +124,12 @@ interface Props {
     agendaEvents: any[];
     articles: any[];
     infoMessages: InfoMessage[];
+    merchItems: any[];
+    occazItems: any[];
+    signageSlides: any[];
 }
 
-export default function AdminClient({ plannings, marchePlannings, charSessions, agendaEvents, articles, infoMessages }: Props) {
+export default function AdminClient({ plannings, marchePlannings, charSessions, agendaEvents, articles, infoMessages, merchItems, occazItems, signageSlides }: Props) {
     const router = useRouter();
     const refreshData = async () => {
         router.refresh();
@@ -131,7 +137,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
 
     const { stageDefinitions } = useLiveStatus();
 
-    const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'COCKPIT' | 'STAGES' | 'FICHES' | 'MARCHE' | 'AGENDA'>('DASHBOARD');
+    const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'COCKPIT' | 'STAGES' | 'FICHES' | 'MARCHE' | 'AGENDA' | 'SIGNAGE'>('DASHBOARD');
     const [isSaving, setIsSaving] = useState(false);
     const [isEditingArticle, setIsEditingArticle] = useState(false);
 
@@ -621,6 +627,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                 <button onClick={() => setActiveTab('FICHES')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'FICHES' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Fiches Stages</button>
                                 <button onClick={() => setActiveTab('MARCHE')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'MARCHE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Marche</button>
                                 <button onClick={() => setActiveTab('AGENDA')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'AGENDA' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><CalendarDays size={12}/> Blog & Agenda</button>
+                                <button onClick={() => setActiveTab('SIGNAGE')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'SIGNAGE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Monitor size={12}/> Écran</button>
                                 <button onClick={() => setActiveTab('COCKPIT')} className={`shrink-0 ml-auto md:ml-2 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'COCKPIT' ? 'bg-turquoise text-white shadow-sm' : 'bg-turquoise/10 text-turquoise hover:bg-turquoise/20'}`}>🚀 Cockpit</button>
                             </nav>
                         </div>
@@ -1076,9 +1083,13 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                     {/* TAB: FICHES STAGES (page École) */}
                     {activeTab === 'FICHES' && <SchoolStagesEditor />}
 
+                    {/* TAB: DIGITAL SIGNAGE */}
+                    {activeTab === 'SIGNAGE' && <SignageManager slides={signageSlides || []} />}
+
                     {/* TAB: AGENDA & BLOG */}
                     {activeTab === 'AGENDA' && (
-                        <div className="flex flex-col lg:flex-row gap-10 animate-in fade-in slide-in-from-bottom-2">
+                        <div className="flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2">
+                          <div className="flex flex-col lg:flex-row gap-10">
                             {/* AGENDA SECTION */}
                             <div className={`lg:w-1/2 flex-col gap-4 ${isEditingArticle ? 'hidden' : 'flex'}`}>
                                 <div className="flex items-center justify-between mb-2">
@@ -1149,6 +1160,8 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                             <div className={`${isEditingArticle ? 'w-full' : 'lg:w-1/2'} flex flex-col gap-4`}>
                                 <ArticleManager initialArticles={articles || []} onEditingChange={setIsEditingArticle} />
                             </div>
+                          </div>
+                          {!isEditingArticle && <ShopManager merchItems={merchItems || []} occazItems={occazItems || []} />}
                         </div>
                     )}
                 </main>

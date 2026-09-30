@@ -52,7 +52,7 @@ export default function BlogClient({ articles }: { articles: Article[] }) {
                     <p className="text-turquoise text-sm font-semibold uppercase tracking-widest mb-3">
                         Club Nautique de Coutainville
                     </p>
-                    <h1 className="font-['Syncopate'] text-4xl md:text-5xl font-bold italic uppercase text-white tracking-tight leading-tight">
+                    <h1 className="page-hero-title font-['Syncopate'] font-bold italic uppercase text-white tracking-tight">
                         Blog &<br />
                         <span className="text-turquoise">Articles</span>
                     </h1>

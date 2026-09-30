@@ -1,536 +1,207 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import {
-    Zap,
-    Calendar,
-    Sunrise,
-    Sunset,
-    Wind,
-    Waves,
-    Thermometer,
-    ArrowDown,
-    Droplets,
-    Clock,
-    RefreshCw
-} from 'lucide-react';
-import {
-    AreaChart,
-    Area,
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip as RechartsTooltip,
-    ResponsiveContainer as RC,
-    ReferenceLine as RefLine,
-} from 'recharts';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ArrowDown, ArrowRight, ChevronLeft, ChevronRight, Clock, Sunrise, Sunset, Wind, Waves, Thermometer } from 'lucide-react';
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import styles from './SpotConditions.module.css';
 
+type Series = { time: string[]; [key: string]: (number | null)[] | string[] };
 interface WeatherExpertData {
-    weather: any;
-    currents: any;
-    waves: any;
+    weather: { hourly?: Series; minutely_15?: Series; daily?: { time: string[]; sunrise: string[]; sunset: string[] } };
+    currents?: { hourly?: Series };
+    waves?: { hourly?: Series };
     updatedAt: string;
 }
+interface ForecastPoint {
+    time: string; label: string;
+    wind: number | null; gust: number | null; direction: number | null;
+    wave: number | null; waveDirection: number | null; period: number | null;
+    air: number | null; sea: number | null; rain: number | null;
+}
+const bands = [
+    { max: 10, label: '< 10', background: '#edf6f8', color: '#24475b' },
+    { max: 20, label: '10–19', background: '#c5eaf0', color: '#003e50' },
+    { max: 30, label: '20–29', background: '#f6e1b2', color: '#684710' },
+    { max: 40, label: '30–39', background: '#f2c4a5', color: '#763715' },
+    { max: Infinity, label: '40 et +', background: '#eab8b8', color: '#791f2e' },
+];
+const valueAt = (series: Series | undefined, key: string, index: number): number | null => {
+    const value = series?.[key]?.[index];
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+};
+const number = (value: number | null | undefined, decimals = 0) => value == null ? '—' : value.toLocaleString('fr-FR', { maximumFractionDigits: decimals });
+const timeLabel = (time?: string) => time ? time.slice(11, 16) : '—';
+const parisNow = () => {
+    const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+    const part = (type: string) => parts.find(p => p.type === type)?.value;
+    return `${part('year')}-${part('month')}-${part('day')}T${part('hour')}:${part('minute')}`;
+};
 
-export const WeatherExpert: React.FC = () => {
+function Direction({ value }: { value: number | null }) {
+    if (value == null) return <>—</>;
+    const label = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'][Math.round(value / 45) % 8];
+    return <span className={styles.direction} title={`Provenance : ${label}, ${Math.round(value)}°`}>
+        <ArrowDown size={15} style={{ transform: `rotate(${value}deg)` }} aria-hidden="true" />{label}
+    </span>;
+}
+
+export const WeatherExpert: React.FC<{ webcam?: React.ReactNode }> = ({ webcam }) => {
     const [data, setData] = useState<WeatherExpertData | null>(null);
     const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch('/api/weather-expert');
-                const json = await response.json();
-                setData(json);
-            } catch (error) {
-                console.error("Error fetching expert weather:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-        // Refresh every 60 minutes
-        const interval = setInterval(() => {
-            if (!document.hidden) fetchData();
-        }, 60 * 60 * 1000);
-        return () => clearInterval(interval);
+    const [error, setError] = useState(false);
+    const [selection, setSelection] = useState('next');
+    const [details, setDetails] = useState(false);
+    const [clock, setClock] = useState('');
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const fetchData = useCallback(async (signal?: AbortSignal) => {
+        try {
+            const response = await fetch('/api/weather-expert', { signal });
+            if (!response.ok) throw new Error('Prévisions indisponibles');
+            const json: WeatherExpertData = await response.json();
+            if (!json.weather?.hourly?.time?.length && !json.weather?.minutely_15?.time?.length) throw new Error('Prévisions absentes');
+            setData(json); setClock(parisNow()); setError(false);
+        } catch {
+            if (!signal?.aborted) setError(true);
+        } finally {
+            if (!signal?.aborted) setLoading(false);
+        }
     }, []);
+    useEffect(() => {
+        const controller = new AbortController();
+        fetchData(controller.signal);
+        const timer = setInterval(() => { if (!document.hidden) fetchData(controller.signal); }, 60 * 60 * 1000);
+        return () => { controller.abort(); clearInterval(timer); };
+    }, [fetchData]);
 
-    const getWindColor = (knots: number) => {
-        // Échelle basée sur l'image utilisateur (Windy/IWA/Beaufort style)
-        if (knots <= 1) return { bg: '#7e00ff', text: '#ffffff' }; // 0nd: Violet
-        if (knots <= 3) return { bg: '#6521ff', text: '#ffffff' }; // 2nd: Indigo
-        if (knots <= 5) return { bg: '#2130ff', text: '#ffffff' }; // 4nd: Bleu foncé
-        if (knots <= 7) return { bg: '#0060ff', text: '#ffffff' }; // 6nd: Bleu
-        if (knots <= 9) return { bg: '#0099ff', text: '#ffffff' }; // 8nd: Bleu clair
-        if (knots <= 11) return { bg: '#00ccff', text: '#004a48' }; // 10nd: Cyan ciel
-        if (knots <= 13) return { bg: '#00ffff', text: '#004a48' }; // 12nd: Cyan pur
-        if (knots <= 15) return { bg: '#15f7b8', text: '#004a3d' }; // 14nd: Turquoise
-        if (knots <= 17) return { bg: '#15e378', text: '#004a25' }; // 16nd: Vert d'eau
-        if (knots <= 19) return { bg: '#15db2a', text: '#0c4a00' }; // 18nd: Vert
-        if (knots <= 21) return { bg: '#26e615', text: '#0c4a00' }; // 20nd: Vert clair
-        if (knots <= 23) return { bg: '#84eb21', text: '#314a00' }; // 22nd: Limette
-        if (knots <= 25) return { bg: '#d1f514', text: '#3c4a00' }; // 24nd: Jaune-Vert
-        if (knots <= 27) return { bg: '#ffff00', text: '#4a4a00' }; // 26nd: Jaune
-        if (knots <= 29) return { bg: '#ffdf00', text: '#4a4100' }; // 28nd: Jaune d'or
-        if (knots <= 31) return { bg: '#ffc000', text: '#ffffff' }; // 30nd: Ambre
-        if (knots <= 33) return { bg: '#ff9f00', text: '#ffffff' }; // 32nd: Orange clair
-        if (knots <= 35) return { bg: '#ff7f00', text: '#ffffff' }; // 34nd: Orange
-        if (knots <= 37) return { bg: '#ff5f00', text: '#ffffff' }; // 36nd: Orange foncé
-        if (knots <= 39) return { bg: '#ff3f00', text: '#ffffff' }; // 38nd: Rouge-Orange
-        if (knots <= 41) return { bg: '#ff1f00', text: '#ffffff' }; // 40nd: Rouge clair
-        if (knots <= 43) return { bg: '#df1b00', text: '#ffffff' }; // 42nd: Rouge
-        if (knots <= 45) return { bg: '#bf1700', text: '#ffffff' }; // 44nd: Rouge mat
-        if (knots <= 47) return { bg: '#9f1300', text: '#ffffff' }; // 46nd: Rouge foncé
-        if (knots <= 49) return { bg: '#7f0f00', text: '#ffffff' }; // 48nd: Bordeaux
-        return { bg: '#bf2170', text: '#ffffff' }; // 50nd+: Rose/Violet violent
+    const makePoint = (series: Series, index: number): ForecastPoint => {
+        const time = series.time[index];
+        const hour = `${time.slice(0, 13)}:00`;
+        const hourlyIndex = data?.weather.hourly?.time.indexOf(hour) ?? -1;
+        const waveIndex = data?.waves?.hourly?.time.indexOf(hour) ?? -1;
+        const seaIndex = data?.currents?.hourly?.time.indexOf(hour) ?? -1;
+        return {
+            time, label: timeLabel(time),
+            wind: valueAt(series, 'wind_speed_10m', index),
+            gust: valueAt(series, 'wind_gusts_10m', index) ?? valueAt(data?.weather.hourly, 'wind_gusts_10m', hourlyIndex),
+            direction: valueAt(series, 'wind_direction_10m', index),
+            wave: valueAt(data?.waves?.hourly, 'wave_height', waveIndex),
+            waveDirection: valueAt(data?.waves?.hourly, 'wave_direction', waveIndex),
+            period: valueAt(data?.waves?.hourly, 'wave_period', waveIndex),
+            air: valueAt(series, 'temperature_2m', index),
+            sea: valueAt(data?.currents?.hourly, 'sea_surface_temperature', seaIndex),
+            rain: valueAt(series, 'precipitation_probability', index) ?? valueAt(data?.weather.hourly, 'precipitation_probability', hourlyIndex),
+        };
     };
+    const hourly = data?.weather.hourly;
+    const short = data?.weather.minutely_15;
+    const shortIndices = short?.time.map((_, i) => i).filter(i => short.time[i] >= clock).slice(0, 32) ?? [];
+    const nextPoints = short && shortIndices.length
+        ? shortIndices.filter((_, i) => i % 2 === 0).map(i => makePoint(short, i))
+        : hourly?.time.map((_, i) => i).filter(i => hourly.time[i] >= clock).slice(0, 8).map(i => makePoint(hourly, i)) ?? [];
+    const days = Array.from({ length: 3 }, (_, index) => {
+        const date = new Date(`${clock.slice(0, 10) || '2000-01-01'}T12:00:00Z`);
+        date.setUTCDate(date.getUTCDate() + index);
+        return { key: date.toISOString().slice(0, 10), label: ['Aujourd’hui', 'Demain', 'Après-demain'][index], date };
+    });
+    const dayKey = days[Number(selection)]?.key;
+    const points = selection === 'next' ? nextPoints : hourly?.time.map((_, i) => i)
+        .filter(i => hourly.time[i].startsWith(dayKey ?? '') && hourly.time[i] >= `${clock.slice(0, 13)}:00`)
+        .map(i => makePoint(hourly, i)) ?? [];
+    const current = nextPoints[0];
+    const dailyIndex = data?.weather.daily?.time?.indexOf(clock.slice(0, 10)) ?? -1;
+    const periodLabel = selection === 'next' ? 'Les 8 prochaines heures' : days[Number(selection)].date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Paris' });
+    const rows: { key: keyof ForecastPoint; label: string; unit?: string; decimals?: number; direction?: boolean }[] = [
+        { key: 'wind', label: 'Vent', unit: 'nds' },
+        { key: 'gust', label: 'Rafales', unit: 'nds' },
+        { key: 'direction', label: 'Direction', direction: true },
+        { key: 'wave', label: 'Vagues', unit: 'm', decimals: 1 },
+        ...(details ? [
+            { key: 'waveDirection' as const, label: 'Dir. vagues', direction: true },
+            { key: 'period' as const, label: 'Période', unit: 's' },
+            { key: 'rain' as const, label: 'Pluie', unit: '%' },
+            { key: 'air' as const, label: 'Air', unit: '°C' },
+            { key: 'sea' as const, label: 'Mer', unit: '°C', decimals: 1 },
+        ] : []),
+    ];
 
-    if (loading) return (
-        <div className="flex flex-col items-center justify-center p-20 bg-abysse/50 rounded-[3rem] border border-white/10 animate-pulse">
-            <RefreshCw className="animate-spin text-turquoise mb-4" size={40} />
-            <p className="text-turquoise font-black uppercase tracking-widest text-xs">Chargement AROME HD...</p>
-        </div>
-    );
-
-    if (!data) return null;
-
-    const { weather, currents, waves, updatedAt } = data;
-    if (!weather?.minutely_15) return null;
-    const w15 = weather.minutely_15;
-    const wHor = weather.hourly;
-    const cHor = currents.hourly;
-    const wav = waves.hourly;
-    const now = new Date();
-
-    // --- LOGIQUE SECTION 1 (15 MIN) ---
-    const startIdx15 = w15.time.findIndex((t: string) => new Date(t) >= now);
-    const count15 = 32; // 8 heures × 4 points/h
-    const indices15 = Array.from({ length: count15 }, (_, i) => startIdx15 + i).filter(idx => w15.time[idx]);
-
-    // --- LOGIQUE SECTION 2 (HORAIRE) ---
-    const startIdxHor = wHor.time.findIndex((t: string) => new Date(t) >= new Date(now.getTime() - 3600000));
-    const indicesHor = Array.from({ length: wHor.time.length - startIdxHor }, (_, i) => startIdxHor + i);
-
-    return (
-        <div className="space-y-8 text-white font-sans">
-
-            {/* Header / Meta */}
-            <div className="flex items-center justify-between gap-4 px-4 flex-wrap">
-                <div>
-                    <h2 className="text-2xl md:text-4xl font-black tracking-tighter italic uppercase text-turquoise leading-none">Coutainville Expert</h2>
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mt-2">Détail Haute Définition (1.3km) & Marine</p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    {weather.daily && (
-                        <>
-                            <span className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl border border-slate-200">
-                                <Sunrise size={17} className="text-yellow-500 shrink-0" />
-                                <span className="text-sm font-black text-abysse">
-                                    {new Date(weather.daily.sunrise[0]).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                                </span>
-                            </span>
-                            <span className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl border border-slate-200">
-                                <Sunset size={17} className="text-orange-500 shrink-0" />
-                                <span className="text-sm font-black text-abysse">
-                                    {new Date(weather.daily.sunset[0]).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                                </span>
-                            </span>
-                        </>
-                    )}
-                    <div className="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl border border-emerald-200 flex items-center gap-2">
-                        <Droplets size={17} className="shrink-0" />
-                        <span className="text-sm font-black">Mer {cHor.sea_surface_temperature[0]?.toFixed(1)}°C</span>
+    return <div className={styles.weather}>
+        <div className={webcam ? styles.overview : undefined}>
+            {webcam}
+            <section className={styles.summary} aria-label="Aperçu des prévisions">
+                <div className={styles.eyebrow}><Wind size={15} /> Le temps sur le spot</div>
+                <h2 className={styles.summaryTitle}>Un œil sur les conditions.</h2>
+                <p className={styles.muted}>{current ? `Prévisions pour ${current.label} · heure de Paris` : 'Vent, mer et températures à Coutainville'}</p>
+                {loading ? <div className={styles.skeleton} role="status">Chargement des prévisions…</div> : current ? <>
+                    <div className={styles.windReading}>
+                        <strong>{number(current.wind)}<span>nds</span></strong>
+                        <div><Direction value={current.direction} /><span>Rafales <b>{number(current.gust)} nds</b></span></div>
                     </div>
+                    <dl className={styles.metrics}>
+                        <div><dt><Waves size={16} /> Vagues</dt><dd>{number(current.wave, 1)} <small>m</small></dd></div>
+                        <div><dt><Thermometer size={16} /> Air</dt><dd>{number(current.air)} <small>°C</small></dd></div>
+                        <div><dt><Waves size={16} /> Mer</dt><dd>{number(current.sea, 1)} <small>°C</small></dd></div>
+                    </dl>
+                </> : <p className={styles.message}>L’aperçu météo est momentanément indisponible.</p>}
+                <div className={styles.sunTimes}>
+                    <span><Sunrise size={17} /> Lever <b>{timeLabel(data?.weather.daily?.sunrise[dailyIndex])}</b></span>
+                    <span><Sunset size={17} /> Coucher <b>{timeLabel(data?.weather.daily?.sunset[dailyIndex])}</b></span>
                 </div>
-            </div>
+                <a className={styles.textLink} href="#previsions-spot">Voir les prévisions détaillées <ArrowRight size={16} /></a>
+            </section>
+        </div>
 
-            {/* SECTION 1: AROME HD 15MIN — GRAPHIQUES & DÉTAILS */}
-            <div className="space-y-6">
-                <div className="flex items-center gap-3 px-4">
-                    <Zap size={22} className="text-turquoise" />
-                    <h3 className="text-sm font-black uppercase tracking-widest text-abysse">Direct AROME HD (1.3km)</h3>
+        <section id="previsions-spot" className={styles.forecasts} aria-labelledby="forecast-title">
+            <header className={styles.sectionHeader}>
+                <div><p className={styles.eyebrow}>Pour préparer votre sortie</p><h2 id="forecast-title" className={styles.sectionTitle}>Vent & météo</h2></div>
+                <p className={styles.updated}><Clock size={14} />{data ? `Actualisé à ${new Date(data.updatedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })}` : 'Prévisions locales'}</p>
+            </header>
+            <div className={styles.forecastPanel}>
+                <div className={styles.toolbar} role="group" aria-label="Période des prévisions">
+                    {[{ key: 'next', label: 'Prochaines 8 h' }, ...days.map((day, i) => ({ key: String(i), label: day.label }))].map(item =>
+                        <button key={item.key} type="button" aria-pressed={selection === item.key} className={selection === item.key ? styles.selected : ''} onClick={() => { setSelection(item.key); scrollRef.current?.scrollTo({ left: 0 }); }}>{item.label}</button>
+                    )}
                 </div>
-
-                {(() => {
-                    const chartData15 = indices15.map(idx => {
-                        const d = new Date(w15.time[idx]);
-                        const h = d.getHours();
-                        const m = d.getMinutes();
-                        const timeStrFull = w15.time[idx].substring(0, 14) + '00';
-                        const wIdx = wav.time.indexOf(timeStrFull);
-                        let gust = w15.wind_gusts_10m ? w15.wind_gusts_10m[idx] : null;
-                        if (gust === null || gust === undefined) {
-                            const ts = w15.time[idx].substring(0, 13) + ':00';
-                            const hIdx = wHor.time.findIndex((t: string) => t.startsWith(ts));
-                            gust = hIdx !== -1 ? wHor.wind_gusts_10m[hIdx] : null;
-                        }
-                        return {
-                            time: d.getTime(),
-                            label: `${h}:${m === 0 ? '00' : '30'}`,
-                            isHour: m === 0,
-                            vent: Math.round(w15.wind_speed_10m[idx]),
-                            rafales: gust !== null ? Math.round(gust) : null,
-                            direction: w15.wind_direction_10m?.[idx] ?? null,
-                            waveHeight: wIdx !== -1 ? wav.wave_height[wIdx] : null,
-                            waveDir: wIdx !== -1 ? wav.wave_direction[wIdx] : null,
-                            wavePeriod: wIdx !== -1 ? wav.wave_period[wIdx] : null,
-                            tempAir: w15.temperature_2m?.[idx] ?? null,
-                        };
-                    });
-
-                    // Une colonne de données toutes les 30min
-                    const hdDetails = chartData15.filter((_, i) => i % 2 === 0);
-
-                    const CHART_H = 240;
-                    const ROW_H = 46;
-
-                    const tooltipStyle = { backgroundColor: '#0c1458', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' };
-                    const labelStyle = { color: 'rgba(255,255,255,0.4)', fontSize: '10px', textTransform: 'uppercase' as const, letterSpacing: '0.15em' };
-
-                    const LABEL_BG = 'bg-[#060c20]/95 backdrop-blur-md';
-                    const CELL = 'flex-1 flex items-center justify-center border-r border-white/5 text-sm font-black';
-
-                    return (
-                        <div className="bg-abysse rounded-4xl border border-white/10 overflow-hidden">
-                            {/* Header légende */}
-                            <div className="flex items-center gap-4 md:gap-8 px-6 md:px-8 pt-8 pb-4 flex-wrap">
-                                <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 shrink-0">Vent &amp; Rafales (nds)</span>
-                                <div className="flex gap-4">
-                                    <span className="flex items-center gap-2 text-[10px] font-black text-turquoise"><span className="size-2.5 rounded-sm bg-turquoise inline-block" /> Vent</span>
-                                    <span className="flex items-center gap-2 text-[10px] font-black text-orange-400"><span className="size-2.5 rounded-sm bg-orange-400 inline-block" /> Rafales</span>
-                                </div>
-                            </div>
-
-                            {/* LAYOUT PRINCIPAL: sticky labels | scrollable chart+données */}
-                            <div className="flex overflow-x-auto no-scrollbar scroll-smooth">
-
-                                {/* COLONNE LABELS — sticky à gauche */}
-                                <div className={`sticky left-0 z-30 ${LABEL_BG} border-r border-white/10 shrink-0 w-22 md:w-28 shadow-xl rounded-bl-4xl`}>
-                                    {/* Zone correspondant à la hauteur du chart (CHART_H + padding top 8px) */}
-                                    <div style={{ height: CHART_H + 8 }} />
-                                    {/* Lignes de labels */}
-                                    {[
-                                        { label: 'Vent (kts)', color: 'text-slate-400' },
-                                        { label: 'Rafales', color: 'text-orange-400' },
-                                        { label: 'Direction', color: 'text-slate-500' },
-                                        { label: 'Vagues (m)', color: 'text-cyan-400' },
-                                        { label: 'Dir. vagues', color: 'text-cyan-700' },
-                                        { label: 'Période (s)', color: 'text-slate-400' },
-                                        { label: 'Temp Air', color: 'text-amber-300' },
-                                    ].map(({ label, color }, i) => (
-                                        <div key={i} style={{ height: ROW_H }} className={`flex items-center px-2 md:px-4 border-t border-white/10 text-[10px] md:text-xs font-black whitespace-nowrap ${color}`}>
-                                            {label}
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* ZONE PLEIN ÉCRAN: chart + lignes de données */}
-                                <div className="flex-1 min-w-[700px] md:min-w-[900px]">
-                                    <div>
-
-                                        {/* CHART — 100% de la zone, s'aligne avec les colonnes flex */}
-                                        <RC width="100%" height={CHART_H}>
-                                            <AreaChart data={chartData15} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                                                <defs>
-                                                    <linearGradient id="gradVent2" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="0%" stopColor="#00e5cc" stopOpacity={0.65} />
-                                                        <stop offset="100%" stopColor="#00e5cc" stopOpacity={0.05} />
-                                                    </linearGradient>
-                                                    <linearGradient id="gradRafales2" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="0%" stopColor="#fb923c" stopOpacity={0.45} />
-                                                        <stop offset="100%" stopColor="#fb923c" stopOpacity={0.02} />
-                                                    </linearGradient>
-                                                </defs>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-                                                <XAxis
-                                                    dataKey="label"
-                                                    tick={({ x, y, payload, index }) => {
-                                                        const pt = chartData15[index];
-                                                        return (
-                                                            <text x={x} y={(y as number) + 12} textAnchor="middle"
-                                                                fill={pt?.isHour ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.28)'}
-                                                                fontSize={pt?.isHour ? 13 : 9}
-                                                                fontWeight="bold">
-                                                                {payload.value}
-                                                            </text>
-                                                        );
-                                                    }}
-                                                    axisLine={false} tickLine={false} interval={1}
-                                                />
-                                                <YAxis tick={{ fill: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: 'bold' }} axisLine={false} tickLine={false} width={32} />
-                                                <RechartsTooltip contentStyle={tooltipStyle} labelStyle={labelStyle} formatter={(v: any, n?: string) => [`${v} nds`, n === 'vent' ? 'Vent' : 'Rafales']} labelFormatter={() => ''} />
-                                                <Area type="monotone" dataKey="rafales" stroke="#fb923c" strokeWidth={2} fill="url(#gradRafales2)" dot={false} animationDuration={1200} />
-                                                <Area type="monotone" dataKey="vent" stroke="#00e5cc" strokeWidth={3} fill="url(#gradVent2)" dot={{ r: 2, fill: '#00e5cc', strokeWidth: 0 }} activeDot={{ r: 5 }} animationDuration={1200} />
-                                            </AreaChart>
-                                        </RC>
-
-                                        {/* LIGNES DE DONNÉES — chaque div de largeur COL_W */}
-
-                                        {/* Vent */}
-                                        <div style={{ height: ROW_H }} className="flex border-t border-white/10">
-                                            {hdDetails.map((pt, i) => {
-                                                const c = getWindColor(pt.vent);
-                                                return <div key={i} style={{ backgroundColor: c.bg, color: c.text }} className={CELL}>{pt.vent}</div>;
-                                            })}
-                                        </div>
-
-                                        {/* Rafales */}
-                                        <div style={{ height: ROW_H }} className="flex border-t border-white/10">
-                                            {hdDetails.map((pt, i) => {
-                                                const c = getWindColor(pt.rafales || 0);
-                                                return <div key={i} style={{ backgroundColor: `${c.bg}BB`, color: c.text }} className={CELL}>{pt.rafales ?? '-'}</div>;
-                                            })}
-                                        </div>
-
-                                        {/* Direction */}
-                                        <div style={{ height: ROW_H }} className="flex border-t border-white/10">
-                                            {hdDetails.map((pt, i) => (
-                                                <div key={i} className={CELL + ' bg-white/2'}>
-                                                    {pt.direction != null
-                                                        ? <div style={{ transform: `rotate(${pt.direction}deg)` }}><ArrowDown size={14} className="text-turquoise" /></div>
-                                                        : <span className="text-slate-700">—</span>}
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        {/* Vagues */}
-                                        <div style={{ height: ROW_H }} className="flex border-t border-white/10">
-                                            {hdDetails.map((pt, i) => (
-                                                <div key={i} className={CELL + ' text-cyan-400 bg-cyan-500/5'}>
-                                                    {pt.waveHeight ? pt.waveHeight.toFixed(1) : '-'}
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        {/* Dir. vagues */}
-                                        <div style={{ height: ROW_H }} className="flex border-t border-white/10">
-                                            {hdDetails.map((pt, i) => (
-                                                <div key={i} className={CELL}>
-                                                    {pt.waveDir != null
-                                                        ? <div style={{ transform: `rotate(${pt.waveDir}deg)` }} className="opacity-60"><ArrowDown size={12} className="text-cyan-600" /></div>
-                                                        : <span className="text-slate-700">—</span>}
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        {/* Période */}
-                                        <div style={{ height: ROW_H }} className="flex border-t border-white/10">
-                                            {hdDetails.map((pt, i) => (
-                                                <div key={i} className={CELL + ' text-slate-400'}>
-                                                    {pt.wavePeriod ? Math.round(pt.wavePeriod) : '-'}
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        {/* Temp Air */}
-                                        <div style={{ height: ROW_H }} className="flex border-t border-white/10">
-                                            {hdDetails.map((pt, i) => (
-                                                <div key={i} className={CELL + ' text-amber-300'}>
-                                                    {pt.tempAir != null ? `${Math.round(pt.tempAir)}°` : '-'}
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    );
-                })()}
-            </div>
-
-            {/* SECTION 2: TENDANCES 3 JOURS */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-3 px-4">
-                    <Calendar size={18} className="text-turquoise" />
-                    <h3 className="text-xs font-black uppercase tracking-widest text-abysse">Prévisions 3 Jours (Horaires)</h3>
-                </div>
-                <div className="bg-abysse/80 backdrop-blur-xl rounded-4xl overflow-hidden border border-white/10">
-                    <div className="overflow-x-auto no-scrollbar scroll-smooth">
-                        <table className="w-full border-separate border-spacing-0 table-fixed">
-                            <thead>
-                                <tr className="bg-white/5">
-                                    <th className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-4 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-slate-500 text-left border-r border-white/10 shadow-xl">3 Jours</th>
-                                    {indicesHor.map(idx => {
-                                        const d = new Date(wHor.time[idx]);
-                                        const isNewDay = d.getHours() === 0;
-                                        return (
-                                            <th key={idx} className={`w-20 md:w-16 min-w-[80px] md:min-w-[64px] text-center py-4 border-r border-white/5 ${isNewDay ? 'border-l-4 border-turquoise shadow-[4px_0_0_-2px_rgba(0,229,204,0.3)]' : ''}`}>
-                                                <div className="flex flex-col gap-1">
-                                                    {isNewDay || idx === startIdxHor ? (
-                                                        <span className="text-[10px] font-black text-turquoise">{d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })}</span>
-                                                    ) : <span className="h-[12px]" />}
-                                                    <span className="text-sm font-black">{d.getHours()}h:00</span>
-                                                </div>
-                                            </th>
-                                        );
-                                    })}
-                                </tr>
-                            </thead>
-                            <tbody className="text-sm font-black tracking-tight uppercase">
-                                <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-slate-400 border-r border-white/10">Vent (kts)</td>
-                                    {indicesHor.map(idx => {
-                                        const speed = Math.round(wHor.wind_speed_10m[idx]);
-                                        const colors = getWindColor(speed);
-                                        return (
-                                            <td key={idx}
-                                                style={{ backgroundColor: colors.bg, color: colors.text }}
-                                                className="text-center py-3 border-r border-white/5"
-                                            >
-                                                {speed}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                                {/* Rafales */}
-                                <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-orange-400/80 border-r border-white/10">Rafales</td>
-                                    {indicesHor.map(idx => {
-                                        const gust = Math.round(wHor.wind_gusts_10m[idx]);
-                                        const colors = getWindColor(gust);
-                                        return (
-                                            <td key={idx}
-                                                style={{ backgroundColor: `${colors.bg}CC`, color: colors.text }}
-                                                className="text-center py-3 border-r border-white/5"
-                                            >
-                                                {gust}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                                {/* Direction */}
-                                <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-4 text-[10px] md:text-xs text-slate-400 border-r border-white/10">Direction</td>
-                                    {indicesHor.map(idx => (
-                                        <td key={idx} className="text-center py-4 border-r border-white/5 bg-white/2">
-                                            {wHor.wind_direction_10m?.[idx] != null ? (
-                                                <div style={{ transform: `rotate(${wHor.wind_direction_10m[idx]}deg)` }} className="flex justify-center">
-                                                    <ArrowDown size={14} className="text-turquoise" />
-                                                </div>
-                                            ) : '-'}
-                                        </td>
-                                    ))}
-                                </tr>
-                                {/* Vagues */}
-                                <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-cyan-400 border-r border-white/10">Vagues (m)</td>
-                                    {indicesHor.map(idx => {
-                                        const timeStr = wHor.time[idx];
-                                        const wIdx = wav.time.indexOf(timeStr);
-                                        const wh = wIdx !== -1 ? wav.wave_height[wIdx] : null;
-                                        return (
-                                            <td key={idx} className="text-center py-3 border-r border-white/5 text-cyan-400 bg-cyan-500/5">
-                                                {wh ? wh.toFixed(1) : '-'}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                                {/* Dir Vagues */}
-                                <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-4 text-[10px] md:text-xs text-cyan-700 border-r border-white/10">Dir. Vagues</td>
-                                    {indicesHor.map(idx => {
-                                        const timeStr = wHor.time[idx];
-                                        const wIdx = wav.time.indexOf(timeStr);
-                                        const wd = wIdx !== -1 ? wav.wave_direction?.[wIdx] : null;
-                                        return (
-                                            <td key={idx} className="text-center py-4 border-r border-white/5">
-                                                {wd != null ? (
-                                                    <div style={{ transform: `rotate(${wd}deg)` }} className="flex justify-center opacity-70">
-                                                        <ArrowDown size={12} className="text-cyan-600" />
-                                                    </div>
-                                                ) : '-'}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                                {/* Période — affichée seulement si des données existent */}
-                                {indicesHor.some(idx => { const wIdx = wav.time.indexOf(wHor.time[idx]); return wIdx !== -1 && wav.wave_period[wIdx] != null; }) && (
-                                    <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                        <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-slate-400 border-r border-white/10">Période (s)</td>
-                                        {indicesHor.map(idx => {
-                                            const timeStr = wHor.time[idx];
-                                            const wIdx = wav.time.indexOf(timeStr);
-                                            const wp = wIdx !== -1 ? wav.wave_period[wIdx] : null;
-                                            return (
-                                                <td key={idx} className="text-center py-3 border-r border-white/5 text-slate-400">
-                                                    {wp ? Math.round(wp) : '-'}
-                                                </td>
-                                            );
-                                        })}
-                                    </tr>
-                                )}
-                                {/* Pluie */}
-                                <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-blue-400 border-r border-white/10">Pluie (%)</td>
-                                    {indicesHor.map(idx => {
-                                        const prob = wHor.precipitation_probability?.[idx];
-                                        const hasRain = prob != null && prob > 20;
-                                        return (
-                                            <td key={idx} className={`text-center py-3 border-r border-white/5 font-black text-sm ${hasRain ? 'text-blue-400 bg-blue-500/8' : 'text-slate-400'
-                                                }`}>
-                                                {prob != null ? `${prob}%` : '—'}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                                {/* Air */}
-                                <tr className="hover:bg-white/5 transition-colors border-b border-white/5">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-slate-500 border-r border-white/10">Air (°C)</td>
-                                    {indicesHor.map(idx => {
-                                        const temp = wHor.temperature_2m?.[idx];
-                                        return (
-                                            <td key={idx} className="text-center py-3 border-r border-white/5 text-slate-400">
-                                                {temp != null ? `${Math.round(temp)}°` : '—'}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                                {/* Mer */}
-                                <tr className="hover:bg-white/5 transition-colors">
-                                    <td className="sticky left-0 bg-slate-950/90 backdrop-blur-md z-30 w-22 md:w-28 px-4 py-3 text-[10px] md:text-xs text-emerald-400 border-r border-white/10">Mer (°C)</td>
-                                    {indicesHor.map(idx => {
-                                        const timeStr = wHor.time[idx];
-                                        const cIdx = cHor.time.indexOf(timeStr);
-                                        const wt = cIdx !== -1 ? cHor.sea_surface_temperature[cIdx] : null;
-                                        return (
-                                            <td key={idx} className="text-center py-3 border-r border-white/5 text-emerald-400 bg-emerald-500/5">
-                                                {wt ? wt.toFixed(1) : '-'}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                            </tbody>
+                {error && <div className={styles.message} role="status">{data ? 'Actualisation indisponible : les dernières prévisions reçues restent affichées.' : 'Les prévisions sont momentanément indisponibles.'} <button type="button" onClick={() => fetchData()}>Réessayer</button></div>}
+                {loading ? <div className={styles.loadingChart} role="status">Chargement du vent et des prévisions…</div> : !points.length ? <p className={styles.message}>Aucune donnée disponible pour cette période.</p> : <>
+                    <div className={styles.chartHeading}><h3>{periodLabel}</h3><div><span><i className={styles.windDot} /> Vent</span><span><i className={styles.gustDot} /> Rafales</span><span className={styles.muted}>en nds</span></div></div>
+                    <div className={styles.chart} role="img" aria-label={`Évolution du vent et des rafales : ${periodLabel}. Valeurs détaillées dans le tableau ci-dessous.`}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={points} margin={{ top: 12, right: 18, bottom: 0, left: 0 }}>
+                                <defs><linearGradient id="spotWindFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#00a9ce" stopOpacity={0.18} /><stop offset="100%" stopColor="#00a9ce" stopOpacity={0.01} /></linearGradient></defs>
+                                <CartesianGrid vertical={false} stroke="#e5edf1" strokeDasharray="3 4" />
+                                <XAxis dataKey="label" axisLine={false} tickLine={false} minTickGap={35} tick={{ fill: '#607687', fontSize: 12 }} />
+                                <YAxis axisLine={false} tickLine={false} width={36} tick={{ fill: '#607687', fontSize: 12 }} domain={[0, 'auto']} />
+                                <Tooltip contentStyle={{ border: '1px solid #e2e8f0', borderRadius: 12, color: '#002b49', fontSize: 13 }} formatter={(value, name) => [`${value} nds`, name === 'wind' ? 'Vent' : 'Rafales']} labelFormatter={(label) => `${label} · heure de Paris`} />
+                                <Area dataKey="gust" stroke="#d77a37" strokeWidth={2} strokeDasharray="5 4" fill="transparent" isAnimationActive={false} />
+                                <Area dataKey="wind" stroke="#009bb8" strokeWidth={2.5} fill="url(#spotWindFill)" isAnimationActive={false} />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className={styles.tableTools}>
+                        <span>Heure de Paris · {selection === 'next' && shortIndices.length ? 'pas de 30 min' : 'pas de 1 h'}</span>
+                        <div><button type="button" aria-label="Voir les heures précédentes" onClick={() => scrollRef.current?.scrollBy({ left: -360 })}><ChevronLeft size={17} /></button><span>Parcourir les heures</span><button type="button" aria-label="Voir les heures suivantes" onClick={() => scrollRef.current?.scrollBy({ left: 360 })}><ChevronRight size={17} /></button></div>
+                    </div>
+                    <div ref={scrollRef} className={styles.tableScroll} role="region" aria-label="Tableau des prévisions horaires" tabIndex={0}>
+                        <table className={styles.table}>
+                            <caption className={styles.srOnly}>{periodLabel} — prévisions à Coutainville</caption>
+                            <thead><tr><th scope="col">Heure</th>{points.map(point => <th scope="col" key={point.time}>{point.label}</th>)}</tr></thead>
+                            <tbody>{rows.map(row => <tr key={row.key}>
+                                <th scope="row">{row.label}{row.unit && <small>{row.unit}</small>}</th>
+                                {points.map(point => {
+                                    const value = point[row.key] as number | null;
+                                    const band = value != null && (row.key === 'wind' || row.key === 'gust') ? bands.find(b => Math.round(value) < b.max) : undefined;
+                                    return <td key={point.time} style={band ? { backgroundColor: band.background, color: band.color } : undefined}>{row.direction ? <Direction value={value} /> : number(value, row.decimals)}</td>;
+                                })}
+                            </tr>)}</tbody>
                         </table>
                     </div>
-                </div>
+                    <div className={styles.tableFooter}>
+                        <button type="button" className={styles.detailsButton} aria-expanded={details} onClick={() => setDetails(value => !value)}>{details ? '− Moins de détails' : '+ Pluie, températures & détails marins'}</button>
+                        <div className={styles.scale} aria-label="Intensité du vent en nœuds"><span>nds</span>{bands.map(band => <span key={band.label}><i style={{ backgroundColor: band.background }} />{band.label}</span>)}</div>
+                    </div>
+                </>}
             </div>
-
-            {/* Footer / Legend */}
-            <div className="flex flex-wrap gap-x-8 gap-y-4 px-4 text-[8px] font-black uppercase tracking-[0.2em] text-slate-500 italic pb-8">
-                <div className="flex items-center gap-2">
-                    <Clock size={12} className="text-turquoise" />
-                    Actualisé : {new Date(updatedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="size-2 bg-turquoise rounded-full"></div>
-                    Vent AROME HD
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="size-2 bg-orange-500 rounded-full"></div>
-                    Rafales HD
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="size-2 bg-cyan-500 rounded-full"></div>
-                    Vagues (Marine-API)
-                </div>
-            </div>
-        </div>
-    );
+            <p className={styles.sources}>Prévisions Open-Meteo · AROME HD pour les données horaires · données marines Météo-France. Les valeurs absentes sont indiquées par « — ».</p>
+        </section>
+    </div>;
 };

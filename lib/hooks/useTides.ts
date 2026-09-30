@@ -3,7 +3,8 @@ import { TideData, TideCoefficients as Coefficients } from '@/types';
 
 const CALIBRATION = {
   HEIGHT: 0.0,
-  TIME: -20, // minutes
+  // The SHOM comparisons show that the previous -20 min shift made predictions early.
+  TIME: 0,
 };
 
 let globalPromise: Promise<{ tides: TideData[], coefficients: Coefficients | null }> | null = null;

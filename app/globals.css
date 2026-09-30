@@ -6,6 +6,11 @@
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/container-queries";
 
+@utility page-hero-title {
+  @apply text-3xl md:text-5xl lg:text-6xl;
+  line-height: 1;
+}
+
 @theme {
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);

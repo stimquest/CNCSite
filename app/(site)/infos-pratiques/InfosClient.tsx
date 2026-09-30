@@ -608,7 +608,7 @@ export default function InfosClient({ initialData }: { initialData?: InfosData }
                         <Compass size={14} />
                         <span>Pratique & Contact</span>
                     </div>
-                    <h1 className="text-5xl md:text-8xl text-white leading-[0.85] mb-8">
+                    <h1 className="page-hero-title text-white mb-8">
                         {initialData?.heroTitle || "L'Escale Logistique."}
                     </h1>
                     <p className="text-xl text-slate-300 font-medium leading-relaxed max-w-3xl mx-auto">

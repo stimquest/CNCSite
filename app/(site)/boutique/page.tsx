@@ -49,7 +49,7 @@ export default async function BoutiquePage() {
                         <ShoppingBag size={14} />
                         <span>Showcase & Merchandising</span>
                     </div>
-                    <h1 className="text-5xl md:text-8xl text-white leading-[0.85] mb-8">
+                    <h1 className="page-hero-title text-white mb-8">
                         L'Échoppe<br /><span className="text-yellow-400">du Club.</span>
                     </h1>
                     <p className="text-xl text-slate-300 font-medium leading-relaxed max-w-3xl mx-auto">

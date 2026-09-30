@@ -8,6 +8,8 @@ interface PageHeroProps {
     /** Background image URL */
     image: string;
     imageAlt?: string;
+    /** Focal point for cropping the background image on this page. */
+    imagePosition?: React.CSSProperties['objectPosition'];
     /** Icon component to render in the badge */
     tagIcon: React.ReactNode;
     /** Text to display in the badge */
@@ -22,8 +24,6 @@ interface PageHeroProps {
     children?: React.ReactNode;
     /** Height variant */
     size?: 'default' | 'compact';
-    /** Typography variant, independent from hero height */
-    headingSize?: 'default' | 'compact';
     /** Color the bottom fades into */
     bottomColor?: 'white' | 'slate';
 }
@@ -31,6 +31,7 @@ interface PageHeroProps {
 export const PageHero: React.FC<PageHeroProps> = ({
     image,
     imageAlt = 'Hero background',
+    imagePosition = 'center',
     tagIcon,
     tagText,
     title,
@@ -38,23 +39,24 @@ export const PageHero: React.FC<PageHeroProps> = ({
     description,
     children,
     size = 'default',
-    headingSize = size,
     bottomColor = 'white',
 }) => {
     const heightClass = size === 'compact'
-        ? 'h-[55vh] min-h-[450px]'
-        : 'h-[80vh] min-h-[600px]';
-    const titleSizeClass = headingSize === 'compact'
-        ? 'text-3xl md:text-5xl lg:text-6xl'
-        : 'text-5xl md:text-8xl lg:text-9xl';
+        ? 'min-h-[max(360px,45vh)]'
+        : 'min-h-[max(480px,65vh)]';
 
     const bottomColorHex = bottomColor === 'slate' ? '#f8fafc' : '#ffffff';
 
     return (
-        <section className={`relative ${heightClass} w-full flex items-center justify-center overflow-hidden bg-abysse`}>
+        <section className={`relative ${heightClass} w-full flex items-center py-12 overflow-hidden bg-abysse`}>
             {/* Background */}
             <div className="absolute inset-0 z-0">
-                <img src={image} className="w-full h-full object-cover scale-105" alt={imageAlt} />
+                <img
+                    src={image}
+                    className="w-full h-full object-cover scale-105"
+                    style={{ objectPosition: imagePosition, transformOrigin: imagePosition }}
+                    alt={imageAlt}
+                />
                 <div className="absolute inset-0" style={{
                     background: `linear-gradient(to bottom,
                         rgba(0,43,73,0.55) 0%,
@@ -66,7 +68,7 @@ export const PageHero: React.FC<PageHeroProps> = ({
             </div>
 
             {/* Content */}
-            <div className={`relative z-10 container mx-auto px-6 max-w-[1400px] ${size === 'default' ? 'mt-20' : ''}`}>
+            <div className="relative z-10 container mx-auto px-6 max-w-[1400px]">
                 <div className="flex flex-col items-center text-center">
 
                     {/* Badge — always same style */}
@@ -84,7 +86,7 @@ export const PageHero: React.FC<PageHeroProps> = ({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className={`${titleSizeClass} text-white leading-[0.8] mb-12`}
+                        className="page-hero-title text-white mb-12"
                     >
                         {title} <br />
                         <span className="text-transparent bg-clip-text bg-linear-to-r from-turquoise to-white">
