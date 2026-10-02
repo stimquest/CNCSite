@@ -37,6 +37,7 @@ import FrenchWeekDatePicker from '@/components/admin/FrenchWeekDatePicker';
 import StagePlanningGrid from '@/components/admin/StagePlanningGrid';
 import ArticleManager from './ArticleEditor';
 import SchoolStagesEditor from '@/components/admin/SchoolStagesEditor';
+import ActivityPricingManager from '@/components/admin/ActivityPricingManager';
 import ShopManager from '@/components/admin/ShopManager';
 import SignageManager from '@/components/admin/SignageManager';
 import adminStyles from './AdminClient.module.css';
@@ -563,14 +564,15 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                                 <button onClick={() => { setOpenNavMenu(null); setCharInitialMode('reserve'); setCharInitialSessionId(undefined); setCharInitialBookingId(undefined); setCharInitialDate(undefined); goTab('CHAR'); }} className={`${adminStyles.navItem} ${activeTab === 'CHAR' ? adminStyles.navActive : ''}`}><Ship size={14} /> Réservations char</button>
 
                                 <details className={adminStyles.navGroup} open={openNavMenu === 'activities'} onPointerEnter={event => handleMenuPointerEnter(event, 'activities')} onPointerLeave={event => handleMenuPointerLeave(event, 'activities')}>
-                                    <summary data-menu-trigger="activities" aria-expanded={openNavMenu === 'activities'} onClick={event => handleMenuTrigger(event, 'activities')} className={`${adminStyles.navSummary} ${['STAGES', 'FICHES', 'MARCHE'].includes(activeTab) ? adminStyles.navParentActive : ''}`}>
+                                    <summary data-menu-trigger="activities" aria-expanded={openNavMenu === 'activities'} onClick={event => handleMenuTrigger(event, 'activities')} className={`${adminStyles.navSummary} ${['STAGES', 'FICHES', 'PRICING', 'MARCHE'].includes(activeTab) ? adminStyles.navParentActive : ''}`}>
                                         <Waves size={14} />
-                                        <span>{activeTab === 'STAGES' ? 'Activités · Stages' : activeTab === 'FICHES' ? 'Activités · Fiches' : activeTab === 'MARCHE' ? 'Activités · Marche' : 'Activités'}</span>
+                                        <span>{activeTab === 'STAGES' ? 'Activités · Stages' : activeTab === 'FICHES' ? 'Activités · Fiches' : activeTab === 'PRICING' ? 'Activités · Tarifs' : activeTab === 'MARCHE' ? 'Activités · Marche' : 'Activités'}</span>
                                         <ChevronDown size={13} className={adminStyles.navChevron} />
                                     </summary>
                                     <div onPointerEnter={event => handleMenuPointerEnter(event, 'activities')} className={adminStyles.navMenu}>
                                         <button onClick={() => { setOpenNavMenu(null); goTab('STAGES'); }} className={activeTab === 'STAGES' ? adminStyles.navSubActive : ''}><strong>Planning des stages</strong><small>Organiser les semaines et créneaux</small></button>
                                         <button onClick={() => { setOpenNavMenu(null); goTab('FICHES'); }} className={activeTab === 'FICHES' ? adminStyles.navSubActive : ''}><strong>Fiches stages</strong><small>Gérer les contenus de présentation</small></button>
+                                        <button onClick={() => { setOpenNavMenu(null); goTab('PRICING'); }} className={activeTab === 'PRICING' ? adminStyles.navSubActive : ''}><strong>Activités & tarifs</strong><small>Contrôler les montants affichés</small></button>
                                         <button onClick={() => { setOpenNavMenu(null); goTab('MARCHE'); }} className={activeTab === 'MARCHE' ? adminStyles.navSubActive : ''}><strong>Marche aquatique</strong><small>Planning et séances</small></button>
                                     </div>
                                 </details>
@@ -866,6 +868,8 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
 
                     {/* TAB: FICHES STAGES (page École) */}
                     {activeTab === 'FICHES' && <SchoolStagesEditor />}
+
+                    {activeTab === 'PRICING' && <ActivityPricingManager />}
 
                     {/* TAB: DIGITAL SIGNAGE */}
                     {activeTab === 'SIGNAGE' && <SignageManager slides={signageSlides || []} initialCreate={dashboardAction === 'new-slide'} />}

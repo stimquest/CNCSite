@@ -82,6 +82,22 @@ export const activity = defineType({
       description: 'Prix affiché en résumé (ex: "45€")',
     }),
     defineField({
+      name: 'pricingMode',
+      title: 'Mode tarifaire de l’activité',
+      type: 'string',
+      description: 'Détermine la destination de toute la grille. Utilisez « Mixte » uniquement si les lignes vont dans plusieurs onglets.',
+      options: {
+        list: [
+          { title: 'Séances & cours', value: 'courses' },
+          { title: 'Locations uniquement', value: 'locations' },
+          { title: 'Mixte — choix par ligne', value: 'mixed' },
+          { title: 'Fiche activité uniquement', value: 'hidden' },
+        ],
+      },
+      initialValue: 'mixed',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
       name: 'prices',
       title: 'Grille tarifaire',
       type: 'array',
@@ -89,10 +105,32 @@ export const activity = defineType({
         type: 'object',
         fields: [
           { name: 'label', title: 'Label', type: 'string' },
-          { name: 'value', title: 'Prix', type: 'string' }
+          { name: 'value', title: 'Prix', type: 'string' },
+          {
+            name: 'pricingSection',
+            title: 'Affichage dans la page Tarifs',
+            type: 'string',
+            options: {
+              list: [
+                { title: 'Séances & cours', value: 'courses' },
+                { title: 'Locations', value: 'locations' },
+                { title: 'Fiche activité uniquement', value: 'hidden' },
+              ],
+            },
+            initialValue: 'hidden',
+            validation: (Rule) => Rule.required(),
+          },
+          { name: 'duration', title: 'Durée affichée', type: 'string' },
+          { name: 'details', title: 'Précisions tarifaires', type: 'string' },
         ]
       }],
       description: 'Détail des tarifs (séance, stage...)',
+    }),
+    defineField({
+      name: 'pricingLastConfirmedAt',
+      title: 'Dernière vérification des tarifs',
+      type: 'datetime',
+      readOnly: true,
     }),
     defineField({
       name: 'image',

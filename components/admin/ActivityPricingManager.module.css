@@ -1,0 +1,59 @@
+.root { min-width: 0; color: #002b49; }
+.headerActions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+.headerActions a, .secondary, .linesHeading button, .save { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 9px 13px; border-radius: 9px; font-size: 12px; font-weight: 700; }
+.headerActions a { color: #007e9e; background: #e7f7fa; }
+.secondary { border: 1px solid #d7e2e7; background: white; color: #547182; }
+.error, .notice { display: flex; align-items: center; gap: 9px; margin: 0 0 16px; padding: 12px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; }
+.error { color: #a6303f; background: #ffebec; }
+.notice { color: #087857; background: #e8f8f1; }
+.summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+.summary > div { display: flex; align-items: baseline; gap: 9px; padding: 13px 16px; border: 1px solid #dce7eb; border-radius: 11px; background: white; }
+.summary strong { font-size: 24px; line-height: 1; }
+.summary span { color: #647b88; font-size: 12px; font-weight: 600; }
+.summary [data-alert="true"] { border-color: #f0c58f; background: #fff7eb; color: #9a4c16; }
+.layout { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 16px; align-items: start; }
+.sidebar, .editor { border: 1px solid #dce7eb; border-radius: 14px; background: white; overflow: hidden; }
+.sidebar { position: sticky; top: 174px; }
+.search { display: flex; align-items: center; gap: 9px; margin: 12px; padding: 9px 11px; border: 1px solid #c8dce4; border-radius: 9px; color: #0086a5; }
+.search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #002b49; font-size: 13px; }
+.activityList { max-height: calc(100vh - 290px); overflow-y: auto; border-top: 1px solid #edf2f4; }
+.activityList > button { display: flex; flex-direction: column; gap: 7px; width: 100%; padding: 13px 14px; border: 0; border-bottom: 1px solid #edf2f4; background: white; color: inherit; text-align: left; }
+.activityList > button[data-active="true"] { background: #e9f8fb; box-shadow: inset 4px 0 #008daf; }
+.activityIdentity { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; width: 100%; }
+.activityIdentity strong { font-size: 13px; }
+.activityIdentity small { color: #547182; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.ok, .warning { display: inline-flex; align-items: center; gap: 5px; width: fit-content; font-size: 10px; font-weight: 700; }
+.ok { color: #087857; }
+.warning { color: #a95919; }
+.loading, .empty { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 120px; padding: 24px; color: #647b88; font-size: 13px; text-align: center; }
+.editor { padding: 20px; }
+.editorTitle { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 17px; border-bottom: 1px solid #e5edef; }
+.editorTitle > div > span { color: #008daf; font-size: 10px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.editorTitle h3 { margin-top: 3px; font-size: 21px; }
+.pricingControls { display: grid; grid-template-columns: minmax(220px, 260px) minmax(280px, 420px); gap: 18px; align-items: start; padding: 18px 0; }
+.primaryPrice { display: block; }
+.primaryPrice > span, .modeControl > span, .priceLine label > span { display: block; margin-bottom: 6px; color: #647b88; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.primaryPrice > div { display: flex; align-items: center; gap: 10px; max-width: 260px; padding: 11px 13px; border: 1px solid #9fcbd7; border-radius: 10px; color: #008daf; background: #f6fcfd; }
+.primaryPrice input { width: 100%; border: 0; outline: 0; background: transparent; color: #002b49; font-size: 18px; font-weight: 800; }
+.modeControl select { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #9fcbd7; border-radius: 10px; outline: 0; background: #f6fcfd; color: #002b49; font-size: 13px; font-weight: 750; }
+.modeControl small { display: block; margin-top: 6px; color: #647b88; font-size: 11px; }
+.linesHeading { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 0; border-top: 1px solid #e5edef; }
+.linesHeading h4 { font-size: 16px; }
+.linesHeading p { margin-top: 3px; color: #647b88; font-size: 12px; }
+.linesHeading button { border: 0; background: #e7f7fa; color: #007e9e; }
+.priceLines { display: flex; flex-direction: column; gap: 10px; }
+.priceLine { padding: 14px; border: 1px solid #dce7eb; border-radius: 11px; background: #f9fbfc; }
+.lineMain, .lineDetails { display: grid; gap: 10px; }
+.lineMain { grid-template-columns: minmax(0, 1fr) 150px auto; align-items: end; }
+.lineDetails { grid-template-columns: 190px 130px minmax(0, 1fr); margin-top: 11px; }
+.priceLine input, .priceLine select { width: 100%; min-height: 39px; padding: 8px 10px; border: 1px solid #cbdde4; border-radius: 8px; background: white; color: #002b49; font-size: 13px; outline: 0; }
+.priceLine select:disabled { cursor: not-allowed; background: #edf4f6; color: #547182; opacity: 1; }
+.priceLine input:focus, .priceLine select:focus { border-color: #008daf; box-shadow: 0 0 0 3px #00a9ce14; }
+.lineMain > button { display: grid; place-items: center; width: 39px; height: 39px; border: 0; border-radius: 8px; background: #fff0f1; color: #c2414f; }
+.footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; padding-top: 16px; border-top: 1px solid #e5edef; }
+.footer p { color: #647b88; font-size: 12px; }
+.save { border: 0; background: #002b49; color: white; }
+.save:disabled, .secondary:disabled { cursor: wait; opacity: .6; }
+@media (hover:hover) { .activityList > button:hover { background: #f4fafb; } .headerActions a:hover, .linesHeading button:hover { background: #d5f1f6; } .save:hover { background: #007e9e; } }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .sidebar { position: static; } .activityList { max-height: 300px; } }
+@media (max-width: 640px) { .summary, .pricingControls { grid-template-columns: 1fr; } .editor { padding: 15px; } .editorTitle, .linesHeading, .footer { align-items: flex-start; flex-direction: column; } .lineMain, .lineDetails { grid-template-columns: 1fr; } .lineMain > button { width: 100%; } .save { width: 100%; } }

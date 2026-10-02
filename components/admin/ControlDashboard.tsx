@@ -7,7 +7,7 @@ import { expandAgendaEvents, parisToday, type AgendaSource } from '@/lib/editori
 import { CharSessionDoc, PlanningMarche, SpotStatus, WeeklyPlanning } from '@/types';
 import styles from './ControlDashboard.module.css';
 
-export type ControlTab = 'HOME' | 'DASHBOARD' | 'CHAR' | 'COCKPIT' | 'STAGES' | 'FICHES' | 'MARCHE' | 'AGENDA' | 'SIGNAGE';
+export type ControlTab = 'HOME' | 'DASHBOARD' | 'CHAR' | 'COCKPIT' | 'STAGES' | 'FICHES' | 'PRICING' | 'MARCHE' | 'AGENDA' | 'SIGNAGE';
 export type CharMode = 'reserve' | 'plan' | 'follow';
 export type ControlAction = 'take-call' | 'new-session' | 'new-stage-week' | 'new-message' | 'new-article' | 'new-event' | 'new-slide' | 'new-marche-period';
 

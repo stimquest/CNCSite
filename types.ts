@@ -54,8 +54,12 @@ export interface WeatherData {
 }
 
 export interface ActivityPrice {
+  _key?: string;
   label: string;
   value: string;
+  pricingSection?: 'courses' | 'locations' | 'hidden';
+  duration?: string;
+  details?: string;
 }
 
 export interface Activity {
@@ -68,6 +72,7 @@ export interface Activity {
   logistique: string[];
   price?: string;
   prices: ActivityPrice[];
+  pricingLastConfirmedAt?: string;
   image: string;
   gallery?: string[];
   isTideDependent: boolean;

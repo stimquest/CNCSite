@@ -73,8 +73,17 @@ export default defineType({
               type: 'string',
             },
             {
+              name: 'secondWeekDiscountPercent',
+              title: 'Remise à partir de la 2e semaine (%)',
+              type: 'number',
+              description: 'Règle générale affichée à part des grilles tarifaires. Aucun prix de deuxième semaine n’est calculé ou inventé dans le tableau.',
+              initialValue: 5,
+              validation: (Rule) => Rule.min(0).max(100),
+            },
+            {
               name: 'rows',
-              title: 'Lignes',
+              title: 'Anciennes lignes tarifaires (compatibilité)',
+              description: 'Données historiques. Les tarifs détaillés des stages sont maintenant lus depuis la grille de chaque stage.',
               type: 'array',
               of: [{
                 type: 'object',
@@ -82,8 +91,7 @@ export default defineType({
                 fields: [
                   { name: 'activity', title: 'Activité', type: 'string' },
                   { name: 'ages', title: 'Âges', type: 'string' },
-                  { name: 'price1', title: '1ère semaine', type: 'string' },
-                  { name: 'price2', title: '2ème semaine (−5%)', type: 'string' },
+                  { name: 'price1', title: 'Ancien tarif de référence', type: 'string' },
                 ],
                 preview: { select: { title: 'activity', subtitle: 'ages' } },
               }],

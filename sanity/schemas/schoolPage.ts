@@ -98,7 +98,7 @@ export default defineType({
                     { name: 'title', type: 'text', rows: 2, title: 'Titre narratif' },
                     { name: 'officialName', type: 'string', title: 'Nom officiel du stage' },
                     { name: 'age', type: 'string', title: 'Tranche d\'âge' },
-                    { name: 'price', type: 'string', title: 'Prix (ex: 165€)' },
+                    { name: 'price', type: 'string', title: 'Prix principal / résumé (ex: 165€)', description: 'Prix court utilisé comme résumé. Si une grille détaillée existe, ce sont ses lignes qui sont affichées sur la page Tarifs.' },
                     { name: 'hook', type: 'text', rows: 3, title: 'Accroche (Citation)' },
                     { name: 'description', type: 'basicRichText', title: 'Description courte (Colonnes)' },
                     { name: 'longDescription', type: 'basicRichText', title: 'Description longue (Détails)' },
@@ -109,7 +109,8 @@ export default defineType({
                     {
                         name: 'pricingTiers',
                         type: 'array',
-                        title: 'Grille Tarifaire',
+                        title: 'Grille tarifaire détaillée',
+                        description: 'Une ligne par formule réelle (ex. licencié, non licencié, tout compris). L’ordre des lignes ne représente pas la première ou la deuxième semaine.',
                         of: [{
                             type: 'object',
                             fields: [

@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
     Clock, MapPin, Phone, Mail, Download,
     FileText, CheckCircle2, GraduationCap,
@@ -29,11 +29,32 @@ interface InfosData {
         eyebrow?: string;
         title: string;
         pdfUrl?: string;
-        stages:    { label?: string; note?: string; rows: Array<{ activity: string; ages: string; price1: string; price2: string }> };
-        courses:   { label?: string; rows: Array<{ activity: string; duration: string; details: string; price: string }> };
-        locations: { label?: string; rows: Array<{ support: string; type: string; duration: string; price: string }> };
+        stages:    { label?: string; note?: string; secondWeekDiscountPercent?: number; rows: Array<{ activity: string; ages: string; price1: string }> };
+        courses:   { label?: string };
+        locations: { label?: string };
         footerNote?: any[];
     };
+    catalogActivities?: Array<{
+        id: string;
+        title: string;
+        duration?: string;
+        pricingMode?: 'courses' | 'locations' | 'mixed' | 'hidden';
+        prices?: Array<{
+            _key?: string;
+            label: string;
+            value: string;
+            pricingSection?: 'courses' | 'locations' | 'hidden';
+            duration?: string;
+            details?: string;
+        }>;
+    }>;
+    catalogStages?: Array<{
+        id: string;
+        officialName: string;
+        age?: string;
+        price?: string;
+        pricingTiers?: Array<{ label: string; value: string }>;
+    }>;
 }
 
 const CATEGORIES = [
@@ -60,7 +81,14 @@ const formatPrice = (price: string) => {
 };
 
 // --- HELPERS TABLEAU ───────────────────────────────────────────────────────
-type CourseRow = InfosData['pricing']['courses']['rows'][number];
+type CourseRow = { activity: string; duration: string; details: string; price: string };
+type LocationRow = { support: string; type: string; duration: string; price: string };
+type StageTariff = { label: string; value: string };
+type StageDisplayRow = {
+    activity: string;
+    ages: string;
+    tariffs: StageTariff[];
+};
 
 const Th: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
     <th className={`px-4 py-4 text-left text-[10px] font-black uppercase tracking-[0.24em] text-slate-400 border-b border-slate-100 ${className}`}>
@@ -109,9 +137,16 @@ const groupCourseRows = (rows: CourseRow[]) => {
 };
 
 // ── Onglet 1 : Stages ──────────────────────────────────────────────────────
-const TableStages: React.FC<{ rows: InfosData['pricing']['stages']['rows']; note?: string }> = ({ rows, note }) => (
+const TableStages: React.FC<{ rows: StageDisplayRow[]; note?: string; secondWeekDiscountPercent?: number }> = ({ rows, note, secondWeekDiscountPercent = 5 }) => (
     <TableShell icon={<GraduationCap size={22} />} eyebrow="Stages nautiques" note={note}>
         <div className="px-4 pb-4 pt-2 md:px-6 md:pb-6">
+            <div className="mt-4 flex items-start gap-3 rounded-2xl border border-turquoise/20 bg-turquoise/10 px-4 py-3 text-sm text-abysse md:mx-0 md:px-5">
+                <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-turquoise text-xs font-black text-white">%</span>
+                <p className="leading-relaxed">
+                    <strong>−{secondWeekDiscountPercent}% dès la deuxième semaine de stage.</strong>
+                </p>
+            </div>
+
             {/* Desktop Table View */}
             <div className="hidden md:block">
                 <div className="overflow-x-auto">
@@ -120,8 +155,7 @@ const TableStages: React.FC<{ rows: InfosData['pricing']['stages']['rows']; note
                         <tr>
                                 <Th className="border-0 pl-4 text-slate-300">Activité</Th>
                                 <Th className="border-0 text-slate-300">Âges</Th>
-                                <Th className="border-0 text-right text-slate-300">1ère semaine</Th>
-                                <Th className="border-0 pr-4 text-right text-slate-300">2ème semaine&nbsp;(−5%)</Th>
+                                <Th className="border-0 pr-4 text-right text-slate-300">Formules & tarifs</Th>
                         </tr>
                         </thead>
                         <tbody>
@@ -138,15 +172,15 @@ const TableStages: React.FC<{ rows: InfosData['pricing']['stages']['rows']; note
                                     <td className="border border-r-0 border-l-0 border-slate-100 bg-white px-4 py-5 align-middle shadow-[0_18px_40_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
                                         <span className="font-medium text-slate-500">{row.ages}</span>
                                     </td>
-                                    <td className="border border-r-0 border-l-0 border-slate-100 bg-white px-4 py-5 text-right align-middle shadow-[0_18px_40_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
-                                        <span className="inline-flex rounded-2xl bg-[#f7f2ea] px-4 py-3 text-base font-black tabular-nums text-abysse">
-                                            {formatPrice(row.price1)}
-                                        </span>
-                                    </td>
-                                    <td className="rounded-r-3xl border border-l-0 border-slate-100 bg-white px-5 py-5 text-right align-middle shadow-[0_18px_40_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
-                                        <span className="inline-flex rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base font-black tabular-nums text-abysse shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
-                                            {formatPrice(row.price2)}
-                                        </span>
+                                    <td className="rounded-r-3xl border border-l-0 border-slate-100 bg-white px-5 py-5 align-middle shadow-[0_18px_40_rgba(15,23,42,0.45)] transition-all group-hover:border-slate-200 group-hover:bg-[#faf7f1]">
+                                        <div className="flex flex-wrap justify-end gap-2">
+                                            {row.tariffs.map((tariff, tariffIndex) => (
+                                                <div key={`${tariff.label}-${tariffIndex}`} className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-[#f7f2ea] px-4 py-3">
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">{tariff.label}</span>
+                                                    <span className="text-base font-black tabular-nums text-abysse">{formatPrice(tariff.value)}</span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -167,15 +201,13 @@ const TableStages: React.FC<{ rows: InfosData['pricing']['stages']['rows']; note
                                 <span className="text-abysse">{row.ages}</span>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 bg-slate-50/50">
-                            <div className="p-4 border-r border-slate-100 flex flex-col items-center text-center">
-                                <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-2">1ère semaine</span>
-                                <span className="text-lg font-black text-abysse tabular-nums">{formatPrice(row.price1)}</span>
-                            </div>
-                            <div className="p-4 flex flex-col items-center text-center">
-                                <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-2">Semaine sup. (−5%)</span>
-                                <span className="text-lg font-black text-abysse tabular-nums">{formatPrice(row.price2)}</span>
-                            </div>
+                        <div className="grid gap-2 bg-slate-50/50 p-4">
+                            {row.tariffs.map((tariff, tariffIndex) => (
+                                <div key={`${tariff.label}-${tariffIndex}`} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white px-4 py-3">
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">{tariff.label}</span>
+                                    <span className="text-lg font-black text-abysse tabular-nums">{formatPrice(tariff.value)}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 ))}
@@ -185,8 +217,12 @@ const TableStages: React.FC<{ rows: InfosData['pricing']['stages']['rows']; note
 );
 
 // ── Onglet 2 : Séances & Cours ─────────────────────────────────────────────
-const TableCourses: React.FC<{ rows: InfosData['pricing']['courses']['rows'] }> = ({ rows }) => {
+const TableCourses: React.FC<{ rows: CourseRow[] }> = ({ rows }) => {
     const groupedRows = groupCourseRows(rows);
+
+    if (groupedRows.length === 0) {
+        return <div className="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center text-sm font-bold text-slate-500">Aucun tarif de séance ou de cours n’est actuellement publié.</div>;
+    }
 
     return (
         <div className="grid gap-x-10 gap-y-12 xl:grid-cols-2">
@@ -230,9 +266,12 @@ const TableCourses: React.FC<{ rows: InfosData['pricing']['courses']['rows'] }> 
 };
 
 // ── Onglet 3 : Locations ───────────────────────────────────────────────────
-const TableLocations: React.FC<{ rows: InfosData['pricing']['locations']['rows'] }> = ({ rows }) => (
+const TableLocations: React.FC<{ rows: LocationRow[] }> = ({ rows }) => (
     <TableShell icon={<Clock size={22} />} eyebrow="Locations & supports">
         <div className="px-2 pb-4 pt-2 md:px-6 md:pb-6">
+            {rows.length === 0 ? (
+                <p className="px-4 py-10 text-center text-sm font-bold text-slate-500">Aucun tarif de location n’est actuellement publié.</p>
+            ) : <>
             {/* Desktop View */}
             <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full border-separate border-spacing-0">
@@ -275,6 +314,7 @@ const TableLocations: React.FC<{ rows: InfosData['pricing']['locations']['rows']
                     </div>
                 ))}
             </div>
+            </>}
         </div>
     </TableShell>
 );
@@ -282,8 +322,50 @@ const TableLocations: React.FC<{ rows: InfosData['pricing']['locations']['rows']
 // --- COMPONENT: PRICING WIDGET ---
 type TabKey = 'stages' | 'courses' | 'locations';
 
-const PricingWidget: React.FC<{ data?: InfosData['pricing'] }> = ({ data }) => {
+const PricingWidget: React.FC<{ data?: InfosData['pricing']; activities?: InfosData['catalogActivities']; stages?: InfosData['catalogStages'] }> = ({ data, activities = [], stages = [] }) => {
     const [activeTab, setActiveTab] = useState<TabKey>('stages');
+
+    const syncedPricing = useMemo(() => {
+        const stageRows: StageDisplayRow[] = stages.filter(stage => stage.officialName && (stage.price || stage.pricingTiers?.some(tier => tier.value))).map(stage => {
+            const detailedTariffs = (stage.pricingTiers || [])
+                .filter(tier => tier.value?.trim())
+                .map(tier => ({ label: tier.label?.trim() || 'Tarif', value: tier.value }));
+            return {
+                activity: stage.officialName,
+                ages: stage.age || '',
+                tariffs: detailedTariffs.length > 0
+                    ? detailedTariffs
+                    : [{ label: 'Tarif semaine', value: stage.price || '' }],
+            };
+        });
+        const courseRows = activities.flatMap(activity => (activity.prices || []).filter(price => (activity.pricingMode === 'mixed' ? price.pricingSection : activity.pricingMode || price.pricingSection) === 'courses').map(price => ({
+            activity: activity.title,
+            duration: price.duration || activity.duration || '',
+            details: price.details || price.label,
+            price: price.value,
+        })));
+        const locationRows = activities.flatMap(activity => (activity.prices || []).filter(price => (activity.pricingMode === 'mixed' ? price.pricingSection : activity.pricingMode || price.pricingSection) === 'locations').map(price => ({
+            support: activity.title,
+            type: price.label,
+            duration: price.duration || activity.duration || '',
+            price: price.value,
+        })));
+        const legacyStageRows: StageDisplayRow[] = (data?.stages?.rows || [])
+            .filter(row => row.price1)
+            .map(row => ({
+                activity: row.activity,
+                ages: row.ages,
+                tariffs: [{ label: 'Tarif semaine', value: row.price1 }],
+            }));
+        return {
+            // La fiche École de voile est la source de vérité. L'ancien tableau
+            // n'est utilisé qu'en secours, jamais fusionné avec les stages actuels.
+            stages: stageRows.length > 0 ? stageRows : legacyStageRows,
+            // CNC Control est l'unique source pour ces deux onglets.
+            courses: courseRows,
+            locations: locationRows,
+        };
+    }, [activities, stages, data?.stages?.rows]);
 
     const tabs: { key: TabKey; label: string }[] = [
         { key: 'stages',    label: data?.stages?.label    || 'Stages nautiques' },
@@ -332,13 +414,17 @@ const PricingWidget: React.FC<{ data?: InfosData['pricing'] }> = ({ data }) => {
                 {/* CONTENU */}
                 <div className="animate-in fade-in duration-500">
                     {activeTab === 'stages' && (
-                        <TableStages rows={data?.stages?.rows ?? []} note={data?.stages?.note} />
+                        <TableStages
+                            rows={syncedPricing.stages}
+                            note={data?.stages?.note}
+                            secondWeekDiscountPercent={data?.stages?.secondWeekDiscountPercent ?? 5}
+                        />
                     )}
                     {activeTab === 'courses' && (
-                        <TableCourses rows={data?.courses?.rows ?? []} />
+                        <TableCourses rows={syncedPricing.courses} />
                     )}
                     {activeTab === 'locations' && (
-                        <TableLocations rows={data?.locations?.rows ?? []} />
+                        <TableLocations rows={syncedPricing.locations} />
                     )}
                 </div>
 
@@ -671,7 +757,7 @@ export default function InfosClient({ initialData }: { initialData?: InfosData }
                 </div>
             </section>
 
-            <PricingWidget data={initialData?.pricing} />
+            <PricingWidget data={initialData?.pricing} activities={initialData?.catalogActivities} stages={initialData?.catalogStages} />
 
             <div className="h-32 bg-white"></div>
         </div>

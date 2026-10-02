@@ -135,7 +135,7 @@ export const ActivityFinder: React.FC<ActivityFinderProps> = ({ age, category, f
                     options={[
                         { value: null, label: 'Tous les formats' },
                         { value: 'reservation', label: 'Séance (à l’unité)' },
-                        { value: 'stage', label: 'Stage (plusieurs jours)' },
+                        { value: 'stage', label: 'Stages vacances (École de voile)' },
                         { value: 'rental', label: 'Location / Libre' },
                     ]}
                 />
@@ -147,7 +147,7 @@ export const ActivityFinder: React.FC<ActivityFinderProps> = ({ age, category, f
                         className="w-full md:w-auto px-8 py-5 bg-linear-to-r from-abysse to-turquoise text-white rounded-3xl text-[11px] font-black uppercase tracking-widest hover:shadow-lg hover:shadow-turquoise/30 transition-all flex items-center justify-center gap-2 transform hover:scale-105 whitespace-nowrap"
                     >
                         <Search size={16} />
-                        Voir {resultCount} résultat{resultCount > 1 ? 's' : ''}
+                        {format === 'stage' ? 'Voir les stages vacances' : `Voir ${resultCount} résultat${resultCount > 1 ? 's' : ''}`}
                     </button>
                     {hasFilters && (
                         <button onClick={onReset} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-turquoise">

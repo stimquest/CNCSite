@@ -27,7 +27,7 @@ const AGENDA_QUERY = `*[(_type == "agendaEvent" || (_type == "article" && (count
 export const queries = {
   activities: `*[_type == "activity" && !(_id in path('drafts.**'))] | order(order asc, title asc) {
     id, title, category, description, pedagogie, experience, logistique, price,
-    "prices": prices[]{ label, value },
+    "prices": prices[]{ _key, label, value, pricingSection, duration, details },
     "image": image.asset->url,
     "gallery": gallery[].asset->url,
     isTideDependent, bookingUrl, duration, minAge, accroche, planningNote,
@@ -209,10 +209,17 @@ export const queries = {
     "documents": documents[]{ title, description, category, "url": file.asset->url },
     "pricing": pricing {
       eyebrow, title, "pdfUrl": pricingFile.asset->url,
-      "stages": stages { label, note, rows[] { activity, ages, price1, price2 } },
-      "courses": courses { label, rows[] { activity, duration, details, price } },
-      "locations": locations { label, rows[] { support, type, duration, price } },
+      "stages": stages { label, note, secondWeekDiscountPercent, rows[] { activity, ages, price1 } },
+      "courses": courses { label },
+      "locations": locations { label },
       footerNote
+    },
+    "catalogActivities": *[_type == "activity" && !(_id in path('drafts.**'))] | order(order asc, title asc) {
+      id, title, duration, pricingMode,
+      "prices": prices[defined(label) && label != "" && defined(value) && value != ""]{ _key, label, value, pricingSection, duration, details }
+    },
+    "catalogStages": *[_type == "schoolPage" && !(_id in path('drafts.**'))][0].stages[]{
+      id, officialName, age, price, "pricingTiers": pricingTiers[]{ label, value }
     }
   }`,
   leSpotPage: `*[_type == "leSpotPage"][0] {

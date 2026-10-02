@@ -211,10 +211,11 @@ function StageForm({ stage, onChange }: { stage: SchoolStage; onChange: (patch: 
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
                     <span className="text-[10px] font-black uppercase tracking-widest text-abysse">Tarifs</span>
                     <div className="mt-3">
-                        <label className={labelClass}>Prix principal</label>
+                        <label className={labelClass}>Prix principal / résumé</label>
                         <input type="text" value={stage.price || ''} onChange={(e) => onChange({ price: e.target.value })} className={`${inputClass} bg-white`} placeholder="165 €" />
                     </div>
                     <div className="mt-3 space-y-2">
+                        <p className="text-[11px] leading-relaxed text-slate-500">Grille détaillée : une ligne par formule réelle. La remise de deuxième semaine est gérée séparément.</p>
                         {tiers.map((tier, i) => (
                             <div key={tier._key || i} className="flex gap-2">
                                 <input type="text" value={tier.label || ''} onChange={(e) => onChange({ pricingTiers: tiers.map((t, j) => j === i ? { ...t, label: e.target.value } : t) })} className="flex-1 p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-turquoise" placeholder="Libellé (ex: Licencié)" />
