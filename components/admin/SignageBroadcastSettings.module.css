@@ -1,0 +1,24 @@
+.root { min-width: 0; }
+.library { display: flex; flex-wrap: wrap; gap: 8px; }
+.media { display: flex; min-width: 0; max-width: 100%; border: 1px solid #dce5ee; border-radius: 8px; background: #fff; }
+.mediaDrag { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; padding: 7px 10px; cursor: grab; touch-action: none; text-align: left; }
+.mediaDrag:active, .grip:active { cursor: grabbing; }
+.mediaIcon { display: grid; width: 26px; height: 26px; flex-shrink: 0; place-items: center; color: #002b49; }
+.thumbnail { width: 26px; height: 26px; flex-shrink: 0; object-fit: cover; border-radius: 4px; }
+.add { display: grid; place-items: center; flex-shrink: 0; width: 36px; border-left: 1px solid #dce5ee; color: #002b49; }
+.add:hover { background: #e6f6fa; }
+.track { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; min-height: 110px; padding: 12px; border: 1px solid #dce5ee; border-radius: 10px; background: #f8fafc; }
+.block { flex-grow: 1; max-width: 100%; min-width: 0; border: 1px solid #c7dce6; border-radius: 9px; background: #fff; }
+.selected { border-color: #00a9ce; box-shadow: 0 0 0 2px #00a9ce; background: #e6f6fa; }
+.blockTop { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; color: #64748b; font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.grip { padding: 4px; cursor: grab; touch-action: none; }
+.selectBlock { display: block; width: 100%; min-height: 64px; padding: 4px 10px 10px; text-align: left; }
+.dropBefore { box-shadow: -5px 0 0 #00a9ce; }
+.dropEnd { border-color: #00a9ce; background: #e6f6fa; }
+.inspector { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 14px; border: 1px solid #cbd5e1; border-radius: 10px; background: #f8fafc; }
+.inspector > span { flex: 1 1 170px; }
+.tool { display: inline-flex; align-items: center; gap: 6px; padding: 8px; border: 1px solid #dce5ee; border-radius: 7px; background: #fff; font-size: 12px; }
+.tool:disabled, .add:disabled, .mediaDrag:disabled { opacity: .4; cursor: default; }
+.unavailable { opacity: .5; }
+.ghost { position: fixed; z-index: 100; display: flex; align-items: center; gap: 8px; max-width: 220px; padding: 10px 14px; pointer-events: none; border-radius: 9px; background: #002b49; color: #fff; box-shadow: 0 8px 20px #002b4926; font-size: 12px; }
+.root button:focus-visible, .root a:focus-visible, .root input:focus-visible { outline: 2px solid #00a9ce; outline-offset: 3px; }

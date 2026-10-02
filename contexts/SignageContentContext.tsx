@@ -6,11 +6,13 @@ import { MOCK_WEATHER } from '@/constants';
 import { client } from '@/lib/sanity';
 import { fetchRealtimeWeather } from '@/lib/weather';
 import { SignageSlide, TideData, WeatherData } from '@/types';
+import { DEFAULT_SIGNAGE_SETTINGS, normalizeSignageSettings, type SignageSettings } from '@/lib/signage';
 
 interface SignageContentContextType {
   weather: WeatherData;
   tides: TideData[];
   signageSlides: SignageSlide[];
+  signageSettings: SignageSettings;
 }
 
 const SIGNAGE_SLIDES_QUERY = `*[_type == "signageSlide" && isActive == true] | order(order asc) {
@@ -39,10 +41,14 @@ export const SignageContentProvider: React.FC<{ children: React.ReactNode }> = (
   const [weather, setWeather] = useState<WeatherData>(MOCK_WEATHER);
   const [tides, setTides] = useState<TideData[]>([]);
   const [signageSlides, setSignageSlides] = useState<SignageSlide[]>([]);
+  const [signageSettings, setSignageSettings] = useState(DEFAULT_SIGNAGE_SETTINGS);
 
   const refreshData = React.useCallback(async () => {
     try {
       await Promise.all([
+        fetch('/api/signage', { cache: 'no-store' })
+          .then(async response => { if (response.ok) setSignageSettings(normalizeSignageSettings(await response.json())); })
+          .catch(() => { /* Conserver les derniers réglages en cas de coupure. */ }),
         fetchRealtimeWeather()
           .then((data) => {
             if (!data) return;
@@ -161,7 +167,7 @@ export const SignageContentProvider: React.FC<{ children: React.ReactNode }> = (
           try {
             const { projectId } = client.config();
             if (!projectId) return;
-            const slides = await client.fetch<SignageSlide[]>(SIGNAGE_SLIDES_QUERY);
+            const slides = await client.withConfig({ useCdn: false }).fetch<SignageSlide[]>(SIGNAGE_SLIDES_QUERY, {}, { cache: 'no-store' });
             if (slides) setSignageSlides(slides);
           } catch (err) {
             console.warn('Signage slides unavailable:', err);
@@ -185,7 +191,8 @@ export const SignageContentProvider: React.FC<{ children: React.ReactNode }> = (
     weather,
     tides,
     signageSlides,
-  }), [weather, tides, signageSlides]);
+    signageSettings,
+  }), [weather, tides, signageSlides, signageSettings]);
 
   return (
     <SignageContentContext.Provider value={value}>

@@ -23,6 +23,7 @@ import { natureEntity } from './natureEntity';
 import homePage from "./homePage";
 import infosPage from "./infosPage";
 import { signageSlide } from './signageSlide';
+import { signageSettings } from './signageSettings';
 import { basicRichText } from './basicRichText';
 import { dicoWord } from './dicoWord';
 import { bookingTemplate } from './bookingTemplate';
@@ -66,6 +67,7 @@ export const schemaTypes = [
   naturePage,
   natureEntity,
   signageSlide,
+  signageSettings,
   dicoWord,
   bookingTemplate,
   article,

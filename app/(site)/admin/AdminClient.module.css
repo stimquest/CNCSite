@@ -1,0 +1,207 @@
+.root :where(h1, h2, h3, h4, h5, h6):not([data-dashboard-display]) {
+    font-family: var(--font-sans), sans-serif;
+    font-style: normal;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: normal;
+    line-height: 1.3;
+    padding-right: 0;
+    margin-right: 0;
+}
+
+.root [data-admin-page-header] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.root [data-admin-page-header][data-admin-header-in-flow] { margin-bottom: 0; }
+.root [data-admin-page-header][data-admin-header-compact] { margin-bottom: 10px; }
+
+.root [data-admin-page-title] {
+    margin: 0;
+    color: #002b49;
+    font-family: var(--font-sans), sans-serif;
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: normal;
+    line-height: 1.3;
+    text-transform: none;
+}
+
+.root [data-admin-page-header] p[data-admin-page-description] {
+    margin-top: 5px;
+    color: #547182;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: normal;
+    line-height: 1.4;
+    text-transform: none;
+}
+
+.controlNav {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 12px;
+    background: #f1f5f7;
+}
+
+.navItem,
+.navSummary {
+    display: inline-flex;
+    min-height: 38px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 12px;
+    border-radius: 8px;
+    color: #6d8490;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    line-height: 1.15;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.navItem:hover,
+.navSummary:hover {
+    color: #002b49;
+    background: #ffffffa8;
+}
+
+.navItem:active,
+.navSummary:active {
+    transform: scale(.98);
+}
+
+.navActive,
+.navParentActive {
+    color: #002b49;
+    background: #fff;
+    box-shadow: 0 2px 7px #00334f12;
+}
+
+.navCockpit {
+    color: #007e9e;
+    background: #dff4f7;
+}
+
+.navCockpit:hover,
+.navCockpitActive {
+    color: #fff;
+    background: #007e9e;
+}
+
+.navGroup {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.navSummary {
+    list-style: none;
+    user-select: none;
+}
+
+.navSummary::-webkit-details-marker {
+    display: none;
+}
+
+.navChevron {
+    transition: transform 160ms ease;
+}
+
+.navGroup[open] .navChevron {
+    transform: rotate(180deg);
+}
+
+.navMenu {
+    position: absolute;
+    z-index: 50;
+    top: calc(100% + 9px);
+    left: 0;
+    display: grid;
+    width: min(300px, calc(100vw - 32px));
+    gap: 3px;
+    padding: 7px;
+    border: 1px solid #d4e3e8;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 16px 38px #00334f24;
+}
+
+.navMenuRight {
+    right: 0;
+    left: auto;
+}
+
+.navMenu button {
+    display: grid;
+    gap: 3px;
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 8px;
+    color: #315568;
+    text-align: left;
+    transition: color 150ms ease, background 150ms ease;
+}
+
+.navMenu button:hover,
+.navMenu .navSubActive {
+    color: #002b49;
+    background: #eaf6f8;
+}
+
+.navMenu strong {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.navMenu small {
+    color: #748b96;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.controlNav :where(button, summary):focus-visible {
+    outline: 2px solid #008daf;
+    outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+    .controlNav {
+        flex-wrap: wrap;
+    }
+
+    .navItem {
+        flex: 1 1 auto;
+    }
+
+    .navGroup {
+        flex: 1 1 calc(50% - 4px);
+    }
+
+    .navGroup[open] {
+        flex-basis: 100%;
+    }
+
+    .navSummary {
+        width: 100%;
+    }
+
+    .navMenu {
+        position: static;
+        width: 100%;
+        margin-top: 4px;
+        box-shadow: inset 0 0 0 1px #edf3f5;
+    }
+}

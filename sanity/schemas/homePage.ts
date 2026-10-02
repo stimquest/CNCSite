@@ -196,6 +196,8 @@ export default defineType({
             group: 'campus',
             fields: [
                 defineField({ name: 'tagline', title: 'Petit Titre (Tagline)', type: 'string', initialValue: 'Campus Nautique' }),
+                defineField({ name: 'compactTitle', title: 'Titre sur l’accueil', type: 'string', initialValue: 'Un campus ouvert sur la mer' }),
+                defineField({ name: 'intro', title: 'Introduction sur l’accueil', type: 'text', rows: 3, description: 'Expliquer le rôle de ces parcours après la séquence animée.' }),
                 defineField({ name: 'titlePart1', title: 'Titre - Partie 1', type: 'string', initialValue: "Plus qu'un Club," }),
                 defineField({ name: 'titlePart2', title: 'Titre - Partie 2 (Couleur)', type: 'string', initialValue: 'une Institution.' }),
                 defineField({
@@ -207,12 +209,13 @@ export default defineType({
                             type: 'object',
                             fields: [
                                 defineField({ name: 'label', title: 'Label', type: 'string' }),
+                                defineField({ name: 'audience', title: 'À qui s’adresse ce parcours ?', type: 'string' }),
                                 defineField({ name: 'title', title: 'Titre', type: 'string' }),
                                 defineField({ name: 'titleSpan', title: 'Titre (Couleur)', type: 'string' }),
                                 defineField({ name: 'proof', title: 'Preuve (Court)', type: 'string' }),
                                 defineField({ name: 'desc', title: 'Description', type: 'text', rows: 3 }),
                                 defineField({ name: 'image', title: 'Image', type: 'image', options: { hotspot: true } }),
-                                defineField({ name: 'link', title: 'Lien', type: 'string' }),
+                                defineField({ name: 'link', title: 'Lien', type: 'string', description: 'Viser la section correspondante : /ecole-voile#ecole-annee, /ecole-voile#formations-pro ou /nature#estran.' }),
                                 defineField({ name: 'linkLabel', title: 'Texte du Lien', type: 'string' }),
                                 defineField({
                                     name: 'themeColor',

@@ -12,6 +12,7 @@ const DRAFT_ID = `drafts.${DOC_ID}`;
 const STAGE_FIELDS = [
     '_key', 'id', 'title', 'officialName', 'age', 'price', 'hook', 'description', 'longDescription',
     'logistique', 'image', 'color', 'bgColor', 'pricingTiers', 'registrationUrl', 'showOnHome',
+    'availabilityStartMonth', 'availabilityEndMonth',
 ] as const;
 
 const cleanStage = (input: Record<string, unknown>) => {
@@ -38,11 +39,11 @@ export async function GET() {
     try {
         const serverClient = getServerWriteClient();
         const doc = await serverClient.fetch(`*[_id == $id][0]{
-            _rev,
+            _rev, campaigns[] { ..., "imageUrl": image.asset->url }, pinnedCampaignKey,
             stages[] { ..., "imageUrl": image.asset->url }
         }`, { id: DOC_ID });
         const hasDraft = !!(await serverClient.fetch(`defined(*[_id == $id][0]._id)`, { id: DRAFT_ID }));
-        return NextResponse.json({ stages: doc?.stages || [], rev: doc?._rev || null, hasDraft });
+        return NextResponse.json({ campaigns: doc?.campaigns || [], pinnedCampaignKey: doc?.pinnedCampaignKey || "", stages: doc?.stages || [], rev: doc?._rev || null, hasDraft });
     } catch (error) {
         console.error('School stages GET error', error);
         return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
@@ -52,20 +53,45 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const serverClient = getServerWriteClient();
-        const { stages, rev } = await req.json();
+        const { stages, rev, campaigns, pinnedCampaignKey } = await req.json();
         if (!Array.isArray(stages)) return NextResponse.json({ error: 'Stages manquants' }, { status: 400 });
 
         const cleaned = stages.map(cleanStage);
         const missing = cleaned.findIndex((s) => !s.officialName);
         if (missing >= 0) return NextResponse.json({ error: `Le stage n°${missing + 1} n'a pas de nom officiel` }, { status: 400 });
 
+        const updates: Record<string, unknown> = { stages: cleaned };
+        if (campaigns !== undefined) {
+            if (!Array.isArray(campaigns) || campaigns.length > 100) return NextResponse.json({ error: 'Campagnes invalides' }, { status: 400 });
+            const keys = new Set(cleaned.map(s => s._key));
+            const seen = new Set<string>();
+            const validDate = (s: unknown) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s)) && new Date(s).toISOString().slice(0, 10) === s;
+            for (const c of campaigns) {
+                if (!c || typeof c._key !== 'string' || !c._key || seen.has(c._key) || typeof c.title !== 'string' || !Array.isArray(c.stageKeys) || c.stageKeys.some((k: unknown) => !keys.has(k))) return NextResponse.json({ error: 'Une campagne contient une référence de stage invalide ou un identifiant en double.' }, { status: 400 });
+                seen.add(c._key);
+                if (c.enabled && (!c.title.trim() || !validDate(c.startDate) || !validDate(c.endDate) || !validDate(c.promotionStart) || c.endDate < c.startDate || c.promotionStart > c.endDate)) return NextResponse.json({ error: 'Renseignez le titre et des dates cohérentes pour chaque campagne active.' }, { status: 400 });
+                if (c.registrationUrl) {
+                    try { if (!['https:', 'http:'].includes(new URL(c.registrationUrl).protocol)) throw new Error(); }
+                    catch { return NextResponse.json({ error: 'Lien d’inscription invalide.' }, { status: 400 }); }
+                }
+            }
+            if (pinnedCampaignKey && !seen.has(pinnedCampaignKey)) return NextResponse.json({ error: 'Campagne sélectionnée introuvable.' }, { status: 400 });
+            updates.campaigns = campaigns.map(c => ({
+                _key: c._key, _type: 'stageCampaign', title: c.title.trim(), enabled: !!c.enabled,
+                startDate: c.startDate || '', endDate: c.endDate || '', promotionStart: c.promotionStart || '',
+                stageKeys: [...new Set(c.stageKeys)], description: String(c.description || ''), registrationUrl: c.registrationUrl || '',
+                ...(c.image?.asset?._ref ? { image: { _type: 'image', asset: { _type: 'reference', _ref: c.image.asset._ref } } } : {}),
+            }));
+            updates.pinnedCampaignKey = pinnedCampaignKey || '';
+        }
+
         let tx = serverClient.transaction().patch(DOC_ID, (p) => {
-            const patch = p.set({ stages: cleaned });
+            const patch = p.set(updates);
             return rev ? patch.ifRevisionId(rev) : patch;
         });
         // Un brouillon Studio ouvert écraserait nos changements à sa publication : on le garde aligné.
         const draftExists = await serverClient.getDocument(DRAFT_ID);
-        if (draftExists) tx = tx.patch(DRAFT_ID, (p) => p.set({ stages: cleaned }));
+        if (draftExists) tx = tx.patch(DRAFT_ID, (p) => p.set(updates));
 
         try {
             await tx.commit();
@@ -80,8 +106,8 @@ export async function POST(req: Request) {
         revalidatePath('/ecole-voile');
         revalidatePath('/activites');
         revalidatePath('/');
-        const fresh = await serverClient.fetch(`*[_id == $id][0]{ _rev, stages[] { ..., "imageUrl": image.asset->url } }`, { id: DOC_ID });
-        return NextResponse.json({ success: true, stages: fresh?.stages || [], rev: fresh?._rev || null });
+        const fresh = await serverClient.fetch(`*[_id == $id][0]{ _rev, campaigns[] { ..., "imageUrl": image.asset->url }, pinnedCampaignKey, stages[] { ..., "imageUrl": image.asset->url } }`, { id: DOC_ID });
+        return NextResponse.json({ success: true, campaigns: fresh?.campaigns || [], pinnedCampaignKey: fresh?.pinnedCampaignKey || "", stages: fresh?.stages || [], rev: fresh?._rev || null });
     } catch (error) {
         console.error('School stages POST error', error);
         return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });

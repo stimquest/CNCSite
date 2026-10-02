@@ -211,7 +211,7 @@ const NatureClient: React.FC<NatureClientProps> = ({ initialNatureData }) => {
             {/* 2. LE PHÉNOMÈNE DES MARÉES (Educational - GSAP Pinned) */}
             {/* 2. L'ESTRAN : COMPRENDRE LES MARÉES */}
             {/* 2. L'ESTRAN : COMPRENDRE LES MARÉES */}
-            <section className="py-24 bg-white educational-section" ref={estranRef}>
+            <section id="estran" className="scroll-mt-24 py-24 bg-white educational-section" ref={estranRef}>
                 <div className="container mx-auto px-6 max-w-325">
                     <div className="flex flex-col md:flex-row gap-16 items-start">
                         {/* Title Column */}

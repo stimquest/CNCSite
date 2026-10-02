@@ -22,6 +22,21 @@ export default defineType({
         }
     },
     fields: [
+        defineField({ name: 'pinnedCampaignKey', type: 'string', title: 'Campagne choisie sur l’accueil', group: 'stages', description: 'Gérée depuis l’administration du site. Vide = automatique.' }),
+        defineField({
+            name: 'campaigns', title: 'Campagnes de vacances', type: 'array', group: 'stages',
+            of: [{ type: 'object', name: 'stageCampaign', fields: [
+                { name: 'title', type: 'string', title: 'Titre' },
+                { name: 'enabled', type: 'boolean', title: 'Active', initialValue: false },
+                { name: 'promotionStart', type: 'date', title: 'Début de mise en avant' },
+                { name: 'startDate', type: 'date', title: 'Début des stages' },
+                { name: 'endDate', type: 'date', title: 'Fin des stages' },
+                { name: 'description', type: 'text', title: 'Présentation' },
+                { name: 'registrationUrl', type: 'url', title: 'Lien d’inscription' },
+                { name: 'image', type: 'image', title: 'Photo' },
+                { name: 'stageKeys', type: 'array', of: [{ type: 'string' }], title: 'Formules', description: 'Sélectionner les formules depuis l’administration du site.' },
+            ] }],
+        }),
         // HERO SECTION
         defineField({
             name: 'hero',
@@ -104,6 +119,16 @@ export default defineType({
                         }]
                     },
                     { name: 'registrationUrl', type: 'url', title: 'Lien d\'inscription (Axyomes)' },
+                    defineField({
+                        name: 'availabilityStartMonth', type: 'number', title: 'Disponible à partir de (mois)',
+                        description: 'Période annuelle récurrente. Laisser vide avec « jusqu’au mois » pour une disponibilité toute l’année.',
+                        validation: (Rule) => Rule.integer().min(1).max(12),
+                    }),
+                    defineField({
+                        name: 'availabilityEndMonth', type: 'number', title: 'Disponible jusqu’au (mois)',
+                        description: 'Janvier = 1, décembre = 12. Une période peut traverser le nouvel an.',
+                        validation: (Rule) => Rule.integer().min(1).max(12),
+                    }),
                     { name: 'showOnHome', type: 'boolean', title: "Afficher sur l'accueil", description: "Décocher pour masquer ce stage de l'accueil (ex: non proposé aux prochaines vacances). Il reste sur la page École.", initialValue: true },
                 ],
                 preview: {

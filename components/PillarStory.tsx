@@ -4,46 +4,50 @@ import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import gsap from 'gsap';
+import styles from './PillarStory.module.css';
 
 const CHAPTERS = [
     {
         id: 'education',
-        label: "L'Éducation",
-        title: "Académie",
-        titleSpan: "Nautique.",
-        proof: "On forme des marins, pas des touristes.",
-        desc: "Un parcours pédagogique structuré et labellisé par la FFVoile. Des Mini-Mousses de 4 ans jusqu'au CQP Initiateur professionnel — le CNC est une vraie école, avec une vraie exigence.",
+        label: "Apprendre dans la durée",
+        audience: "Enfants, jeunes et adultes",
+        title: "L’école",
+        titleSpan: "à l’année.",
+        proof: "Progresser au fil des séances.",
+        desc: "Retrouver son groupe chaque semaine, prendre confiance et progresser en voile. Les mercredis pour les enfants, les samedis pour les jeunes et les adultes : un rendez-vous régulier avec la mer.",
         image: "/images/imgBank/minimousse.jpg",
-        link: "/ecole-voile",
-        linkLabel: "Découvrir l'École",
+        link: "/ecole-voile#ecole-annee",
+        linkLabel: "Découvrir l’école à l’année",
         accentClass: 'text-turquoise',
         borderClass: 'border-turquoise/30 hover:bg-turquoise hover:text-white',
         dotColor: 'var(--color-turquoise)',
     },
     {
         id: 'environnement',
-        label: "L'Environnement",
+        label: "Comprendre le littoral",
+        audience: "Pour les curieux de nature",
         title: "La Pointe",
         titleSpan: "d'Agon.",
-        proof: "Gardiens d'un site classé Natura 2000.",
-        desc: "Notre plan d'eau n'est pas un décor. C'est un écosystème vivant — phoques veau-marins, oiseaux migrateurs, prés-salés. Le CNC assume une mission environnementale à chaque sortie.",
+        proof: "Observer pour mieux préserver.",
+        desc: "Comprendre les marées, reconnaître les habitants de l’estran et découvrir les bons gestes sur le littoral. La Pointe d’Agon est aussi un terrain d’observation et d’apprentissage.",
         image: "/images/imgBank/pointAgon.jpg",
-        link: "/nature",
-        linkLabel: "Explorer le site",
+        link: "/nature#estran",
+        linkLabel: "Découvrir l’estran et sa biodiversité",
         accentClass: 'text-emerald-500',
         borderClass: 'border-emerald-500/30 hover:bg-emerald-500 hover:text-white',
         dotColor: '#10b981',
     },
     {
         id: 'expertise',
-        label: "L'Expertise",
-        title: "Sauvetage &",
-        titleSpan: "Formation Pro.",
-        proof: "Centre de formation agréé BNSSA.",
-        desc: "Au-delà du loisir, le CNC forme les professionnels de la mer. Formations BNSSA, sécurité maritime, premiers secours — un rôle public que peu de clubs assument.",
+        label: "Transmettre et secourir",
+        audience: "Futurs encadrants, moniteurs et bénévoles",
+        title: "Formation &",
+        titleSpan: "secourisme.",
+        proof: "Se former pour encadrer et intervenir.",
+        desc: "Devenir initiateur voile, développer ses compétences de moniteur ou apprendre les gestes de premiers secours. Retrouvez les formations proposées par le club et leurs conditions d’accès.",
         image: "/images/imgBank/Secourisme.jpg",
-        link: "/ecole-voile",
-        linkLabel: "En savoir plus",
+        link: "/ecole-voile#formations-pro",
+        linkLabel: "Voir les formations et les prérequis",
         accentClass: 'text-orange-500',
         borderClass: 'border-orange-500/30 hover:bg-orange-500 hover:text-white',
         dotColor: '#f97316',
@@ -66,11 +70,44 @@ const CHAPTERS = [
 
 interface PillarStoryProps {
     campusData?: any;
+    compact?: boolean;
 }
 
-const PillarStory = ({ campusData }: PillarStoryProps) => {
+const PillarStory = ({ campusData, compact = false }: PillarStoryProps) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const imagesRef = useRef<(HTMLDivElement | null)[]>([]);
+    const compactRef = useRef<HTMLElement>(null);
+
+    useEffect(() => {
+        if (!compact || !compactRef.current) return;
+        const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+        if (preference.matches) return;
+        const animations: Animation[] = [];
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                observer.unobserve(entry.target);
+                if (preference.matches) return;
+                animations.push(entry.target.animate([
+                    { opacity: 0, transform: 'translateY(20px)' },
+                    { opacity: 1, transform: 'translateY(0)' },
+                ], {
+                    duration: 450,
+                    delay: Number((entry.target as HTMLElement).dataset.campusReveal || 0) * 70,
+                    easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+                    fill: 'backwards',
+                }));
+            });
+        }, { threshold: 0.15 });
+        compactRef.current.querySelectorAll('[data-campus-reveal]').forEach(el => observer.observe(el));
+        const stop = () => { if (preference.matches) animations.forEach(animation => animation.cancel()); };
+        preference.addEventListener('change', stop);
+        return () => {
+            observer.disconnect();
+            animations.forEach(animation => animation.cancel());
+            preference.removeEventListener('change', stop);
+        };
+    }, [compact]);
 
     const displayChapters = campusData?.chapters?.length ? campusData.chapters.map((ch: any, i: number) => {
         const theme = ch.themeColor || 'turquoise';
@@ -95,6 +132,7 @@ const PillarStory = ({ campusData }: PillarStoryProps) => {
         return {
             id: `chapter-${i}`,
             label: ch.label || '',
+            audience: ch.audience || '',
             title: ch.title || '',
             titleSpan: ch.titleSpan || '',
             proof: ch.proof || '',
@@ -109,6 +147,7 @@ const PillarStory = ({ campusData }: PillarStoryProps) => {
     }) : CHAPTERS;
 
     useEffect(() => {
+        if (compact) return;
         // Simple crossfade for images
         displayChapters.forEach((_: any, i: number) => {
             const img = imagesRef.current[i];
@@ -120,7 +159,53 @@ const PillarStory = ({ campusData }: PillarStoryProps) => {
                 scale: i === activeIndex ? 1 : 1.05
             });
         });
-    }, [activeIndex]);
+    }, [activeIndex, compact]);
+
+    if (compact) return (
+        <section ref={compactRef} id="institution" aria-labelledby="campus-title" className="scroll-mt-24 bg-white py-12 md:py-16">
+            <div className="mx-auto max-w-400 px-5 md:px-6">
+                <div data-campus-reveal="0" className="mb-8 flex flex-wrap items-end justify-between gap-5">
+                    <div className="max-w-3xl">
+                        <h2 id="campus-title" className="text-2xl md:text-3xl font-black uppercase italic tracking-tight text-abysse">{campusData?.compactTitle || 'Un campus ouvert sur la mer'}</h2>
+                        <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600">{campusData?.intro || 'Au CNC, la mer est aussi un lieu d’apprentissage : pratiquer toute l’année, comprendre le littoral et se former pour transmettre.'}</p>
+                    </div>
+                    <Link href="/club#identity" className="md:mr-16 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-abysse rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise">Découvrir l’association <ArrowRight size={16} /></Link>
+                </div>
+                <div className="grid gap-8 md:grid-cols-3 md:gap-8">
+                    {displayChapters.filter((ch: any) => ch.link?.split('#')[0] !== '/club').slice(0, 3).map((ch: any, index: number) => (
+                        <article data-campus-reveal={index + 1} key={ch.id} className={styles.chapter}>
+                            <Link href={ch.link} className={`${styles.card} group flex flex-col rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise`}>
+                                <div className="h-48 w-full overflow-hidden rounded-xl md:h-44 lg:h-56">
+                                    <img src={ch.image} alt="" loading="lazy" className={`${styles.image} h-full w-full object-cover`} />
+                                </div>
+                                <div className="min-w-0 flex flex-1 flex-col pt-5">
+                                    <p className={`mb-2 text-xs font-bold ${ch.accentClass}`}>{ch.label}</p>
+                                    <h3 className="text-lg lg:text-xl font-black uppercase italic leading-tight text-abysse">{ch.title} <span className={ch.accentClass}>{ch.titleSpan}</span></h3>
+                                    {ch.audience && <p className="mt-3 text-sm font-semibold text-abysse">{ch.audience}</p>}
+                                    <p className="mt-2 mb-5 text-sm leading-relaxed text-slate-600">{ch.desc}</p>
+                                    <span className="mt-auto inline-flex min-h-11 items-center gap-2 text-sm font-bold text-abysse group-hover:text-turquoise">{ch.linkLabel} <ArrowRight size={14} className={`${styles.arrow} shrink-0`} /></span>
+                                </div>
+                            </Link>
+                        </article>
+                    ))}
+                </div>
+                <aside data-campus-reveal="4" aria-labelledby="play-title" className={styles.playInvite}>
+                    <div className={styles.playArtwork}>
+                        <img src="/images/Games/illu_mini_Game2.jpeg" alt="" loading="lazy" className="h-full w-full object-cover" />
+                    </div>
+                    <div className={styles.playCopy}>
+                        <p className={styles.playEyebrow}>Mini-jeux & dico des parents</p>
+                        <h3 id="play-title" className={styles.playTitle}>Qui a le pied marin ?</h3>
+                        <p className={styles.playDescription}>Prenez la barre du simulateur, testez vos réflexes en mer et décodez les mots des moussaillons. Des jeux et un dico pour s’amuser, même les pieds au sec.</p>
+                        <div className={styles.playActions}>
+                            <Link href="/apprendre" className={styles.playButton}>À moi de jouer ! <ArrowRight size={18} className={styles.arrow} /></Link>
+                            <span className={styles.playNote}>À partager en famille, petits et grands.</span>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+    );
 
     return (
         <section id="institution" className="relative w-full bg-slate-50 py-24 md:py-32 overflow-hidden">

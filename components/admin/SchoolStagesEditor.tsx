@@ -4,6 +4,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { PortableTextBlock } from '@portabletext/editor';
 import { ArrowDown, ArrowLeft, ArrowUp, Copy, Eye, EyeOff, Loader2, Plus, RefreshCw, Save, Trash2, Upload, X } from 'lucide-react';
 
+import StageCampaignEditor from './StageCampaignEditor';
+import type { StageCampaign } from '@/lib/stageCampaigns';
 import RichTextField from '@/components/admin/RichTextField';
 import { uploadImage } from '@/components/admin/uploadImage';
 
@@ -27,6 +29,8 @@ type SchoolStage = {
     pricingTiers?: PricingTier[];
     registrationUrl?: string;
     showOnHome?: boolean;
+    availabilityStartMonth?: number;
+    availabilityEndMonth?: number;
 };
 
 // Teintes proposées : couleur de fond du badge + couleur de texte assortie.
@@ -64,6 +68,12 @@ const cloneBlocks = (blocks?: PortableTextBlock[]) =>
 
 const inputClass = 'w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-sm text-abysse';
 const labelClass = 'text-[10px] font-black uppercase text-slate-400 ml-1';
+const MONTHS = [
+    { value: 1, label: 'Janvier' }, { value: 2, label: 'Février' }, { value: 3, label: 'Mars' },
+    { value: 4, label: 'Avril' }, { value: 5, label: 'Mai' }, { value: 6, label: 'Juin' },
+    { value: 7, label: 'Juillet' }, { value: 8, label: 'Août' }, { value: 9, label: 'Septembre' },
+    { value: 10, label: 'Octobre' }, { value: 11, label: 'Novembre' }, { value: 12, label: 'Décembre' },
+];
 
 // ─── Interrupteur "Sur l'accueil" (absent = affiché) ────────────────────────
 function HomeToggle({ stage, onToggle, compact }: { stage: SchoolStage; onToggle: () => void; compact?: boolean }) {
@@ -89,7 +99,7 @@ function CardPreview({ stage }: { stage: SchoolStage }) {
                 <div className={`${stage.color || 'text-slate-500'} text-[10px] font-black px-3 flex items-center uppercase leading-tight line-clamp-2`}>{stage.officialName || 'Nom du stage'}</div>
             </div>
             <div className="absolute bottom-4 left-4 right-4">
-                <h4 className="text-white font-black italic uppercase text-lg leading-none whitespace-pre-line">{stage.title || 'Titre narratif'}</h4>
+                <h4 data-dashboard-display className="text-white font-black italic uppercase text-lg leading-none whitespace-pre-line">{stage.title || 'Titre narratif'}</h4>
                 {stage.hook && <p className="text-white/70 text-[11px] italic mt-2 line-clamp-3">{stage.hook}</p>}
             </div>
         </div>
@@ -176,6 +186,27 @@ function StageForm({ stage, onChange }: { stage: SchoolStage; onChange: (patch: 
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2 p-4 bg-sky-50 rounded-2xl border border-sky-100">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-abysse">Période de disponibilité annuelle</span>
+                    <p className="text-xs text-slate-500 mt-1 mb-3">Cette période apparaît sur le badge de la fiche École. L’ordre des fiches est conservé ; les campagnes pilotent l’accueil.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label className={labelClass}>Disponible à partir de
+                            <select value={stage.availabilityStartMonth ?? ''} onChange={(e) => onChange({ availabilityStartMonth: e.target.value ? Number(e.target.value) : undefined })} className={`${inputClass} mt-1 bg-white`}>
+                                <option value="">Toute l’année</option>
+                                {MONTHS.map((month) => <option key={month.value} value={month.value}>{month.label}</option>)}
+                            </select>
+                        </label>
+                        <label className={labelClass}>Jusqu’au
+                            <select value={stage.availabilityEndMonth ?? ''} onChange={(e) => onChange({ availabilityEndMonth: e.target.value ? Number(e.target.value) : undefined })} className={`${inputClass} mt-1 bg-white`}>
+                                <option value="">Toute l’année</option>
+                                {MONTHS.map((month) => <option key={month.value} value={month.value}>{month.label}</option>)}
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Tarifs */}
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
                     <span className="text-[10px] font-black uppercase tracking-widest text-abysse">Tarifs</span>
@@ -229,6 +260,8 @@ export default function SchoolStagesEditor() {
     const [stages, setStages] = useState<SchoolStage[] | null>(null);
     const [rev, setRev] = useState<string | null>(null);
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
+    const [campaigns, setCampaigns] = useState<StageCampaign[]>([]);
+    const [pinnedKey, setPinnedKey] = useState('');
     const [dirty, setDirty] = useState(false);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
@@ -240,6 +273,8 @@ export default function SchoolStagesEditor() {
             const data = await fetch('/api/cockpit/school-stages').then((r) => r.json());
             if (data.error) throw new Error(data.error);
             setStages(data.stages);
+            setCampaigns(data.campaigns || []);
+            setPinnedKey(data.pinnedCampaignKey || '');
             setRev(data.rev);
             setDirty(false);
             setLoadCount((n) => n + 1);
@@ -294,6 +329,7 @@ export default function SchoolStagesEditor() {
     const remove = (stage: SchoolStage) => {
         if (!window.confirm(`Retirer « ${stage.officialName} » de la page École ?`)) return;
         mutate((stages || []).filter((s) => s._key !== stage._key));
+        setCampaigns(current => current.map(c => ({ ...c, stageKeys: c.stageKeys.filter(key => key !== stage._key) })));
         setSelectedKey(null);
     };
 
@@ -304,11 +340,13 @@ export default function SchoolStagesEditor() {
             const res = await fetch('/api/cockpit/school-stages', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ stages, rev }),
+                body: JSON.stringify({ stages, rev, campaigns, pinnedCampaignKey: pinnedKey }),
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Erreur');
             setStages(data.stages);
+            setCampaigns(data.campaigns || []);
+            setPinnedKey(data.pinnedCampaignKey || '');
             setRev(data.rev);
             setDirty(false);
             setMessage({ kind: 'ok', text: 'Stages enregistrés et publiés sur le site' });
@@ -357,17 +395,17 @@ export default function SchoolStagesEditor() {
 
     return (
         <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2">
-            <div className="flex flex-wrap items-center gap-3 mb-2">
+            <header data-admin-page-header data-admin-header-in-flow className="flex flex-wrap items-center gap-3">
                 <div className="flex-1 min-w-[200px]">
-                    <h3 className="text-xl font-black uppercase italic text-abysse">Fiches Stages Vacances</h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Page École de voile · l'œil choisit ceux mis en avant sur l'accueil</p>
+                    <h3 data-admin-page-title>Fiches stages vacances</h3>
+                    <p data-admin-page-description>Les campagnes pilotent l’accueil. L’œil reste utilisé tant qu’aucune campagne n’a été créée.</p>
                 </div>
                 <button onClick={() => { if (!dirty || window.confirm('Abandonner les modifications non enregistrées ?')) load(); }} className="p-2 text-slate-400 hover:text-abysse" title="Recharger"><RefreshCw size={16} /></button>
                 <button onClick={addStage} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2"><Plus size={14} /> Nouveau stage</button>
                 <button onClick={save} disabled={!dirty || saving} className="px-4 py-2 bg-abysse text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-turquoise transition-all flex items-center gap-2 disabled:opacity-40">
                     {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Enregistrer
                 </button>
-            </div>
+            </header>
 
             {message && (
                 <div className={`px-4 py-2 rounded-xl text-xs font-bold ${message.kind === 'ok' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>{message.text}</div>
@@ -376,6 +414,7 @@ export default function SchoolStagesEditor() {
                 <div className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-50 text-amber-700">Modifications non enregistrées — cliquez sur « Enregistrer » pour les publier.</div>
             )}
 
+            <StageCampaignEditor campaigns={campaigns} pinnedKey={pinnedKey} stages={stages} onChange={(next, key) => { setCampaigns(next); setPinnedKey(key); setDirty(true); setMessage(null); }} />
             <div className="grid grid-cols-1 xl:grid-cols-[340px_1fr] gap-6 items-start">
                 <div className={selected ? 'hidden xl:block' : ''}>{list}</div>
                 {selected ? (

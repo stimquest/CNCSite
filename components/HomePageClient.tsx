@@ -23,17 +23,17 @@ import {
   Briefcase,
 } from "lucide-react";
 import { PhotoWallGallery } from "../components/PhotoWallGallery";
-import { GamesSlideshow } from "../components/GamesSlideshow";
+
 import PillarStory from "../components/PillarStory";
+import SpiritVerbs from "./home/SpiritVerbs";
 import { YouTubeBackground } from "../components/YouTubeBackground";
-import PageNavigation from "../components/PageNavigation";
 import { StatusDashboard } from "@/components/StatusDashboard";
 import { FreshnessIndicator } from "@/components/FreshnessIndicator";
 import { SpotConditionsBento } from "../components/SpotConditionsBento";
 import { LogoComponent } from "../components/Logo";
-import { DicoParents } from "../components/DicoParents";
+
 import Link from "next/link";
-import SpiritVerbs from "./home/SpiritVerbs";
+
 import { PortableText } from "@portabletext/react";
 import { CharDiscoveryModal } from "./CharDiscoveryModal";
 import { WelcomeGuide } from "./WelcomeGuide";
@@ -276,7 +276,7 @@ const HeroLogo = ({ homePageData }: { homePageData: any }) => {
             <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/15"><Wind size={22} /></span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] font-black uppercase tracking-wide leading-tight">Char à voile & séances</span>
-              <span className="block text-[11px] font-semibold text-white/80">Ados & adultes · à l’heure</span>
+              <span className="block text-[11px] font-semibold text-white/80">Char dès 8 ans · à la séance</span>
             </span>
             <ChevronDown size={18} className="shrink-0 opacity-80 transition-transform group-hover:translate-y-0.5" />
           </Link>
@@ -439,11 +439,12 @@ const FocusCardItem = ({
 
 export default function HomePageClient({
   homePageData,
-  dicoWords,
   homeGallery,
   infoMessages,
   upcomingEvents = [],
   schoolStages = [],
+  stageCampaigns = [],
+  pinnedCampaignKey = "",
 }: any) {
   const {
     weather,
@@ -474,7 +475,6 @@ export default function HomePageClient({
 
   // TRUE INFINITE SCROLL LOGIC
   // La carte "Organisez les vacances" fait doublon avec la section Réserver : on la masque.
-  const featuredEvent = upcomingEvents.find((event: any) => event.startDate >= todayIso() && event.image);
 
   const originalCards = (homePageData?.focusCards || []).filter(
     (card: any) => !/vacances/i.test(card?.title || ""),
@@ -632,12 +632,11 @@ export default function HomePageClient({
 
   return (
     <div className="w-full">
-      <PageNavigation />
 
       {/* HERO SECTION - LOGO GLASS EFFECT */}
       <section
         id="hero"
-        className="relative h-svh w-full flex items-center justify-center overflow-hidden"
+        className="relative min-h-[620px] h-[85svh] max-h-[860px] w-full flex items-center justify-center overflow-hidden"
       >
         {/* Background: Video or Slideshow */}
         <div className="absolute inset-0 w-full h-full overflow-hidden bg-abysse">
@@ -697,10 +696,11 @@ export default function HomePageClient({
         id="dashboard"
         className="max-w-400 mx-auto px-6 pt-10 pb-4 relative z-10"
       >
+
         <div className="bg-white relative overflow-hidden rounded-[2rem] shadow-[0_8px_32px_rgba(0,43,73,0.05)] border border-abysse/10">
           <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch relative z-10">
             {/* COL 1-4 : Le Spot / Météo (Image brute avec lettrage très contrasté) */}
-            <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-abysse/10 p-6 lg:p-8 flex flex-col justify-between group h-full min-h-55 relative overflow-hidden bg-black">
+            <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-abysse/10 p-5 lg:p-6 flex flex-col justify-between group h-full min-h-55 relative overflow-hidden bg-black">
               {/* Image brute sans le filtre bleu abysse envahissant */}
               <img
                 src={
@@ -772,10 +772,7 @@ export default function HomePageClient({
                         <div className="bg-orange-500/20 backdrop-blur-sm px-2 py-1 rounded-md border border-orange-500/30 text-orange-400 flex items-center h-6">
                           <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
                             Raf.{" "}
-                            {weather.gusts ||
-                              (weather.windSpeed
-                                ? weather.windSpeed + 5
-                                : "--")}
+                            {weather.gusts ?? "--"}
                           </span>
                         </div>
                       </div>
@@ -786,7 +783,7 @@ export default function HomePageClient({
             </div>
 
             {/* COL 5-8 : Programme du jour (Texte sombre pour contraste élevé) */}
-            <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-abysse/10 p-6 lg:p-8 flex flex-col justify-between">
+            <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-abysse/10 p-5 lg:p-6 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <span className="text-[10px] font-black uppercase tracking-[0.25em] text-abysse/50">
@@ -944,7 +941,7 @@ export default function HomePageClient({
             </div>
 
             {/* COL 9-12 : Flash Infos (Esthétique d'écran de bord, listes de logs) */}
-            <div className="lg:col-span-4 p-6 lg:p-8 flex flex-col">
+            <div className="lg:col-span-4 p-5 lg:p-6 flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <span className="size-1.5 rounded-full bg-abysse animate-pulse" />
@@ -1020,30 +1017,16 @@ export default function HomePageClient({
             </div>
           </div>
         </div>
+
+        {infoMessages?.some((msg: any) => msg.category === 'alert') && <Link href="/fil-info" className="mt-3 block rounded-xl bg-amber-50 p-3 text-sm font-bold text-amber-900">{infoMessages.find((msg: any) => msg.category === 'alert')?.title} →</Link>}
       </section>
 
       {/* JE SAIS CE QUE JE CHERCHE : aiguillage vers les bonnes pages */}
-      <FindActivity stages={schoolStages}>
-          {featuredEvent && (
-            <Link href={featuredEvent.articleSlug ? "/blog/" + featuredEvent.articleSlug : "/club#agenda"} className="mt-6 md:mt-8 grid overflow-hidden rounded-3xl bg-abysse text-white shadow-lg transition hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise md:grid-cols-[minmax(240px,0.8fr)_1.2fr]">
-              {/* Affiche entière (contain) sur un fond flouté de la même image : le texte de l'affiche n'est jamais coupé */}
-              <div className="relative h-64 md:h-80 overflow-hidden bg-abysse">
-                <img src={featuredEvent.image} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-xl" loading="lazy" />
-                <img src={featuredEvent.image} alt={"Affiche ou illustration : " + featuredEvent.title} className="relative h-full w-full object-contain p-3" loading="lazy" />
-                <span className="absolute left-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white">À la une</span>
-              </div>
-              <div className="flex flex-col justify-center p-5 md:p-8">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-turquoise">{featuredEvent.badge || "Événement du club"} · {new Date(featuredEvent.startDate).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}</span>
-                <h3 className="mt-2 text-2xl md:text-3xl font-black uppercase italic tracking-tight">{featuredEvent.title}</h3>
-                {featuredEvent.time && <p className="mt-2 text-sm font-semibold text-white/75">{featuredEvent.time}</p>}
-                <span className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest">Découvrir l’événement <ArrowRight size={15} /></span>
-              </div>
-            </Link>
-          )}
-      </FindActivity>
+      <FindActivity stages={schoolStages} campaigns={stageCampaigns} pinnedCampaignKey={pinnedCampaignKey} />
 
       {/* JE DÉCOUVRE LE CLUB : les 3 grandes intentions du club, en "spot publicitaire" animé au scroll */}
       <SpiritVerbs spirit={homePageData?.spirit} />
+      <PillarStory campusData={homePageData?.campus} compact />
 
       {/* --- SECTION : AGENDA / ÉVÉNEMENTS --- */}
       <section id="agenda" className="py-24 relative z-10 overflow-hidden">
@@ -1173,30 +1156,6 @@ export default function HomePageClient({
               )}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* --- PILLAR STORY --- */}
-      <PillarStory campusData={homePageData?.campus} />
-
-      {/* --- SECTION : MINI-JEU PÉDAGOGIQUE (desktop only) --- */}
-      <section
-        id="pedagogie"
-        className="hidden md:block py-24 bg-abysse relative z-10"
-      >
-        <div className="max-w-400 mx-auto px-6">
-          <GamesSlideshow />
-        </div>
-      </section>
-
-      {/* --- SECTION : LE DICO DES PARENTS --- */}
-      <section id="dico-parents" className="py-24 bg-slate-50 relative z-10">
-        <div className="max-w-400 mx-auto px-6">
-          {dicoWords && dicoWords.length > 0 ? (
-            <DicoParents dicoWords={dicoWords} />
-          ) : (
-            <DicoParents /> // Fallback temp if not loaded
-          )}
         </div>
       </section>
 

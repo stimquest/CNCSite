@@ -1,4 +1,5 @@
 import { client, queries } from '../../lib/sanity';
+import { expandAgendaEvents } from '@/lib/editorial';
 import HomePageClient from '../../components/HomePageClient';
 
 export const metadata = {
@@ -20,14 +21,12 @@ export default async function Page() {
     // SSR Fetching
     const [
         homePageData,
-        dicoWords,
         homeGallery,
         infoMessages,
         upcomingEvents,
         schoolStages
     ] = await Promise.all([
         client.fetch(queries.homePage),
-        client.fetch(queries.dicoWords),
         client.fetch(queries.homeGallery),
         client.fetch(queries.infoMessages),
         client.fetch(queries.homeAgenda),
@@ -37,11 +36,12 @@ export default async function Page() {
     return (
         <HomePageClient 
             homePageData={homePageData} 
-            dicoWords={dicoWords} 
             homeGallery={homeGallery} 
             infoMessages={infoMessages} 
-            upcomingEvents={upcomingEvents || []}
+            upcomingEvents={expandAgendaEvents(upcomingEvents || [])}
             schoolStages={schoolStages?.stages || []}
+            stageCampaigns={schoolStages?.campaigns || []}
+            pinnedCampaignKey={schoolStages?.pinnedCampaignKey || ""}
         />
     );
 }

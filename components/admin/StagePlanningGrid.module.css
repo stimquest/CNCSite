@@ -1,0 +1,70 @@
+.root {
+    container: stage-planning / inline-size;
+    min-width: 0;
+}
+
+.table {
+    width: 100%;
+}
+
+.header {
+    display: none;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+}
+
+.group {
+    grid-column: 1 / -1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.cell {
+    container: stage-slot / inline-size;
+    min-width: 0;
+    border-top-width: 1px;
+    overflow-wrap: anywhere;
+}
+
+.hourControls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 4px;
+}
+
+@container stage-planning (min-width: 760px) {
+    .header,
+    .row {
+        display: grid;
+        grid-template-columns: 140px repeat(var(--stage-day-count), minmax(0, 1fr));
+    }
+
+    .group {
+        grid-column: auto;
+        padding: 0.5rem;
+    }
+
+    .group > span:first-child {
+        font-size: 0.75rem;
+    }
+
+    .cell {
+        border-top-width: 0;
+        border-left-width: 1px;
+    }
+
+    .dayLabel {
+        display: none;
+    }
+
+}
+
+@container stage-slot (min-width: 130px) {
+    .hourControls {
+        grid-template-columns: minmax(0, 1fr) 4rem;
+    }
+}

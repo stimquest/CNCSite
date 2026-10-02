@@ -62,12 +62,12 @@ const FALLBACK_CARDS: SpiritCard[] = [
     image: "/images/imgBank/paddlekayak.jpg",
   },
   {
-    tag: "Nature",
+    tag: "Bien-être",
     title: "RESSENTIR",
     description:
-      "De l'éveil des sens à l'autonomie. L'école de voile pour les enfants de 5 à 12 ans et la découverte de l'estran.",
-    buttonText: "Découvrir l'école",
-    link: "/ecole-voile",
+      "Prendre le temps, respirer et bouger au rythme de la mer. Retrouvez les activités bien-être du club pour partager un moment au grand air.",
+    buttonText: "Voir les activités bien-être",
+    link: "/activites?cat=Bien-être",
     image: "/images/imgBank/Cata001.jpg",
   },
 ];
@@ -83,7 +83,11 @@ const VERB_SIZE = "text-[min(11.5vw,20svh)]";
 
 export default function SpiritVerbs({ spirit }: { spirit?: Spirit }) {
   const reduce = useReducedMotion();
-  const cards = (spirit?.cards?.length ? spirit.cards : FALLBACK_CARDS).slice(0, 3);
+  const cards = (spirit?.cards?.length ? spirit.cards : FALLBACK_CARDS).slice(0, 3).map(card => {
+    // Ressentir désigne le parcours bien-être, quel que soit le contenu fourni par le CMS.
+    if (card.title.trim().toLocaleLowerCase('fr') !== 'ressentir') return card;
+    return { ...card, link: '/activites?cat=Bien-être', buttonText: 'Voir les activités bien-être' };
+  });
 
   return reduce ? (
     <SpiritStatic spirit={spirit} cards={cards} />

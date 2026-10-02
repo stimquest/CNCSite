@@ -63,6 +63,7 @@ export const Header: React.FC<HeaderProps> = () => {
         { label: 'Formations Pro', href: '/ecole-voile#formations-pro' },
         { label: 'École à l\'Année', href: '/ecole-voile#ecole-annee' },
         { label: 'Planning & Dispos', href: '/ecole-voile#planning' },
+        { label: 'Jeux & dico des parents', href: '/apprendre' },
       ]
     },
     {

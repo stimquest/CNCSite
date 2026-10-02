@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ImagePlus, Loader2, Monitor, Pencil, Plus, Save, Trash2, X } from "lucide-react";
 import { uploadImage } from "@/components/admin/uploadImage";
+import SignageBroadcastSettings from './SignageBroadcastSettings';
 
 type SlideType = "promo" | "partners" | "info";
 type InfoCategory = "alert" | "info" | "event" | "vibe";
@@ -43,10 +44,10 @@ const newSlide = (type: SlideType): SignageSlideDraft => ({
   ...(type === "info" ? { infoContent: { title: "", message: "", category: "info" as const } } : {}),
 });
 
-export default function SignageManager({ slides: initialSlides }: { slides: SignageSlideDraft[] }) {
+export default function SignageManager({ slides: initialSlides, initialCreate = false }: { slides: SignageSlideDraft[]; initialCreate?: boolean }) {
   const router = useRouter();
   const [slides, setSlides] = useState(initialSlides);
-  const [editing, setEditing] = useState<SignageSlideDraft | null>(null);
+  const [editing, setEditing] = useState<SignageSlideDraft | null>(() => initialCreate ? newSlide('info') : null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -210,11 +211,10 @@ export default function SignageManager({ slides: initialSlides }: { slides: Sign
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
+      <header data-admin-page-header data-admin-header-in-flow className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-turquoise"><Monitor size={14} /> Affichage du club</p>
-          <h3 className="text-2xl font-black uppercase italic text-abysse">Diapositives de l’écran</h3>
-          <p className="mt-1 max-w-2xl text-sm text-slate-500">La météo et l’agenda s’insèrent automatiquement dans la rotation, entre vos diapositives personnalisées.</p>
+          <h3 data-admin-page-title>Diapositives de l’écran</h3>
+          <p data-admin-page-description>Créez vos diapos, puis composez leur diffusion dans la timeline.</p>
         </div>
         <button type="button" onClick={() => { setEditing(newSlide("promo")); setError(""); }} className="inline-flex items-center gap-2 rounded-xl bg-abysse px-4 py-3 text-xs font-black uppercase tracking-wide text-white hover:bg-turquoise">
           <Plus size={16} /> Nouvelle diapositive
@@ -239,11 +239,8 @@ export default function SignageManager({ slides: initialSlides }: { slides: Sign
                   <option value="promo">Promotion</option><option value="partners">Partenaires</option><option value="info">Information</option>
                 </select>
               </label>
-              <label className="text-xs font-bold text-slate-600">Durée à l’écran (secondes)
+              <label className="text-xs font-bold text-slate-600">Durée par défaut (secondes)
                 <input type="number" min={5} max={120} step={1} value={Math.round(editing.duration / 1000)} onChange={(e) => patchEditing({ duration: Number(e.target.value) * 1000 })} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
-              </label>
-              <label className="text-xs font-bold text-slate-600">Position dans la rotation
-                <input type="number" min={1} step={1} value={editing.order + 1} onChange={(e) => patchEditing({ order: Math.max(0, Number(e.target.value) - 1) })} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
               </label>
             </div>
             <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
@@ -318,7 +315,7 @@ export default function SignageManager({ slides: initialSlides }: { slides: Sign
               {editing.type === "promo" && editing.promoContent?.image && <img src={editing.promoContent.image} alt="" className="absolute inset-0 size-full object-cover opacity-30" />}
               <div className="relative flex h-full flex-col justify-center">
                 <span className="text-[9px] font-black uppercase tracking-[0.25em] text-cyan-300">{editing.type === "promo" ? (editing.promoContent?.tag || "Promotion") : TYPE_LABELS[editing.type]}</span>
-                <h5 className="mt-2 text-xl font-black uppercase italic leading-tight sm:text-3xl">
+                <h5 data-dashboard-display className="mt-2 text-xl font-black uppercase italic leading-tight sm:text-3xl">
                   {editing.type === "promo" ? editing.promoContent?.title || "Titre de la promotion" : editing.type === "partners" ? editing.partnersContent?.title || "Nos partenaires" : editing.infoContent?.title || "Information"}
                 </h5>
                 {editing.type === "promo" && <p className="mt-3 max-w-md text-xs text-white/80 sm:text-sm">{editing.promoContent?.description || "Votre message apparaîtra ici."}</p>}
@@ -333,7 +330,7 @@ export default function SignageManager({ slides: initialSlides }: { slides: Sign
 
       <div className="grid gap-3 md:grid-cols-2">
         {sortedSlides.map((slide, index) => <article key={slide._id || `${slide.title}-${index}`} className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-sm font-black text-abysse">{slide.order + 1}</span>
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-abysse"><Monitor size={18} /></span>
           <div className="min-w-0 flex-1">
             <p className="truncate font-bold text-abysse">{slide.title || "Sans titre"}</p>
             <p className="text-xs text-slate-500">{TYPE_LABELS[slide.type]} · {Math.round(slide.duration / 1000)} s</p>
@@ -341,8 +338,9 @@ export default function SignageManager({ slides: initialSlides }: { slides: Sign
           <button type="button" disabled={saving} onClick={() => void changeActive(slide)} className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${slide.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{slide.isActive ? "Active" : "Masquée"}</button>
           <button type="button" aria-label={`Modifier ${slide.title}`} onClick={() => startEdit(slide)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><Pencil size={15} /></button>
         </article>)}
-        {!sortedSlides.length && <p className="rounded-xl border border-dashed border-slate-300 bg-white px-5 py-10 text-center text-sm text-slate-500 md:col-span-2">Aucune diapositive personnalisée. La météo et l’agenda continueront de s’afficher automatiquement.</p>}
+        {!sortedSlides.length && <p className="rounded-xl border border-dashed border-slate-300 bg-white px-5 py-10 text-center text-sm text-slate-500 md:col-span-2">Créez votre première diapo. La météo et l’agenda sont déjà disponibles dans la timeline.</p>}
       </div>
+      <SignageBroadcastSettings slides={slides} />
     </div>
   );
 }

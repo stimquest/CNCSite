@@ -28,6 +28,16 @@ export const agendaEvent = defineType({
     title: 'Agenda',
     type: 'document',
     fields: [
+        defineField({ name: 'archived', title: 'Archivé', type: 'boolean', initialValue: false, description: 'Conservé dans les archives, masqué des listes publiques.' }),
+        defineField({
+            name: 'agendaDates', title: 'Dates dans l’agenda', type: 'array',
+            of: [{ type: 'object', name: 'agendaOccurrence', title: 'Date', fields: [
+                { name: 'date', title: 'Date', type: 'date', validation: (Rule) => Rule.required() },
+                { name: 'time', title: 'Horaire / durée', type: 'string' },
+                { name: 'badge', title: 'Badge', type: 'string' },
+                { name: 'archived', title: 'Date archivée', type: 'boolean', initialValue: false },
+            ], preview: { select: { title: 'date', subtitle: 'time' } } }],
+        }),
         defineField({
             name: 'title',
             title: 'Titre',
@@ -39,7 +49,8 @@ export const agendaEvent = defineType({
             title: 'Date',
             type: 'date',
             options: { dateFormat: 'YYYY-MM-DD' },
-            validation: (Rule) => Rule.required(),
+            hidden: ({ document }) => Array.isArray(document?.agendaDates),
+            validation: (Rule) => Rule.custom((value, context) => Array.isArray(context.document?.agendaDates) || value ? true : 'Date obligatoire'),
         }),
         defineField({
             name: 'badge',

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import type { ActivityType, StageDefinition, StageSlot, WeeklyPlanning } from '@/types';
+import styles from './StagePlanningGrid.module.css';
 
 function minutes(value: string): number | null {
     const text = value.trim();
@@ -19,6 +20,10 @@ function durationOf(slot: StageSlot | undefined, stage: StageDefinition) {
     return start != null && end != null && end > start ? end - start : stage.planningType === 'kid' ? 120 : 180;
 }
 const range = (start: number, duration: number) => `${timeLabel(start)} - ${timeLabel(start + duration)}`;
+
+function hasTime(slot: StageSlot | undefined) {
+    return minutes((slot?.time || '').split(' - ')[0]) !== null;
+}
 
 function HourInput({ value, label, onCommit }: { value: string; label: string; onCommit: (value: number | null) => boolean }) {
     const [draft, setDraft] = useState(value);
@@ -55,8 +60,16 @@ export default function StagePlanningGrid({ planning, stages, activities, onChan
     const [groups, setGroups] = useState<string[]>([]);
     const [bulkHour, setBulkHour] = useState('');
     const [message, setMessage] = useState('');
+    const [onlyScheduled, setOnlyScheduled] = useState(false);
+    const stageRows = stages.map(stage => ({
+        stage,
+        count: planning.days.filter(day => hasTime(day.stageSlots?.find(slot => slot.stageKey === stage.key))).length,
+    }));
+    const scheduledRows = stageRows.filter(row => row.count > 0);
+    const slotCount = scheduledRows.reduce((total, row) => total + row.count, 0);
+    const visibleRows = stageRows.filter(row => !onlyScheduled || row.count > 0);
     const dayForBulk = planning.days.find(day => day._key === bulkDay);
-    const columns = { gridTemplateColumns: `160px repeat(${planning.days.length}, minmax(160px, 1fr))` };
+    const columns = { '--stage-day-count': planning.days.length } as CSSProperties;
 
     function updateSlot(dayKey: string, stage: StageDefinition, updates: Partial<StageSlot>) {
         onChange({ ...planning, days: planning.days.map(day => {
@@ -85,7 +98,17 @@ export default function StagePlanningGrid({ planning, stages, activities, onChan
         setMessage(`${selected.length} groupe(s) à ${timeLabel(start)} le ${dayForBulk.name.toLowerCase()}. Durées conservées. Pensez à enregistrer.`);
     }
 
-    return <div className="space-y-4">
+    return <div className={`${styles.root} space-y-4`}>
+        <section aria-label="Résumé des créneaux" className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-turquoise/30 bg-turquoise/10 p-4">
+            <div>
+                <p className="text-sm font-bold text-abysse">{scheduledRows.length ? `${scheduledRows.length} groupe${scheduledRows.length > 1 ? 's' : ''} programmé${scheduledRows.length > 1 ? 's' : ''} · ${slotCount} créneau${slotCount > 1 ? 'x' : ''} cette semaine` : 'Aucun créneau programmé cette semaine'}</p>
+                <p className="mt-1 text-xs text-abysse/75">{scheduledRows.length ? scheduledRows.map(({ stage }) => stage.label).join(' · ') : 'Renseignez une heure de début pour programmer un groupe.'}</p>
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-abysse">
+                <input type="checkbox" checked={onlyScheduled} onChange={e => setOnlyScheduled(e.target.checked)} className="size-4 accent-turquoise" />
+                Groupes programmés uniquement
+            </label>
+        </section>
         <p className="text-xs text-slate-500">Saisissez 930 pour 09h30, puis Tab. La durée est conservée. « Horaire commun » permet de modifier plusieurs groupes d’une journée.</p>
         {dayForBulk && <section className="rounded-2xl border border-turquoise/30 bg-turquoise/5 p-4 space-y-3" aria-label="Horaire commun">
             <div className="flex items-center justify-between gap-3">
@@ -107,17 +130,20 @@ export default function StagePlanningGrid({ planning, stages, activities, onChan
             <p className="text-xs text-slate-500">Chaque groupe garde sa durée et son activité. Un créneau vide prend la durée habituelle du groupe.</p>
             <p role="status" className="text-sm font-medium text-abysse">{message}</p>
         </section>}
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
-            <div className="grid bg-slate-50" style={columns}>
-                <div className="sticky left-0 z-10 bg-slate-50 p-3 text-xs font-bold text-slate-500">Groupe / Jour</div>
-                {planning.days.map(day => <div key={day._key} className="border-l border-slate-200 p-3">
-                    <div className="font-bold text-abysse">{day.name}</div>
+        <div className={`${styles.table} rounded-xl border border-slate-200`} style={columns}>
+            <div className={`${styles.header} bg-slate-50`}>
+                <div className="bg-slate-50 p-2 text-xs font-bold text-slate-500">Groupe / Jour</div>
+                {planning.days.map(day => <div key={day._key} className="min-w-0 border-l border-slate-200 p-2">
+                    <div className="text-sm font-bold text-abysse">{day.name}</div>
                     <div className="text-xs text-slate-500">{new Date(day.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
                     <button type="button" onClick={() => { setBulkDay(day._key); setGroups([]); setBulkHour(''); setMessage(''); }} className="mt-2 text-xs font-bold text-abysse underline">Horaire commun</button>
                 </div>)}
             </div>
-            {stages.map(stage => <div key={stage.key} className="grid border-t border-slate-200" style={columns}>
-                <div className="sticky left-0 z-10 flex items-center bg-slate-50 p-3 text-xs font-bold text-abysse">{stage.label}</div>
+            {visibleRows.map(({ stage, count }) => <div key={stage.key} className={`${styles.row} border-t ${count ? 'border-turquoise/30' : 'border-slate-200'}`}>
+                <div className={`${styles.group} flex flex-col justify-center gap-2 border-l-4 p-3 ${count ? 'border-turquoise bg-[#e6f6fa] text-abysse' : 'border-transparent bg-slate-50 text-slate-500'}`}>
+                    <span className="text-sm font-bold">{stage.label}</span>
+                    {count > 0 && <span className="text-xs font-semibold text-abysse">{count} créneau{count > 1 ? 'x' : ''}</span>}
+                </div>
                 {planning.days.map(day => {
                     const slot = day.stageSlots?.find(item => item.stageKey === stage.key);
                     const duration = durationOf(slot, stage);
@@ -126,20 +152,24 @@ export default function StagePlanningGrid({ planning, stages, activities, onChan
                     const raids = (day.raidStageKey || '').split(',').filter(Boolean);
                     const isRaid = raids.includes(stage.key);
                     const durations = [...new Set([60, 90, 120, 150, 180, 210, 240, 300, 360, 420, duration])].sort((a, b) => a - b);
-                    return <div key={day._key} className={`space-y-2 border-l border-slate-200 p-2 ${isRaid ? 'bg-orange-50' : 'bg-white'}`}>
-                        <div className="flex items-start gap-1">
+                    return <div key={day._key} className={`${styles.cell} space-y-2 p-2 ${isRaid ? 'border-orange-200 bg-orange-50' : start !== null ? 'border-turquoise/30 bg-turquoise/5' : 'border-slate-200 bg-slate-50/60'}`}>
+                        <div className={styles.dayLabel}>
+                            <div className="text-sm font-bold text-abysse">{day.name} <span className="text-xs font-normal text-slate-500">{new Date(day.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}</span></div>
+                            <button type="button" onClick={() => { setBulkDay(day._key); setGroups([]); setBulkHour(''); setMessage(''); }} className="mt-1 text-xs font-bold text-abysse underline">Horaire commun</button>
+                        </div>
+                        <div className={styles.hourControls}>
                             <HourInput key={slot?.time || 'empty'} value={startText} label={`Début ${stage.label}, ${day.name}`} onCommit={value => {
                                 if (value !== null && value + duration >= 1440) return false;
                                 updateSlot(day._key, stage, { time: value === null ? '' : range(value, duration) }); return true;
                             }} />
                             <select aria-label={`Durée ${stage.label}, ${day.name}`} value={duration} disabled={start === null}
                                 onChange={e => { if (start !== null) updateSlot(day._key, stage, { time: range(start, Number(e.target.value)) }); }}
-                                className="w-20 rounded-lg border border-turquoise/20 bg-turquoise/10 px-1 py-2 text-xs font-bold text-abysse disabled:opacity-40">
+                                className="min-w-0 w-full rounded-lg border border-turquoise/20 bg-turquoise/10 px-1 py-2 text-xs font-bold text-abysse disabled:opacity-40">
                                 {durations.map(value => <option key={value} value={value} disabled={start !== null && start + value >= 1440}>{Math.floor(value / 60)}h{value % 60 ? String(value % 60).padStart(2, '0') : ''}</option>)}
                             </select>
                         </div>
-                        <div className="min-h-4 text-xs font-semibold text-slate-500">{start !== null ? slot?.time : 'Pas de créneau'}</div>
-                        <select aria-label={`Activité ${stage.label}, ${day.name}`} value={slot?.activity || ''} onChange={e => updateSlot(day._key, stage, { activity: (e.target.value || undefined) as ActivityType | undefined })} className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs">
+                        {start !== null && <div className="text-sm font-bold tabular-nums text-abysse">{slot?.time}</div>}
+                        <select aria-label={`Activité ${stage.label}, ${day.name}`} value={slot?.activity || ''} onChange={e => updateSlot(day._key, stage, { activity: (e.target.value || undefined) as ActivityType | undefined })} className="min-w-0 w-full rounded-lg border border-slate-200 bg-white p-2 text-xs">
                             <option value="">Activité…</option>
                             {activities.map(activity => <option key={activity.value} value={activity.value}>{activity.label}</option>)}
                         </select>
@@ -150,6 +180,7 @@ export default function StagePlanningGrid({ planning, stages, activities, onChan
                     </div>;
                 })}
             </div>)}
+            {onlyScheduled && visibleRows.length === 0 && <p className="p-6 text-center text-sm text-slate-500">Aucun groupe programmé. Décochez le filtre pour renseigner des créneaux.</p>}
         </div>
     </div>;
 }

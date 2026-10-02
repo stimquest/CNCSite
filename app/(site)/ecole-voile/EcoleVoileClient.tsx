@@ -12,6 +12,7 @@ import {
 import { PageHero } from '@/components/PageHero';
 import { PortableText } from '@portabletext/react';
 import { useLiveStatus } from '@/contexts/LiveStatusContext';
+import { selectStageCampaign, campaignDates } from '@/lib/stageCampaigns';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -97,6 +98,7 @@ Le programme est riche et varié : deux séances de deux heures du Lundi au Vend
     logistique: ["Gilet de sauvetage fourni", "Combinaison adaptée fournie", "Bassin marin sécurisé", "Carnet de voile offert"],
     image: "/images/imgBank/minimousse.jpg",
     color: "text-orange-500", bgColor: "bg-orange-500",
+    availabilityStartMonth: 7, availabilityEndMonth: 8,
   },
   {
     id: "moussaillons",
@@ -115,6 +117,7 @@ Le reste de la semaine, les séances de 2h permettent une progression ludique ve
     logistique: ["Initiation sur lac incluse", "Matériel sécurisé FFV", "Passage de niveaux", "Combinaison fournie"],
     image: "/images/imgBank/moussaillon.jpg",
     color: "text-turquoise", bgColor: "bg-turquoise",
+    availabilityStartMonth: 7, availabilityEndMonth: 8,
   },
   {
     id: "catamaran",
@@ -307,19 +310,31 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
   return (
     <>
       {/* Grille 4 colonnes desktop, 2 mobile */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-        {items.map((item, index) => (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 md:gap-x-4 gap-y-9 md:gap-y-10 pt-4">
+        {items.map((item, index) => {
+          const startMonth = Number(item.availabilityStartMonth);
+          const endMonth = Number(item.availabilityEndMonth);
+          const hasConfiguredPeriod = Number.isInteger(startMonth) && startMonth >= 1 && startMonth <= 12
+            && Number.isInteger(endMonth) && endMonth >= 1 && endMonth <= 12;
+          const isLegacySummer = !hasConfiguredPeriod && /juillet\s*(?:et|à)\s*ao[uû]t/i.test(String(item.longDescription || ''));
+          const monthLabel = (month: number) => new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(new Date(2020, month - 1));
+          const periodLabel = hasConfiguredPeriod
+            ? startMonth === endMonth ? monthLabel(startMonth) : `${monthLabel(startMonth)} – ${monthLabel(endMonth)}`
+            : isLegacySummer ? 'Juillet – août' : '';
+          return (
           <div key={item._key || item.id || index} onClick={() => setSelectedKey(item._key || item.id || String(index))}
-            className="relative rounded-2xl overflow-hidden aspect-square shadow-md cursor-pointer group"
+            className="relative rounded-2xl overflow-visible aspect-square shadow-md cursor-pointer group"
           >
-            <img src={item.image} alt={item.officialName}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            <div className="absolute inset-0 overflow-hidden rounded-2xl">
+              <img src={item.image} alt={item.officialName}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
 
-            {/* Gradient fort sur le bas */}
-            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent" />
+              {/* Gradient fort sur le bas */}
+              <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent" />
+            </div>
 
             {/* Badge en haut : nom + âge — Micro-Split centered at top */}
-            <div className="absolute top-3 md:top-5 left-0 right-0 flex flex-col items-center gap-1 px-2 pointer-events-none">
+            <div className="absolute top-5 md:top-6 left-0 right-0 flex flex-col items-center gap-1 px-2 pointer-events-none">
               {/* Mobile : empilé */}
               <div className="md:hidden flex flex-col items-center gap-1">
                 <div className={`${item.bgColor} text-white text-[9px] font-black px-2.5 py-0.5 rounded-full shadow uppercase tracking-widest`}>
@@ -339,6 +354,12 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
                 </div>
               </div>
             </div>
+
+            {periodLabel && (
+              <div className="pointer-events-none absolute left-1/2 top-0 z-10 w-max max-w-[calc(100%-1.5rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-abysse/10 bg-white px-3 py-1.5 md:px-4 text-center text-[10px] md:text-xs font-bold leading-4 text-abysse shadow-sm">
+                <span className="block first-letter:uppercase">{periodLabel}</span>
+              </div>
+            )}
 
             {/* Bas : Titre + Prix + Accroche */}
             <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 flex flex-col gap-1.5 md:gap-2">
@@ -371,7 +392,7 @@ const StagesVacancesGrid = ({ items }: { items: any[] }) => {
               </motion.div>
             </div>
           </div>
-        ))}
+        )})}
       </div>
 
       {/* Overlay animé */}
@@ -609,6 +630,7 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
   const { stageDefinitions: contextDefs } = useLiveStatus();
   const stageDefinitions = (initialStageDefinitions?.length ? initialStageDefinitions : contextDefs);
   const schoolPageData = initialSchoolPageData;
+  const campaign = selectStageCampaign(schoolPageData?.campaigns || [], schoolPageData?.pinnedCampaignKey);
   const stages = schoolPageData?.stages?.length ? schoolPageData.stages : STAGES_VACANCES;
   const proFormations = schoolPageData?.proFormations?.length ? schoolPageData.proFormations : PRO_FORMATIONS_FALLBACK;
   const anneeGroups = schoolPageData?.ecoleAnnee?.groups?.length ? schoolPageData.ecoleAnnee.groups : ANNEE_GROUPS;
@@ -767,6 +789,15 @@ const EcoleVoileClient: React.FC<EcoleVoileClientProps> = ({ initialSchoolPageDa
 
         {/* Grille de cartes */}
         <div className="px-4 lg:px-16 xl:px-32 pb-10">
+          {campaign && <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-turquoise/20 bg-white p-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-turquoise">Les prochains rendez-vous</p>
+              <h3 className="mt-2 text-xl font-black text-abysse">{campaign.title}</h3>
+              <p className="mt-1 text-sm text-slate-600">{campaignDates(campaign)}</p>
+              <p className="mt-2 text-sm text-slate-500">{stages.filter((s: any) => campaign.stageKeys.includes(s._key)).map((s: any) => s.officialName).join(' · ') || 'Programme en préparation'}</p>
+            </div>
+            {campaign.registrationUrl && <a href={campaign.registrationUrl} className="shrink-0 rounded-xl bg-abysse px-5 py-3 text-sm font-bold text-white">Voir les inscriptions</a>}
+          </div>}
           <StagesVacancesGrid items={stages} />
 
           {/* Note tarifaire */}

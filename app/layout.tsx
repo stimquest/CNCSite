@@ -1,4 +1,5 @@
 import type { Viewport } from 'next';
+import DevDomBridge from '@/components/DevDomBridge';
 /**
  * Layout racine minimal - les layouts spécifiques sont dans :
  * - (site)/layout.tsx - Site public avec Header/Footer
@@ -28,6 +29,7 @@ export default function RootLayout({
       </head>
       <body>
         {children}
+        {process.env.NODE_ENV === 'development' && <DevDomBridge />}
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLiveStatus } from '@/contexts/LiveStatusContext';
 import {
     Save,
@@ -8,12 +8,10 @@ import {
     Plus,
     CalendarDays,
     Waves,
-    Anchor,
     Wind,
     Sun,
     Ship,
     Clock,
-    RefreshCw,
     Shield,
     Check,
     AlertTriangle,
@@ -24,9 +22,6 @@ import {
     Bell,
     Printer,
     Zap,
-    Pencil,
-    X,
-    CalendarClock,
     Copy,
     Monitor,
 } from 'lucide-react';
@@ -34,14 +29,18 @@ import { Activity, SpotStatus, WeeklyPlanning, PlanningCharAVoile, PlanningMarch
 import { CharSessionDoc } from '@/types';
 import Link from 'next/link';
 import CharBookingAdmin from '@/components/admin/CharBookingAdmin';
+import ControlDashboard, { type ControlTab, type CharMode, type ControlAction } from '@/components/admin/ControlDashboard';
 
 import CockpitClient from '@/components/admin/CockpitClient';
+import VigieClient from '@/components/admin/VigieClient';
 import FrenchWeekDatePicker from '@/components/admin/FrenchWeekDatePicker';
 import StagePlanningGrid from '@/components/admin/StagePlanningGrid';
 import ArticleManager from './ArticleEditor';
 import SchoolStagesEditor from '@/components/admin/SchoolStagesEditor';
 import ShopManager from '@/components/admin/ShopManager';
 import SignageManager from '@/components/admin/SignageManager';
+import adminStyles from './AdminClient.module.css';
+import { parisToday } from '@/lib/editorial';
 
 // --- CONSTANTS ---
 const ACTIVITY_OPTIONS: { label: string, value: ActivityType }[] = [
@@ -121,7 +120,6 @@ interface Props {
     plannings: WeeklyPlanning[];
     marchePlannings: PlanningMarche[];
     charSessions: CharSessionDoc[];
-    agendaEvents: any[];
     articles: any[];
     infoMessages: InfoMessage[];
     merchItems: any[];
@@ -129,7 +127,7 @@ interface Props {
     signageSlides: any[];
 }
 
-export default function AdminClient({ plannings, marchePlannings, charSessions, agendaEvents, articles, infoMessages, merchItems, occazItems, signageSlides }: Props) {
+export default function AdminClient({ plannings, marchePlannings, charSessions, articles, infoMessages, merchItems, occazItems, signageSlides }: Props) {
     const router = useRouter();
     const refreshData = async () => {
         router.refresh();
@@ -137,21 +135,82 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
 
     const { stageDefinitions } = useLiveStatus();
 
-    const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'COCKPIT' | 'STAGES' | 'FICHES' | 'MARCHE' | 'AGENDA' | 'SIGNAGE'>('DASHBOARD');
+    const [activeTab, setActiveTab] = useState<ControlTab>('HOME');
+    const [openNavMenu, setOpenNavMenu] = useState<'activities' | 'communication' | null>(null);
+    const controlNavRef = useRef<HTMLElement>(null);
+    const navCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [charInitialMode, setCharInitialMode] = useState<CharMode>('reserve');
+    const [charInitialSessionId, setCharInitialSessionId] = useState<string | undefined>();
+    const [charInitialBookingId, setCharInitialBookingId] = useState<string | undefined>();
+    const [charInitialDate, setCharInitialDate] = useState<string | undefined>();
+    const [dashboardAction, setDashboardAction] = useState<ControlAction | null>(null);
+    const [cockpitDirty, setCockpitDirty] = useState(false);
+    // Quitter le Cockpit avec des modifications non publiées : on demande confirmation (le brouillon est alors abandonné).
+    const goTab = (tab: typeof activeTab) => {
+        if (tab !== activeTab && activeTab === 'COCKPIT' && cockpitDirty && !window.confirm('Des modifications ne sont pas publiées. Quitter sans les publier ?')) return;
+        setDashboardAction(null);
+        setActiveTab(tab);
+    };
     const [isSaving, setIsSaving] = useState(false);
     const [isEditingArticle, setIsEditingArticle] = useState(false);
 
-    // --- VIGIE STATE ---
-    const [vigieMsg, setVigieMsg] = useState({
-        title: '',
-        content: '',
-        category: 'info',
-        targetGroups: [] as string[],
-        isPinned: false,
-        externalLink: '',
-        expiresAt: '',
-    });
-    const [editingVigieId, setEditingVigieId] = useState<string | null>(null);
+    useEffect(() => {
+        if (!openNavMenu) return;
+
+        const clearCloseTimer = () => {
+            if (navCloseTimerRef.current) clearTimeout(navCloseTimerRef.current);
+            navCloseTimerRef.current = null;
+        };
+        const closeOnOutsideClick = (event: PointerEvent) => {
+            if (!controlNavRef.current?.contains(event.target as Node)) {
+                clearCloseTimer();
+                setOpenNavMenu(null);
+            }
+        };
+        const closeOnEscape = (event: KeyboardEvent) => {
+            if (event.key !== 'Escape') return;
+            const trigger = controlNavRef.current?.querySelector<HTMLElement>(`[data-menu-trigger="${openNavMenu}"]`);
+            clearCloseTimer();
+            setOpenNavMenu(null);
+            requestAnimationFrame(() => trigger?.focus());
+        };
+
+        document.addEventListener('pointerdown', closeOnOutsideClick);
+        document.addEventListener('keydown', closeOnEscape);
+        return () => {
+            document.removeEventListener('pointerdown', closeOnOutsideClick);
+            document.removeEventListener('keydown', closeOnEscape);
+            if (navCloseTimerRef.current) clearTimeout(navCloseTimerRef.current);
+            navCloseTimerRef.current = null;
+        };
+    }, [openNavMenu]);
+
+    const handleMenuPointerEnter = (event: React.PointerEvent<HTMLElement>, menu: 'activities' | 'communication') => {
+        if (event.pointerType !== 'mouse') return;
+        if (navCloseTimerRef.current) clearTimeout(navCloseTimerRef.current);
+        navCloseTimerRef.current = null;
+        setOpenNavMenu(menu);
+    };
+
+    const handleMenuPointerLeave = (event: React.PointerEvent<HTMLElement>, menu: 'activities' | 'communication') => {
+        if (event.pointerType !== 'mouse') return;
+        if (navCloseTimerRef.current) clearTimeout(navCloseTimerRef.current);
+        navCloseTimerRef.current = setTimeout(() => {
+            setOpenNavMenu(current => current === menu ? null : current);
+            navCloseTimerRef.current = null;
+        }, 220);
+    };
+
+    const handleMenuTrigger = (event: React.MouseEvent<HTMLElement>, menu: 'activities' | 'communication') => {
+        event.preventDefault();
+        const keyboardActivation = event.detail === 0;
+        const hoverDevice = window.matchMedia('(hover: hover)').matches;
+        if (hoverDevice && !keyboardActivation) {
+            setOpenNavMenu(menu);
+            return;
+        }
+        setOpenNavMenu(current => current === menu ? null : menu);
+    };
 
     // SELECTORS
     const currentWeekStart = getWeekMondayDate();
@@ -162,8 +221,14 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
     });
 
     const [selectedMarchePeriod, setSelectedMarchePeriod] = useState<PlanningMarche | null>(null);
-    const [selectedAgendaEvent, setSelectedAgendaEvent] = useState<any | null>(null);
     const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
+
+    const openDashboardTool = (tab: ControlTab, mode: CharMode = 'reserve', planning?: WeeklyPlanning, sessionId?: string, bookingId?: string, date?: string) => {
+        if (tab === 'CHAR') { setCharInitialMode(mode); setCharInitialSessionId(sessionId); setCharInitialBookingId(bookingId); setCharInitialDate(date); }
+        if (planning) { setSelectedDate(planning.startDate); setSelectedStage(normalizeWeeklyPlanning(planning)); }
+        goTab(tab);
+        window.scrollTo({ top: 0, behavior: 'auto' });
+    };
 
 
     // --- HANDLERS: STAGES ---
@@ -367,7 +432,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
 
     // --- HANDLERS: MARCHE AQUATIQUE ---
     const createNewMarchePeriod = () => {
-        const today = formatDate(new Date());
+        const today = parisToday();
         const newPeriod: PlanningMarche = {
             _type: 'planningMarche',
             title: "Nouvelle Période Marche",
@@ -376,6 +441,22 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
             weeks: []
         };
         setSelectedMarchePeriod(newPeriod);
+    };
+
+    const runDashboardAction = (action: ControlAction) => {
+        const destinations: Record<ControlAction, ControlTab> = {
+            'take-call': 'CHAR', 'new-session': 'CHAR', 'new-stage-week': 'STAGES',
+            'new-message': 'DASHBOARD', 'new-article': 'AGENDA', 'new-event': 'AGENDA',
+            'new-slide': 'SIGNAGE', 'new-marche-period': 'MARCHE',
+        };
+        openDashboardTool(destinations[action], action === 'new-session' ? 'plan' : 'reserve');
+        setDashboardAction(action);
+        if (action === 'new-stage-week') {
+            let startDate = getWeekMondayDate();
+            while (plannings.some(planning => planning.startDate === startDate)) startDate = addDays(startDate, 7);
+            setSelectedDate(startDate); initNewStage(startDate);
+        }
+        if (action === 'new-marche-period') createNewMarchePeriod();
     };
 
     const addMarcheWeek = () => {
@@ -429,80 +510,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
     }
 
 
-    // --- HANDLERS: AGENDA ---
-    const createNewAgendaEvent = () => {
-        setSelectedAgendaEvent({
-            _type: 'agendaEvent',
-            title: "Nouvel Événement",
-            startDate: formatDate(new Date()),
-            time: "",
-            badge: "",
-            description: [],
-            _tempDesc: ""
-        });
-    };
-
-    const saveAgendaEvent = async () => {
-        if (!selectedAgendaEvent) return;
-        setIsSaving(true);
-        try {
-            const finalEvent = { ...selectedAgendaEvent };
-            if (finalEvent._tempDesc !== undefined) {
-                if (finalEvent._tempDesc.trim() !== "") {
-                    finalEvent.description = [{
-                        _type: 'block',
-                        _key: Date.now().toString(),
-                        style: 'normal',
-                        markDefs: [],
-                        children: [{
-                            _type: 'span',
-                            _key: Date.now().toString(),
-                            marks: [],
-                            text: finalEvent._tempDesc
-                        }]
-                    }];
-                } else {
-                    finalEvent.description = null;
-                }
-                delete finalEvent._tempDesc;
-            }
-
-            const res = await fetch('/api/cockpit/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'UPSERT_AGENDA',
-                    document: finalEvent,
-                })
-            });
-            if (!res.ok) throw new Error("Erreur");
-            await refreshData();
-            alert("Événement enregistré !");
-        } catch (err) { console.error(err); alert("Erreur sauvegarde Agenda"); }
-        finally { setIsSaving(false); }
-    };
-
-    const deleteAgendaEvent = async () => {
-        if (!selectedAgendaEvent?._id) return;
-        if (!confirm("Supprimer cet événement ?")) return;
-        setIsSaving(true);
-        try {
-            const res = await fetch('/api/cockpit/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'DELETE_AGENDA',
-                    _id: selectedAgendaEvent._id,
-                })
-            });
-            if (!res.ok) throw new Error();
-            setSelectedAgendaEvent(null);
-            await refreshData();
-        } catch (err) { console.error(err); alert("Erreur suppression"); }
-        finally { setIsSaving(false); }
-    };
-
-    // --- VIGIE HANDLERS ---
+    // --- TEST PUSH ---
     const [testPushId, setTestPushId] = useState('');
     const [isTestingPush, setIsTestingPush] = useState(false);
 
@@ -536,117 +544,69 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
         }
     };
 
-    const resetVigieForm = () => {
-        setVigieMsg({ title: '', content: '', category: 'info', targetGroups: [] as string[], isPinned: false, externalLink: '', expiresAt: '' });
-        setEditingVigieId(null);
-    };
-
-    const handleSendVigie = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!vigieMsg.title || !vigieMsg.content) return alert("Titre et contenu obligatoires");
-        if (vigieMsg.targetGroups.length === 0) return alert("Sélectionnez au moins un groupe cible.");
-        setIsSaving(true);
-        const patch = {
-            ...vigieMsg,
-            externalLink: vigieMsg.externalLink ? vigieMsg.externalLink : undefined,
-            expiresAt: vigieMsg.expiresAt ? new Date(vigieMsg.expiresAt).toISOString() : undefined,
-        };
-        try {
-            const res = await fetch('/api/cockpit/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(
-                    editingVigieId
-                        ? { type: 'UPDATE_INFO', _id: editingVigieId, patch }
-                        : { type: 'CREATE_INFO', patch: { ...patch, publishedAt: new Date().toISOString() } }
-                )
-            });
-            if (res.ok) {
-                resetVigieForm();
-                refreshData();
-            } else {
-                alert("Erreur lors de la publication");
-            }
-        } catch (e) {
-            console.error(e);
-            alert("Erreur réseau");
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const handleDeleteVigie = async (id: string) => {
-        if (!confirm("Supprimer ce message Vigie ?")) return;
-        setIsSaving(true);
-        try {
-            await fetch('/api/cockpit/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'DELETE_INFO', _id: id })
-            });
-            if (editingVigieId === id) resetVigieForm();
-            refreshData();
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const handleEditVigie = (msg: InfoMessage) => {
-        setVigieMsg({
-            title: msg.title,
-            content: msg.content,
-            category: msg.category,
-            targetGroups: msg.targetGroups,
-            isPinned: msg.isPinned,
-            externalLink: msg.externalLink ?? '',
-            expiresAt: msg.expiresAt ? new Date(msg.expiresAt).toISOString().slice(0, 16) : '',
-        });
-        setEditingVigieId(msg._id);
-    };
-
-
     // --- RENDER DASHBOARD ---
     return (
-        <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
+        <div className={`${adminStyles.root} min-h-screen bg-slate-100 flex flex-col font-sans`}>
             <div className="flex flex-col flex-1">
 
                 {/* HEADER */}
                 <header className="bg-white border-b border-slate-200 sticky top-16 z-40 py-3 md:py-0 md:h-20">
                     <div className="max-w-400 mx-auto px-4 md:px-6 h-full flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
-                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6 w-full overflow-hidden">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6 w-full">
                             <div className="flex items-center justify-between w-full md:w-auto shrink-0">
-                                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-abysse">CNC <span className="text-turquoise">CONTROL</span></h2>
+                                <h2 data-dashboard-display className="text-xl md:text-2xl font-black uppercase tracking-tighter text-abysse">CNC <span className="text-turquoise">CONTROL</span></h2>
                                 {isSaving && <span className="text-[10px] font-black text-turquoise animate-pulse uppercase md:hidden">Sauvegarde...</span>}
                             </div>
-                            <nav className="flex gap-1 bg-slate-100 p-1 rounded-xl w-full overflow-x-auto hide-scrollbar">
-                                <button onClick={() => setActiveTab('DASHBOARD')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'DASHBOARD' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Bell size={12} /> Dashboard / Vigie</button>
-                                <button onClick={() => setActiveTab('STAGES')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'STAGES' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Stages</button>
+                            <nav ref={controlNavRef} className={adminStyles.controlNav} aria-label="Navigation CNC Control">
+                                <button onClick={() => { setOpenNavMenu(null); goTab('HOME'); }} className={`${adminStyles.navItem} ${activeTab === 'HOME' ? adminStyles.navActive : ''}`}><Monitor size={14} /> Tableau de bord</button>
+                                <button onClick={() => { setOpenNavMenu(null); goTab('COCKPIT'); }} className={`${adminStyles.navItem} ${adminStyles.navCockpit} ${activeTab === 'COCKPIT' ? adminStyles.navCockpitActive : ''}`}><Zap size={14} /> Cockpit</button>
+                                <button onClick={() => { setOpenNavMenu(null); setCharInitialMode('reserve'); setCharInitialSessionId(undefined); setCharInitialBookingId(undefined); setCharInitialDate(undefined); goTab('CHAR'); }} className={`${adminStyles.navItem} ${activeTab === 'CHAR' ? adminStyles.navActive : ''}`}><Ship size={14} /> Réservations char</button>
 
-                                <button onClick={() => setActiveTab('FICHES')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'FICHES' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Fiches Stages</button>
-                                <button onClick={() => setActiveTab('MARCHE')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'MARCHE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}>Marche</button>
-                                <button onClick={() => setActiveTab('AGENDA')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'AGENDA' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><CalendarDays size={12}/> Blog & Agenda</button>
-                                <button onClick={() => setActiveTab('SIGNAGE')} className={`shrink-0 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'SIGNAGE' ? 'bg-white text-abysse shadow-sm' : 'text-slate-400'}`}><Monitor size={12}/> Écran</button>
-                                <button onClick={() => setActiveTab('COCKPIT')} className={`shrink-0 ml-auto md:ml-2 px-3 md:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === 'COCKPIT' ? 'bg-turquoise text-white shadow-sm' : 'bg-turquoise/10 text-turquoise hover:bg-turquoise/20'}`}>🚀 Cockpit</button>
+                                <details className={adminStyles.navGroup} open={openNavMenu === 'activities'} onPointerEnter={event => handleMenuPointerEnter(event, 'activities')} onPointerLeave={event => handleMenuPointerLeave(event, 'activities')}>
+                                    <summary data-menu-trigger="activities" aria-expanded={openNavMenu === 'activities'} onClick={event => handleMenuTrigger(event, 'activities')} className={`${adminStyles.navSummary} ${['STAGES', 'FICHES', 'MARCHE'].includes(activeTab) ? adminStyles.navParentActive : ''}`}>
+                                        <Waves size={14} />
+                                        <span>{activeTab === 'STAGES' ? 'Activités · Stages' : activeTab === 'FICHES' ? 'Activités · Fiches' : activeTab === 'MARCHE' ? 'Activités · Marche' : 'Activités'}</span>
+                                        <ChevronDown size={13} className={adminStyles.navChevron} />
+                                    </summary>
+                                    <div onPointerEnter={event => handleMenuPointerEnter(event, 'activities')} className={adminStyles.navMenu}>
+                                        <button onClick={() => { setOpenNavMenu(null); goTab('STAGES'); }} className={activeTab === 'STAGES' ? adminStyles.navSubActive : ''}><strong>Planning des stages</strong><small>Organiser les semaines et créneaux</small></button>
+                                        <button onClick={() => { setOpenNavMenu(null); goTab('FICHES'); }} className={activeTab === 'FICHES' ? adminStyles.navSubActive : ''}><strong>Fiches stages</strong><small>Gérer les contenus de présentation</small></button>
+                                        <button onClick={() => { setOpenNavMenu(null); goTab('MARCHE'); }} className={activeTab === 'MARCHE' ? adminStyles.navSubActive : ''}><strong>Marche aquatique</strong><small>Planning et séances</small></button>
+                                    </div>
+                                </details>
+
+                                <details className={adminStyles.navGroup} open={openNavMenu === 'communication'} onPointerEnter={event => handleMenuPointerEnter(event, 'communication')} onPointerLeave={event => handleMenuPointerLeave(event, 'communication')}>
+                                    <summary data-menu-trigger="communication" aria-expanded={openNavMenu === 'communication'} onClick={event => handleMenuTrigger(event, 'communication')} className={`${adminStyles.navSummary} ${['DASHBOARD', 'AGENDA', 'SIGNAGE'].includes(activeTab) ? adminStyles.navParentActive : ''}`}>
+                                        <Bell size={14} />
+                                        <span>{activeTab === 'DASHBOARD' ? 'Communication · Vigie' : activeTab === 'AGENDA' ? 'Communication · Agenda' : activeTab === 'SIGNAGE' ? 'Communication · Écran' : 'Communication'}</span>
+                                        <ChevronDown size={13} className={adminStyles.navChevron} />
+                                    </summary>
+                                    <div onPointerEnter={event => handleMenuPointerEnter(event, 'communication')} className={`${adminStyles.navMenu} ${adminStyles.navMenuRight}`}>
+                                        <button onClick={() => { setOpenNavMenu(null); goTab('DASHBOARD'); }} className={activeTab === 'DASHBOARD' ? adminStyles.navSubActive : ''}><strong>Vigie</strong><small>Messages et informations prioritaires</small></button>
+                                        <button onClick={() => { setOpenNavMenu(null); goTab('AGENDA'); }} className={activeTab === 'AGENDA' ? adminStyles.navSubActive : ''}><strong>Blog & Agenda</strong><small>Articles et événements</small></button>
+                                        <button onClick={() => { setOpenNavMenu(null); goTab('SIGNAGE'); }} className={activeTab === 'SIGNAGE' ? adminStyles.navSubActive : ''}><strong>Écran</strong><small>Diapositives diffusées au club</small></button>
+                                    </div>
+                                </details>
                             </nav>
                         </div>
                         {isSaving && <span className="hidden md:block text-[10px] font-black text-turquoise animate-pulse uppercase shrink-0 ml-4">Sauvegarde...</span>}
                     </div>
                 </header>
 
-                <main className="flex-1 w-full max-w-350 mx-auto p-6 md:p-10">
+                <main className="flex-1 w-full max-w-400 mx-auto px-4 md:px-6 py-6 md:py-8">
+                    {activeTab === 'HOME' && <ControlDashboard plannings={plannings} marchePlannings={marchePlannings} sessions={charSessions} messages={infoMessages} articles={articles} slides={signageSlides} onNavigate={openDashboardTool} onRefresh={refreshData} onAction={runDashboardAction} />}
                     {/* (Editor content will stay as is, but now it's inside a no-print parent) */}
 
                     {/* TAB: COCKPIT */}
                     {activeTab === 'COCKPIT' && (
                         <div className="animate-in fade-in slide-in-from-bottom-2">
-                            <CockpitClient />
+                            <CockpitClient onDirtyChange={setCockpitDirty} />
                         </div>
                     )}
 
 
                     {/* TAB: STAGES */}
+                    {activeTab === 'STAGES' && <header data-admin-page-header><h2 data-admin-page-title>Planning des stages</h2></header>}
                     {activeTab === 'STAGES' && (
                         <div className="flex flex-col xl:flex-row gap-6">
 
@@ -792,6 +752,7 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
 
 
                     {/* TAB: MARCHE AQUATIQUE */}
+                    {activeTab === 'MARCHE' && <header data-admin-page-header><h2 data-admin-page-title>Marche aquatique</h2></header>}
                     {activeTab === 'MARCHE' && (
                         <div className="flex flex-col lg:flex-row gap-10">
                             <div className="lg:w-80 shrink-0 space-y-4 no-print">
@@ -890,193 +851,16 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                             </div>
                         </div>
                     )}
-                    {/* TAB: DASHBOARD (Booking + Vigie) */}
-                    {activeTab === 'DASHBOARD' && (
+                    {/* TAB: CHAR À VOILE (Pilotage quotidien) + VIGIE */}
+                    {(activeTab === 'DASHBOARD' || activeTab === 'CHAR') && (
                         <div className="flex flex-col xl:flex-row gap-8 items-start">
                             {/* DASHBOARD GAUCHE (Booking) */}
-                            <div className="flex-1 w-full min-w-0">
-                                <div className="mb-6 flex items-center gap-4">
-                                    <div className="p-3 bg-orange-500/10 text-orange-600 rounded-xl">
-                                        <Ship size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-black uppercase italic text-abysse tracking-tighter">Pilotage Quotidien</h3>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Gestion terrain des inscriptions (Char à voile)</p>
-                                    </div>
-                                </div>
-                                <CharBookingAdmin sessions={charSessions ?? []} onRefresh={refreshData} />
-                            </div>
+                            {activeTab === 'CHAR' && <div className="flex-1 w-full min-w-0">
+                                <CharBookingAdmin sessions={charSessions ?? []} onRefresh={refreshData} initialMode={charInitialMode} initialSessionId={charInitialSessionId} initialBookingId={charInitialBookingId} initialDate={charInitialDate} initialCreate={dashboardAction === 'new-session'} />
+                            </div>}
 
-                            {/* VIGIE DROITE */}
-                            <div className="xl:w-[450px] shrink-0 w-full no-print xl:sticky xl:top-40">
-                                {/* Titre hors carte — même pattern que Pilotage */}
-                                <div className="mb-6 flex items-center gap-4">
-                                    <div className="p-3 bg-turquoise/10 text-turquoise rounded-xl">
-                                        <Bell size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-black uppercase italic text-abysse tracking-tighter">Vigie Direct</h3>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Alerte en temps réel sur le site</p>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white rounded-4xl shadow-xl border border-slate-200 overflow-hidden">
-                                    {/* Liste des messages en cours */}
-                                    {infoMessages.length > 0 && (
-                                        <div className="border-b border-slate-100">
-                                            <p className="text-[9px] font-black uppercase text-slate-400 px-6 pt-5 pb-2 tracking-widest">Messages en cours ({infoMessages.length})</p>
-                                            <ul className="max-h-48 overflow-y-auto custom-scrollbar divide-y divide-slate-50">
-                                                {infoMessages.map(msg => {
-                                                    const isExpired = msg.expiresAt ? new Date(msg.expiresAt) < new Date() : false;
-                                                    const isEditing = editingVigieId === msg._id;
-                                                    const categoryIcon: Record<string, string> = { info: 'ℹ️', alert: '🚨', weather: '🌦️', event: '🎉', vibe: '🤙' };
-                                                    return (
-                                                        <li key={msg._id} className={`flex items-center gap-3 px-6 py-3 transition-all ${isEditing ? 'bg-turquoise/5' : 'hover:bg-slate-50'}`}>
-                                                            <span className="text-base shrink-0">{categoryIcon[msg.category] ?? 'ℹ️'}</span>
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className={`text-xs font-black truncate ${isExpired ? 'text-slate-400 line-through' : 'text-abysse'}`}>{msg.title}</p>
-                                                                {msg.expiresAt && (
-                                                                    <p className={`text-[9px] font-medium mt-0.5 ${isExpired ? 'text-red-400' : 'text-slate-400'}`}>
-                                                                        expire le {new Date(msg.expiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                                                    </p>
-                                                                )}
-                                                                {msg.isPinned && <span className="text-[8px] font-black text-amber-500 uppercase">📌 Épinglé</span>}
-                                                            </div>
-                                                            <div className="flex gap-1 shrink-0">
-                                                                <button onClick={() => handleEditVigie(msg)} className={`p-1.5 rounded-lg transition-all ${isEditing ? 'bg-turquoise text-white' : 'text-slate-400 hover:text-turquoise hover:bg-turquoise/10'}`} title="Modifier">
-                                                                    <Pencil size={13} />
-                                                                </button>
-                                                                <button onClick={() => handleDeleteVigie(msg._id)} className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all" title="Supprimer">
-                                                                    <Trash2 size={13} />
-                                                                </button>
-                                                            </div>
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        </div>
-                                    )}
-
-                                    {/* Formulaire création / édition */}
-                                    <div className="p-6">
-                                        {editingVigieId && (
-                                            <div className="flex items-center justify-between mb-4 p-2 bg-turquoise/5 border border-turquoise/20 rounded-xl">
-                                                <span className="text-[10px] font-black uppercase text-turquoise tracking-wider">Mode édition</span>
-                                                <button onClick={resetVigieForm} className="p-1 text-slate-400 hover:text-slate-600 transition-all">
-                                                    <X size={14} />
-                                                </button>
-                                            </div>
-                                        )}
-                                        <form onSubmit={handleSendVigie} className="space-y-4">
-                                            <div className="space-y-3">
-                                                <input
-                                                    type="text"
-                                                    value={vigieMsg.title}
-                                                    onChange={(e) => setVigieMsg({ ...vigieMsg, title: e.target.value })}
-                                                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise focus:ring-2 ring-turquoise/5 font-bold text-sm text-abysse transition-all"
-                                                    placeholder="Titre (Ex: Alerte Vent Fort)"
-                                                />
-
-                                                <textarea
-                                                    rows={3}
-                                                    value={vigieMsg.content}
-                                                    onChange={(e) => setVigieMsg({ ...vigieMsg, content: e.target.value })}
-                                                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise focus:ring-2 ring-turquoise/5 font-medium text-sm text-abysse transition-all"
-                                                    placeholder="Message adressé au public..."
-                                                />
-
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <select
-                                                        value={vigieMsg.category}
-                                                        onChange={(e) => setVigieMsg({ ...vigieMsg, category: e.target.value })}
-                                                        className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-xs text-abysse appearance-none"
-                                                    >
-                                                        <option value="info">ℹ️ Info</option>
-                                                        <option value="alert">🚨 Alerte</option>
-                                                        <option value="weather">🌦️ Météo</option>
-                                                        <option value="event">🎉 Événement</option>
-                                                        <option value="vibe">🤙 Vibe</option>
-                                                    </select>
-
-                                                    <input
-                                                        type="url"
-                                                        value={vigieMsg.externalLink}
-                                                        onChange={(e) => setVigieMsg({ ...vigieMsg, externalLink: e.target.value })}
-                                                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-medium text-xs text-abysse"
-                                                        placeholder="Lien (Opt)"
-                                                    />
-                                                </div>
-
-                                                {/* Date de péremption */}
-                                                <label className="flex items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer focus-within:border-turquoise transition-all">
-                                                    <CalendarClock size={15} className="text-slate-400 shrink-0" />
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-0.5">Expire le (Opt)</p>
-                                                        <input
-                                                            type="datetime-local"
-                                                            value={vigieMsg.expiresAt}
-                                                            onChange={(e) => setVigieMsg({ ...vigieMsg, expiresAt: e.target.value })}
-                                                            className="w-full bg-transparent outline-none font-bold text-xs text-abysse"
-                                                        />
-                                                    </div>
-                                                    {vigieMsg.expiresAt && (
-                                                        <button type="button" onClick={() => setVigieMsg({ ...vigieMsg, expiresAt: '' })} className="text-slate-300 hover:text-slate-500 transition-all">
-                                                            <X size={13} />
-                                                        </button>
-                                                    )}
-                                                </label>
-
-                                                {/* Cibles */}
-                                                <div className="space-y-2">
-                                                    <label className="text-[9px] font-black uppercase text-slate-400 px-1">Cibles</label>
-                                                    <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto custom-scrollbar pr-1">
-                                                        {[
-                                                            { id: 'all', label: 'Tous' },
-                                                            { id: 'club-hebdo', label: 'Club Hebdo' },
-                                                            { id: 'char-voile', label: 'Char Voile' },
-                                                            ...stageDefinitions.map(s => ({ id: s.vigieGroupId, label: s.shortLabel || s.label })),
-                                                            { id: 'marche-aquatique', label: 'Marche' },
-                                                            { id: 'pratique-libre', label: 'Libre' }
-                                                        ].map(group => (
-                                                            <label key={group.id} className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${vigieMsg.targetGroups.includes(group.id) ? 'bg-turquoise/5 border-turquoise/30 text-abysse' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={vigieMsg.targetGroups.includes(group.id)}
-                                                                    onChange={(e) => {
-                                                                        const newGroups = e.target.checked
-                                                                            ? [...vigieMsg.targetGroups, group.id]
-                                                                            : vigieMsg.targetGroups.filter(id => id !== group.id);
-                                                                        setVigieMsg({ ...vigieMsg, targetGroups: newGroups });
-                                                                    }}
-                                                                    className="size-3 accent-turquoise"
-                                                                />
-                                                                <span className="text-[9px] font-black uppercase tracking-tight line-clamp-1">{group.label}</span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
-                                                </div>
-
-                                                <label className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${vigieMsg.isPinned ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
-                                                    <div className="flex items-center gap-2">
-                                                        <Anchor size={16} className={vigieMsg.isPinned ? 'text-amber-500' : 'text-slate-400'} />
-                                                        <span className={`text-[10px] font-black uppercase ${vigieMsg.isPinned ? 'text-amber-700' : 'text-slate-500'}`}>Épingler en haut</span>
-                                                    </div>
-                                                    <input type="checkbox" checked={vigieMsg.isPinned} onChange={e => setVigieMsg({ ...vigieMsg, isPinned: e.target.checked })} className="size-4 accent-amber-500" />
-                                                </label>
-                                            </div>
-
-                                            <button
-                                                type="submit"
-                                                disabled={isSaving}
-                                                className="w-full py-4 bg-abysse text-white rounded-xl font-black text-[11px] uppercase tracking-widest shadow-xl hover:bg-turquoise transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                                            >
-                                                {isSaving ? <RefreshCw size={16} className="animate-spin" /> : <Zap size={16} />}
-                                                {editingVigieId ? 'Mettre à jour' : 'Publier le message'}
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
+                            {/* VIGIE */}
+                            {activeTab === 'DASHBOARD' && <div className="w-full no-print"><VigieClient messages={infoMessages} onRefresh={refreshData} initialCompose={dashboardAction === 'new-message'} /></div>}
                         </div>
                     )}
 
@@ -1084,84 +868,13 @@ export default function AdminClient({ plannings, marchePlannings, charSessions, 
                     {activeTab === 'FICHES' && <SchoolStagesEditor />}
 
                     {/* TAB: DIGITAL SIGNAGE */}
-                    {activeTab === 'SIGNAGE' && <SignageManager slides={signageSlides || []} />}
+                    {activeTab === 'SIGNAGE' && <SignageManager slides={signageSlides || []} initialCreate={dashboardAction === 'new-slide'} />}
 
                     {/* TAB: AGENDA & BLOG */}
                     {activeTab === 'AGENDA' && (
                         <div className="flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-2">
-                          <div className="flex flex-col lg:flex-row gap-10">
-                            {/* AGENDA SECTION */}
-                            <div className={`lg:w-1/2 flex-col gap-4 ${isEditingArticle ? 'hidden' : 'flex'}`}>
-                                <div className="flex items-center justify-between mb-2">
-                                    <div>
-                                        <h3 className="text-xl font-black uppercase italic text-abysse">Agenda Simplifié</h3>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Événements rapides</p>
-                                    </div>
-                                    <button onClick={createNewAgendaEvent} className="px-4 py-2 bg-turquoise text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-abysse transition-all shadow-md flex items-center gap-2"><Plus size={14}/> Nouveau</button>
-                                </div>
-
-                                {selectedAgendaEvent ? (
-                                    <div className="bg-white p-6 rounded-3xl shadow-md border border-slate-200">
-                                        <div className="flex items-center justify-between mb-6">
-                                            <h4 className="font-black text-sm uppercase text-abysse">Édition Événement</h4>
-                                            <div className="flex gap-2">
-                                                {selectedAgendaEvent._id && <button onClick={deleteAgendaEvent} className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all"><Trash2 size={16}/></button>}
-                                                <button onClick={saveAgendaEvent} disabled={isSaving} className="px-4 py-2 bg-abysse text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-turquoise transition-all flex items-center gap-2"><Save size={14}/> Enregistrer</button>
-                                                <button onClick={() => setSelectedAgendaEvent(null)} className="p-2 text-slate-400 hover:text-abysse transition-all"><XCircle size={16}/></button>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Titre</label>
-                                                <input type="text" value={selectedAgendaEvent.title || ''} onChange={(e) => setSelectedAgendaEvent({ ...selectedAgendaEvent, title: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-sm text-abysse" placeholder="Ex: Assemblée Générale" />
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Date</label>
-                                                    <input type="date" value={selectedAgendaEvent.startDate || ''} onChange={(e) => setSelectedAgendaEvent({ ...selectedAgendaEvent, startDate: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-sm text-abysse" />
-                                                </div>
-                                                <div>
-                                                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Heure/Durée</label>
-                                                    <input type="text" value={selectedAgendaEvent.time || ''} onChange={(e) => setSelectedAgendaEvent({ ...selectedAgendaEvent, time: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-sm text-abysse" placeholder="Ex: 14h - 17h" />
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Badge / Catégorie</label>
-                                                <input type="text" value={selectedAgendaEvent.badge || ''} onChange={(e) => setSelectedAgendaEvent({ ...selectedAgendaEvent, badge: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise font-bold text-sm text-abysse" placeholder="Ex: Régate, Événement..." />
-                                            </div>
-                                            <div>
-                                                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Description (Simple)</label>
-                                                <textarea rows={4} value={typeof selectedAgendaEvent._tempDesc === 'string' ? selectedAgendaEvent._tempDesc : (selectedAgendaEvent.description?.[0]?.children?.[0]?.text || '')} onChange={(e) => setSelectedAgendaEvent({ ...selectedAgendaEvent, _tempDesc: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-turquoise text-sm text-slate-600" placeholder="Description de l'événement..."></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-                                        {(agendaEvents || []).map((ev) => (
-                                            <button key={ev._id} onClick={() => {
-                                                const text = ev.description?.[0]?.children?.map((c: any) => c.text).join('') || '';
-                                                setSelectedAgendaEvent({ ...ev, _tempDesc: text });
-                                            }} className="w-full p-5 text-left border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-all flex items-center justify-between">
-                                                <div>
-                                                    <span className="block font-black text-abysse uppercase tracking-tighter line-clamp-1">{ev.title}</span>
-                                                    <span className="block text-[10px] text-slate-400 mt-1 italic">{new Date(ev.startDate).toLocaleDateString()} {ev.time && `· ${ev.time}`}</span>
-                                                </div>
-                                                {ev.badge && <span className="text-[9px] bg-slate-100 text-slate-500 px-2 py-1 rounded-md font-bold uppercase">{ev.badge}</span>}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {!isEditingArticle && <div className="hidden lg:block w-px bg-slate-200"></div>}
-
-                            {/* BLOG SECTION */}
-                            <div className={`${isEditingArticle ? 'w-full' : 'lg:w-1/2'} flex flex-col gap-4`}>
-                                <ArticleManager initialArticles={articles || []} onEditingChange={setIsEditingArticle} />
-                            </div>
-                          </div>
-                          {!isEditingArticle && <ShopManager merchItems={merchItems || []} occazItems={occazItems || []} />}
+                            <ArticleManager initialArticles={articles || []} onEditingChange={setIsEditingArticle} initialCreate={dashboardAction === 'new-article' ? 'article' : dashboardAction === 'new-event' ? 'event' : undefined} />
+                            {!isEditingArticle && <ShopManager merchItems={merchItems || []} occazItems={occazItems || []} />}
                         </div>
                     )}
                 </main>

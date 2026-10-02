@@ -524,6 +524,9 @@ export interface SchoolStage {
   pricingTiers?: { label: string; value: string; }[];
   gallery?: string[];
   registrationUrl?: string;
+  showOnHome?: boolean;
+  availabilityStartMonth?: number;
+  availabilityEndMonth?: number;
 }
 
 export interface SchoolPageData {
@@ -596,10 +599,16 @@ export interface CharSessionDoc {
   actif?: boolean;
   // Computed client-side from bookings
   placesRestantes?: number;
+  placesReservees?: number;
+  reservationsEnAttente?: number;
+  reservationsAValider?: number;
+  reservationsListeAttente?: number;
+  reservationsASuivre?: { _id: string; clientNom: string; nbPlaces: number; statut: CharBookingStatut; motifSuivi?: string }[];
+  reservationTodos?: { _id: string; clientNom: string; nbPlaces: number; todo: string }[];
   bookings?: CharBookingDoc[];
 }
 
-export type CharBookingStatut = 'confirme' | 'liste_attente' | 'annule';
+export type CharBookingStatut = 'confirme' | 'a_valider' | 'liste_attente' | 'annule';
 
 export interface CharBookingDoc {
   _id: string;
@@ -610,6 +619,9 @@ export interface CharBookingDoc {
   clientTel: string;
   nbPlaces: number;
   statut: CharBookingStatut;
+  motifSuivi?: string;
   notes?: string;
+  todo?: string;
+  todoDone?: boolean;
   stripePaymentIntentId?: string; // Future Stripe integration
 }

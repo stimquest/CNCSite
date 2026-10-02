@@ -9,6 +9,7 @@ const STATIC_ROUTES: { url: string; priority: number; changeFrequency: MetadataR
     { url: '/nature',                  priority: 0.7,  changeFrequency: 'monthly' },
     { url: '/activites',               priority: 0.9,  changeFrequency: 'monthly' },
     { url: '/ecole-voile',             priority: 0.9,  changeFrequency: 'monthly' },
+    { url: '/apprendre',               priority: 0.6,  changeFrequency: 'monthly' },
     { url: '/groupes-entreprises',     priority: 0.8,  changeFrequency: 'monthly' },
     { url: '/club',                    priority: 0.8,  changeFrequency: 'monthly' },
     { url: '/blog',                    priority: 0.8,  changeFrequency: 'weekly' },
@@ -20,7 +21,7 @@ const STATIC_ROUTES: { url: string; priority: number; changeFrequency: MetadataR
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Slugs des articles de blog
     const articles = await client.fetch<{ slug: string; publishedAt: string }[]>(
-        `*[_type == "article" && defined(slug.current)] { "slug": slug.current, publishedAt }`
+        `*[_type == "article" && coalesce(contentType, "article") != "event" && defined(slug.current) && !(_id in path("drafts.**"))] { "slug": slug.current, publishedAt }`
     ).catch(() => []);
 
     const articleRoutes: MetadataRoute.Sitemap = articles.map((article) => ({

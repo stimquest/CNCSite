@@ -20,6 +20,7 @@ import {
     Activity
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useLiveStatus } from '@/contexts/LiveStatusContext';
 import { useTides } from '@/lib/hooks/useTides';
 import { getNextCrossing } from '@/lib/tide-utils';
@@ -30,6 +31,13 @@ import { ChevronUp } from 'lucide-react';
 type ModalType = 'weather' | 'planning' | null;
 
 export const FloatingActions: React.FC = () => {
+    const pathname = usePathname();
+    const isAdminPage = ['/admin', '/cockpit', '/studio'].some(path => pathname === path || pathname.startsWith(`${path}/`));
+    if (isAdminPage) return null;
+    return <FloatingActionsContent />;
+};
+
+const FloatingActionsContent: React.FC = () => {
     const [activeModal, setActiveModal] = useState<ModalType>(null);
     const {
         weather,

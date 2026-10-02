@@ -16,6 +16,14 @@ export function urlFor(source: SanityImageSource) {
   return builder.image(source);
 }
 
+const AGENDA_QUERY = `*[(_type == "agendaEvent" || (_type == "article" && (count(agendaDates) > 0 || defined(agendaDate)))) && archived != true && !(_id in path("drafts.**"))] {
+  _id, _type, contentType, title, archived, agendaDates, agendaDate, agendaTime, agendaBadge,
+  startDate, badge, time,
+  "description": select(_type == "agendaEvent" => description, excerpt),
+  "image": coalesce(image.asset->url, coverImage.asset->url),
+  "articleSlug": select(_type == "article" && coalesce(contentType, "article") != "event" => slug.current, articleRef->slug.current)
+}`;
+
 export const queries = {
   activities: `*[_type == "activity" && !(_id in path('drafts.**'))] | order(order asc, title asc) {
     id, title, category, description, pedagogie, experience, logistique, price,
@@ -114,7 +122,7 @@ export const queries = {
     "team": team { tag, title, "boardMembers": boardMembers[] { name, role, image }, caMembers, "proTeam": proTeam[] { name, role, image } },
     "site": site { title, description, facilities, imageCaption, imageSublabel, "image": image.asset->url },
     "fleet": fleet { title, "items": items[] { name, subtitle, description, crew, stats, "gallery": gallery[].asset->url } },
-    "agenda": agenda { title, highlightText, description, volunteering, "events": *[(_type == "agendaEvent") || (_type == "article" && defined(agendaDate))] | order(coalesce(startDate, agendaDate) asc) { _id, _type, "title": title, "startDate": coalesce(startDate, agendaDate), "badge": coalesce(badge, agendaBadge), "time": coalesce(time, agendaTime), "description": coalesce(description, excerpt), "image": coalesce(image.asset->url, coverImage.asset->url), "articleSlug": select(_type == "article" => slug.current, _type == "agendaEvent" => articleRef->slug.current) } },
+    "agenda": agenda { title, highlightText, description, volunteering, "events": ${AGENDA_QUERY} },
     "souvenirs": souvenirs { title, highlightText, description, "items": items[] { "image": image.asset->url, title, date, decade } },
     cta
   }`,
@@ -123,14 +131,17 @@ export const queries = {
     "image": image.asset->url,
     "articleSlug": articleRef->slug.current
   }`,
-  homeAgenda: `*[(_type == "agendaEvent") || (_type == "article" && defined(agendaDate))] | order(coalesce(startDate, agendaDate) asc) {
-    _id, _type, "title": title, "startDate": coalesce(startDate, agendaDate), "badge": coalesce(badge, agendaBadge), "time": coalesce(time, agendaTime), "description": coalesce(description, excerpt), "image": coalesce(image.asset->url, coverImage.asset->url), "articleSlug": select(_type == "article" => slug.current, _type == "agendaEvent" => articleRef->slug.current)
+  homeAgenda: AGENDA_QUERY,
+  adminEditorial: `*[_type in ["article", "agendaEvent"] && !(_id in path("drafts.**"))] | order(coalesce(publishedAt, startDate) desc) {
+    _id, _type, title, contentType, archived, "slug": slug.current, category, publishedAt,
+    agendaDates, agendaDate, agendaTime, agendaBadge, startDate, time, badge,
+    "coverImage": coalesce(coverImage.asset->url, image.asset->url)
   }`,
-  articles: `*[_type == "article"] | order(publishedAt desc) {
+  articles: `*[_type == "article" && coalesce(contentType, "article") != "event" && archived != true && !(_id in path("drafts.**"))] | order(publishedAt desc) {
     _id, title, "slug": slug.current, category, publishedAt, excerpt,
     "coverImage": coverImage.asset->url
   }`,
-  articleBySlug: `*[_type == "article" && slug.current == $slug][0] {
+  articleBySlug: `*[_type == "article" && coalesce(contentType, "article") != "event" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
     _id, title, "slug": slug.current, category, publishedAt, excerpt,
     "coverImage": coverImage.asset->url,
     body[] {
@@ -151,7 +162,7 @@ export const queries = {
     "focusChar": focusChar { title, highlightSuffix, tagline, subTagline, description, badgeValue, badgeLabel, "images": images[].asset->url, ctaButton, infoButton },
     "focusGlisse": focusGlisse { title, highlightSuffix, tagline, subTagline, description, badgeValue, badgeLabel, "images": images[].asset->url, ctaButton, infoButton },
     "focusBienEtre": focusBienEtre { title, highlightSuffix, tagline, subTagline, description, badgeValue, badgeLabel, "images": images[].asset->url, ctaButton, infoButton },
-    "campus": campus { tagline, titlePart1, titlePart2, chapters[] { label, title, titleSpan, proof, desc, "image": image.asset->url, link, linkLabel, themeColor } },
+    "campus": campus { tagline, titlePart1, titlePart2, compactTitle, intro, chapters[] { label, audience, title, titleSpan, proof, desc, "image": image.asset->url, link, linkLabel, themeColor } },
     "immersion": { "titlePart1": immersionTitlePart1, "titlePart2": immersionTitlePart2, "cards": immersionCards[] { titlePart1, titlePart2, description, "image": image.asset->url, link, buttonText, iconName, iconColor } }
   }`,
 
@@ -222,8 +233,9 @@ export const queries = {
     ecoleAnnee { sectionTitle, sectionSubtitle, sectionDescription, groups[] { title, age, jour, activite, detail, price, priceSuffix, accentColor, color, iconName } }
   }`,
   schoolStages: `*[_type == "schoolPage"][0]{
+    pinnedCampaignKey, campaigns[] { ..., "imageUrl": image.asset->url },
     "stages": stages[] {
-      id, officialName, age, price, hook, description, logistique, registrationUrl, bgColor, showOnHome,
+      _key, id, officialName, age, price, hook, description, logistique, registrationUrl, bgColor, showOnHome,
       "pricingTiers": pricingTiers[]{ label, value },
       "image": image.asset->url
     }
@@ -238,7 +250,12 @@ export const queries = {
   // Sessions char à voile avec comptage des réservations confirmées
   charSessions: `*[_type == "charSession"] | order(date asc) {
     _id, _type, date, heureDebut, heureFin, capaciteMax, notes, actif,
-    "placesReservees": coalesce(math::sum(*[_type == "charBooking" && session._ref == ^._id && statut == "confirme"].nbPlaces), 0)
+    "placesReservees": coalesce(math::sum(*[_type == "charBooking" && session._ref == ^._id && statut == "confirme"].nbPlaces), 0),
+    "reservationsEnAttente": count(*[_type == "charBooking" && session._ref == ^._id && statut in ["a_valider", "liste_attente"]]),
+    "reservationsAValider": count(*[_type == "charBooking" && session._ref == ^._id && statut == "a_valider"]),
+    "reservationsListeAttente": count(*[_type == "charBooking" && session._ref == ^._id && statut == "liste_attente"]),
+    "reservationsASuivre": *[_type == "charBooking" && session._ref == ^._id && statut in ["a_valider", "liste_attente"]] | order(_createdAt asc) {_id, clientNom, nbPlaces, statut, motifSuivi},
+    "reservationTodos": *[_type == "charBooking" && session._ref == ^._id && defined(todo) && todo != "" && todoDone != true && statut != "annule"]{_id, clientNom, nbPlaces, todo}
   }`,
   // Sessions publiques uniquement (actif == true et date >= aujourd'hui)
   charSessionsPublic: `*[_type == "charSession" && actif != false && date >= $today] | order(date asc) {
@@ -247,7 +264,7 @@ export const queries = {
   }`,
   // Bookings d'une session
   charBookingsBySession: `*[_type == "charBooking" && session._ref == $sessionId] | order(_createdAt asc) {
-    _id, _type, _createdAt, clientNom, clientTel, nbPlaces, statut, notes
+    _id, _type, _createdAt, clientNom, clientTel, nbPlaces, statut, motifSuivi, notes, todo, todoDone
   }`,
   // Tous les bookings (pour admin)
   charBookings: `*[_type == "charBooking"] | order(_createdAt desc) {

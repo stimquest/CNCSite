@@ -5,6 +5,19 @@ export const article = defineType({
     title: 'Articles & Blog',
     type: 'document',
     fields: [
+        defineField({ name: 'contentType', title: 'Type de contenu', type: 'string', initialValue: 'article', options: { list: [{ title: 'Article de blog', value: 'article' }, { title: 'Événement simple', value: 'event' }], layout: 'radio' } }),
+        defineField({ name: 'archived', title: 'Archivé', type: 'boolean', initialValue: false, description: 'Conservé dans les archives, masqué des listes publiques.' }),
+        defineField({
+            name: 'agendaDates', title: 'Dates dans l’agenda', type: 'array',
+            of: [{ type: 'object', name: 'agendaOccurrence', title: 'Date', fields: [
+                { name: 'date', title: 'Date', type: 'date', validation: (Rule) => Rule.required() },
+                { name: 'time', title: 'Horaire / durée', type: 'string' },
+                { name: 'badge', title: 'Badge', type: 'string' },
+                { name: 'archived', title: 'Date archivée', type: 'boolean', initialValue: false },
+            ], preview: { select: { title: 'date', subtitle: 'time' } } }],
+        }),
+        defineField({ name: 'articleRef', title: 'Article associé à cet événement', type: 'reference', to: [{ type: 'article' }], hidden: ({ document }) => document?.contentType !== 'event' }),
+
         defineField({
             name: 'title',
             title: 'Titre',
@@ -20,7 +33,8 @@ export const article = defineType({
                 source: 'title',
                 maxLength: 96,
             },
-            validation: (Rule) => Rule.required(),
+            hidden: ({ document }) => document?.contentType === 'event',
+            validation: (Rule) => Rule.custom((value, context) => context.document?.contentType === 'event' || value ? true : 'Champ obligatoire pour un article'),
         }),
         defineField({
             name: 'category',
@@ -35,14 +49,16 @@ export const article = defineType({
                 ],
                 layout: 'radio',
             },
-            validation: (Rule) => Rule.required(),
+            hidden: ({ document }) => document?.contentType === 'event',
+            validation: (Rule) => Rule.custom((value, context) => context.document?.contentType === 'event' || value ? true : 'Champ obligatoire pour un article'),
         }),
         defineField({
             name: 'publishedAt',
             title: 'Date de publication',
             type: 'date',
             options: { dateFormat: 'YYYY-MM-DD' },
-            validation: (Rule) => Rule.required(),
+            hidden: ({ document }) => document?.contentType === 'event',
+            validation: (Rule) => Rule.custom((value, context) => context.document?.contentType === 'event' || value ? true : 'Champ obligatoire pour un article'),
         }),
         defineField({
             name: 'coverImage',
@@ -56,7 +72,7 @@ export const article = defineType({
             type: 'text',
             rows: 2,
             description: 'Affiché sur la carte dans le blog et dans l\'agenda. 1-2 phrases.',
-            validation: (Rule) => Rule.max(200),
+            validation: (Rule) => Rule.custom((value, context) => !value || value.length <= (context.document?.contentType === 'event' ? 2000 : 200) ? true : 'Description trop longue'),
         }),
         // ── Agenda optionnel ──────────────────────────────────────────
         defineField({
@@ -64,7 +80,8 @@ export const article = defineType({
             title: 'Date de l\'événement (optionnel)',
             type: 'date',
             options: { dateFormat: 'YYYY-MM-DD' },
-            description: 'Si renseigné, cet article apparaît aussi dans l\'agenda.',
+            description: 'Ancienne date unique. Utilisez désormais Dates dans l’agenda.',
+            hidden: ({ document }) => Array.isArray(document?.agendaDates),
         }),
         defineField({
             name: 'agendaTime',
@@ -83,6 +100,7 @@ export const article = defineType({
         // ─────────────────────────────────────────────────────────────
         defineField({
             name: 'body',
+            hidden: ({ document }) => document?.contentType === 'event',
             title: 'Contenu de l\'article',
             type: 'array',
             of: [

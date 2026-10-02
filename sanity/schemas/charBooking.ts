@@ -47,7 +47,8 @@ export const charBooking = defineType({
       options: {
         list: [
           { title: '✅ Confirmé', value: 'confirme' },
-          { title: '⏳ Liste d\'attente', value: 'liste_attente' },
+          { title: '🔎 À valider', value: 'a_valider' },
+          { title: '⏳ Prévenir si une place se libère', value: 'liste_attente' },
           { title: '❌ Annulé', value: 'annule' }
         ],
         layout: 'radio'
@@ -56,10 +57,39 @@ export const charBooking = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
+      name: 'motifSuivi',
+      title: 'Motif du suivi',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Nombre final à confirmer', value: 'nombre_a_confirmer' },
+          { title: 'Organisation ou matériel à vérifier', value: 'organisation_a_verifier' },
+          { title: 'Conditions météo à confirmer', value: 'meteo_a_confirmer' },
+          { title: 'Demande particulière à valider', value: 'demande_speciale' },
+          { title: 'Surbooking à régulariser', value: 'surbooking_a_regulariser' },
+          { title: 'Prévenir si une place se libère', value: 'place_a_liberer' }
+        ]
+      },
+      hidden: ({ parent }) => !['a_valider', 'liste_attente'].includes(parent?.statut)
+    }),
+    defineField({
       name: 'notes',
       title: 'Notes',
       type: 'text',
       rows: 2
+    }),
+    defineField({
+      name: 'todo',
+      title: 'Demande particulière / à faire',
+      type: 'text',
+      rows: 2,
+      description: 'Suivi interne pour un grand groupe ou une demande spéciale.'
+    }),
+    defineField({
+      name: 'todoDone',
+      title: 'Demande traitée',
+      type: 'boolean',
+      initialValue: false
     }),
     // Future Stripe integration — nullable for now
     defineField({
@@ -80,7 +110,7 @@ export const charBooking = defineType({
       sessionDebut: 'session.heureDebut'
     },
     prepare({ clientNom, clientTel, nbPlaces, statut, sessionDate, sessionDebut }) {
-      const statusIcon = statut === 'confirme' ? '✅' : statut === 'annule' ? '❌' : '⏳';
+      const statusIcon = statut === 'confirme' ? '✅' : statut === 'annule' ? '❌' : statut === 'a_valider' ? '🔎' : '⏳';
       const d = sessionDate ? new Date(sessionDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—';
       return {
         title: `${clientNom ?? 'Client'} · ${nbPlaces}p`,

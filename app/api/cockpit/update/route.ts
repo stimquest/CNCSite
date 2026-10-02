@@ -46,7 +46,10 @@ export async function POST(req: Request) {
 
         if (type === 'UPDATE_INFO') {
             if (!_id || _id === SINGLETON_ID) return NextResponse.json({ error: 'ID manquant' }, { status: 400 });
-            await serverClient.patch(_id).set(patch).commit();
+            // unset : seuls les champs optionnels d'un message peuvent être retirés (lien, date d'expiration)
+            const unset = Array.isArray(body.unset) ? body.unset.filter((key: string) => key === 'externalLink' || key === 'expiresAt') : [];
+            const operation = serverClient.patch(_id).set(patch);
+            await (unset.length ? operation.unset(unset) : operation).commit();
             revalidatePath('/');
             revalidatePath('/fil-info');
             return NextResponse.json({ success: true });
@@ -346,7 +349,7 @@ export async function POST(req: Request) {
         // --- CHAR BOOKING ---
 
         if (type === 'CREATE_CHAR_BOOKING') {
-            const { sessionId, clientNom, clientTel, nbPlaces, statut, notes } = patch ?? {};
+            const { sessionId, clientNom, clientTel, nbPlaces, statut, motifSuivi, notes, todo, todoDone } = patch ?? {};
             if (!sessionId || !clientNom || !clientTel || !nbPlaces) {
                 return NextResponse.json({ error: 'Champs obligatoires manquants' }, { status: 400 });
             }
@@ -357,7 +360,9 @@ export async function POST(req: Request) {
                 clientTel,
                 nbPlaces,
                 statut: statut ?? 'confirme',
+                ...(motifSuivi ? { motifSuivi } : {}),
                 notes: notes ?? '',
+                ...(todo?.trim() ? { todo: todo.trim(), todoDone: todoDone === true } : {}),
             });
             revalidateCharPages();
             return NextResponse.json({ success: true, id: result._id });

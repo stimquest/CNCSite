@@ -1,5 +1,6 @@
 import React from 'react';
 import { client, queries } from '@/lib/sanity';
+import { expandAgendaEvents } from '@/lib/editorial';
 import ClubClient from './ClubClient';
 
 export const metadata = {
@@ -11,6 +12,8 @@ export const revalidate = 60;
 
 export default async function ClubPage() {
     const clubData = await client.fetch(queries.clubPage).catch(() => null);
+
+    if (clubData?.agenda) clubData.agenda.events = expandAgendaEvents(clubData.agenda.events || []);
 
     return (
         <ClubClient initialClubData={clubData} />

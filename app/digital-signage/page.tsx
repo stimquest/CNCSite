@@ -10,8 +10,10 @@ import {
   TrendingUp, TrendingDown, Minus, ArrowUp, ArrowDown, Sunrise, Sunset
 } from 'lucide-react';
 import { SignageSlide } from '@/types';
+import { buildSignageSequence } from '@/lib/signage';
 
 interface SequenceItem {
+  key: string;
   type: string;
   duration: number;
   data?: SignageSlide;
@@ -234,45 +236,28 @@ const WeatherSlide: React.FC = () => {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export const DigitalSignagePage: React.FC = () => {
-  const { signageSlides } = useSignageContent();
+  const { signageSlides, signageSettings } = useSignageContent();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  const SEQUENCE = useMemo((): SequenceItem[] => {
-    const weatherSlide: SequenceItem = { type: 'WEATHER', duration: 20000 };
-    const agendaSlide: SequenceItem = { type: 'AGENDA', duration: 25000 };
-    if (signageSlides.length === 0) return [weatherSlide, agendaSlide];
-    // Interleave: MÉTÉO → slide A → AGENDA → slide B → …
-    const result: SequenceItem[] = [];
-    signageSlides.forEach((slide, i) => {
-      result.push(weatherSlide);
-      result.push({
-        type: slide.type.toUpperCase(),
-        duration: Math.max(slide.duration || 15000, 5000),
-        data: slide,
-      });
-      // Insérer l'agenda toutes les 2 slides Sanity
-      if ((i + 1) % 2 === 0) result.push(agendaSlide);
-    });
-    if (!result.find(s => s.type === 'AGENDA')) result.push(agendaSlide);
-    return result;
-  }, [signageSlides]);
+  const SEQUENCE = useMemo((): SequenceItem[] => buildSignageSequence(signageSlides, signageSettings), [signageSlides, signageSettings]);
 
   // Ref pour que le callback du timer lise toujours la dernière longueur de séquence
   // sans que SEQUENCE soit une dépendance de l'effect (évite les intervals en double)
   const sequenceLengthRef = useRef(SEQUENCE.length);
   useEffect(() => { sequenceLengthRef.current = SEQUENCE.length; }, [SEQUENCE]);
 
-  const currentSlide = SEQUENCE[currentSlideIndex] || SEQUENCE[0];
+  const currentSlide = SEQUENCE[currentSlideIndex % SEQUENCE.length];
 
   useEffect(() => {
     if (!currentSlide) return;
+    setProgress(0);
     const duration = currentSlide.duration;
-    const startTime = Date.now();
+    let startTime = Date.now();
     const timer = setInterval(() => {
       const elapsed = Date.now() - startTime;
       if (elapsed >= duration) {
-        clearInterval(timer);
+        startTime = Date.now();
         setProgress(0);
         setCurrentSlideIndex(i => (i + 1) % sequenceLengthRef.current);
       } else {
@@ -280,9 +265,9 @@ export const DigitalSignagePage: React.FC = () => {
       }
     }, 100);
     return () => clearInterval(timer);
-  }, [currentSlideIndex]); // SEQUENCE volontairement absent : on lit sa longueur via ref
+  }, [currentSlideIndex, currentSlide?.key, currentSlide?.duration]);
 
-  if (!currentSlide) return null;
+  if (!currentSlide) return <div className="fixed inset-0 grid place-items-center bg-abysse p-8 text-center text-white"><p>Aucun contenu à diffuser pour le moment.</p></div>;
 
   return (
     <div

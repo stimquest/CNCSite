@@ -1,0 +1,68 @@
+.chapter {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.chapter > .card {
+  flex: 1;
+}
+.image {
+  transition: transform 450ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.arrow {
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .card:hover .image { transform: scale(1.045); }
+  .card:hover .arrow { transform: translateX(4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .image, .arrow { transition: none; }
+}
+
+
+.playInvite {
+  display: grid;
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 2fr);
+  margin-top: 2.75rem;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: #e6f7f9;
+}
+.playArtwork { min-height: 18rem; }
+.playCopy { padding: clamp(1.5rem, 3vw, 3rem); min-width: 0; align-self: center; }
+.playEyebrow { color: #007b8c; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem; }
+.playTitle {
+  color: var(--color-abysse);
+  font-size: clamp(1.5rem, 2.7vw, 2.5rem);
+  font-weight: 900;
+  line-height: 1.15;
+  text-transform: uppercase;
+  font-style: italic;
+  text-wrap: balance;
+}
+.playDescription { max-width: 42rem; margin-top: 1rem; color: #355569; font-size: 1rem; line-height: 1.65; }
+.playActions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; margin-top: 1.5rem; }
+.playButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 0.75rem;
+  background: var(--color-abysse);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background-color 180ms ease;
+}
+.playButton:hover { background: #005a70; }
+.playButton:focus-visible { outline: 3px solid #007b8c; outline-offset: 4px; }
+.playNote { color: #355569; font-size: 0.875rem; }
+@media (max-width: 639px) {
+  .playInvite { grid-template-columns: minmax(0, 1fr); margin-top: 2rem; }
+  .playArtwork { min-height: 0; height: 12rem; }
+  .playButton { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .playButton { transition: none; } }
